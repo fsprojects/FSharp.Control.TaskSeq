@@ -1,0 +1,21 @@
+version: 2
+updates:
+- package-ecosystem: github-actions
+  directory: "/"
+  ignore:
+    # ignore all patch and pre-release updates
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+
+- package-ecosystem: nuget
+  directory: "/"
+  ignore:
+    # ignore all patch and pre-release updates
+    - dependency-name: "*"
+      update-types: ["version-update:semver-patch"]
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
