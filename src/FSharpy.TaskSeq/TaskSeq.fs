@@ -106,39 +106,47 @@ module TaskSeq =
             yield c
     }
 
+    //
+    // Convert 'To' functions
+    //
+
     /// Unwraps the taskSeq as a Task<array<_>>. This function is non-blocking.
     let toArrayAsync taskSeq =
         Internal.toResizeArrayAsync taskSeq
         |> Task.map (fun a -> a.ToArray())
 
     /// Unwraps the taskSeq as a Task<list<_>>. This function is non-blocking.
-    let toListAsync taskSeq = (Internal.toResizeArrayAsync >> Task.map List.ofSeq) taskSeq
+    let toListAsync taskSeq = Internal.toResizeArrayAndMapAsync List.ofSeq taskSeq
 
     /// Unwraps the taskSeq as a Task<ResizeArray<_>>. This function is non-blocking.
-    let toResizeArrayAsync taskSeq =
-        Internal.toResizeArrayAsync taskSeq
-        |> Task.map (fun a -> a.ToArray())
+    let toResizeArrayAsync taskSeq = Internal.toResizeArrayAsync taskSeq
 
     /// Unwraps the taskSeq as a Task<IList<_>>. This function is non-blocking.
-    let toIListAsync taskSeq =
-        (Internal.toResizeArrayAsync
-         >> Task.map (fun x -> x :> IList<_>))
-            taskSeq
+    let toIListAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) taskSeq
 
     /// Unwraps the taskSeq as a Task<seq<_>>. This function is non-blocking,
     /// exhausts the sequence and caches the results of the tasks in the sequence.
-    let toSeqCachedAsync taskSeq =
-        (Internal.toResizeArrayAsync
-         >> Task.map (fun x -> x :> seq<_>))
-            taskSeq
+    let toSeqCachedAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) taskSeq
+
+    //
+    // iter/map/collect functions
+    //
 
     /// Iterates over the taskSeq. This function is non-blocking
     /// exhausts the sequence as soon as the task is evaluated.
-    let iterAsync action taskSeq = Internal.iteriAsync (fun _ -> action) taskSeq
+    let iter action taskSeq = Internal.iter (SimpleAction action) taskSeq
 
     /// Iterates over the taskSeq. This function is non-blocking,
     /// exhausts the sequence as soon as the task is evaluated.
-    let iteriAsync action taskSeq = Internal.iteriAsync action taskSeq
+    let iteri action taskSeq = Internal.iter (CountableAction action) taskSeq
+
+    /// Iterates over the taskSeq. This function is non-blocking
+    /// exhausts the sequence as soon as the task is evaluated.
+    let iterAsync action taskSeq = Internal.iter (AsyncSimpleAction action) taskSeq
+
+    /// Iterates over the taskSeq. This function is non-blocking,
+    /// exhausts the sequence as soon as the task is evaluated.
+    let iteriAsync action taskSeq = Internal.iter (AsyncCountableAction action) taskSeq
 
     /// Maps over the taskSeq. This function is non-blocking.
     let map (mapper: 'T -> 'U) taskSeq = Internal.mapi (fun _ -> mapper) taskSeq
@@ -157,6 +165,10 @@ module TaskSeq =
 
     /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
     let collectSeq (binder: 'T -> #seq<'U>) taskSeq = Internal.collectSeq binder taskSeq
+
+    //
+    // zip/unzip etc functions
+    //
 
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
