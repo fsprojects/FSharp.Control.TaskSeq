@@ -80,7 +80,7 @@ module internal TaskSeqInternal =
         return res
     }
 
-    let inline toResizeArrayAndMapAsync mapper taskSeq = (toResizeArrayAsync >> Task.map mapper) taskSeq
+    let toResizeArrayAndMapAsync mapper taskSeq = (toResizeArrayAsync >> Task.map mapper) taskSeq
 
     let map mapper (taskSequence: taskSeq<_>) =
         match mapper with

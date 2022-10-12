@@ -9,7 +9,7 @@ module TaskSeq =
     open FSharpy.TaskSeqBuilders
 
     // Just for convenience
-    module Internal = FSharpy.TaskSeqInternal
+    module Internal = TaskSeqInternal
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
     let toList (t: taskSeq<'T>) = [
