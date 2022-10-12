@@ -22,7 +22,7 @@ type DummyTaskFactory() =
         return x // this dereferences the variable
     }
 
-    member _.CreateBunchOfTasks total = [
+    member _.CreateDelayedTasks total = [
         for i in 0 .. total - 1 do
             fun () -> runTask i
     ]
@@ -55,7 +55,7 @@ module TestUtils =
 
     let createAndJoinMultipleTasks total joiner : Task<_> =
         // the actual creation of tasks
-        let tasks = DummyTaskFactory().CreateBunchOfTasks total
+        let tasks = DummyTaskFactory().CreateDelayedTasks total
         let combinedTask = joiner tasks
         // start the combined tasks
         combinedTask ()

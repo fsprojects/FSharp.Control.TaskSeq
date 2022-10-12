@@ -7,8 +7,9 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 module TaskSeqTests =
-    let createAsyncEnum count =
-        let tasks = DummyTaskFactory().CreateBunchOfTasks count
+    let createTaskSeq count =
+        /// Set of delayed tasks in the form of `unit -> Task<int>`
+        let tasks = DummyTaskFactory().CreateDelayedTasks count
 
         taskSeq {
             for task in tasks do
@@ -19,7 +20,7 @@ module TaskSeqTests =
 
     [<Fact>]
     let ``TaskSeq-iteriAsync should go over all items`` () = task {
-        let tq = createAsyncEnum 10
+        let tq = createTaskSeq 10
         let mutable sum = 0
         do! tq |> TaskSeq.iteriAsync (fun i _ -> sum <- sum + i)
         sum |> should equal 45 // index starts at 0
@@ -27,7 +28,7 @@ module TaskSeqTests =
 
     [<Fact>]
     let ``TaskSeq-iterAsync should go over all items`` () = task {
-        let tq = createAsyncEnum 10
+        let tq = createTaskSeq 10
         let mutable sum = 0
         do! tq |> TaskSeq.iterAsync (fun item -> sum <- sum + item)
         sum |> should equal 55 // task-dummies started at 1
@@ -36,7 +37,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-map maps in correct order`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.map (fun item -> char (item + 64))
             |> TaskSeq.toSeqCachedAsync
 
@@ -49,7 +50,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-mapAsync maps in correct order`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
             |> TaskSeq.toSeqCachedAsync
 
@@ -62,7 +63,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-collect operates in correct order`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.collect (fun item -> taskSeq {
                 yield char (item + 64)
                 yield char (item + 65)
@@ -78,7 +79,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-collectSeq operates in correct order`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.collectSeq (fun item -> seq {
                 yield char (item + 64)
                 yield char (item + 65)
@@ -94,7 +95,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-collect with empty task sequences`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.collect (fun _ -> TaskSeq.ofSeq Seq.empty)
             |> TaskSeq.toSeqCachedAsync
 
@@ -104,7 +105,7 @@ module TaskSeqTests =
     [<Fact>]
     let ``TaskSeq-collectSeq with empty sequences`` () = task {
         let! sq =
-            createAsyncEnum 10
+            createTaskSeq 10
             |> TaskSeq.collectSeq (fun _ -> Seq.empty<int>)
             |> TaskSeq.toSeqCachedAsync
 
