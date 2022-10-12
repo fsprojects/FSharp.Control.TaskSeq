@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-dotnet@v2
       # build it, test it, pack it
       - name: Run dotnet build
-        run: build.cmd
+        run: ./build.cmd
       # - name: Publish test results
       #   uses: dorny/test-reporter@v1
       #   if: always()
