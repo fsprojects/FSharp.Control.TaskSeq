@@ -15,11 +15,24 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v2
-      # build it, test it, pack it
       - name: Run dotnet build
         run: ./build.cmd
+
+  test-release:
+    name: Test Release Build
+    runs-on: windows-latest
+    steps:
+      # checkout the code
+      - name: checkout-code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # setup dotnet based on global.json
+      - name: setup-dotnet
+        uses: actions/setup-dotnet@v2
+      # build it, test it, pack it
       - name: Run dotnet test
-        run: dotnet test -c Release --logger "trx;LogFileName=test-results.trx" ./src/FSharpy.TaskSeq/FSharpy.TaskSeq.Tests.fsproj
+        run: dotnet test -c Release --logger "trx;LogFileName=test-results.trx" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
       - name: Publish test results
         uses: dorny/test-reporter@v1
         if: always()
