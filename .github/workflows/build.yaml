@@ -1,6 +1,6 @@
 name: ci
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   build:
@@ -15,6 +15,9 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v2
+      # build it, test it, pack it
+      - name: Run dotnet build
+        run: ./build.cmd
 
   test-release:
     name: Test Release Build
@@ -29,14 +32,14 @@ jobs:
       - name: setup-dotnet
         uses: actions/setup-dotnet@v2
       # build it, test it, pack it
-      - name: Run dotnet test
-        run: dotnet test -c Release --logger "trx;LogFileName=test-results.trx" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
-      - name: Publish test results
+      - name: Run dotnet test - release
+        run: dotnet test -c Release --logger "trx;LogFileName=test-results-release.trx" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
+      - name: Publish test results - release
         uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: tests
-          path: ./src/FSharpy.TaskSeq/test-results.trx
+          name: Report release tests
+          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-release.trx
           reporter: dotnet-trx
 
   test-debug:
@@ -52,15 +55,16 @@ jobs:
       - name: setup-dotnet
         uses: actions/setup-dotnet@v2
       # build it, test it, pack it
-      - name: Run dotnet test
-        run: dotnet test -c Debug --logger "trx;LogFileName=test-results.trx" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
-      - name: Publish test results
+      - name: Run dotnet test - debug
+        run: dotnet test -c Debug --logger "trx;LogFileName=test-results-debug.trx" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
+      - name: Publish test results - debug
         uses: dorny/test-reporter@v1
         if: always()
         with:
-          name: tests
-          path: ./src/FSharpy.TaskSeq/test-results.trx
+          name: Report debug tests
+          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-debug.trx
           reporter: dotnet-trx
+
   # deploy:
   #   name: deploy
   #   runs-on: ubuntu-latest
