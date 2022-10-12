@@ -18,13 +18,16 @@ jobs:
       # build it, test it, pack it
       - name: Run dotnet build
         run: ./build.cmd
-      # - name: Publish test results
-      #   uses: dorny/test-reporter@v1
-      #   if: always()
-      #   with:
-      #     name: tests
-      #     path: Lula.Extensions.Tests/TestResults/test-results.trx
-      #     reporter: dotnet-trx
+      - name: Run dotnet test
+        run: dotnet test -c Release --logger "trx;LogFileName=test-results.trx" ./src/FSharpy.TaskSeq/FSharpy.TaskSeq.Tests.fsproj
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: tests
+          path: ./src/FSharpy.TaskSeq/test-results.trx
+          reporter: dotnet-trx
+
   # deploy:
   #   name: deploy
   #   runs-on: ubuntu-latest
