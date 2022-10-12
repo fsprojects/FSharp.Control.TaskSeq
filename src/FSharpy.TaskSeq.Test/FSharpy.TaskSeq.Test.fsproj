@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TestUtils.fs" />
     <Compile Include="TaskSeq.Tests.fs" />
+    <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
