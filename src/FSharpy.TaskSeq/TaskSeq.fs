@@ -132,32 +132,32 @@ module TaskSeq =
     // iter/map/collect functions
     //
 
-    /// Iterates over the taskSeq. This function is non-blocking
+    /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking
     /// exhausts the sequence as soon as the task is evaluated.
     let iter action taskSeq = Internal.iter (SimpleAction action) taskSeq
 
-    /// Iterates over the taskSeq. This function is non-blocking,
+    /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking,
     /// exhausts the sequence as soon as the task is evaluated.
     let iteri action taskSeq = Internal.iter (CountableAction action) taskSeq
 
-    /// Iterates over the taskSeq. This function is non-blocking
+    /// Iterates over the taskSeq applying the async action to each item. This function is non-blocking
     /// exhausts the sequence as soon as the task is evaluated.
     let iterAsync action taskSeq = Internal.iter (AsyncSimpleAction action) taskSeq
 
-    /// Iterates over the taskSeq. This function is non-blocking,
+    /// Iterates over the taskSeq, applying the async action to each item. This function is non-blocking,
     /// exhausts the sequence as soon as the task is evaluated.
     let iteriAsync action taskSeq = Internal.iter (AsyncCountableAction action) taskSeq
 
-    /// Maps over the taskSeq. This function is non-blocking.
+    /// Maps over the taskSeq, applying the mapper function to each item. This function is non-blocking.
     let map (mapper: 'T -> 'U) taskSeq = Internal.map (SimpleAction mapper) taskSeq
 
-    /// Maps over the taskSeq with an index. This function is non-blocking.
+    /// Maps over the taskSeq with an index, applying the mapper function to each item. This function is non-blocking.
     let mapi (mapper: int -> 'T -> 'U) taskSeq = Internal.map (CountableAction mapper) taskSeq
 
-    /// Maps over the taskSeq. This function is non-blocking.
+    /// Maps over the taskSeq, applying the async mapper function to each item. This function is non-blocking.
     let mapAsync mapper taskSeq = Internal.map (AsyncSimpleAction mapper) taskSeq
 
-    /// Maps over the taskSeq with an index. This function is non-blocking.
+    /// Maps over the taskSeq with an index, applying the async mapper function to each item. This function is non-blocking.
     let mapiAsync mapper taskSeq = Internal.map (AsyncCountableAction mapper) taskSeq
 
     /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
@@ -165,6 +165,13 @@ module TaskSeq =
 
     /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
     let collectSeq (binder: 'T -> #seq<'U>) taskSeq = Internal.collectSeq binder taskSeq
+
+    /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
+    let collectAsync (binder: 'T -> #Task<#IAsyncEnumerable<'U>>) taskSeq : taskSeq<'U> =
+        Internal.collectAsync binder taskSeq
+
+    /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
+    let collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) taskSeq : taskSeq<'U> = Internal.collectSeqAsync binder taskSeq
 
     //
     // zip/unzip etc functions

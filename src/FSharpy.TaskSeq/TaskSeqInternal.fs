@@ -143,6 +143,18 @@ module internal TaskSeqInternal =
             yield! binder c :> seq<_>
     }
 
+    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (taskSequence: taskSeq<_>) = taskSeq {
+        for c in taskSequence do
+            let! result = binder c
+            yield! result :> IAsyncEnumerable<_>
+    }
+
+    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (taskSequence: taskSeq<_>) = taskSeq {
+        for c in taskSequence do
+            let! result = binder c
+            yield! result :> seq<_>
+    }
+
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
     let toListResult (t: taskSeq<'T>) = [
         let e = t.GetAsyncEnumerator(CancellationToken())
