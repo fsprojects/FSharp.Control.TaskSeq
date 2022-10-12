@@ -1,0 +1,45 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+      # checkout the code
+      - name: checkout-code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # setup dotnet based on global.json
+      - name: setup-dotnet
+        uses: actions/setup-dotnet@v2
+      # build it, test it, pack it
+      - name: Run dotnet build
+        run: build.cmd
+      # - name: Publish test results
+      #   uses: dorny/test-reporter@v1
+      #   if: always()
+      #   with:
+      #     name: tests
+      #     path: Lula.Extensions.Tests/TestResults/test-results.trx
+      #     reporter: dotnet-trx
+  # deploy:
+  #   name: deploy
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     # checkout the code
+  #     - name: checkout-code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     # setup dotnet based on global.json
+  #     - name: setup-dotnet
+  #       uses: actions/setup-dotnet@v2
+  #     # push it to nuget
+  #     - name: deploy
+  #       run: make cd
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
