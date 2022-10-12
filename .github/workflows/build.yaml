@@ -62,7 +62,7 @@ jobs:
         if: always()
         with:
           name: Report debug tests
-          path: .\src\FSharpy.TaskSeq.Test\TestResults\test-results-debug.trx
+          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-debug.trx
           reporter: dotnet-trx
 
   # deploy:
