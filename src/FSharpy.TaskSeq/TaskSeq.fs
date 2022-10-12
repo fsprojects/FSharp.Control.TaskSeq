@@ -11,7 +11,18 @@ module TaskSeq =
     // Just for convenience
     module Internal = TaskSeqInternal
 
-    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
+    /// Initialize an empty taskSeq.
+    let empty<'T> = taskSeq {
+        for c: 'T in [] do
+            yield c
+    }
+
+
+    //
+    // Convert 'ToXXX' functions
+    //
+
+    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     let toList (t: taskSeq<'T>) = [
         let e = t.GetAsyncEnumerator(CancellationToken())
 
@@ -23,7 +34,7 @@ module TaskSeq =
     ]
 
 
-    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
+    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     let toArray (taskSeq: taskSeq<'T>) = [|
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
 
@@ -34,11 +45,38 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     |]
 
-    /// Initialize an empty taskSeq.
-    let empty<'T> = taskSeq {
-        for c: 'T in [] do
-            yield c
+    /// Returns taskSeq as a seq, similar to Seq.cached. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
+    let toSeqCached (taskSeq: taskSeq<'T>) = seq {
+        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+
+        try
+            while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
+                yield e.Current
+        finally
+            e.DisposeAsync().AsTask().Wait()
     }
+
+    /// Unwraps the taskSeq as a Task<array<_>>. This function is non-blocking.
+    let toArrayAsync taskSeq =
+        Internal.toResizeArrayAsync taskSeq
+        |> Task.map (fun a -> a.ToArray())
+
+    /// Unwraps the taskSeq as a Task<list<_>>. This function is non-blocking.
+    let toListAsync taskSeq = Internal.toResizeArrayAndMapAsync List.ofSeq taskSeq
+
+    /// Unwraps the taskSeq as a Task<ResizeArray<_>>. This function is non-blocking.
+    let toResizeArrayAsync taskSeq = Internal.toResizeArrayAsync taskSeq
+
+    /// Unwraps the taskSeq as a Task<IList<_>>. This function is non-blocking.
+    let toIListAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) taskSeq
+
+    /// Unwraps the taskSeq as a Task<seq<_>>. This function is non-blocking,
+    /// exhausts the sequence and caches the results of the tasks in the sequence.
+    let toSeqCachedAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) taskSeq
+
+    //
+    // Convert 'OfXXX' functions
+    //
 
     /// Create a taskSeq of an array.
     let ofArray (array: 'T[]) = taskSeq {
@@ -106,27 +144,6 @@ module TaskSeq =
             yield c
     }
 
-    //
-    // Convert 'To' functions
-    //
-
-    /// Unwraps the taskSeq as a Task<array<_>>. This function is non-blocking.
-    let toArrayAsync taskSeq =
-        Internal.toResizeArrayAsync taskSeq
-        |> Task.map (fun a -> a.ToArray())
-
-    /// Unwraps the taskSeq as a Task<list<_>>. This function is non-blocking.
-    let toListAsync taskSeq = Internal.toResizeArrayAndMapAsync List.ofSeq taskSeq
-
-    /// Unwraps the taskSeq as a Task<ResizeArray<_>>. This function is non-blocking.
-    let toResizeArrayAsync taskSeq = Internal.toResizeArrayAsync taskSeq
-
-    /// Unwraps the taskSeq as a Task<IList<_>>. This function is non-blocking.
-    let toIListAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) taskSeq
-
-    /// Unwraps the taskSeq as a Task<seq<_>>. This function is non-blocking,
-    /// exhausts the sequence and caches the results of the tasks in the sequence.
-    let toSeqCachedAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) taskSeq
 
     //
     // iter/map/collect functions

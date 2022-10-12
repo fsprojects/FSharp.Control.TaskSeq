@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <Compile Include="TestUtils.fs" />
+    <Compile Include="TaskSeq.ToXXX.Tests.fs" />
+    <Compile Include="TaskSeq.OfXXX.Tests.fs" />
+    <Compile Include="TaskSeq.Iter.Tests.fs" />
+    <Compile Include="TaskSeq.Map.Tests.fs" />
+    <Compile Include="TaskSeq.Collect.Tests.fs" />
     <Compile Include="TaskSeq.Tests.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="Program.fs" />
