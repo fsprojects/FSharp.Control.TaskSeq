@@ -1,11 +1,12 @@
-﻿namespace FSharpy.TaskSeq
+namespace FSharpy
 
 open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
 module TaskSeq =
-    open TaskSeq
+    open FSharpy.TaskSeqBuilders
+    module Internal = FSharpy.TaskSeqInternal
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
     let toList (t: taskSeq<'T>) = [

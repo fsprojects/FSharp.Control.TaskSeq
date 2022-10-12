@@ -1,4 +1,4 @@
-﻿namespace FSharpy.TaskSeq
+namespace FSharpy
 
 open System.Threading.Tasks
 
@@ -31,8 +31,7 @@ module Task =
         }
 
     /// Bind a Task<'T>
-    let inline bind binder (task: Task<'T>) : Task<'U> =
-        TaskBuilder.task { return! binder task }
+    let inline bind binder (task: Task<'T>) : Task<'U> = TaskBuilder.task { return! binder task }
 
 module Async =
     /// Convert an Task<'T> into an Async<'T>
@@ -45,11 +44,10 @@ module Async =
     let inline toTask (async: Async<'T>) = task { return! async }
 
     /// Convert an Async<'T> into an Async<unit>, ignoring the result
-    let inline ignore (async': Async<'T>) =
-        async {
-            let! _ = async'
-            return ()
-        }
+    let inline ignore (async': Async<'T>) = async {
+        let! _ = async'
+        return ()
+    }
 
     /// Map an Async<'T>
     let inline map mapper (async: Async<'T>) : Async<'U> =
@@ -59,5 +57,4 @@ module Async =
         }
 
     /// Bind an Async<'T>
-    let inline bind binder (task: Async<'T>) : Async<'U> =
-        ExtraTopLevelOperators.async { return! binder task }
+    let inline bind binder (task: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder task }

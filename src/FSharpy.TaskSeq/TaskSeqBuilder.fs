@@ -1,4 +1,6 @@
-﻿namespace FSharpy.TaskSeq
+namespace FSharpy.TaskSeqBuilders
+
+#nowarn "57" // note: this is *not* an experimental feature, but they forgot to switch off the flag
 
 open System
 open System.Collections.Generic
@@ -10,7 +12,6 @@ open System.Threading.Tasks.Sources
 open FSharp.Core.CompilerServices
 open FSharp.Core.CompilerServices.StateMachineHelpers
 
-#nowarn "57" // note: this is *not* an experimental feature, but they forgot to switch off the flag
 
 [<AutoOpen>]
 module Internal = // cannot be marked with 'internal' scope
@@ -538,8 +539,3 @@ type TaskSeqBuilder() =
                 // For tailcalls we return 'false' and re-run from the entry (trampoline)
                 false
             | _ -> b.YieldFrom(other).Invoke(&sm))
-
-[<AutoOpen>]
-module TaskSeqBuilder =
-    /// A TaskSeq workflow for IAsyncEnumerable<'T> types.
-    let taskSeq = TaskSeqBuilder()
