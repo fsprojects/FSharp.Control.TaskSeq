@@ -6,7 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Utils.fs" />
     <Compile Include="TaskSeqBuilder.fs" />
+    <Compile Include="TaskSeqInternal.fs" />
+    <Compile Include="TaskSeq.fs" />
   </ItemGroup>
 
 </Project>
