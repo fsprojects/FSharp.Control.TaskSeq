@@ -5,7 +5,10 @@ open System.Threading
 open System.Threading.Tasks
 
 module TaskSeq =
+    // F# BUG: the following module is 'AutoOpen' and this isn't needed in the Tests project. Why do we need to open it?
     open FSharpy.TaskSeqBuilders
+
+    // Just for convenience
     module Internal = FSharpy.TaskSeqInternal
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted.
@@ -31,61 +34,72 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     |]
 
+    /// Initialize an empty taskSeq.
     let empty<'T> = taskSeq {
         for c: 'T in [] do
             yield c
     }
 
+    /// Create a taskSeq of an array.
     let ofArray (array: 'T[]) = taskSeq {
         for c in array do
             yield c
     }
 
+    /// Create a taskSeq of a list.
     let ofList (list: 'T list) = taskSeq {
         for c in list do
             yield c
     }
 
+    /// Create a taskSeq of a seq.
     let ofSeq (sequence: 'T seq) = taskSeq {
         for c in sequence do
             yield c
     }
 
+    /// Create a taskSeq of a ResizeArray, aka List.
     let ofResizeArray (data: 'T ResizeArray) = taskSeq {
         for c in data do
             yield c
     }
 
+    /// Create a taskSeq of a sequence of tasks, that may already have hot-started.
     let ofTaskSeq (sequence: #Task<'T> seq) = taskSeq {
         for c in sequence do
             let! c = c
             yield c
     }
 
+    /// Create a taskSeq of a list of tasks, that may already have hot-started.
     let ofTaskList (list: #Task<'T> list) = taskSeq {
         for c in list do
             let! c = c
             yield c
     }
 
+    /// Create a taskSeq of an array of tasks, that may already have hot-started.
     let ofTaskArray (array: #Task<'T> array) = taskSeq {
         for c in array do
             let! c = c
             yield c
     }
 
+    /// Create a taskSeq of a seq of async.
     let ofAsyncSeq (sequence: Async<'T> seq) = taskSeq {
         for c in sequence do
             let! c = task { return! c }
             yield c
     }
 
+    /// Create a taskSeq of a list of async.
     let ofAsyncList (list: Async<'T> list) = taskSeq {
         for c in list do
             let! c = Task.ofAsync c
             yield c
     }
 
+    /// Create a taskSeq of an array of async.
     let ofAsyncArray (array: Async<'T> array) = taskSeq {
         for c in array do
             let! c = Async.toTask c
