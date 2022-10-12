@@ -59,3 +59,15 @@ module TestUtils =
         let combinedTask = joiner tasks
         // start the combined tasks
         combinedTask ()
+
+    /// Create a bunch of dummy tasks
+    let createDummyTaskSeq count =
+        /// Set of delayed tasks in the form of `unit -> Task<int>`
+        let tasks = DummyTaskFactory().CreateDelayedTasks count
+
+        taskSeq {
+            for task in tasks do
+                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                let! x = task ()
+                yield x
+        }
