@@ -10,19 +10,53 @@ module ExtraTaskSeqOperators =
     /// A TaskSeq workflow for IAsyncEnumerable<'T> types.
     let taskSeq = TaskSeqBuilder()
 
+[<Struct>]
+type Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
+    | CountableAction of c_action: (int -> 'T -> 'U)
+    | SimpleAction of s_action: ('T -> 'U)
+    | AsyncCountableAction of ac_action: (int -> 'T -> 'TaskU)
+    | AsyncSimpleAction of as_action: ('T -> 'TaskU)
+
 module internal TaskSeqInternal =
-    let iteriAsync action (taskSeq: taskSeq<_>) = task {
+    let iter action (taskSeq: taskSeq<_>) = task {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
-        let mutable i = 0
         let! step = e.MoveNextAsync()
         go <- step
 
-        while go do
-            action i e.Current
-            let! step = e.MoveNextAsync()
-            i <- i + 1
-            go <- step
+        // this ensures that the inner loop is optimized for the closure
+        // though perhaps we need to split into individual functions after all to use
+        // InlineIfLambda?
+        match action with
+        | CountableAction action ->
+            let mutable i = 0
+
+            while go do
+                do action i e.Current
+                let! step = e.MoveNextAsync()
+                i <- i + 1
+                go <- step
+
+        | SimpleAction action ->
+            while go do
+                do action e.Current
+                let! step = e.MoveNextAsync()
+                go <- step
+
+        | AsyncCountableAction action ->
+            let mutable i = 0
+
+            while go do
+                do! action i e.Current
+                let! step = e.MoveNextAsync()
+                i <- i + 1
+                go <- step
+
+        | AsyncSimpleAction action ->
+            while go do
+                do! action e.Current
+                let! step = e.MoveNextAsync()
+                go <- step
     }
 
     let fold (action: 'State -> 'T -> 'State) initial (taskSeq: taskSeq<_>) = task {
@@ -42,9 +76,11 @@ module internal TaskSeqInternal =
 
     let toResizeArrayAsync taskSeq = task {
         let res = ResizeArray()
-        do! taskSeq |> iteriAsync (fun _ item -> res.Add item)
+        do! taskSeq |> iter (SimpleAction(fun item -> res.Add item))
         return res
     }
+
+    let inline toResizeArrayAndMapAsync mapper taskSeq = (toResizeArrayAsync >> Task.map mapper) taskSeq
 
     let mapi mapper (taskSequence: taskSeq<_>) = taskSeq {
         let mutable i = 0
