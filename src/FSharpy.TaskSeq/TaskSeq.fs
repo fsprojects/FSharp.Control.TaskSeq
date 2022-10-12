@@ -149,16 +149,16 @@ module TaskSeq =
     let iteriAsync action taskSeq = Internal.iter (AsyncCountableAction action) taskSeq
 
     /// Maps over the taskSeq. This function is non-blocking.
-    let map (mapper: 'T -> 'U) taskSeq = Internal.mapi (fun _ -> mapper) taskSeq
+    let map (mapper: 'T -> 'U) taskSeq = Internal.map (SimpleAction mapper) taskSeq
 
     /// Maps over the taskSeq with an index. This function is non-blocking.
-    let mapi (mapper: int -> 'T -> 'U) taskSeq = Internal.mapi mapper taskSeq
+    let mapi (mapper: int -> 'T -> 'U) taskSeq = Internal.map (CountableAction mapper) taskSeq
 
     /// Maps over the taskSeq. This function is non-blocking.
-    let mapAsync (mapper: 'T -> Task<'U>) taskSeq = Internal.mapiAsync (fun _ -> mapper) taskSeq
+    let mapAsync mapper taskSeq = Internal.map (AsyncSimpleAction mapper) taskSeq
 
     /// Maps over the taskSeq with an index. This function is non-blocking.
-    let mapiAsync (mapper: int -> 'T -> Task<'U>) taskSeq = Internal.mapiAsync mapper taskSeq
+    let mapiAsync mapper taskSeq = Internal.map (AsyncCountableAction mapper) taskSeq
 
     /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
     let collect (binder: 'T -> #IAsyncEnumerable<'U>) taskSeq = Internal.collect binder taskSeq

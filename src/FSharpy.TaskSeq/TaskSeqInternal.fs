@@ -82,22 +82,35 @@ module internal TaskSeqInternal =
 
     let inline toResizeArrayAndMapAsync mapper taskSeq = (toResizeArrayAsync >> Task.map mapper) taskSeq
 
-    let mapi mapper (taskSequence: taskSeq<_>) = taskSeq {
-        let mutable i = 0
+    let map mapper (taskSequence: taskSeq<_>) =
+        match mapper with
+        | CountableAction mapper -> taskSeq {
+            let mutable i = 0
 
-        for c in taskSequence do
-            yield mapper i c
-            i <- i + 1
-    }
+            for c in taskSequence do
+                yield mapper i c
+                i <- i + 1
+          }
 
-    let mapiAsync (mapper: _ -> _ -> Task<'T>) (taskSequence: taskSeq<_>) = taskSeq {
-        let mutable i = 0
+        | SimpleAction mapper -> taskSeq {
+            for c in taskSequence do
+                yield mapper c
+          }
 
-        for c in taskSequence do
-            let! x = mapper i c
-            yield x
-            i <- i + 1
-    }
+        | AsyncCountableAction mapper -> taskSeq {
+            let mutable i = 0
+
+            for c in taskSequence do
+                let! result = mapper i c
+                yield result
+                i <- i + 1
+          }
+
+        | AsyncSimpleAction mapper -> taskSeq {
+            for c in taskSequence do
+                let! result = mapper c
+                yield result
+          }
 
     let zip (taskSequence1: taskSeq<_>) (taskSequence2: taskSeq<_>) = taskSeq {
         let e1 = taskSequence1.GetAsyncEnumerator(CancellationToken())
