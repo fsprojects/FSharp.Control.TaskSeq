@@ -14,7 +14,7 @@ type DummyTaskFactory() =
     let rnd = Random()
     let rnd () = rnd.Next(10, 30)
 
-    let runTask i = backgroundTask {
+    let runTaskDelayed i = backgroundTask {
         // ensure unequal running lengths and points-in-time for assigning the variable
         // DO NOT use Thead.Sleep(), it's blocking!
         let! _ = Task.Delay(rnd ())
@@ -22,9 +22,21 @@ type DummyTaskFactory() =
         return x // this dereferences the variable
     }
 
+    let runTaskDirect i = backgroundTask {
+        x <- x + 1
+        return x
+    }
+
+    /// Bunch of delayed tasks that randomly have a yielding delay of 10-30ms, therefore having overlapping execution times.
     member _.CreateDelayedTasks total = [
         for i in 0 .. total - 1 do
-            fun () -> runTask i
+            fun () -> runTaskDelayed i
+    ]
+
+    /// Bunch of delayed tasks without internally using Task.Delay, therefore hot-started and immediately finished.
+    member _.CreateDirectTasks total = [
+        for i in 0 .. total - 1 do
+            fun () -> runTaskDirect i
     ]
 
 [<AutoOpen>]
@@ -60,10 +72,22 @@ module TestUtils =
         // start the combined tasks
         combinedTask ()
 
-    /// Create a bunch of dummy tasks
+    /// Create a bunch of dummy tasks, each lasting between 10-30m.
     let createDummyTaskSeq count =
         /// Set of delayed tasks in the form of `unit -> Task<int>`
         let tasks = DummyTaskFactory().CreateDelayedTasks count
+
+        taskSeq {
+            for task in tasks do
+                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                let! x = task ()
+                yield x
+        }
+
+    /// Create a bunch of dummy tasks, each lasting between 10-30m.
+    let createDummyDirectTaskSeq count =
+        /// Set of delayed tasks in the form of `unit -> Task<int>`
+        let tasks = DummyTaskFactory().CreateDirectTasks count
 
         taskSeq {
             for task in tasks do
