@@ -1,4 +1,4 @@
-module FSharpy.TaskSeq.Tests.``Conversion-From``
+module FSharpy.Tests.``Conversion-From``
 
 open Xunit
 open FsUnit.Xunit

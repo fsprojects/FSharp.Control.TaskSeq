@@ -1,4 +1,4 @@
-﻿namespace FSharpy.TaskSeq.Tests
+﻿namespace FSharpy.Tests
 
 open System
 open System.Threading
