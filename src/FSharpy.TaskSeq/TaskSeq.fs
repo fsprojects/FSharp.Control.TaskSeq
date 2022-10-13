@@ -16,9 +16,7 @@ module TaskSeq =
             yield c
     }
 
-    let isEmpty taskSeq = (Internal.isEmptyAsync taskSeq).Result
-
-    let isEmptyAsync taskSeq = Internal.isEmptyAsync taskSeq
+    let isEmpty taskSeq = Internal.isEmptyAsync taskSeq
 
     //
     // Convert 'ToXXX' functions

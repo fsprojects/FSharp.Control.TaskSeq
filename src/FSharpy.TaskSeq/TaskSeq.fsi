@@ -10,15 +10,8 @@ module TaskSeq =
 
     /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
-    /// This function is blocking until the first item is found and awaited. See <see cref="isEmptyAsync" />
-    /// for the non-blocking variant that can be awaited.
     /// </summary>
-    val isEmpty: taskSeq: taskSeq<'T> -> bool
-
-    /// <summary>
-    /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
-    /// </summary>
-    val isEmptyAsync: taskSeq: taskSeq<'T> -> Task<bool>
+    val isEmpty: taskSeq: taskSeq<'T> -> Task<bool>
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: t: taskSeq<'T> -> 'T list
