@@ -43,10 +43,27 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
-    let isEmptyAsync (taskSeq: taskSeq<_>) = task {
+    let isEmpty (taskSeq: taskSeq<_>) = task {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         return not step
+    }
+
+    let tryExactlyOne (taskSeq: taskSeq<_>) = task {
+        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+
+        match! e.MoveNextAsync() with
+        | true ->
+            // grab first item and test if there's a second item
+            let current = e.Current
+
+            match! e.MoveNextAsync() with
+            | true -> return None // 2 or more items
+            | false -> return Some current // exactly one
+
+        | false ->
+            // zero items
+            return None
     }
 
     let iter action (taskSeq: taskSeq<_>) = task {
