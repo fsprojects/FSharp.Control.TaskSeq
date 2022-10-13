@@ -191,14 +191,74 @@ module TaskSeq =
     let collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) taskSeq : taskSeq<'U> = Internal.collectSeqAsync binder taskSeq
 
     //
+    // choosers, pickers and the like
+    //
+
+    /// <summary>
+    /// Returns the first element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    let tryHead taskSeq = Internal.tryHead taskSeq
+
+    /// <summary>
+    /// Returns the first element of the <see cref="IAsyncEnumerable" />.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    let head taskSeq = task {
+        match! Internal.tryHead taskSeq with
+        | Some head -> head
+        | None -> Internal.raiseEmptySeq ()
+    }
+
+    /// <summary>
+    /// Returns the last element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    let tryLast taskSeq = Internal.tryLast taskSeq
+
+    /// <summary>
+    /// Returns the last element of the <see cref="IAsyncEnumerable" />.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    let last taskSeq = task {
+        match! Internal.tryLast taskSeq with
+        | Some last -> last
+        | None -> Internal.raiseEmptySeq ()
+    }
+
+    /// <summary>
+    /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
+    /// does not contain enough elements, or if <paramref name="index" /> is negative.
+    /// Parameter <paramref name="index" /> is zero-based, that is, the value 0 returns the first element.
+    /// </summary>
+    let tryItem index taskSeq = Internal.tryItem index taskSeq
+
+    /// <summary>
+    /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
+    /// does not contain enough elements, or if <paramref name="index" /> is negative.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or
+    /// <paramref name="index" /> is negative.</exception>
+    let item index taskSeq = task {
+        match! Internal.tryItem index taskSeq with
+        | Some item -> item
+        | None -> Internal.raiseInsufficient ()
+    }
+
+    //
     // zip/unzip etc functions
     //
 
+    /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
+    /// </summary>
+    /// <exception cref="ArgumentException">The sequences have different lengths.</exception>
     let zip taskSeq1 taskSeq2 = Internal.zip taskSeq1 taskSeq2
 
+    /// <summary>
     /// Applies a function to each element of the task sequence, threading an accumulator argument through the computation.
+    /// </summary>
     let fold folder state taskSeq = Internal.fold (FolderAction folder) state taskSeq
 
     /// Applies an async function to each element of the task sequence, threading an accumulator argument through the computation.
