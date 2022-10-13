@@ -44,4 +44,6 @@ module TaskSeq =
   val collectAsync: binder: ('T -> #Task<'b>) -> taskSeq: taskSeq<'T> -> taskSeq<'U> when 'b :> IAsyncEnumerable<'U>
   val collectSeqAsync: binder: ('T -> #Task<'b>) -> taskSeq: taskSeq<'T> -> taskSeq<'U> when 'b :> seq<'U>
   val zip: taskSeq1: taskSeq<'a> -> taskSeq2: taskSeq<'b> -> IAsyncEnumerable<'a * 'b>
+  val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> taskSeq: IAsyncEnumerable<'T> -> Task<'State>
+  val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> taskSeq: IAsyncEnumerable<'T> -> Task<'State>
 ```
