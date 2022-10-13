@@ -14,6 +14,7 @@
     <Compile Include="TaskSeq.Iter.Tests.fs" />
     <Compile Include="TaskSeq.Map.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
+    <Compile Include="TaskSeq.Fold.Tests.fs" />
     <Compile Include="TaskSeq.Tests.Utility.fs" />
     <Compile Include="TaskSeq.Tests.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />

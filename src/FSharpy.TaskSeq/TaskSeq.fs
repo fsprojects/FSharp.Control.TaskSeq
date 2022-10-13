@@ -197,3 +197,9 @@ module TaskSeq =
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
     let zip taskSeq1 taskSeq2 = Internal.zip taskSeq1 taskSeq2
+
+    /// Applies a function to each element of the task sequence, threading an accumulator argument through the computation.
+    let fold folder state taskSeq = Internal.fold (FolderAction folder) state taskSeq
+
+    /// Applies an async function to each element of the task sequence, threading an accumulator argument through the computation.
+    let foldAsync folder state taskSeq = Internal.fold (AsyncFolderAction folder) state taskSeq
