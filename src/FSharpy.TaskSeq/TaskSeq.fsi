@@ -8,6 +8,18 @@ module TaskSeq =
     /// Initialize an empty taskSeq.
     val empty<'T> : taskSeq<'T>
 
+    /// <summary>
+    /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
+    /// This function is blocking until the first item is found and awaited. See <see cref="isEmptyAsync" />
+    /// for the non-blocking variant that can be awaited.
+    /// </summary>
+    val isEmpty: taskSeq: taskSeq<'T> -> bool
+
+    /// <summary>
+    /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
+    /// </summary>
+    val isEmptyAsync: taskSeq: taskSeq<'T> -> Task<bool>
+
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: t: taskSeq<'T> -> 'T list
 
@@ -102,10 +114,6 @@ module TaskSeq =
 
     /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
     val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> taskSeq: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
-
-    /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
-    /// if the sequences are or unequal length.
-    val zip: taskSeq1: taskSeq<'T> -> taskSeq2: taskSeq<'U> -> taskSeq<'T * 'U>
 
     /// <summary>
     /// Returns the first element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
