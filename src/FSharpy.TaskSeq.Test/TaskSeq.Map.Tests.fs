@@ -1,4 +1,4 @@
-module FSharpy.TaskSeq.Tests.Map
+module FSharpy.Tests.Map
 
 open Xunit
 open FsUnit.Xunit

@@ -1,4 +1,4 @@
-module FSharpy.TaskSeq.Tests.Fold
+module FSharpy.Tests.Fold
 
 open System.Text
 open Xunit

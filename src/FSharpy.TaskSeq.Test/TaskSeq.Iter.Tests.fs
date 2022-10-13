@@ -1,4 +1,4 @@
-module FSharpy.TaskSeq.Tests.Iter
+module FSharpy.Tests.Iter
 
 open Xunit
 open FsUnit.Xunit

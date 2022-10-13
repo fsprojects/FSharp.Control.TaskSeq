@@ -1,4 +1,4 @@
-namespace FSharpy.TaskSeq.Tests
+namespace FSharpy.Tests
 
 open Xunit
 open FsUnit.Xunit

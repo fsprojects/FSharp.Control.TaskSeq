@@ -1,4 +1,4 @@
-﻿module FSharpy.TaskSeq.Tests.``taskSeq Computation Expression``
+﻿module FSharpy.Tests.``taskSeq Computation Expression``
 
 open Xunit
 open FsUnit.Xunit
