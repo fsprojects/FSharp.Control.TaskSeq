@@ -5,10 +5,19 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OtherFlags>--allsigs</OtherFlags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OtherFlags>--allsigs</OtherFlags>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="Utils.fs" />
     <Compile Include="TaskSeqBuilder.fs" />
     <Compile Include="TaskSeqInternal.fs" />
+    <Compile Include="TaskSeq.fsi" />
     <Compile Include="TaskSeq.fs" />
   </ItemGroup>
 
