@@ -162,4 +162,4 @@ module TestUtils =
         }
 
     /// Create a bunch of dummy tasks, each lasting between 10-30ms with spin-wait delays.
-    let createDummyTaskSeq = createDummyTaskSeqWith 10_0000L<µs> 30_0000L<µs>
+    let createDummyTaskSeq = createDummyTaskSeqWith 10_000L<µs> 30_000L<µs>
