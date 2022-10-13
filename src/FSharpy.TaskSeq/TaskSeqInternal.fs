@@ -12,10 +12,15 @@ module ExtraTaskSeqOperators =
 
 [<Struct>]
 type Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
-    | CountableAction of c_action: (int -> 'T -> 'U)
-    | SimpleAction of s_action: ('T -> 'U)
-    | AsyncCountableAction of ac_action: (int -> 'T -> 'TaskU)
-    | AsyncSimpleAction of as_action: ('T -> 'TaskU)
+    | CountableAction of countable_action: (int -> 'T -> 'U)
+    | SimpleAction of simple_action: ('T -> 'U)
+    | AsyncCountableAction of async_countable_action: (int -> 'T -> 'TaskU)
+    | AsyncSimpleAction of async_simple_action: ('T -> 'TaskU)
+
+[<Struct>]
+type FolderAction<'T, 'State, 'TaskState when 'TaskState :> Task<'State>> =
+    | FolderAction of state_action: ('State -> 'T -> 'State)
+    | AsyncFolderAction of async_state_action: ('State -> 'T -> 'TaskState)
 
 module internal TaskSeqInternal =
     let iter action (taskSeq: taskSeq<_>) = task {
@@ -59,17 +64,26 @@ module internal TaskSeqInternal =
                 go <- step
     }
 
-    let fold (action: 'State -> 'T -> 'State) initial (taskSeq: taskSeq<_>) = task {
+    let fold folder initial (taskSeq: taskSeq<_>) = task {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable result = initial
         let! step = e.MoveNextAsync()
         go <- step
 
-        while go do
-            result <- action result e.Current
-            let! step = e.MoveNextAsync()
-            go <- step
+        match folder with
+        | FolderAction folder ->
+            while go do
+                result <- folder result e.Current
+                let! step = e.MoveNextAsync()
+                go <- step
+
+        | AsyncFolderAction folder ->
+            while go do
+                let! tempResult = folder result e.Current
+                result <- tempResult
+                let! step = e.MoveNextAsync()
+                go <- step
 
         return result
     }
