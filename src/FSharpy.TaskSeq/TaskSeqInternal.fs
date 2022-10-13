@@ -43,6 +43,12 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
+    let isEmptyAsync (taskSeq: taskSeq<_>) = task {
+        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+        let! step = e.MoveNextAsync()
+        return not step
+    }
+
     let iter action (taskSeq: taskSeq<_>) = task {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
