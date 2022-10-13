@@ -59,23 +59,25 @@ let ``CE taskSeq with nested yield!`` () = task {
 }
 
 [<Fact>]
-let ``CE taskSeq with nested deeply yield! perf test`` () = task {
+let ``CE taskSeq with nested deeply yield! perf test 8521 nested tasks`` () = task {
     let control = seq {
         yield! [ 1..10 ]
 
         // original:
-        // yield! Seq.concat <| Seq.init 2145 (fun _ -> [ 1; 2 ])
-        yield! Seq.concat <| Seq.init 120 (fun _ -> [ 1; 2 ])
+        yield! Seq.concat <| Seq.init 4251 (fun _ -> [ 1; 2 ])
+    //yield! Seq.concat <| Seq.init 120 (fun _ -> [ 1; 2 ])
     }
 
     let createTasks = createDummyTaskSeqWith 1L<µs> 10L<µs>
     // FIXME: it appears that deeply nesting adds to performance degradation, need to benchmark/profile this
     // probably cause: since this is *fast* with DirectTask, the reason is likely the way the Task.Delay causes
     // *many* subtasks to be delayed, resulting in exponential delay. Reason: max accuracy of Delay is about 15ms (!)
+
+    // RESOLUTION: seems to have been caused by erratic Task.Delay which has only a 15ms resolution
     let tskSeq = taskSeq {
         yield! createTasks 10
 
-        // nestings amount to 2145 sequences of [1;2]
+        // nestings amount to 8512 sequences of [1;2]
         for i in 0..2 do
             yield! createTasks 2
 
@@ -87,28 +89,27 @@ let ``CE taskSeq with nested deeply yield! perf test`` () = task {
 
                     for i in 0..2 do
                         yield! createTasks 2
-                        // stopping here, at a total 250 nested taskSeq
-                        // add the below to get to 4300
 
-                        //for i in 0..2 do
-                        //    yield! createTasks 2
+                        for i in 0..2 do
+                            yield! createTasks 2
 
-                        //    for i in 0..2 do
-                        //        yield! createTasks 2
+                            for i in 0..2 do
+                                yield! createTasks 2
 
-                        //for i in 0..2 do
-                        //    yield! createTasks 2
+                        for i in 0..2 do
+                            yield! createTasks 2
 
-                        //    for i in 0..2 do
-                        //        yield! createTasks 2
+                            for i in 0..2 do
+                                yield! createTasks 2
 
-                        //        for i in 0..2 do
-                        //            yield! createTasks 2
+                                for i in 0..2 do
+                                    yield! createTasks 2
+
                         yield! TaskSeq.empty
     }
 
     let! data = tskSeq |> TaskSeq.toListAsync
-    data |> List.length |> should equal 250
+    data |> List.length |> should equal 8512
     data |> should equal (List.ofSeq control)
 }
 
