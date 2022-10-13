@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OtherFlags>--allsigs</OtherFlags>
+    <OtherFlags></OtherFlags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OtherFlags>--allsigs</OtherFlags>
+    <OtherFlags></OtherFlags>
   </PropertyGroup>
 
   <ItemGroup>
