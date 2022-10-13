@@ -16,7 +16,7 @@ module TaskSeq =
             yield c
     }
 
-    let isEmpty taskSeq = Internal.isEmptyAsync taskSeq
+    let isEmpty taskSeq = Internal.isEmpty taskSeq
 
     //
     // Convert 'ToXXX' functions
@@ -163,24 +163,32 @@ module TaskSeq =
 
     let head taskSeq = task {
         match! Internal.tryHead taskSeq with
-        | Some head -> head
-        | None -> Internal.raiseEmptySeq ()
+        | Some head -> return head
+        | None -> return Internal.raiseEmptySeq ()
     }
 
     let tryLast taskSeq = Internal.tryLast taskSeq
 
     let last taskSeq = task {
         match! Internal.tryLast taskSeq with
-        | Some last -> last
-        | None -> Internal.raiseEmptySeq ()
+        | Some last -> return last
+        | None -> return Internal.raiseEmptySeq ()
     }
 
     let tryItem index taskSeq = Internal.tryItem index taskSeq
 
     let item index taskSeq = task {
         match! Internal.tryItem index taskSeq with
-        | Some item -> item
-        | None -> Internal.raiseInsufficient ()
+        | Some item -> return item
+        | None -> return Internal.raiseInsufficient ()
+    }
+
+    let tryExactlyOne source = Internal.tryExactlyOne source
+
+    let exactlyOne source = task {
+        match! Internal.tryExactlyOne source with
+        | Some item -> return item
+        | None -> return invalidArg (nameof source) "The input sequence contains more than one element."
     }
 
     //

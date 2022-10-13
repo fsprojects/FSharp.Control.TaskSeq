@@ -118,7 +118,7 @@ module TaskSeq =
     /// Returns the first element of the <see cref="IAsyncEnumerable" />.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val head: taskSeq: taskSeq<unit> -> Task<unit>
+    val head: taskSeq: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the last element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
@@ -130,7 +130,7 @@ module TaskSeq =
     /// Returns the last element of the <see cref="IAsyncEnumerable" />.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val last: taskSeq: taskSeq<unit> -> Task<unit>
+    val last: taskSeq: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
@@ -145,7 +145,19 @@ module TaskSeq =
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or
     /// <paramref name="index" /> is negative.</exception>
-    val item: index: int -> taskSeq: taskSeq<unit> -> Task<unit>
+    val item: index: int -> taskSeq: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the only element of the task sequence, or <see cref="None" /> if the sequence is empty of
+    /// contains more than one element.
+    /// </summary>
+    val tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the only element of the task sequence.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the input sequence does not contain precisely one element.</exception>
+    val exactlyOne: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
