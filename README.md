@@ -1,10 +1,26 @@
 # TaskSeq
-An implementation `IAsyncEnumerableM<'T>` as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
+An implementation [`IAsyncEnumerable<'T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0) as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
+
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-7.0) call on the [`IAsyncEnumerator<'T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1?view=net-7.0) given by a call to [`GetAsyncEnumerator()`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1.getasyncenumerator?view=net-7.0). It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-7.0) as well, which requires careful handling.
+
+A good C#-based introduction on `IAsyncEnumerable` [can be found in this blog](https://stu.dev/iasyncenumerable-introduction/). Another resource is [this MSDN article shortly after its introductiono](https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8).
 
 ## In progress!!!
 
 It's based on [Don Symes `taskSeq.fs`](https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs)
 but expanded with useful utility functions and a few extra binding overloads.
+
+## Short-term feature planning
+
+Not necessarily in order of importance:
+
+ - [x] A minimal base set of useful functions and sensible CE overloads, like `map`, `collect`, `fold`, `zip`. These functions will live in the module `TaskSeq`. The CE will be called `taskSeq`.
+ - [ ] Packaging and publishing on Nuget
+ - [ ] Provide the same surface area of functions as `Seq` in F# Core
+ - [ ] For each function, have a "normal" function, where the operator is non-async, and an async version. I.e., `TaskSeq.map` and `TaskSeq.mapAsync`, the difference being that the `mapper` function returns a `#Task<'T>` in the second version.
+ - [ ] Examples, documentation and tests
+ - [ ] Expand surface area based on user requests
+ - [ ] Improving the original code, adding benchmarks, and what have you.
 
 ## Current set of `TaskSeq` utility functions
 
