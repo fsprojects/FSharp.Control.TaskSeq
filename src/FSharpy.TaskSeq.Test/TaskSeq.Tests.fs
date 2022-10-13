@@ -56,6 +56,60 @@ let ``CE taskSeq with mixing yield! and yield`` () = task {
 }
 
 [<Fact>]
+let ``CE taskSeq with nested deeply yield! perf test`` () = task {
+    let control = seq {
+        yield! [ 1..10 ]
+
+        // original:
+        // yield! Seq.concat <| Seq.init 4251 (fun _ -> [ 1; 2 ])
+        yield! Seq.concat <| Seq.init 120 (fun _ -> [ 1; 2 ])
+    }
+
+    //let createTasks = createDummyTaskSeqWith 1L<µs> 10L<µs>
+    // FIXME: it appears that deeply nesting adds to performance degradation, need to benchmark/profile this
+    // probably cause: since this is *fast* with DirectTask, the reason is likely the way the Task.Delay causes
+    // *many* subtasks to be delayed, resulting in exponential delay. Reason: max accuracy of Delay is about 15ms (!)
+    let tskSeq = taskSeq {
+        yield! createDummyTaskSeq 10
+
+        // nestings amount to 8512 sequences of [1;2]
+        for i in 0..2 do
+            yield! createDummyTaskSeq 2
+
+            for i in 0..2 do
+                yield! createDummyTaskSeq 2
+
+                for i in 0..2 do
+                    yield! createDummyTaskSeq 2
+
+                    for i in 0..2 do
+                        yield! createDummyTaskSeq 2
+                        // stopping here, at a total 250 nested taskSeq
+                        // add the below to get to 4300
+
+                        //for i in 0..2 do
+                        //    yield! createDummyTaskSeq 2
+
+                        //    for i in 0..2 do
+                        //        yield! createDummyTaskSeq 2
+
+                        //for i in 0..2 do
+                        //    yield! createDummyTaskSeq 2
+
+                        //    for i in 0..2 do
+                        //        yield! createDummyTaskSeq 2
+
+                        //        for i in 0..2 do
+                        //            yield! createDummyTaskSeq 2
+                        yield! TaskSeq.empty
+    }
+
+    let! data = tskSeq |> TaskSeq.toListAsync
+    data |> List.length |> should equal 250 // 8512
+    data |> should equal (List.ofSeq control)
+}
+
+[<Fact>]
 let ``CE taskSeq: 500 TaskDelay-delayed tasks using yield!`` () = task {
     // runs in 10-15s because of Task.Delay between 10-30ms
     // should generally be about as fast as `task`, see below
