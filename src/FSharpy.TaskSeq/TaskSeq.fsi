@@ -111,32 +111,32 @@ module TaskSeq =
     /// Returns the first element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val tryHead: taskSeq: TaskSeqBuilders.taskSeq<'a> -> System.Threading.Tasks.Task<'a option>
+    val tryHead: taskSeq: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the first element of the <see cref="IAsyncEnumerable" />.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val head: taskSeq: TaskSeqBuilders.taskSeq<unit> -> System.Threading.Tasks.Task<unit>
+    val head: taskSeq: taskSeq<unit> -> Task<unit>
 
     /// <summary>
     /// Returns the last element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val tryLast: taskSeq: TaskSeqBuilders.taskSeq<'a> -> System.Threading.Tasks.Task<'a option>
+    val tryLast: taskSeq: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the last element of the <see cref="IAsyncEnumerable" />.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
-    val last: taskSeq: TaskSeqBuilders.taskSeq<unit> -> System.Threading.Tasks.Task<unit>
+    val last: taskSeq: taskSeq<unit> -> Task<unit>
 
     /// <summary>
     /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
     /// does not contain enough elements, or if <paramref name="index" /> is negative.
     /// Parameter <paramref name="index" /> is zero-based, that is, the value 0 returns the first element.
     /// </summary>
-    val tryItem: index: int -> taskSeq: TaskSeqBuilders.taskSeq<'a> -> System.Threading.Tasks.Task<'a option>
+    val tryItem: index: int -> taskSeq: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
@@ -144,17 +144,14 @@ module TaskSeq =
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or
     /// <paramref name="index" /> is negative.</exception>
-    val item: index: int -> taskSeq: TaskSeqBuilders.taskSeq<unit> -> System.Threading.Tasks.Task<unit>
+    val item: index: int -> taskSeq: taskSeq<unit> -> Task<unit>
 
     /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
     /// </summary>
     /// <exception cref="ArgumentException">The sequences have different lengths.</exception>
-    val zip:
-        taskSeq1: TaskSeqBuilders.taskSeq<'T> ->
-        taskSeq2: TaskSeqBuilders.taskSeq<'U> ->
-            System.Collections.Generic.IAsyncEnumerable<'T * 'U>
+    val zip: taskSeq1: taskSeq<'T> -> taskSeq2: taskSeq<'U> -> IAsyncEnumerable<'T * 'U>
 
     /// Applies a function to each element of the task sequence, threading an accumulator argument through the computation.
     val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> taskSeq: taskSeq<'T> -> Task<'State>
