@@ -35,11 +35,11 @@ type FilterAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
 
 module internal TaskSeqInternal =
     let inline raiseEmptySeq () =
-        ArgumentException("The asynchronous input sequence was empty.", "taskSeq")
+        ArgumentException("The asynchronous input sequence was empty.", "source")
         |> raise
 
     let inline raiseInsufficient () =
-        ArgumentException("The asynchronous input sequence was has an insufficient number of elements.", "taskSeq")
+        ArgumentException("The asynchronous input sequence was has an insufficient number of elements.", "source")
         |> raise
 
     let inline raiseNotFound () =
@@ -241,23 +241,28 @@ module internal TaskSeqInternal =
         if go then return Some e.Current else return None
     }
 
-    let tryItem i (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let mutable idx = 0
-        let mutable foundItem = None
-        let! step = e.MoveNextAsync()
-        go <- step
-
-        while go && idx <= i do
-            if idx = i then
-                foundItem <- Some e.Current
-
+    let tryItem index (taskSeq: taskSeq<_>) = task {
+        if index < 0 then
+            // while the loop below wouldn't run anyway, we don't want to call MoveNext in this case
+            // to prevent side effects hitting unnecessarily
+            return None
+        else
+            let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let mutable idx = 0
+            let mutable foundItem = None
             let! step = e.MoveNextAsync()
             go <- step
-            idx <- idx + 1
 
-        return foundItem
+            while go && idx <= index do
+                if idx = index then
+                    foundItem <- Some e.Current
+
+                let! step = e.MoveNextAsync()
+                go <- step
+                idx <- idx + 1
+
+            return foundItem
     }
 
     let tryPick chooser (taskSeq: taskSeq<_>) = task {

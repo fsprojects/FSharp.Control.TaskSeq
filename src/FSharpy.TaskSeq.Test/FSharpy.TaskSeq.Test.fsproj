@@ -8,15 +8,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Nunit.Extensions.fs" />
     <Compile Include="TestUtils.fs" />
+    <Compile Include="TaskSeq.Choose.Tests.fs" />
+    <Compile Include="TaskSeq.Collect.Tests.fs" />
+    <Compile Include="TaskSeq.Filter.Tests.fs" />
+    <Compile Include="TaskSeq.Find.Tests.fs" />
+    <Compile Include="TaskSeq.Fold.Tests.fs" />
+    <Compile Include="TaskSeq.Head.Tests.fs" />
+    <Compile Include="TaskSeq.Item.Tests.fs" />
+    <Compile Include="TaskSeq.Iter.Tests.fs" />
+    <Compile Include="TaskSeq.Last.Tests.fs" />
+    <Compile Include="TaskSeq.Map.Tests.fs" />
+    <Compile Include="TaskSeq.Pick.Tests.fs" />
     <Compile Include="TaskSeq.ToXXX.Tests.fs" />
     <Compile Include="TaskSeq.OfXXX.Tests.fs" />
-    <Compile Include="TaskSeq.Iter.Tests.fs" />
-    <Compile Include="TaskSeq.Map.Tests.fs" />
-    <Compile Include="TaskSeq.Collect.Tests.fs" />
-    <Compile Include="TaskSeq.Fold.Tests.fs" />
-    <Compile Include="TaskSeq.Tests.Utility.fs" />
-    <Compile Include="TaskSeq.Tests.fs" />
+    <Compile Include="TaskSeq.Tests.Other.fs" />
+    <Compile Include="TaskSeq.Tests.CE.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

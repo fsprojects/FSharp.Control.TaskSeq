@@ -180,7 +180,11 @@ module TaskSeq =
     let item index taskSeq = task {
         match! Internal.tryItem index taskSeq with
         | Some item -> return item
-        | None -> return Internal.raiseInsufficient ()
+        | None ->
+            if index < 0 then
+                return invalidArg (nameof index) "The input must be non-negative."
+            else
+                return Internal.raiseInsufficient ()
     }
 
     let tryExactlyOne source = Internal.tryExactlyOne source
