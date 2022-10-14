@@ -53,6 +53,28 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     }
 
+    let toSeqOfTasks (taskSeq: taskSeq<'T>) = seq {
+        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+
+        // TODO: check this!
+        try
+            let mutable go = false
+
+            while go do
+                yield task {
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+                    if step then
+                        return e.Current
+                    else
+                        return Unchecked.defaultof<_> // FIXME!
+                }
+
+        finally
+            e.DisposeAsync().AsTask().Wait()
+    }
+
     let toArrayAsync taskSeq =
         Internal.toResizeArrayAsync taskSeq
         |> Task.map (fun a -> a.ToArray())
