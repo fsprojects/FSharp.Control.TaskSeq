@@ -1,4 +1,5 @@
 [![build](https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml/badge.svg)](https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml)
+[![test](https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml/badge.svg)](https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml)
 
 # TaskSeq
 An implementation [`IAsyncEnumerable<'T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0) as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
