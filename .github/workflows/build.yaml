@@ -1,4 +1,4 @@
-name: ci
+name: ci-build
 
 on: [pull_request]
 
@@ -18,55 +18,7 @@ jobs:
       # build it, test it, pack it
       - name: Run dotnet build
         run: ./build.cmd
-
-  test-release:
-    name: Test Release Build
-    runs-on: windows-latest
-    steps:
-      # checkout the code
-      - name: checkout-code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      # setup dotnet based on global.json
-      - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
-      # build it, test it, pack it
-      - name: Run dotnet test - release
-        run: dotnet test -c Release --logger "trx;LogFileName=test-results-release.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
-      - name: Publish test results - release
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Report release tests
-          # this path glob pattern requires forward slashes!
-          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-release.trx
-          reporter: dotnet-trx
-
-  test-debug:
-    name: Test Debug Build
-    runs-on: windows-latest
-    steps:
-      # checkout the code
-      - name: checkout-code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      # setup dotnet based on global.json
-      - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
-      # build it, test it, pack it
-      - name: Run dotnet test - debug
-        run: dotnet test -c Debug --logger "trx;LogFileName=test-results-debug.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
-      - name: Publish test results - debug
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Report debug tests
-          # this path glob pattern requires forward slashes!
-          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-debug.trx
-          reporter: dotnet-trx
-
+        
   # deploy:
   #   name: deploy
   #   runs-on: ubuntu-latest
