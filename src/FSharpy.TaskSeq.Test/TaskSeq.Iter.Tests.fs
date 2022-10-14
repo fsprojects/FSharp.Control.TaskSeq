@@ -1,4 +1,4 @@
-module FSharpy.Tests.Iter
+namespace FSharpy.Tests
 
 open Xunit
 open FsUnit.Xunit
@@ -7,42 +7,56 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-iteri should go over all items`` () = task {
-    let tq = createDummyTaskSeq 10
-    let mutable sum = 0
-    do! tq |> TaskSeq.iteri (fun i _ -> sum <- sum + i)
-    sum |> should equal 45 // index starts at 0
-}
+type Iter(output) =
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-iter should go over all items`` () = task {
-    let tq = createDummyTaskSeq 10
-    let mutable sum = 0
-    do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
-    sum |> should equal 55 // task-dummies started at 1
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-iteri should go over all items`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-iteriAsync should go over all items`` () = task {
-    let tq = createDummyTaskSeq 10
-    let mutable sum = 0
+        task {
+            let tq = createDummyTaskSeq 10
+            let mutable sum = 0
+            do! tq |> TaskSeq.iteri (fun i _ -> sum <- sum + i)
+            sum |> should equal 45 // index starts at 0
+        }
 
-    do!
-        tq
-        |> TaskSeq.iteriAsync (fun i _ -> task { sum <- sum + i })
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-iter should go over all items`` () =
+        logStart output
 
-    sum |> should equal 45 // index starts at 0
-}
+        task {
+            let tq = createDummyTaskSeq 10
+            let mutable sum = 0
+            do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
+            sum |> should equal 55 // task-dummies started at 1
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-iterAsync should go over all items`` () = task {
-    let tq = createDummyTaskSeq 10
-    let mutable sum = 0
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-iteriAsync should go over all items`` () =
+        logStart output
 
-    do!
-        tq
-        |> TaskSeq.iterAsync (fun item -> task { sum <- sum + item })
+        task {
+            let tq = createDummyTaskSeq 10
+            let mutable sum = 0
 
-    sum |> should equal 55 // task-dummies started at 1
-}
+            do!
+                tq
+                |> TaskSeq.iteriAsync (fun i _ -> task { sum <- sum + i })
+
+            sum |> should equal 45 // index starts at 0
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-iterAsync should go over all items`` () =
+        logStart output
+
+        task {
+            let tq = createDummyTaskSeq 10
+            let mutable sum = 0
+
+            do!
+                tq
+                |> TaskSeq.iterAsync (fun item -> task { sum <- sum + item })
+
+            sum |> should equal 55 // task-dummies started at 1
+        }

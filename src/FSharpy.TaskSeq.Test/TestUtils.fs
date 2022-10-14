@@ -8,6 +8,8 @@ open System.Diagnostics
 open FsToolkit.ErrorHandling
 
 open FSharpy
+open Xunit.Abstractions
+open System.Reflection
 
 /// Milliseconds
 [<Measure>]
@@ -16,6 +18,13 @@ type ms
 /// Microseconds
 [<Measure>]
 type µs
+
+[<AutoOpen>]
+module Log =
+    let inline logStart (output: ITestOutputHelper) =
+        let name = MethodBase.GetCurrentMethod().Name
+        output.WriteLine $"Starting test: {name}"
+
 
 /// Helpers for short waits, as Task.Delay has about 15ms precision.
 /// Inspired by IoT code: https://github.com/dotnet/iot/pull/235/files

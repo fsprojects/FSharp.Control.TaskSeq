@@ -1,4 +1,4 @@
-module FSharpy.Tests.Filter
+namespace FSharpy.Tests
 
 open System
 open Xunit
@@ -7,47 +7,62 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-filter on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.filter ((=) 12)
-        |> TaskSeq.toListAsync
 
-    List.isEmpty empty |> should be True
-}
+type Filter(output) =
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-filterAsync on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.filterAsync (fun x -> task { return x = 12 })
-        |> TaskSeq.toListAsync
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-filter on an empty sequence`` () =
+        logStart output
 
-    List.isEmpty empty |> should be True
-}
+        task {
+            let! empty =
+                TaskSeq.empty
+                |> TaskSeq.filter ((=) 12)
+                |> TaskSeq.toListAsync
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-filter filters correctly`` () = task {
-    let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.filter ((<=) 26) // lambda of '>' etc inverts order of args, so this means 'greater than'
-        |> TaskSeq.map char
-        |> TaskSeq.map ((+) '@')
-        |> TaskSeq.toArrayAsync
+            List.isEmpty empty |> should be True
+        }
 
-    // we filtered all digits above-or-equal-to 26
-    String alphabet |> should equal "Z[\]^_`abcdefghijklmnopqr"
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-filterAsync on an empty sequence`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-filterAsync filters correctly`` () = task {
-    let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.filterAsync (fun x -> task { return x <= 26 })
-        |> TaskSeq.map char
-        |> TaskSeq.map ((+) '@')
-        |> TaskSeq.toArrayAsync
+        task {
+            let! empty =
+                TaskSeq.empty
+                |> TaskSeq.filterAsync (fun x -> task { return x = 12 })
+                |> TaskSeq.toListAsync
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+            List.isEmpty empty |> should be True
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-filter filters correctly`` () =
+        logStart output
+
+        task {
+            let! alphabet =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.filter ((<=) 26) // lambda of '>' etc inverts order of args, so this means 'greater than'
+                |> TaskSeq.map char
+                |> TaskSeq.map ((+) '@')
+                |> TaskSeq.toArrayAsync
+
+            // we filtered all digits above-or-equal-to 26
+            String alphabet |> should equal "Z[\]^_`abcdefghijklmnopqr"
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-filterAsync filters correctly`` () =
+        logStart output
+
+        task {
+            let! alphabet =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.filterAsync (fun x -> task { return x <= 26 })
+                |> TaskSeq.map char
+                |> TaskSeq.map ((+) '@')
+                |> TaskSeq.toArrayAsync
+
+            String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        }

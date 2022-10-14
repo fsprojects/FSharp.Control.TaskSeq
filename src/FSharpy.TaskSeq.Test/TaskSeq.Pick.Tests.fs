@@ -1,4 +1,4 @@
-module FSharpy.Tests.Pick
+namespace FSharpy.Tests
 
 open System
 open System.Collections.Generic
@@ -8,251 +8,327 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+type Pick(output) =
 
-//
-// TaskSeq.pick
-// TaskSeq.pickAsync
-// the tryXXX versions are at the bottom half
-//
+    //
+    // TaskSeq.pick
+    // TaskSeq.pickAsync
+    // the tryXXX versions are at the bottom half
+    //
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick on an empty sequence raises KeyNotFoundException`` () = task {
-    fun () ->
-        TaskSeq.empty
-        |> TaskSeq.pick (fun x -> if x = 12 then Some x else None)
-        |> Task.ignore
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick on an empty sequence raises KeyNotFoundException`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick on an empty sequence raises KeyNotFoundException - variant`` () = task {
-    fun () ->
-        taskSeq { do () }
-        |> TaskSeq.pick (fun x -> if x = 12 then Some x else None)
-        |> Task.ignore
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+        task {
+            fun () ->
+                TaskSeq.empty
+                |> TaskSeq.pick (fun x -> if x = 12 then Some x else None)
+                |> Task.ignore
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync on an empty sequence raises KeyNotFoundException`` () = task {
-    fun () ->
-        TaskSeq.empty
-        |> TaskSeq.pickAsync (fun x -> task { return if x = 12 then Some x else None })
-        |> Task.ignore
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick on an empty sequence raises KeyNotFoundException - variant`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick sad path raises KeyNotFoundException`` () = task {
-    fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
-        |> Task.ignore
+        task {
+            fun () ->
+                taskSeq { do () }
+                |> TaskSeq.pick (fun x -> if x = 12 then Some x else None)
+                |> Task.ignore
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync on an empty sequence raises KeyNotFoundException`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync sad path raises KeyNotFoundException`` () = task {
-    fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pickAsync (fun x -> task { return if x < 0 then Some x else None }) // dummy tasks sequence starts at 1
-        |> Task.ignore
+        task {
+            fun () ->
+                TaskSeq.empty
+                |> TaskSeq.pickAsync (fun x -> task { return if x = 12 then Some x else None })
+                |> Task.ignore
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick sad path raises KeyNotFoundException`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick sad path raises KeyNotFoundException variant`` () = task {
-    fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pick (fun x -> if x = 51 then Some x else None) // dummy tasks sequence ends at 50
-        |> Task.ignore
+        task {
+            fun () ->
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
+                |> Task.ignore
 
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync sad path raises KeyNotFoundException variant`` () = task {
-    fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pickAsync (fun x -> task { return if x = 51 then Some x else None }) // dummy tasks sequence ends at 50
-        |> Task.ignore
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync sad path raises KeyNotFoundException`` () =
+        logStart output
 
-    |> should throwAsyncExact typeof<KeyNotFoundException>
-}
+        task {
+            fun () ->
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pickAsync (fun x -> task { return if x < 0 then Some x else None }) // dummy tasks sequence starts at 1
+                |> Task.ignore
 
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick happy path middle of seq`` () = task {
-    let! twentyFive =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pick (fun x -> if x < 26 && x > 24 then Some "foo" else None)
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick sad path raises KeyNotFoundException variant`` () =
+        logStart output
 
-    twentyFive |> should equal "foo"
-}
+        task {
+            fun () ->
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pick (fun x -> if x = 51 then Some x else None) // dummy tasks sequence ends at 50
+                |> Task.ignore
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync happy path middle of seq`` () = task {
-    let! twentyFive =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pickAsync (fun x -> task { return if x < 26 && x > 24 then Some "foo" else None })
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
-    twentyFive |> should equal "foo"
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync sad path raises KeyNotFoundException variant`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick happy path first item of seq`` () = task {
-    let! first =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pick (fun x -> if x = 1 then Some $"first{x}" else None) // dummy tasks seq starts at 1
+        task {
+            fun () ->
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pickAsync (fun x -> task { return if x = 51 then Some x else None }) // dummy tasks sequence ends at 50
+                |> Task.ignore
 
-    first |> should equal "first1"
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync happy path first item of seq`` () = task {
-    let! first =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pickAsync (fun x -> task { return if x = 1 then Some $"first{x}" else None }) // dummy tasks seq starts at 1
-
-    first |> should equal "first1"
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pick happy path last item of seq`` () = task {
-    let! last =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pick (fun x -> if x = 50 then Some $"last{x}" else None) // dummy tasks seq ends at 50
-
-    last |> should equal "last50"
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-pickAsync happy path last item of seq`` () = task {
-    let! last =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.pickAsync (fun x -> task { return if x = 50 then Some $"last{x}" else None }) // dummy tasks seq ends at 50
-
-    last |> should equal "last50"
-}
-
-//
-// TaskSeq.tryPick
-// TaskSeq.tryPickAsync
-//
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick on an empty sequence returns None`` () = task {
-    let! nothing =
-        TaskSeq.empty
-        |> TaskSeq.tryPick (fun x -> if x = 12 then Some x else None)
-
-    nothing |> should be None'
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync on an empty sequence returns None`` () = task {
-    let! nothing =
-        TaskSeq.empty
-        |> TaskSeq.tryPickAsync (fun x -> task { return if x = 12 then Some x else None })
-
-    nothing |> should be None'
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick sad path returns None`` () = task {
-    let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
-
-    nothing |> should be None'
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync sad path return None`` () = task {
-    let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPickAsync (fun x -> task { return if x = 0 then Some x else None }) // dummy tasks sequence starts at 1
-
-    nothing |> should be None'
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick sad path returns None variant`` () = task {
-    let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPick (fun x -> if x >= 51 then Some x else None) // dummy tasks sequence ends at 50 (inverted sign in lambda!)
-
-    nothing |> should be None'
-}
-
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync sad path return None - variant`` () = task {
-    let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPickAsync (fun x -> task { return if x >= 51 then Some x else None }) // dummy tasks sequence ends at 50
-
-    nothing |> should be None'
-}
+            |> should throwAsyncExact typeof<KeyNotFoundException>
+        }
 
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick happy path middle of seq`` () = task {
-    let! twentyFive =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPick (fun x -> if x < 26 && x > 24 then Some $"foo{x}" else None)
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick happy path middle of seq`` () =
+        logStart output
 
-    twentyFive |> should be Some'
-    twentyFive |> should equal (Some "foo25")
-}
+        task {
+            let! twentyFive =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pick (fun x -> if x < 26 && x > 24 then Some "foo" else None)
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync happy path middle of seq`` () = task {
-    let! twentyFive =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPickAsync (fun x -> task { return if x < 26 && x > 24 then Some $"foo{x}" else None })
+            twentyFive |> should equal "foo"
+        }
 
-    twentyFive |> should be Some'
-    twentyFive |> should equal (Some "foo25")
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync happy path middle of seq`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick happy path first item of seq`` () = task {
-    let! first =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPick (sprintf "foo%i" >> Some) // dummy tasks seq starts at 1
+        task {
+            let! twentyFive =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pickAsync (fun x -> task { return if x < 26 && x > 24 then Some "foo" else None })
 
-    first |> should be Some'
-    first |> should equal (Some "foo1")
-}
+            twentyFive |> should equal "foo"
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync happy path first item of seq`` () = task {
-    let! first =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPickAsync (fun x -> task { return (sprintf "foo%i" >> Some) x }) // dummy tasks seq starts at 1
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick happy path first item of seq`` () =
+        logStart output
 
-    first |> should be Some'
-    first |> should equal (Some "foo1")
-}
+        task {
+            let! first =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pick (fun x -> if x = 1 then Some $"first{x}" else None) // dummy tasks seq starts at 1
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPick happy path last item of seq`` () = task {
-    let! last =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPick (fun x -> if x = 50 then Some $"foo{x}" else None) // dummy tasks seq ends at 50
+            first |> should equal "first1"
+        }
 
-    last |> should be Some'
-    last |> should equal (Some "foo50")
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync happy path first item of seq`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-tryPickAsync happy path last item of seq`` () = task {
-    let! last =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.tryPickAsync (fun x -> task { return if x = 50 then Some $"foo{x}" else None }) // dummy tasks seq ends at 50
+        task {
+            let! first =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pickAsync (fun x -> task { return if x = 1 then Some $"first{x}" else None }) // dummy tasks seq starts at 1
 
-    last |> should be Some'
-    last |> should equal (Some "foo50")
-}
+            first |> should equal "first1"
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pick happy path last item of seq`` () =
+        logStart output
+
+        task {
+            let! last =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pick (fun x -> if x = 50 then Some $"last{x}" else None) // dummy tasks seq ends at 50
+
+            last |> should equal "last50"
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-pickAsync happy path last item of seq`` () =
+        logStart output
+
+        task {
+            let! last =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.pickAsync (fun x -> task { return if x = 50 then Some $"last{x}" else None }) // dummy tasks seq ends at 50
+
+            last |> should equal "last50"
+        }
+
+    //
+    // TaskSeq.tryPick
+    // TaskSeq.tryPickAsync
+    //
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick on an empty sequence returns None`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                TaskSeq.empty
+                |> TaskSeq.tryPick (fun x -> if x = 12 then Some x else None)
+
+            nothing |> should be None'
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync on an empty sequence returns None`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                TaskSeq.empty
+                |> TaskSeq.tryPickAsync (fun x -> task { return if x = 12 then Some x else None })
+
+            nothing |> should be None'
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick sad path returns None`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
+
+            nothing |> should be None'
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync sad path return None`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPickAsync (fun x -> task { return if x = 0 then Some x else None }) // dummy tasks sequence starts at 1
+
+            nothing |> should be None'
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick sad path returns None variant`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPick (fun x -> if x >= 51 then Some x else None) // dummy tasks sequence ends at 50 (inverted sign in lambda!)
+
+            nothing |> should be None'
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync sad path return None - variant`` () =
+        logStart output
+
+        task {
+            let! nothing =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPickAsync (fun x -> task { return if x >= 51 then Some x else None }) // dummy tasks sequence ends at 50
+
+            nothing |> should be None'
+        }
+
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick happy path middle of seq`` () =
+        logStart output
+
+        task {
+            let! twentyFive =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPick (fun x -> if x < 26 && x > 24 then Some $"foo{x}" else None)
+
+            twentyFive |> should be Some'
+            twentyFive |> should equal (Some "foo25")
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync happy path middle of seq`` () =
+        logStart output
+
+        task {
+            let! twentyFive =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPickAsync (fun x -> task { return if x < 26 && x > 24 then Some $"foo{x}" else None })
+
+            twentyFive |> should be Some'
+            twentyFive |> should equal (Some "foo25")
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick happy path first item of seq`` () =
+        logStart output
+
+        task {
+            let! first =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPick (sprintf "foo%i" >> Some) // dummy tasks seq starts at 1
+
+            first |> should be Some'
+            first |> should equal (Some "foo1")
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync happy path first item of seq`` () =
+        logStart output
+
+        task {
+            let! first =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPickAsync (fun x -> task { return (sprintf "foo%i" >> Some) x }) // dummy tasks seq starts at 1
+
+            first |> should be Some'
+            first |> should equal (Some "foo1")
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPick happy path last item of seq`` () =
+        logStart output
+
+        task {
+            let! last =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPick (fun x -> if x = 50 then Some $"foo{x}" else None) // dummy tasks seq ends at 50
+
+            last |> should be Some'
+            last |> should equal (Some "foo50")
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-tryPickAsync happy path last item of seq`` () =
+        logStart output
+
+        task {
+            let! last =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.tryPickAsync (fun x -> task { return if x = 50 then Some $"foo{x}" else None }) // dummy tasks seq ends at 50
+
+            last |> should be Some'
+            last |> should equal (Some "foo50")
+        }

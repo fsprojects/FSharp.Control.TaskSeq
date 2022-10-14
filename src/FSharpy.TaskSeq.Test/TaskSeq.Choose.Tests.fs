@@ -1,4 +1,4 @@
-module FSharpy.Tests.Choose
+namespace FSharpy.Tests
 
 open System
 open System.Threading.Tasks
@@ -8,50 +8,68 @@ open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
 open FSharpy
+open Xunit.Abstractions
 
-[<Fact(Timeout = 10_000)>]
-let ``ZHang timeout test`` () = task {
-    let! empty = Task.Delay 30
 
-    empty |> should be Null
-}
+type Choose(output: ITestOutputHelper) =
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-choose on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.choose (fun _ -> Some 42)
-        |> TaskSeq.toListAsync
+    [<Fact(Timeout = 10_000)>]
+    let ``ZHang timeout test`` () =
+        logStart output
 
-    List.isEmpty empty |> should be True
-}
+        task {
+            let! empty = Task.Delay 30
+            empty |> should be Null
+        }
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-chooseAsync on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.chooseAsync (fun _ -> task { return Some 42 })
-        |> TaskSeq.toListAsync
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-choose on an empty sequence`` () =
+        logStart output
 
-    List.isEmpty empty |> should be True
-}
+        task {
+            let! empty =
+                TaskSeq.empty
+                |> TaskSeq.choose (fun _ -> Some 42)
+                |> TaskSeq.toListAsync
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-choose can convert and filter`` () = task {
-    let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
-        |> TaskSeq.toArrayAsync
+            List.isEmpty empty |> should be True
+        }
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-chooseAsync on an empty sequence`` () =
+        logStart output
 
-[<Fact(Timeout = 10_000)>]
-let ``TaskSeq-chooseAsync can convert and filter`` () = task {
-    let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
-        |> TaskSeq.toArrayAsync
+        task {
+            let! empty =
+                TaskSeq.empty
+                |> TaskSeq.chooseAsync (fun _ -> task { return Some 42 })
+                |> TaskSeq.toListAsync
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+            List.isEmpty empty |> should be True
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-choose can convert and filter`` () =
+        logStart output
+
+        task {
+            let! alphabet =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
+                |> TaskSeq.toArrayAsync
+
+            String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        }
+
+    [<Fact(Timeout = 10_000)>]
+    let ``TaskSeq-chooseAsync can convert and filter`` () =
+        logStart output
+
+        task {
+            let! alphabet =
+                createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+                |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
+                |> TaskSeq.toArrayAsync
+
+            String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        }
