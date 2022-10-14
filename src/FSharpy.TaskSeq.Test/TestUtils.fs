@@ -1,4 +1,4 @@
-﻿namespace FSharpy.Tests
+namespace FSharpy.Tests
 
 open System
 open System.Threading
@@ -65,12 +65,13 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
         //let! _ = Task.Delay(rnd ())
         let! _ = Task.Delay 0 // this creates a resume state, which seems more efficient than SpinWait.SpinOnce, see DelayHelper.
         DelayHelper.delayMicroseconds (rnd ()) false
-        x <- x + 1
+        Interlocked.Increment &x |> ignore
+        //x <- x + 1
         return x // this dereferences the variable
     }
 
     let runTaskDirect i = backgroundTask {
-        x <- x + 1
+        Interlocked.Increment &x |> ignore
         return x
     }
 
