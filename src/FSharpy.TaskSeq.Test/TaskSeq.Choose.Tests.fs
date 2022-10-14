@@ -1,12 +1,20 @@
 module FSharpy.Tests.Choose
 
 open System
+open System.Threading.Tasks
+
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
 open FSharpy
 
+[<Fact>]
+let ``ZHang timeout test`` () = task {
+    let! empty = Task.Delay 30
+
+    empty |> should be Null
+}
 
 [<Fact>]
 let ``TaskSeq-choose on an empty sequence`` () = task {
