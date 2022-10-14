@@ -7,7 +7,7 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-iteri should go over all items`` () = task {
     let tq = createDummyTaskSeq 10
     let mutable sum = 0
@@ -15,7 +15,7 @@ let ``TaskSeq-iteri should go over all items`` () = task {
     sum |> should equal 45 // index starts at 0
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-iter should go over all items`` () = task {
     let tq = createDummyTaskSeq 10
     let mutable sum = 0
@@ -23,7 +23,7 @@ let ``TaskSeq-iter should go over all items`` () = task {
     sum |> should equal 55 // task-dummies started at 1
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-iteriAsync should go over all items`` () = task {
     let tq = createDummyTaskSeq 10
     let mutable sum = 0
@@ -35,7 +35,7 @@ let ``TaskSeq-iteriAsync should go over all items`` () = task {
     sum |> should equal 45 // index starts at 0
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-iterAsync should go over all items`` () = task {
     let tq = createDummyTaskSeq 10
     let mutable sum = 0

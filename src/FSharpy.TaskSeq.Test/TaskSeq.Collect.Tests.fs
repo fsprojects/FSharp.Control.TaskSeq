@@ -6,7 +6,7 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-collect operates in correct order`` () = task {
     let! sq =
         createDummyTaskSeq 10
@@ -22,7 +22,7 @@ let ``TaskSeq-collect operates in correct order`` () = task {
     |> should equal "ABBCCDDEEFFGGHHIIJJK"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-collectSeq operates in correct order`` () = task {
     let! sq =
         createDummyTaskSeq 10
@@ -38,7 +38,7 @@ let ``TaskSeq-collectSeq operates in correct order`` () = task {
     |> should equal "ABBCCDDEEFFGGHHIIJJK"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-collect with empty task sequences`` () = task {
     let! sq =
         createDummyTaskSeq 10
@@ -48,7 +48,7 @@ let ``TaskSeq-collect with empty task sequences`` () = task {
     Seq.isEmpty sq |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-collectSeq with empty sequences`` () = task {
     let! sq =
         createDummyTaskSeq 10
@@ -58,7 +58,7 @@ let ``TaskSeq-collectSeq with empty sequences`` () = task {
     Seq.isEmpty sq |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-empty is empty`` () = task {
     let! sq = TaskSeq.empty<string> |> TaskSeq.toSeqCachedAsync
     Seq.isEmpty sq |> should be True

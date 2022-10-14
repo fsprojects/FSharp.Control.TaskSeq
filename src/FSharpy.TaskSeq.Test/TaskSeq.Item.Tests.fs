@@ -8,19 +8,19 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item throws on empty sequences`` () = task {
     fun () -> TaskSeq.empty<string> |> TaskSeq.item 0 |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item throws on empty sequence - variant`` () = task {
     fun () -> taskSeq { do () } |> TaskSeq.item 50000 |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item throws when not found`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -29,7 +29,7 @@ let ``TaskSeq-item throws when not found`` () = task {
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item throws when not found - variant`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -38,13 +38,13 @@ let ``TaskSeq-item throws when not found - variant`` () = task {
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item throws when accessing 2nd item in singleton sequence`` () = task {
     fun () -> taskSeq { yield 10 } |> TaskSeq.item 1 |> Task.ignore // zero-based!
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item always throws with negative values`` () = task {
     let make50 () = createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
 
@@ -70,19 +70,19 @@ let ``TaskSeq-item always throws with negative values`` () = task {
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None on empty sequences`` () = task {
     let! nothing = TaskSeq.empty<string> |> TaskSeq.tryItem 0
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None on empty sequence - variant`` () = task {
     let! nothing = taskSeq { do () } |> TaskSeq.tryItem 50000
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None when not found`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -91,7 +91,7 @@ let ``TaskSeq-tryItem returns None when not found`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None when not found - variant`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -100,13 +100,13 @@ let ``TaskSeq-tryItem returns None when not found - variant`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None when accessing 2nd item in singleton sequence`` () = task {
     let! nothing = taskSeq { yield 10 } |> TaskSeq.tryItem 1 // zero-based!
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem returns None throws with negative values`` () = task {
     let make50 () = createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
 
@@ -129,7 +129,7 @@ let ``TaskSeq-tryItem returns None throws with negative values`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item can get the first item in a longer sequence`` () = task {
     let! head =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -138,7 +138,7 @@ let ``TaskSeq-item can get the first item in a longer sequence`` () = task {
     head |> should equal 1
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item can get the last item in a longer sequence`` () = task {
     let! head =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -147,13 +147,13 @@ let ``TaskSeq-item can get the last item in a longer sequence`` () = task {
     head |> should equal 50
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-item can get the first item in a singleton sequence`` () = task {
     let! head = taskSeq { yield 10 } |> TaskSeq.item 0 // zero-based index!
     head |> should equal 10
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem can get the first item in a longer sequence`` () = task {
     let! head =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -163,7 +163,7 @@ let ``TaskSeq-tryItem can get the first item in a longer sequence`` () = task {
     head |> should equal (Some 1)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () = task {
     let! head = createDummyDirectTaskSeq 5_001 |> TaskSeq.tryItem 5_000 // zero-based!
 
@@ -171,7 +171,7 @@ let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () 
     head |> should equal (Some 5_001)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (50_000 items - slow variant)`` () = task {
     let! head = createDummyDirectTaskSeq 50_001 |> TaskSeq.tryItem 50_000 // zero-based!
 
@@ -179,7 +179,7 @@ let ``TaskSeq-tryItem in a very long sequence (50_000 items - slow variant)`` ()
     head |> should equal (Some 50_001)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (50_000 items - fast variant)`` () = task {
     let! head =
         // using taskSeq instead of the delayed-task approach above, which creates an extra closure for each
@@ -194,7 +194,7 @@ let ``TaskSeq-tryItem in a very long sequence (50_000 items - fast variant)`` ()
     head |> should equal (Some 50_000)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (50_000 items - using sync Seq)`` () = task {
     // this test is just for smoke-test perf comparison with TaskSeq above
     let head =
@@ -208,7 +208,7 @@ let ``TaskSeq-tryItem in a very long sequence (50_000 items - using sync Seq)`` 
     head |> should equal (Some 50_000)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (500_000 items - fast variant)`` () = task {
     let! head =
         taskSeq {
@@ -221,7 +221,7 @@ let ``TaskSeq-tryItem in a very long sequence (500_000 items - fast variant)`` (
     head |> should equal (Some 500_000)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem in a very long sequence (500_000 items - using sync Seq)`` () = task {
     // this test is just for smoke-test perf comparison with TaskSeq above
     let head =
@@ -235,7 +235,7 @@ let ``TaskSeq-tryItem in a very long sequence (500_000 items - using sync Seq)``
     head |> should equal (Some 500_000)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryItem gets the first item in a singleton sequence`` () = task {
     let! head = taskSeq { yield 10 } |> TaskSeq.tryItem 0 // zero-based!
     head |> should be Some'

@@ -9,14 +9,14 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``ZHang timeout test`` () = task {
     let! empty = Task.Delay 30
 
     empty |> should be Null
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-choose on an empty sequence`` () = task {
     let! empty =
         TaskSeq.empty
@@ -26,7 +26,7 @@ let ``TaskSeq-choose on an empty sequence`` () = task {
     List.isEmpty empty |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-chooseAsync on an empty sequence`` () = task {
     let! empty =
         TaskSeq.empty
@@ -36,7 +36,7 @@ let ``TaskSeq-chooseAsync on an empty sequence`` () = task {
     List.isEmpty empty |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-choose can convert and filter`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -46,7 +46,7 @@ let ``TaskSeq-choose can convert and filter`` () = task {
     String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-chooseAsync can convert and filter`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50

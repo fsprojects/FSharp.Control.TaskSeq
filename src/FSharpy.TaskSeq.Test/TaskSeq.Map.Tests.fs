@@ -7,7 +7,7 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-map maps in correct order`` () = task {
     let! sq =
         createDummyTaskSeq 10
@@ -20,7 +20,7 @@ let ``TaskSeq-map maps in correct order`` () = task {
     |> should equal "ABCDEFGHIJ"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-mapAsync maps in correct order`` () = task {
     let! sq =
         createDummyTaskSeq 10

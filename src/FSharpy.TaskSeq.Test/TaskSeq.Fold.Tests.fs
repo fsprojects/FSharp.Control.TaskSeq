@@ -8,7 +8,7 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-fold folds with every item`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 26
@@ -18,7 +18,7 @@ let ``TaskSeq-fold folds with every item`` () = task {
     |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-foldAsync folds with every item`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 26
@@ -30,7 +30,7 @@ let ``TaskSeq-foldAsync folds with every item`` () = task {
     |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-fold takes state on empty IAsyncEnumberable`` () = task {
     let! empty =
         TaskSeq.empty
@@ -39,7 +39,7 @@ let ``TaskSeq-fold takes state on empty IAsyncEnumberable`` () = task {
     empty |> should equal '_'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-foldAsync takes state on empty IAsyncEnumerable`` () = task {
     let! alphabet =
         TaskSeq.empty

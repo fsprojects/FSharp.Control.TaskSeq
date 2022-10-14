@@ -1,4 +1,4 @@
-﻿module FSharpy.Tests.``taskSeq Computation Expression``
+module FSharpy.Tests.``taskSeq Computation Expression``
 
 open Xunit
 open FsUnit.Xunit
@@ -9,7 +9,7 @@ open System.Threading.Tasks
 open System.Diagnostics
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq with several yield!`` () = task {
     let tskSeq = taskSeq {
         yield! createDummyTaskSeq 10
@@ -24,7 +24,7 @@ let ``CE taskSeq with several yield!`` () = task {
     |> should equal (List.concat [ [ 1..10 ]; [ 1..5 ]; [ 1..10 ]; [ 1..5 ] ])
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq with nested yield!`` () = task {
     let control = seq {
         yield! [ 1..10 ]
@@ -58,7 +58,7 @@ let ``CE taskSeq with nested yield!`` () = task {
     data |> should haveLength 150
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq with nested deeply yield! perf test 8521 nested tasks`` () = task {
     let control = seq {
         yield! [ 1..10 ]
@@ -113,7 +113,7 @@ let ``CE taskSeq with nested deeply yield! perf test 8521 nested tasks`` () = ta
     data |> should equal (List.ofSeq control)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq with several return!`` () = task {
     // TODO: should we even support this? Traditional 'seq' doesn't.
     let tskSeq = taskSeq {
@@ -128,7 +128,7 @@ let ``CE taskSeq with several return!`` () = task {
 }
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq with mixing yield! and yield`` () = task {
     let tskSeq = taskSeq {
         yield! createDummyTaskSeq 10
@@ -146,7 +146,7 @@ let ``CE taskSeq with mixing yield! and yield`` () = task {
     |> should equal (List.concat [ [ 1..10 ]; [ 42 ]; [ 1..5 ]; [ 42 ]; [ 1..10 ]; [ 42 ]; [ 1..5 ] ])
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq: 1000 TaskDelay-delayed tasks using yield!`` () = task {
     // Smoke performance test
     // Runs in slightly over half a second (average of spin-wait, plus small overhead)
@@ -156,7 +156,7 @@ let ``CE taskSeq: 1000 TaskDelay-delayed tasks using yield!`` () = task {
     data |> should equal [ 1..1000 ]
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq: 1000 sync-running tasks using yield!`` () = task {
     // Smoke performance test
     // Runs in a few 10's of ms, because of absense of Task.Delay
@@ -166,7 +166,7 @@ let ``CE taskSeq: 1000 sync-running tasks using yield!`` () = task {
     data |> should equal [ 1..1000 ]
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE taskSeq: 5000 sync-running tasks using yield!`` () = task {
     // Smoke performance test
     // Compare with task-ce test below. Uses a no-delay hot-started sequence of tasks.
@@ -175,7 +175,7 @@ let ``CE taskSeq: 5000 sync-running tasks using yield!`` () = task {
     data |> should equal [ 1..5000 ]
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE task: 1000 TaskDelay-delayed tasks using for-loop`` () = task {
     // Uses SpinWait for effective task-delaying
     // for smoke-test comparison with taskSeq
@@ -189,7 +189,7 @@ let ``CE task: 1000 TaskDelay-delayed tasks using for-loop`` () = task {
     i |> should equal 1000
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE task: 1000 list of sync-running tasks using for-loop`` () = task {
     // runs in a few 10's of ms, because of absense of Task.Delay
     // for smoke-test comparison with taskSeq
@@ -203,7 +203,7 @@ let ``CE task: 1000 list of sync-running tasks using for-loop`` () = task {
     i |> should equal 1000
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``CE task: 5000 list of sync-running tasks using for-loop`` () = task {
     // runs in a few 100's of ms, because of absense of Task.Delay
     // for smoke-test comparison with taskSeq

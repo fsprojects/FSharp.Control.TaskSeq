@@ -13,19 +13,19 @@ open System.Collections.Generic
 // the tryXXX versions are at the bottom half
 //
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find on an empty sequence raises KeyNotFoundException`` () = task {
     fun () -> TaskSeq.empty |> TaskSeq.find ((=) 12) |> Task.ignore
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find on an empty sequence raises KeyNotFoundException - variant`` () = task {
     fun () -> taskSeq { do () } |> TaskSeq.find ((=) 12) |> Task.ignore
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync on an empty sequence raises KeyNotFoundException`` () = task {
     fun () ->
         TaskSeq.empty
@@ -34,7 +34,7 @@ let ``TaskSeq-findAsync on an empty sequence raises KeyNotFoundException`` () = 
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find sad path raises KeyNotFoundException`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -44,7 +44,7 @@ let ``TaskSeq-find sad path raises KeyNotFoundException`` () = task {
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync sad path raises KeyNotFoundException`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -54,7 +54,7 @@ let ``TaskSeq-findAsync sad path raises KeyNotFoundException`` () = task {
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find sad path raises KeyNotFoundException variant`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -64,7 +64,7 @@ let ``TaskSeq-find sad path raises KeyNotFoundException variant`` () = task {
     |> should throwAsyncExact typeof<KeyNotFoundException>
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync sad path raises KeyNotFoundException variant`` () = task {
     fun () ->
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -75,7 +75,7 @@ let ``TaskSeq-findAsync sad path raises KeyNotFoundException variant`` () = task
 }
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find happy path middle of seq`` () = task {
     let! twentyFive =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -84,7 +84,7 @@ let ``TaskSeq-find happy path middle of seq`` () = task {
     twentyFive |> should equal 25
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync happy path middle of seq`` () = task {
     let! twentyFive =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -93,7 +93,7 @@ let ``TaskSeq-findAsync happy path middle of seq`` () = task {
     twentyFive |> should equal 25
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find happy path first item of seq`` () = task {
     let! first =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -102,7 +102,7 @@ let ``TaskSeq-find happy path first item of seq`` () = task {
     first |> should equal 1
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync happy path first item of seq`` () = task {
     let! first =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -111,7 +111,7 @@ let ``TaskSeq-findAsync happy path first item of seq`` () = task {
     first |> should equal 1
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-find happy path last item of seq`` () = task {
     let! last =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -120,7 +120,7 @@ let ``TaskSeq-find happy path last item of seq`` () = task {
     last |> should equal 50
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-findAsync happy path last item of seq`` () = task {
     let! last =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -134,13 +134,13 @@ let ``TaskSeq-findAsync happy path last item of seq`` () = task {
 // TaskSeq.tryFindAsync
 //
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind on an empty sequence returns None`` () = task {
     let! nothing = TaskSeq.empty |> TaskSeq.tryFind ((=) 12)
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync on an empty sequence returns None`` () = task {
     let! nothing =
         TaskSeq.empty
@@ -149,7 +149,7 @@ let ``TaskSeq-tryFindAsync on an empty sequence returns None`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind sad path returns None`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -158,7 +158,7 @@ let ``TaskSeq-tryFind sad path returns None`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync sad path return None`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -167,7 +167,7 @@ let ``TaskSeq-tryFindAsync sad path return None`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind sad path returns None variant`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -176,7 +176,7 @@ let ``TaskSeq-tryFind sad path returns None variant`` () = task {
     nothing |> should be None'
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync sad path return None - variant`` () = task {
     let! nothing =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -186,7 +186,7 @@ let ``TaskSeq-tryFindAsync sad path return None - variant`` () = task {
 }
 
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind happy path middle of seq`` () = task {
     let! twentyFive =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -196,7 +196,7 @@ let ``TaskSeq-tryFind happy path middle of seq`` () = task {
     twentyFive |> should equal (Some 25)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync happy path middle of seq`` () = task {
     let! twentyFive =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -206,7 +206,7 @@ let ``TaskSeq-tryFindAsync happy path middle of seq`` () = task {
     twentyFive |> should equal (Some 25)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind happy path first item of seq`` () = task {
     let! first =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -216,7 +216,7 @@ let ``TaskSeq-tryFind happy path first item of seq`` () = task {
     first |> should equal (Some 1)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync happy path first item of seq`` () = task {
     let! first =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -226,7 +226,7 @@ let ``TaskSeq-tryFindAsync happy path first item of seq`` () = task {
     first |> should equal (Some 1)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFind happy path last item of seq`` () = task {
     let! last =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -236,7 +236,7 @@ let ``TaskSeq-tryFind happy path last item of seq`` () = task {
     last |> should equal (Some 50)
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-tryFindAsync happy path last item of seq`` () = task {
     let! last =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50

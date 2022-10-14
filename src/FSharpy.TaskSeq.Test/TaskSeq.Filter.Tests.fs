@@ -7,7 +7,7 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-filter on an empty sequence`` () = task {
     let! empty =
         TaskSeq.empty
@@ -17,7 +17,7 @@ let ``TaskSeq-filter on an empty sequence`` () = task {
     List.isEmpty empty |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-filterAsync on an empty sequence`` () = task {
     let! empty =
         TaskSeq.empty
@@ -27,7 +27,7 @@ let ``TaskSeq-filterAsync on an empty sequence`` () = task {
     List.isEmpty empty |> should be True
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-filter filters correctly`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
@@ -40,7 +40,7 @@ let ``TaskSeq-filter filters correctly`` () = task {
     String alphabet |> should equal "Z[\]^_`abcdefghijklmnopqr"
 }
 
-[<Fact>]
+[<Fact(Timeout = 10_000)>]
 let ``TaskSeq-filterAsync filters correctly`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50

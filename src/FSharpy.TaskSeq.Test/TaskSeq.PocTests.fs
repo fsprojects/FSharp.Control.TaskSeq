@@ -17,14 +17,14 @@ open FSharpy
 
 module ``PoC's for seq of tasks`` =
 
-    [<Fact>]
+    [<Fact(Timeout = 10_000)>]
     let ``Good: Show joining tasks with continuation is good`` () = task {
         // acts like a fold
         let! results = createAndJoinMultipleTasks 10 joinWithContinuation
         results |> should equal 10
     }
 
-    [<Fact>]
+    [<Fact(Timeout = 10_000)>]
     let ``Good: Show that joining tasks with 'bind' in task CE is good`` () = task {
         let! tasks = createAndJoinMultipleTasks 10 joinIdentityDelayed
 
@@ -40,7 +40,7 @@ module ``PoC's for seq of tasks`` =
         results |> should equal <| Array.init len ((+) 1)
     }
 
-    [<Fact>]
+    [<Fact(Timeout = 10_000)>]
     let ``Good: Show that joining tasks with 'taskSeq' is good`` () = task {
         let! tasks = createAndJoinMultipleTasks 10 joinIdentityDelayed
 
@@ -57,7 +57,7 @@ module ``PoC's for seq of tasks`` =
         <| Array.init (Array.length results) ((+) 1)
     }
 
-    [<Fact>]
+    [<Fact(Timeout = 10_000)>]
     let ``Bad: Show that joining tasks with 'traverseTaskResult' can be bad`` () = task {
         let! taskList = createAndJoinMultipleTasks 10 joinIdentityHotStarted
 
@@ -74,7 +74,7 @@ module ``PoC's for seq of tasks`` =
         | Error err -> failwith $"Impossible: {err}"
     }
 
-    [<Fact>]
+    [<Fact(Timeout = 10_000)>]
     let ``Bad: Show that joining tasks as a list of tasks can be bad`` () = task {
         let! taskList = createAndJoinMultipleTasks 10 joinIdentityHotStarted
 
