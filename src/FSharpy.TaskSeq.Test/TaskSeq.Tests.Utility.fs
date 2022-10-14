@@ -1,4 +1,4 @@
-module FSharpy.Tests.``Utility functions``
+module FSharpy.Tests.``Other functions``
 
 open Xunit
 open FsUnit.Xunit
