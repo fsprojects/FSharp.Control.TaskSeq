@@ -24,9 +24,12 @@ type FolderAction<'T, 'State, 'TaskState when 'TaskState :> Task<'State>> =
     | AsyncFolderAction of async_state_action: ('State -> 'T -> 'TaskState)
 
 [<Struct>]
-type ChooserAction<'T, 'U, 'TaskOption, 'TaskBool when 'TaskOption :> Task<'U option> and 'TaskBool :> Task<bool>> =
+type ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
     | TryPick of try_pick: ('T -> 'U option)
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
+
+[<Struct>]
+type FilterAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
     | TryFilter of try_filter: ('T -> bool)
     | TryFilterAsync of async_try_filter: ('T -> 'TaskBool)
 
@@ -257,7 +260,6 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
-    /// Supports all four types of picking: pick/find/pick-async/find-async
     let tryPick chooser (taskSeq: taskSeq<_>) = task {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
 
@@ -287,6 +289,18 @@ module internal TaskSeqInternal =
                     let! step = e.MoveNextAsync()
                     go <- step
 
+        return foundItem
+    }
+
+    let tryFind chooser (taskSeq: taskSeq<_>) = task {
+        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+
+        let mutable go = true
+        let mutable foundItem = None
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        match chooser with
         | TryFilter filterer ->
             while go do
                 let current = e.Current
@@ -314,8 +328,7 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
-    /// Supports all four types of chosing: choose/filter/choose-async/filter-async
-    let filter chooser (taskSeq': taskSeq<_>) = taskSeq {
+    let choose chooser (taskSeq': taskSeq<_>) = taskSeq {
         match chooser with
         | TryPick picker ->
             for item in taskSeq' do
@@ -328,7 +341,10 @@ module internal TaskSeqInternal =
                 match! picker item with
                 | Some value -> yield value
                 | None -> ()
+    }
 
+    let filter chooser (taskSeq': taskSeq<_>) = taskSeq {
+        match chooser with
         | TryFilter filterer ->
             for item in taskSeq' do
                 if filterer item then
