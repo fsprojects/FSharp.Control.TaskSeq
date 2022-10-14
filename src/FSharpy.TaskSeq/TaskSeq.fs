@@ -191,6 +191,39 @@ module TaskSeq =
         | None -> return invalidArg (nameof source) "The input sequence contains more than one element."
     }
 
+    let choose chooser source = Internal.choose (TryPick chooser) source
+    let chooseAsync chooser source = Internal.choose (TryPickAsync chooser) source
+    let filter predicate source = Internal.filter (TryFilter predicate) source
+    let filterAsync predicate source = Internal.filter (TryFilterAsync predicate) source
+    let tryPick chooser source = Internal.tryPick (TryPick chooser) source
+    let tryPickAsync chooser source = Internal.tryPick (TryPickAsync chooser) source
+    let tryFind predicate source = Internal.tryFind (TryFilter predicate) source
+    let tryFindAsync predicate source = Internal.tryFind (TryFilterAsync predicate) source
+
+    let pick chooser source = task {
+        match! Internal.tryPick (TryPick chooser) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
+    let pickAsync chooser source = task {
+        match! Internal.tryPick (TryPickAsync chooser) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
+    let find predicate source = task {
+        match! Internal.tryFind (TryFilter predicate) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
+    let findAsync predicate source = task {
+        match! Internal.tryFind (TryFilterAsync predicate) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
     //
     // zip/unzip etc functions
     //
