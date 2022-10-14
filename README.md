@@ -24,8 +24,8 @@ Not necessarily in order of importance:
 
 ## Current set of `TaskSeq` utility functions
 
-The following is the current surface area of the `TaskSeq` utility functions. This is just a dump of the signatures, proper 
-documentation will be added soon(ish):
+The following is the current surface area of the `TaskSeq` utility functions. This is just a dump of the signatures with doc comments
+to be used as a quick ref.
 
 ```f#
 module TaskSeq =
@@ -35,6 +35,11 @@ module TaskSeq =
 
     /// Initialize an empty taskSeq.
     val empty<'T> : taskSeq<'T>
+
+    /// <summary>
+    /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
+    /// </summary>
+    val isEmpty: taskSeq: taskSeq<'T> -> Task<bool>
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: t: taskSeq<'T> -> 'T list
@@ -131,13 +136,171 @@ module TaskSeq =
     /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
     val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> taskSeq: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
 
+    /// <summary>
+    /// Returns the first element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    val tryHead: taskSeq: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the first element of the <see cref="IAsyncEnumerable" />.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    val head: taskSeq: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the last element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    val tryLast: taskSeq: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the last element of the <see cref="IAsyncEnumerable" />.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    val last: taskSeq: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
+    /// does not contain enough elements, or if <paramref name="index" /> is negative.
+    /// Parameter <paramref name="index" /> is zero-based, that is, the value 0 returns the first element.
+    /// </summary>
+    val tryItem: index: int -> taskSeq: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the nth element of the <see cref="IAsyncEnumerable" />, or <see cref="None" /> if the sequence
+    /// does not contain enough elements, or if <paramref name="index" /> is negative.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or
+    /// <paramref name="index" /> is negative.</exception>
+    val item: index: int -> taskSeq: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the only element of the task sequence, or <see cref="None" /> if the sequence is empty of
+    /// contains more than one element.
+    /// </summary>
+    val tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the only element of the task sequence.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown when the input sequence does not contain precisely one element.</exception>
+    val exactlyOne: source: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
+    /// a sequence comprised of the results "x" for each element where
+    /// the function returns <c>Some(x)</c>.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseAsync" />.
+    /// </summary>
+    val choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>
+
+    /// <summary>
+    /// Applies the given asynchronous function <paramref name="chooser" /> to each element of the task sequence. Returns
+    /// a sequence comprised of the results "x" for each element where
+    /// the function returns <see cref="Some(x)" />.
+    /// If <paramref name="chooser" /> does not need to be asynchronous, consider using <see cref="TaskSeq.choose" />.
+    /// </summary>
+    val chooseAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> taskSeq<'U>
+
+    /// <summary>
+    /// Returns a new collection containing only the elements of the collection
+    /// for which the given <paramref name="predicate" /> function returns <see cref="true" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.filterAsync" />.
+    /// </summary>
+    val filter: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Returns a new collection containing only the elements of the collection
+    /// for which the given asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.filter" />.
+    /// </summary>
+    val filterAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Applies the given function <paramref name="chooser" /> to successive elements of the task sequence
+    /// in <paramref name="source" />, returning the first result where the function returns <see cref="Some(x)" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.tryPickAsync" />.
+    /// </summary>
+    val tryPick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U option>
+
+    /// <summary>
+    /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements of the task sequence
+    /// in <paramref name="source" />, returning the first result where the function returns <see cref="Some(x)" />.
+    /// If <paramref name="chooser" /> does not need to be asynchronous, consider using <see cref="TaskSeq.tryPick" />.
+    /// </summary>
+    val tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U option>
+
+    /// <summary>
+    /// Returns the first element of the task sequence in <paramref name="source" /> for which the given function
+    /// <paramref name="predicate" /> returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.tryFindAsync" />.
+    /// </summary>
+    val tryFind: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the first element of the task sequence in <paramref name="source" /> for which the given asynchronous function
+    /// <paramref name="predicate" /> returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.tryFind" />.
+    /// </summary>
+    val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
+
+
+    /// <summary>
+    /// Applies the given function <paramref name="chooser" /> to successive elements of the task sequence
+    /// in <paramref name="source" />, returning the first result where the function returns <see cref="Some(x)" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.pickAsync" />.
+    /// <exception cref="KeyNotFoundException">Thrown when every item of the sequence
+    /// evaluates to <see cref="None" /> when the given function is applied.</exception>
+    /// </summary>
+    val pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
+
+    /// <summary>
+    /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements of the task sequence
+    /// in <paramref name="source" />, returning the first result where the function returns <see cref="Some(x)" />.
+    /// If <paramref name="chooser" /> does not need to be asynchronous, consider using <see cref="TaskSeq.pick" />.
+    /// <exception cref="KeyNotFoundException">Thrown when every item of the sequence
+    /// evaluates to <see cref="None" /> when the given function is applied.</exception>
+    /// </summary>
+    val pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
+
+    /// <summary>
+    /// Returns the first element of the task sequence in <paramref name="source" /> for which the given function
+    /// <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findAsync" />.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
+    /// evaluated by the <paramref name="predicate" /> function.</exception>
+    val find: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the first element of the task sequence in <paramref name="source" /> for which the given
+    /// asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.find" />.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
+    /// evaluated by the <paramref name="predicate" /> function.</exception>
+    val findAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
-    val zip: taskSeq1: taskSeq<'T> -> taskSeq2: taskSeq<'U> -> taskSeq<'T * 'U>
+    /// </summary>
+    /// <exception cref="ArgumentException">The sequences have different lengths.</exception>
+    val zip: taskSeq1: taskSeq<'T> -> taskSeq2: taskSeq<'U> -> IAsyncEnumerable<'T * 'U>
 
-    /// Applies a function to each element of the task sequence, threading an accumulator argument through the computation.
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element in the task sequence,
+    /// threading an accumulator argument of type <paramref name="'State" /> through the computation.
+    /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
+    /// </summary>
     val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> taskSeq: taskSeq<'T> -> Task<'State>
 
-    /// Applies an async function to each element of the task sequence, threading an accumulator argument through the computation.
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence,
+    /// threading an accumulator argument of type <paramref name="'State" /> through the computation.
+    /// If the accumulator function <paramref name="folder" /> does not need to be asynchronous, consider using <see cref="TaskSeq.fold" />.
+    /// </summary>
     val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> taskSeq: taskSeq<'T> -> Task<'State>
+
 ```
