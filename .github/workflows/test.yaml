@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-dotnet@v3
       # build it, test it, pack it
       - name: Run dotnet test - release
-        run: dotnet test -c Release  --blame-hang-timeout 15000ms --logger "trx;LogFileName=test-results-release.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
+        run: dotnet test -c Release --blame-hang-timeout 15000ms --logger "trx;LogFileName=test-results-release.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
       - name: Publish test results - release
         uses: dorny/test-reporter@v1
         if: always()
