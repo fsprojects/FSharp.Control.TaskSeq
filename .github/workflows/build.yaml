@@ -16,7 +16,7 @@ jobs:
       - name: setup-dotnet
         uses: actions/setup-dotnet@v3
       # build it, test it, pack it
-      - name: Run dotnet build
+      - name: Run dotnet build (release)
         run: ./build.cmd
         
   # deploy:
