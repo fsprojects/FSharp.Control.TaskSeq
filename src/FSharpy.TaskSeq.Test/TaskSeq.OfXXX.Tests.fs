@@ -48,6 +48,12 @@ let ``TaskSeq-ofTaskSeq should succeed`` () =
     |> validateSequence
 
 [<Fact>]
+let ``TaskSeq-ofResizeArray should succeed`` () =
+    ResizeArray [ 0..9 ]
+    |> TaskSeq.ofResizeArray
+    |> validateSequence
+
+[<Fact>]
 let ``TaskSeq-ofArray should succeed`` () = Array.init 10 id |> TaskSeq.ofArray |> validateSequence
 
 [<Fact>]
