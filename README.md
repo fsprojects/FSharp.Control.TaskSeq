@@ -23,8 +23,10 @@ Just checkout this repo locally. Then, from the root of the repo, you can do:
 ### Build the solution
 
 ```
-build [release|debug]
+build [build] [release|debug]
 ```
+
+With no arguments, defaults to `release`.
 
 ### Run the tests
 
@@ -32,7 +34,7 @@ build [release|debug]
 build test [release|debug]
 ```
 
-By default, all tests are output to the console. If you don't want that, you can use `--logger console;verbosity=summary`.
+With no arguments, defaults to `release`. By default, all tests are output to the console. If you don't want that, you can use `--logger console;verbosity=summary`.
 Furthermore, no TRX file is generated and the `--blame-xxx` flags aren't set.
 
 ### Run the CI command
@@ -41,8 +43,10 @@ Furthermore, no TRX file is generated and the `--blame-xxx` flags aren't set.
 build ci [release|debug]
 ```
 
-This will run `dotnet test` with the `--blame-xxx` settings enabled to [prevent hanging tests][1] caused by 
+With no arguments, defaults to `release`. This will run `dotnet test` with the `--blame-xxx` settings enabled to [prevent hanging tests][1] caused by 
 an [xUnit runner bug][2].
+
+There are no special CI environment variables that need to be set for running this locally.
 
 ### Advanced
 
