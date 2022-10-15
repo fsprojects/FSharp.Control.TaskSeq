@@ -34,6 +34,15 @@ IF "%~1"=="build" (
 	REM Drop 'ci' from the remaining args
 	CALL :shiftArg %REST_ARGS%
 
+) ELSE IF "%~1"=="help" (
+	GOTO :showHelp
+
+) ELSE IF "%~1"=="/help" (
+	GOTO :showHelp
+
+) ELSE IF "%~1"=="-help" (
+	GOTO :showHelp
+
 ) ELSE IF "%~1"=="" (
 	REM No args, default: build
 	SET BUILD_MODE=build
@@ -53,6 +62,8 @@ REM Something wrong, we don't recognize the given arguments
 REM Display help:
 
 ECHO Argument not recognized
+
+:showHelp
 ECHO.
 ECHO Available options are:
 ECHO.

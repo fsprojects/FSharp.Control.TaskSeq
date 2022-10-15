@@ -1,16 +1,76 @@
-[![build](https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml/badge.svg)](https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml)
-[![test](https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml/badge.svg)](https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml)
+[![build][buildstatus_img]][buildstatus]
+[![test][teststatus_img]][teststatus]
 
 # TaskSeq
-An implementation [`IAsyncEnumerable<'T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0) as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
+An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
 
-The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-7.0) call on the [`IAsyncEnumerator<'T>`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1?view=net-7.0) given by a call to [`GetAsyncEnumerator()`](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1.getasyncenumerator?view=net-7.0). It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`](https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-7.0) as well, which requires careful handling.
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
 
-A good C#-based introduction on `IAsyncEnumerable` [can be found in this blog](https://stu.dev/iasyncenumerable-introduction/). Another resource is [this MSDN article shortly after its introductiono](https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8).
+A good C#-based introduction on `IAsyncEnumerable` [can be found in this blog][8]. Another resource is [this MSDN article shortly after its introductiono][9].
+
+## Building & testing
+
+TLDR: just run `build`. Or load the `sln` file in Visual Studio or VS Code and compile.
+
+### Prerequisites
+
+* .NET 6 or .NET 7 Preview
+* F# 6.0 compiler
+* To use `build.cmd`, the `dotnet` command must be accessible from your path.
+
+Just checkout this repo locally. Then, from the root of the repo, you can do:
+
+### Build the solution
+
+```
+build [release|debug]
+```
+
+### Run the tests
+
+```
+build test [release|debug]
+```
+
+By default, all tests are output to the console. If you don't want that, you can use `--logger console;verbosity=summary`.
+Furthermore, no TRX file is generated and the `--blame-xxx` flags aren't set.
+
+### Run the CI command
+
+```
+build ci [release|debug]
+```
+
+This will run `dotnet test` with the `--blame-xxx` settings enabled to [prevent hanging tests][1] caused by 
+an [xUnit runner bug][2].
+
+### Advanced
+
+You can pass any additional options that are valid for `dotnet test` and `dotnet build` respectively. However, 
+these cannot be the very first argument, so you should either use `build build --myadditionalOptions fizz buzz`, or
+just specify the build-kind, i.e. this is fine:
+
+```
+build debug --verbosity detailed
+build test --logger console;verbosity=summary
+```
+
+At this moment, additional options cannot have quotes in them.
+
+Command modifiers, like `release` and `debug`, can be specified with `-` or `/` if you so prefer: `dotnet build /release`.
+
+### Get help (duh!)
+
+```
+build help
+```
+
+For more info, see this PR: https://github.com/abelbraaksma/TaskSeq/pull/29.
+
 
 ## In progress!!!
 
-It's based on [Don Symes `taskSeq.fs`](https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs)
+It's based on [Don Symes `taskSeq.fs`][10]
 but expanded with useful utility functions and a few extra binding overloads.
 
 ## Short-term feature planning
@@ -307,3 +367,19 @@ module TaskSeq =
     val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> taskSeq: taskSeq<'T> -> Task<'State>
 
 ```
+
+[buildstatus]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml
+[buildstatus_img]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml/badge.svg
+[teststatus]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml
+[teststatus_img]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml/badge.svg
+
+[1]: https://github.com/abelbraaksma/TaskSeq/issues/25
+[2]: https://github.com/xunit/xunit/issues/2587
+[3]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0
+[4]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-7.0
+[5]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1?view=net-7.0
+[6]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1.getasyncenumerator?view=net-7.0
+[7]: https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-7.0
+[8]: https://stu.dev/iasyncenumerable-introduction/
+[9]: https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8
+[10]: https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs
