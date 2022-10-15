@@ -6,7 +6,25 @@ An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with acco
 
 The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
 
-A good C#-based introduction on `IAsyncEnumerable` [can be found in this blog][8]. Another resource is [this MSDN article shortly after its introductiono][9].
+### Futher reading `IAsyncEnumerable`
+
+* A good C#-based introduction [can be found in this blog][8].
+* [An MSDN article][9] written shortly after it was introduced.
+* Converting a `seq` to an `IAsyncEnumerable` [demo gist][10] as an example, though `TaskSeq` contains many more utility functions and uses a slightly different approach.
+* If you're looking for using `IAsyncEnumerable` with `async` and not `task`, the excellent [`AsyncSeq`][11] library should be used. While `TaskSeq` is intended to consume `async` just like `task` does, it won't create an `AsyncSeq` type (at least not yet). If you want classic Async and parallelism, you should get this library instead.
+
+### Futher reading on resumable state machines
+
+* A state machine from a monadic perspective in F# [can be found here][12], which works with the pre-F# 6.0 non-resumable internals.
+* The [original RFC for F# 6.0 on resumable state machines][13] 
+* The [original RFC for introducing `task`][14] to F# 6.0.
+* A [pre F# 6.0 `TaskBuilder`][15] that motivated the `task` CE later added to F# Core.
+* [MSDN Documentation on `task`][16] and [`async`][17].
+
+### Further reading on computation expressions
+
+* [Docs on MSDN][18] form a good summary and starting point.
+* Arguably the best [step-by-step tutorial to using and building computation expressions][19] by Scott Wlaschin.
 
 ## Building & testing
 
@@ -74,7 +92,7 @@ For more info, see this PR: https://github.com/abelbraaksma/TaskSeq/pull/29.
 
 ## In progress!!!
 
-It's based on [Don Symes `taskSeq.fs`][10]
+It's based on [Don Symes `taskSeq.fs`][20]
 but expanded with useful utility functions and a few extra binding overloads.
 
 ## Short-term feature planning
@@ -386,4 +404,14 @@ module TaskSeq =
 [7]: https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-7.0
 [8]: https://stu.dev/iasyncenumerable-introduction/
 [9]: https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8
-[10]: https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs
+[10]: https://gist.github.com/akhansari/d88812b742aa6be1c35b4f46bd9f8532
+[11]: https://fsprojects.github.io/FSharp.Control.AsyncSeq/AsyncSeq.html
+[12]: http://blumu.github.io/ResumableMonad/TheResumableMonad.html
+[13]: https://github.com/fsharp/fslang-design/blob/main/FSharp-6.0/FS-1087-resumable-code.md
+[14]: https://github.com/fsharp/fslang-design/blob/main/FSharp-6.0/FS-1097-task-builder.md
+[15]: https://github.com/rspeele/TaskBuilder.fs/
+[16]: https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/task-expressions
+[17]: https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/async-expressions
+[18]: https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
+[19]: https://fsharpforfunandprofit.com/series/computation-expressions/
+[20]: https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs
