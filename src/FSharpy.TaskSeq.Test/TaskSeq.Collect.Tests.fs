@@ -57,9 +57,3 @@ let ``TaskSeq-collectSeq with empty sequences`` () = task {
 
     Seq.isEmpty sq |> should be True
 }
-
-[<Fact>]
-let ``TaskSeq-empty is empty`` () = task {
-    let! sq = TaskSeq.empty<string> |> TaskSeq.toSeqCachedAsync
-    Seq.isEmpty sq |> should be True
-}
