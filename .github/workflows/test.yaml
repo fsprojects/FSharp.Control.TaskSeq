@@ -15,9 +15,9 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v3
-      # build it, test it, pack it
+      # build it, test it
       - name: Run dotnet test - release
-        run: dotnet test -c Release --blame-hang-timeout 60000ms --logger "trx;LogFileName=test-results-release.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
+        run: ./build.cmd ci -release
       - name: Publish test results - release
         uses: dorny/test-reporter@v1
         if: always()
@@ -39,9 +39,9 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v3
-      # build it, test it, pack it
+      # build it, test it
       - name: Run dotnet test - debug
-        run: dotnet test -c Debug --blame-hang-timeout 60000ms --logger "trx;LogFileName=test-results-debug.trx" --logger "console;verbosity=detailed" .\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj
+        run: ./build.cmd ci -debug
       - name: Publish test results - debug
         uses: dorny/test-reporter@v1
         if: always()
