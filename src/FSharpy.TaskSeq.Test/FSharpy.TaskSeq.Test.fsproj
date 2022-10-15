@@ -13,6 +13,7 @@
     <Compile Include="TestUtils.fs" />
     <Compile Include="TaskSeq.Choose.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
+    <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
     <Compile Include="TaskSeq.Find.Tests.fs" />
     <Compile Include="TaskSeq.Fold.Tests.fs" />

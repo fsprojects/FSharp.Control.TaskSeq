@@ -29,7 +29,7 @@ module DelayHelper =
     /// True to allow yielding the thread. If this is set to false, on single-proc systems
     /// this will prevent all other code from running.
     /// </param>
-    let delayMicroseconds microseconds (allowThreadYield: bool) =
+    let spinWaitDelay (microseconds: int64<µs>) (allowThreadYield: bool) =
         let start = Stopwatch.GetTimestamp()
         let minimumTicks = int64 microseconds * Stopwatch.Frequency / 1_000_000L
 
@@ -48,7 +48,7 @@ module DelayHelper =
 
 
 /// <summary>
-/// Creates dummy tasks with a randomized delay and a mutable state,
+/// Creates dummy backgroundTasks with a randomized delay and a mutable state,
 /// to ensure we properly test whether processing is done ordered or not.
 /// Default for <paramref name="µsecMin" /> and <paramref name="µsecMax" />
 /// are 10,000µs and 30,000µs respectively (or 10ms and 30ms).
@@ -63,10 +63,20 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
         // DO NOT use Thead.Sleep(), it's blocking!
         // WARNING: Task.Delay only has a 15ms timer resolution!!!
         //let! _ = Task.Delay(rnd ())
-        let! _ = Task.Delay 0 // this creates a resume state, which seems more efficient than SpinWait.SpinOnce, see DelayHelper.
-        DelayHelper.delayMicroseconds (rnd ()) false
+
+        // TODO: check this! The following comment may not be correct
+        // this creates a resume state, which seems more efficient than SpinWait.SpinOnce, see DelayHelper.
+        let! _ = Task.Delay 0
+        let delay = rnd ()
+
+        // typical minimum accuracy of Task.Delay is 15.6ms
+        // for delay-cases shorter than that, we use SpinWait
+        if delay < 15_000L<µs> then
+            do DelayHelper.spinWaitDelay (rnd ()) false
+        else
+            do! Task.Delay(int <| float delay / 1_000.0)
+
         Interlocked.Increment &x |> ignore
-        //x <- x + 1
         return x // this dereferences the variable
     }
 
@@ -140,6 +150,18 @@ module TestUtils =
 
     /// Create a bunch of dummy tasks, with varying microsecond delays.
     let createDummyTaskSeqWith (min: int64<µs>) max count =
+        /// Set of delayed tasks in the form of `unit -> Task<int>`
+        let tasks = DummyTaskFactory(min, max).CreateDelayedTasks count
+
+        taskSeq {
+            for task in tasks do
+                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                let! x = task ()
+                yield x
+        }
+
+    /// Create a bunch of dummy tasks, with varying millisecond delays.
+    let createLongerDummyTaskSeq (min: int<ms>) max count =
         /// Set of delayed tasks in the form of `unit -> Task<int>`
         let tasks = DummyTaskFactory(min, max).CreateDelayedTasks count
 
