@@ -53,6 +53,7 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     }
 
+    // FIXME: incomplete and incorrect code!!!
     let toSeqOfTasks (taskSeq: taskSeq<'T>) = seq {
         let e = taskSeq.GetAsyncEnumerator(CancellationToken())
 
