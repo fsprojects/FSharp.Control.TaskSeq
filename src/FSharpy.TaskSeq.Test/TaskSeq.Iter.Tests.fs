@@ -2,10 +2,24 @@ module FSharpy.Tests.Iter
 
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharpy
 
+[<Fact>]
+let ``TaskSeq-iteri does nothing on empty sequences`` () = task {
+    let tq = createDummyTaskSeq 10
+    let mutable sum = -1
+    do! TaskSeq.empty |> TaskSeq.iteri (fun i _ -> sum <- sum + i)
+    sum |> should equal -1
+}
+
+[<Fact>]
+let ``TaskSeq-iter does nothing on empty sequences`` () = task {
+    let tq = createDummyTaskSeq 10
+    let mutable sum = -1
+    do! TaskSeq.empty |> TaskSeq.iter (fun i -> sum <- sum + i)
+    sum |> should equal -1
+}
 
 [<Fact>]
 let ``TaskSeq-iteri should go over all items`` () = task {
