@@ -10,7 +10,7 @@ SET	BUILD_MODE=
 SET DOTNET_TEST_ARGS=
 SET DOTNET_TEST_PROJECT_LOCATION=
 
-SET DOTNET_CI_ARGS=--blame-hang-timeout 60000ms --logger "trx;LogFileName=test-results-release.trx" --logger "console;verbosity=detailed"
+SET DOTNET_CI_ARGS=--blame-hang-timeout 60000ms --logger "console;verbosity=detailed"
 SET DOTNET_TEST_ARGS=--logger "console;verbosity=detailed"
 SET DOTNET_TEST_PROJECT_LOCATION=".\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj"
 
@@ -37,7 +37,7 @@ IF "%~1"=="build" (
 ) ELSE IF "%~1"=="" (
 	REM No args, default: build
 	SET BUILD_MODE=build
-	SET BUILD_CONFIG=Release
+	SET BUILD_CONFIG=release
 )
 
 CALL :tryBuildConfig %REST_ARGS%
@@ -94,17 +94,20 @@ GOTO :EOF
 
 REM Normal building
 :runBuild
+SET BUILD_COMMAND=dotnet build src/FSharpy.TaskSeq.sln -c %BUILD_CONFIG% %REST_ARGS%
 ECHO Building for %BUILD_CONFIG% configuration...
 ECHO.
 ECHO Executing:
-ECHO dotnet build src/FSharpy.TaskSeq.sln -c %BUILD_CONFIG% %REST_ARGS%
+ECHO %BUILD_COMMAND%
 ECHO.
+ECHO Restoring dotnet tools...
 dotnet tool restore
-dotnet build src/FSharpy.TaskSeq.sln -c %BUILD_CONFIG% %REST_ARGS%
+%BUILD_COMMAND%
 GOTO :EOF
 
 REM Testing
 :runTest
+SET TEST_COMMAND=dotnet test -c %BUILD_CONFIG% %DOTNET_TEST_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %REST_ARGS%
 ECHO.
 ECHO Testing: %BUILD_CONFIG% configuration...
 ECHO.
@@ -112,12 +115,14 @@ ECHO Restoring dotnet tools...
 dotnet tool restore
 
 ECHO Executing:
-ECHO dotnet test -c %BUILD_CONFIG% %DOTNET_TEST_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %REST_ARGS%
-dotnet test -c %BUILD_CONFIG% %DOTNET_TEST_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %REST_ARGS%
+ECHO %TEST_COMMAND%
+%TEST_COMMAND%
 GOTO :EOF
 
 REM Continuous integration
 :runCi
+SET TRX_LOGGER=--logger "trx;LogFileName=test-results-%BUILD_CONFIG%.trx"
+SET CI_COMMAND=dotnet test -c %BUILD_CONFIG% %DOTNET_CI_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %TRX_LOGGER% %REST_ARGS%
 ECHO.
 ECHO Continuous integration: %BUILD_CONFIG% configuration...
 ECHO.
@@ -125,41 +130,45 @@ ECHO Restoring dotnet tools...
 dotnet tool restore
 
 ECHO Executing:
-ECHO dotnet test -c %BUILD_CONFIG% %DOTNET_CI_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %REST_ARGS%
-dotnet test -c %BUILD_CONFIG% %DOTNET_CI_ARGS% %DOTNET_TEST_PROJECT_LOCATION% %REST_ARGS%
+ECHO %CI_COMMAND%
+%CI_COMMAND%
 GOTO :EOF
 
 
 REM Callable label, will resume after 'CALL' line
 :tryBuildConfig
 IF "%~1"=="release" (
-	SET BUILD_CONFIG=Release
+	SET BUILD_CONFIG=release
 	CALL :shiftArg %REST_ARGS%
 )
 IF "%~1"=="-release" (
-	SET BUILD_CONFIG=Release
+	SET BUILD_CONFIG=release
 	CALL :shiftArg %REST_ARGS%
 )
 IF "%~1"=="/release" (
-	SET BUILD_CONFIG=Release
+	SET BUILD_CONFIG=release
 	CALL :shiftArg %REST_ARGS%
 )
 IF "%~1"=="debug" (
-	SET BUILD_CONFIG=Debug
+	SET BUILD_CONFIG=debug
 	CALL :shiftArg %REST_ARGS%
 )
 IF "%~1"=="-debug" (
-	SET BUILD_CONFIG=Debug
+	SET BUILD_CONFIG=debug
 	CALL :shiftArg %REST_ARGS%
 )
 IF "%~1"=="/debug" (
-	SET BUILD_CONFIG=Debug
+	SET BUILD_CONFIG=debug
 	CALL :shiftArg %REST_ARGS%
 )
 GOTO :EOF
 
 REM Callable label, will resume after 'CALL' line
 :shiftArg
+REM WARNING!!!
+REM If called from inside an IF-statement, it will NOT keep the resulting
+REM variable %REST_ARGS%, until execution gets OUTSIDE of the IF-block
+
 REM Do not call 'SHIFT' here, as we do it manually
 REM Here, '%*' means the arguments given in the CALL command to this label
 SET REST_ARGS=%*
