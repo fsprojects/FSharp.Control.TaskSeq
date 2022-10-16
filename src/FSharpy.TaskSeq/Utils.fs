@@ -15,6 +15,18 @@ module Task =
     /// Convert a Task<unit> into a Task
     let inline toTask (task: Task<unit>) = task :> Task
 
+    /// Convert a Task<'T> into a ValueTask<'T>
+    let inline toValueTask (task: Task<'T>) = ValueTask<'T> task
+
+    /// Convert a Task<unit> into a non-generic ValueTask
+    let inline toIgnoreValueTask (task: Task<unit>) = ValueTask(task :> Task)
+
+    /// <summary>
+    /// Convert a ValueTask&lt;'T> to a Task&lt;'T>. To use a non-generic ValueTask,
+    /// consider using: <paramref name="myValueTask |> Task.ofValueTask |> Task.ofTask" />.
+    /// </summary>
+    let inline ofValueTask (valueTask: ValueTask<'T>) = task { return! valueTask }
+
     /// Convert a Task<'T> into a Task, ignoring the result
     let inline ignore (task: Task<'T>) =
         TaskBuilder.task {
@@ -23,7 +35,7 @@ module Task =
         }
         :> Task
 
-    /// Map a Tas<'T>
+    /// Map a Task<'T>
     let inline map mapper (task: Task<'T>) : Task<'U> =
         TaskBuilder.task {
             let! result = task
