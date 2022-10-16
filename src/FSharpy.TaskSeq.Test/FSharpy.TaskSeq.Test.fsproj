@@ -5,6 +5,7 @@
 
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <ApplicationIcon>TaskSeq.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,10 @@
     <Compile Include="TaskSeq.Tests.CE.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TaskSeq.ico" />
   </ItemGroup>
 
   <ItemGroup>
