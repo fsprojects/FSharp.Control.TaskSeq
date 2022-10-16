@@ -74,20 +74,30 @@ let ``TaskSeq-zip zips different types`` () = task {
     combined |> should equal [| ("one", 42L); ("two", 43L) |]
 }
 
-[<Fact>]
-let ``TaskSeq-zip throws on unequal lengths`` () = task {
-    let one = createDummyTaskSeq 10
-    let two = createDummyTaskSeq 11
-    let combined = TaskSeq.zip one two
+[<Theory; InlineData true; InlineData false>]
+let ``TaskSeq-zip throws on unequal lengths, variant`` leftThrows = task {
+    let long = createDummyTaskSeq 11
+    let short = createDummyTaskSeq 10
+
+    let combined =
+        if leftThrows then
+            TaskSeq.zip short long
+        else
+            TaskSeq.zip long short
 
     fun () -> TaskSeq.toArrayAsync combined |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
-[<Fact>]
-let ``TaskSeq-zip throws on unequal lengths, inverted args`` () = task {
+[<Theory; InlineData true; InlineData false>]
+let ``TaskSeq-zip throws on unequal lengths with empty seq`` leftThrows = task {
     let one = createDummyTaskSeq 1
-    let combined = TaskSeq.zip one TaskSeq.empty
+
+    let combined =
+        if leftThrows then
+            TaskSeq.zip TaskSeq.empty one
+        else
+            TaskSeq.zip one TaskSeq.empty
 
     fun () -> TaskSeq.toArrayAsync combined |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
