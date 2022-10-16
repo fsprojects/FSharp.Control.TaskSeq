@@ -173,18 +173,7 @@ module internal TaskSeqInternal =
           }
 
     let zip (taskSequence1: taskSeq<_>) (taskSequence2: taskSeq<_>) = taskSeq {
-        let e1 = taskSequence1.GetAsyncEnumerator(CancellationToken())
-        let e2 = taskSequence2.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step1 = e1.MoveNextAsync()
-        let! step2 = e2.MoveNextAsync()
-        go <- step1 && step2
-
-        while go do
-            yield e1.Current, e2.Current
-            let! step1 = e1.MoveNextAsync()
-            let! step2 = e2.MoveNextAsync()
-
+        let inline validate step1 step2 =
             if step1 <> step2 then
                 if step1 then
                     invalidArg "taskSequence1" "The task sequences have different lengths."
@@ -192,8 +181,21 @@ module internal TaskSeqInternal =
                 if step2 then
                     invalidArg "taskSequence2" "The task sequences have different lengths."
 
-            go <- step1 && step2
 
+        let e1 = taskSequence1.GetAsyncEnumerator(CancellationToken())
+        let e2 = taskSequence2.GetAsyncEnumerator(CancellationToken())
+        let mutable go = true
+        let! step1 = e1.MoveNextAsync()
+        let! step2 = e2.MoveNextAsync()
+        go <- step1 && step2
+        validate step1 step2
+
+        while go do
+            yield e1.Current, e2.Current
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            validate step1 step2
+            go <- step1 && step2
     }
 
     let collect (binder: _ -> #IAsyncEnumerable<_>) (taskSequence: taskSeq<_>) = taskSeq {
