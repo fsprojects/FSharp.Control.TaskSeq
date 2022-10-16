@@ -28,6 +28,19 @@ let ``TaskSeq-toArrayAsync should succeed`` () = task {
 }
 
 [<Fact>]
+let ``TaskSeq-toArrayAsync can be applied multiple times to the same sequence`` () = task {
+    let tq = createDummyTaskSeq 10
+    let! (results1: _[]) = tq |> TaskSeq.toArrayAsync
+    let! (results2: _[]) = tq |> TaskSeq.toArrayAsync
+    let! (results3: _[]) = tq |> TaskSeq.toArrayAsync
+    let! (results4: _[]) = tq |> TaskSeq.toArrayAsync
+    results1 |> should equal [| 1..10 |]
+    results2 |> should equal [| 1..10 |]
+    results3 |> should equal [| 1..10 |]
+    results4 |> should equal [| 1..10 |]
+}
+
+[<Fact>]
 let ``TaskSeq-toListAsync should succeed`` () = task {
     let tq = createDummyTaskSeq 10
     let! (results: list<_>) = tq |> TaskSeq.toListAsync

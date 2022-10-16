@@ -37,6 +37,18 @@ let ``TaskSeq-iter should go over all items`` () = task {
     sum |> should equal 55 // task-dummies started at 1
 }
 
+
+[<Fact>]
+let ``TaskSeq-iter multiple iterations over same sequence`` () = task {
+    let tq = createDummyTaskSeq 10
+    let mutable sum = 0
+    do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
+    do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
+    do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
+    do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
+    sum |> should equal 220 // task-dummies started at 1
+}
+
 [<Fact>]
 let ``TaskSeq-iteriAsync should go over all items`` () = task {
     let tq = createDummyTaskSeq 10
