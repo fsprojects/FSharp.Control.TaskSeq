@@ -10,13 +10,6 @@ open FsToolkit.ErrorHandling
 open FSharpy
 
 [<Fact>]
-let ``ZHang timeout test`` () = task {
-    let! empty = Task.Delay 30
-
-    empty |> should be Null
-}
-
-[<Fact>]
 let ``TaskSeq-choose on an empty sequence`` () = task {
     let! empty =
         TaskSeq.empty
@@ -50,7 +43,7 @@ let ``TaskSeq-choose can convert and filter`` () = task {
 let ``TaskSeq-chooseAsync can convert and filter`` () = task {
     let! alphabet =
         createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
-        |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
+        |> TaskSeq.chooseAsync (fun number -> task { return if number <= 26 then Some(char number + '@') else None })
         |> TaskSeq.toArrayAsync
 
     String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
