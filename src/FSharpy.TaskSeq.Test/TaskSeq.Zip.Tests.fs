@@ -85,6 +85,15 @@ let ``TaskSeq-zip throws on unequal lengths`` () = task {
 }
 
 [<Fact>]
+let ``TaskSeq-zip throws on unequal lengths, inverted args`` () = task {
+    let one = createDummyTaskSeq 1
+    let combined = TaskSeq.zip one TaskSeq.empty
+
+    fun () -> TaskSeq.toArrayAsync combined |> Task.ignore
+    |> should throwAsyncExact typeof<ArgumentException>
+}
+
+[<Fact>]
 let ``TaskSeq-zip can zip empty arrays`` () = task {
     let combined = TaskSeq.zip TaskSeq.empty<int> TaskSeq.empty<string>
     let! combined = TaskSeq.toArrayAsync combined
