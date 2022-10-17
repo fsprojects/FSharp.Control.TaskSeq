@@ -237,6 +237,22 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 data.taken <- true
                 clone.Machine.Data.cancellationToken <- ct
+                clone.Machine.Data.taken <- true
+                //clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
+                // calling reset causes NRE in IValueTaskSource.GetResult above
+                //clone.Machine.Data.promiseOfValueOrEnd.Reset()
+                //clone.Machine.Data.boxed <- clone
+                //clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
+                //clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
+                //clone.Machine.Data.awaiter <- null
+                //clone.Machine.Data.current <- ValueNone
+
+                if verbose then
+                    printfn
+                        "Cloning, resumption point original: %i, clone: %i"
+                        ts.Machine.ResumptionPoint
+                        clone.Machine.ResumptionPoint
+
                 (clone :> System.Collections.Generic.IAsyncEnumerator<'T>)
 
     interface IAsyncDisposable with
