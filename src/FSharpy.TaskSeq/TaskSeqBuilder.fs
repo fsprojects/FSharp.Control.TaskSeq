@@ -63,17 +63,15 @@ type TaskSeqStateMachineData<'T>() =
     [<DefaultValue(false)>]
     val mutable tailcallTarget: TaskSeq<'T> option
 
-    member data.PushDispose(f: unit -> Task) =
-        match data.disposalStack with
-        | null -> data.disposalStack <- ResizeArray()
-        | _ -> ()
+    member data.PushDispose(disposer: unit -> Task) =
+        if isNull data.disposalStack then
+            data.disposalStack <- ResizeArray()
 
-        data.disposalStack.Add(f)
+        data.disposalStack.Add disposer
 
     member data.PopDispose() =
-        match data.disposalStack with
-        | null -> ()
-        | _ -> data.disposalStack.RemoveAt(data.disposalStack.Count - 1)
+        if not (isNull data.disposalStack) then
+            data.disposalStack.RemoveAt(data.disposalStack.Count - 1)
 
 and [<AbstractClass; NoEquality; NoComparison>] TaskSeq<'T>() =
 
@@ -117,6 +115,8 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         match res with
         | Some tg ->
+            // we get here only when there are multiple returns (it seems)
+            // hence the tailcall logic
             match tg.TailcallTarget with
             | None -> res
             | (Some tg2 as res2) ->
@@ -153,8 +153,23 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         member ts.GetResult(token: int16) =
             match ts.hijack () with
-            | Some tg -> (tg :> IValueTaskSource<bool>).GetResult(token)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+            | Some tg ->
+                if verbose then
+                    printfn "Getting result for token on 'Some' branch: %i" token
+
+                (tg :> IValueTaskSource<bool>).GetResult(token)
+            | None ->
+                try
+                    if verbose then
+                        printfn "Getting result for token on 'None' branch: %i" token
+
+                    ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+                with e ->
+                    if verbose then
+                        printfn "Error for token: %i" token
+
+                    //reraise ()
+                    true
 
         member ts.OnCompleted(continuation, state, token, flags) =
             match ts.hijack () with
@@ -180,14 +195,40 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 data.taken <- true
                 data.cancellationToken <- ct
                 data.builder <- AsyncIteratorMethodBuilder.Create()
+
+                if verbose then
+                    printfn "No cloning, resumption point: %i" ts.Machine.ResumptionPoint
+
                 (ts :> IAsyncEnumerator<_>)
             else
                 if verbose then
                     printfn "GetAsyncEnumerator, cloning..."
 
+                // it appears that the issue is possibly caused by the problem
+                // of having ValueTask all over the place, and by going over the
+                // iteration twice, we are trying to *await* twice, which is not allowed
+                // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
+
+
                 let clone = ts.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 data.taken <- true
                 clone.Machine.Data.cancellationToken <- ct
+                clone.Machine.Data.taken <- true
+                //clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
+                // calling reset causes NRE in IValueTaskSource.GetResult above
+                //clone.Machine.Data.promiseOfValueOrEnd.Reset()
+                //clone.Machine.Data.boxed <- clone
+                //clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
+                //clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
+                //clone.Machine.Data.awaiter <- null
+                //clone.Machine.Data.current <- ValueNone
+
+                if verbose then
+                    printfn
+                        "Cloning, resumption point original: %i, clone: %i"
+                        ts.Machine.ResumptionPoint
+                        clone.Machine.ResumptionPoint
+
                 (clone :> System.Collections.Generic.IAsyncEnumerator<'T>)
 
     interface IAsyncDisposable with
@@ -353,9 +394,11 @@ type TaskSeqBuilder() =
                 let __stack_vtask = condition ()
 
                 if __stack_vtask.IsCompleted then
+                    printfn "Returning completed task (in while)"
                     __stack_condition_fin <- true
                     condition_res <- __stack_vtask.Result
                 else
+                    printfn "Awaiting non-completed task (in while)"
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
                     // This will yield with __stack_fin = false

@@ -78,16 +78,24 @@ let ``TaskSeq-mapAsync can map the same sequence multiple times`` () = task {
         TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
         >> TaskSeq.toSeqCachedAsync
 
-    let ts = createDummyTaskSeq 10
-    let! result1 = mapAndCache ts
-    let! result2 = mapAndCache ts
-    let! result3 = mapAndCache ts
-    let! result4 = mapAndCache ts
+    let ts = createDummyDirectTaskSeq 10
+
+    let! result1 =
+        printfn "starting first"
+        mapAndCache ts
+    //let! result3 = mapAndCache ts
+    //let! result4 = mapAndCache ts
 
     validateSequence result1
+
+    let! result2 =
+        printfn "starting second"
+        mapAndCache ts
+
     validateSequence result2
-    validateSequence result3
-    validateSequence result4
+    //validateSequence result3
+    //validateSequence result4
+    ()
 }
 
 [<Fact>]
