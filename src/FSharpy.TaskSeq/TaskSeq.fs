@@ -16,14 +16,14 @@ module TaskSeq =
             yield c
     }
 
-    let isEmpty taskSeq = Internal.isEmpty taskSeq
+    let isEmpty source = Internal.isEmpty source
 
     //
     // Convert 'ToXXX' functions
     //
 
-    let toList (t: taskSeq<'T>) = [
-        let e = t.GetAsyncEnumerator(CancellationToken())
+    let toList (source: taskSeq<'T>) = [
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
             while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
@@ -32,9 +32,12 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     ]
 
+    let format x = string x
+    let f () = format 42
 
-    let toArray (taskSeq: taskSeq<'T>) = [|
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+
+    let toArray (source: taskSeq<'T>) = [|
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
             while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
@@ -43,8 +46,8 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     |]
 
-    let toSeqCached (taskSeq: taskSeq<'T>) = seq {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let toSeqCached (source: taskSeq<'T>) = seq {
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
             while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
@@ -54,8 +57,8 @@ module TaskSeq =
     }
 
     // FIXME: incomplete and incorrect code!!!
-    let toSeqOfTasks (taskSeq: taskSeq<'T>) = seq {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let toSeqOfTasks (source: taskSeq<'T>) = seq {
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         // TODO: check this!
         try
@@ -76,74 +79,74 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     }
 
-    let toArrayAsync taskSeq =
-        Internal.toResizeArrayAsync taskSeq
+    let toArrayAsync source =
+        Internal.toResizeArrayAsync source
         |> Task.map (fun a -> a.ToArray())
 
-    let toListAsync taskSeq = Internal.toResizeArrayAndMapAsync List.ofSeq taskSeq
+    let toListAsync source = Internal.toResizeArrayAndMapAsync List.ofSeq source
 
-    let toResizeArrayAsync taskSeq = Internal.toResizeArrayAsync taskSeq
+    let toResizeArrayAsync source = Internal.toResizeArrayAsync source
 
-    let toIListAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) taskSeq
+    let toIListAsync source = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) source
 
-    let toSeqCachedAsync taskSeq = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) taskSeq
+    let toSeqCachedAsync source = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) source
 
     //
     // Convert 'OfXXX' functions
     //
 
-    let ofArray (array: 'T[]) = taskSeq {
-        for c in array do
+    let ofArray (source: 'T[]) = taskSeq {
+        for c in source do
             yield c
     }
 
-    let ofList (list: 'T list) = taskSeq {
-        for c in list do
+    let ofList (source: 'T list) = taskSeq {
+        for c in source do
             yield c
     }
 
-    let ofSeq (sequence: 'T seq) = taskSeq {
-        for c in sequence do
+    let ofSeq (source: 'T seq) = taskSeq {
+        for c in source do
             yield c
     }
 
-    let ofResizeArray (data: 'T ResizeArray) = taskSeq {
-        for c in data do
+    let ofResizeArray (source: 'T ResizeArray) = taskSeq {
+        for c in source do
             yield c
     }
 
-    let ofTaskSeq (sequence: #Task<'T> seq) = taskSeq {
-        for c in sequence do
+    let ofTaskSeq (source: #Task<'T> seq) = taskSeq {
+        for c in source do
             let! c = c
             yield c
     }
 
-    let ofTaskList (list: #Task<'T> list) = taskSeq {
-        for c in list do
+    let ofTaskList (source: #Task<'T> list) = taskSeq {
+        for c in source do
             let! c = c
             yield c
     }
 
-    let ofTaskArray (array: #Task<'T> array) = taskSeq {
-        for c in array do
+    let ofTaskArray (source: #Task<'T> array) = taskSeq {
+        for c in source do
             let! c = c
             yield c
     }
 
-    let ofAsyncSeq (sequence: Async<'T> seq) = taskSeq {
-        for c in sequence do
+    let ofAsyncSeq (source: Async<'T> seq) = taskSeq {
+        for c in source do
             let! c = task { return! c }
             yield c
     }
 
-    let ofAsyncList (list: Async<'T> list) = taskSeq {
-        for c in list do
+    let ofAsyncList (source: Async<'T> list) = taskSeq {
+        for c in source do
             let! c = Task.ofAsync c
             yield c
     }
 
-    let ofAsyncArray (array: Async<'T> array) = taskSeq {
-        for c in array do
+    let ofAsyncArray (source: Async<'T> array) = taskSeq {
+        for c in source do
             let! c = Async.toTask c
             yield c
     }
@@ -153,55 +156,55 @@ module TaskSeq =
     // iter/map/collect functions
     //
 
-    let iter action taskSeq = Internal.iter (SimpleAction action) taskSeq
+    let iter action source = Internal.iter (SimpleAction action) source
 
-    let iteri action taskSeq = Internal.iter (CountableAction action) taskSeq
+    let iteri action source = Internal.iter (CountableAction action) source
 
-    let iterAsync action taskSeq = Internal.iter (AsyncSimpleAction action) taskSeq
+    let iterAsync action source = Internal.iter (AsyncSimpleAction action) source
 
-    let iteriAsync action taskSeq = Internal.iter (AsyncCountableAction action) taskSeq
+    let iteriAsync action source = Internal.iter (AsyncCountableAction action) source
 
-    let map (mapper: 'T -> 'U) taskSeq = Internal.map (SimpleAction mapper) taskSeq
+    let map (mapper: 'T -> 'U) source = Internal.map (SimpleAction mapper) source
 
-    let mapi (mapper: int -> 'T -> 'U) taskSeq = Internal.map (CountableAction mapper) taskSeq
+    let mapi (mapper: int -> 'T -> 'U) source = Internal.map (CountableAction mapper) source
 
-    let mapAsync mapper taskSeq = Internal.map (AsyncSimpleAction mapper) taskSeq
+    let mapAsync mapper source = Internal.map (AsyncSimpleAction mapper) source
 
-    let mapiAsync mapper taskSeq = Internal.map (AsyncCountableAction mapper) taskSeq
+    let mapiAsync mapper source = Internal.map (AsyncCountableAction mapper) source
 
-    let collect (binder: 'T -> #IAsyncEnumerable<'U>) taskSeq = Internal.collect binder taskSeq
+    let collect (binder: 'T -> #IAsyncEnumerable<'U>) source = Internal.collect binder source
 
-    let collectSeq (binder: 'T -> #seq<'U>) taskSeq = Internal.collectSeq binder taskSeq
+    let collectSeq (binder: 'T -> #seq<'U>) source = Internal.collectSeq binder source
 
-    let collectAsync (binder: 'T -> #Task<#IAsyncEnumerable<'U>>) taskSeq : taskSeq<'U> =
-        Internal.collectAsync binder taskSeq
+    let collectAsync (binder: 'T -> #Task<#IAsyncEnumerable<'U>>) source : taskSeq<'U> =
+        Internal.collectAsync binder source
 
-    let collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) taskSeq : taskSeq<'U> = Internal.collectSeqAsync binder taskSeq
+    let collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) source : taskSeq<'U> = Internal.collectSeqAsync binder source
 
     //
     // choosers, pickers and the like
     //
 
-    let tryHead taskSeq = Internal.tryHead taskSeq
+    let tryHead source = Internal.tryHead source
 
-    let head taskSeq = task {
-        match! Internal.tryHead taskSeq with
+    let head source = task {
+        match! Internal.tryHead source with
         | Some head -> return head
         | None -> return Internal.raiseEmptySeq ()
     }
 
-    let tryLast taskSeq = Internal.tryLast taskSeq
+    let tryLast source = Internal.tryLast source
 
-    let last taskSeq = task {
-        match! Internal.tryLast taskSeq with
+    let last source = task {
+        match! Internal.tryLast source with
         | Some last -> return last
         | None -> return Internal.raiseEmptySeq ()
     }
 
-    let tryItem index taskSeq = Internal.tryItem index taskSeq
+    let tryItem index source = Internal.tryItem index source
 
-    let item index taskSeq = task {
-        match! Internal.tryItem index taskSeq with
+    let item index source = task {
+        match! Internal.tryItem index source with
         | Some item -> return item
         | None ->
             if index < 0 then
@@ -255,8 +258,8 @@ module TaskSeq =
     // zip/unzip etc functions
     //
 
-    let zip taskSeq1 taskSeq2 = Internal.zip taskSeq1 taskSeq2
+    let zip source1 source2 = Internal.zip source1 source2
 
-    let fold folder state taskSeq = Internal.fold (FolderAction folder) state taskSeq
+    let fold folder state source = Internal.fold (FolderAction folder) state source
 
-    let foldAsync folder state taskSeq = Internal.fold (AsyncFolderAction folder) state taskSeq
+    let foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source

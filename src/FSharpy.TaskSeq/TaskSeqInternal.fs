@@ -46,14 +46,14 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
-    let isEmpty (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let isEmpty (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         return not step
     }
 
-    let tryExactlyOne (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let tryExactlyOne (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         match! e.MoveNextAsync() with
         | true ->
@@ -69,8 +69,8 @@ module internal TaskSeqInternal =
             return None
     }
 
-    let iter action (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let iter action (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
         go <- step
@@ -110,8 +110,8 @@ module internal TaskSeqInternal =
                 go <- step
     }
 
-    let fold folder initial (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let fold folder initial (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable result = initial
         let! step = e.MoveNextAsync()
@@ -134,13 +134,13 @@ module internal TaskSeqInternal =
         return result
     }
 
-    let toResizeArrayAsync taskSeq = task {
+    let toResizeArrayAsync source = task {
         let res = ResizeArray()
-        do! taskSeq |> iter (SimpleAction(fun item -> res.Add item))
+        do! source |> iter (SimpleAction(fun item -> res.Add item))
         return res
     }
 
-    let toResizeArrayAndMapAsync mapper taskSeq = (toResizeArrayAsync >> Task.map mapper) taskSeq
+    let toResizeArrayAndMapAsync mapper source = (toResizeArrayAsync >> Task.map mapper) source
 
     let map mapper (taskSequence: taskSeq<_>) =
         match mapper with
@@ -172,7 +172,7 @@ module internal TaskSeqInternal =
                 yield result
           }
 
-    let zip (taskSequence1: taskSeq<_>) (taskSequence2: taskSeq<_>) = taskSeq {
+    let zip (source1: taskSeq<_>) (source2: taskSeq<_>) = taskSeq {
         let inline validate step1 step2 =
             if step1 <> step2 then
                 if step1 then
@@ -182,8 +182,8 @@ module internal TaskSeqInternal =
                     invalidArg "taskSequence2" "The task sequences have different lengths."
 
 
-        let e1 = taskSequence1.GetAsyncEnumerator(CancellationToken())
-        let e2 = taskSequence2.GetAsyncEnumerator(CancellationToken())
+        let e1 = source1.GetAsyncEnumerator(CancellationToken())
+        let e2 = source2.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step1 = e1.MoveNextAsync()
         let! step2 = e2.MoveNextAsync()
@@ -198,30 +198,30 @@ module internal TaskSeqInternal =
             go <- step1 && step2
     }
 
-    let collect (binder: _ -> #IAsyncEnumerable<_>) (taskSequence: taskSeq<_>) = taskSeq {
-        for c in taskSequence do
+    let collect (binder: _ -> #IAsyncEnumerable<_>) (source: taskSeq<_>) = taskSeq {
+        for c in source do
             yield! binder c :> IAsyncEnumerable<_>
     }
 
-    let collectSeq (binder: _ -> #seq<_>) (taskSequence: taskSeq<_>) = taskSeq {
-        for c in taskSequence do
+    let collectSeq (binder: _ -> #seq<_>) (source: taskSeq<_>) = taskSeq {
+        for c in source do
             yield! binder c :> seq<_>
     }
 
-    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (taskSequence: taskSeq<_>) = taskSeq {
-        for c in taskSequence do
+    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: taskSeq<_>) = taskSeq {
+        for c in source do
             let! result = binder c
             yield! result :> IAsyncEnumerable<_>
     }
 
-    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (taskSequence: taskSeq<_>) = taskSeq {
-        for c in taskSequence do
+    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: taskSeq<_>) = taskSeq {
+        for c in source do
             let! result = binder c
             yield! result :> seq<_>
     }
 
-    let tryLast (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let tryLast (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable last = ValueNone
         let! step = e.MoveNextAsync()
@@ -237,8 +237,8 @@ module internal TaskSeqInternal =
         | ValueNone -> return None
     }
 
-    let tryHead (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let tryHead (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
         go <- step
@@ -246,13 +246,13 @@ module internal TaskSeqInternal =
         if go then return Some e.Current else return None
     }
 
-    let tryItem index (taskSeq: taskSeq<_>) = task {
+    let tryItem index (source: taskSeq<_>) = task {
         if index < 0 then
             // while the loop below wouldn't run anyway, we don't want to call MoveNext in this case
             // to prevent side effects hitting unnecessarily
             return None
         else
-            let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+            let e = source.GetAsyncEnumerator(CancellationToken())
             let mutable go = true
             let mutable idx = 0
             let mutable foundItem = None
@@ -270,8 +270,8 @@ module internal TaskSeqInternal =
             return foundItem
     }
 
-    let tryPick chooser (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let tryPick chooser (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
         let mutable foundItem = None
@@ -302,8 +302,8 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
-    let tryFind chooser (taskSeq: taskSeq<_>) = task {
-        let e = taskSeq.GetAsyncEnumerator(CancellationToken())
+    let tryFind chooser (source: taskSeq<_>) = task {
+        let e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
         let mutable foundItem = None
@@ -338,30 +338,30 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
-    let choose chooser (taskSeq': taskSeq<_>) = taskSeq {
+    let choose chooser (source: taskSeq<_>) = taskSeq {
         match chooser with
         | TryPick picker ->
-            for item in taskSeq' do
+            for item in source do
                 match picker item with
                 | Some value -> yield value
                 | None -> ()
 
         | TryPickAsync picker ->
-            for item in taskSeq' do
+            for item in source do
                 match! picker item with
                 | Some value -> yield value
                 | None -> ()
     }
 
-    let filter chooser (taskSeq': taskSeq<_>) = taskSeq {
+    let filter chooser (source: taskSeq<_>) = taskSeq {
         match chooser with
         | TryFilter filterer ->
-            for item in taskSeq' do
+            for item in source do
                 if filterer item then
                     yield item
 
         | TryFilterAsync filterer ->
-            for item in taskSeq' do
+            for item in source do
                 match! filterer item with
                 | true -> yield item
                 | false -> ()
