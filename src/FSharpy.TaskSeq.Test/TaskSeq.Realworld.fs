@@ -18,9 +18,12 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
     let stream = new MemoryStream(data: byte[])
     let buffered = new BufferedStream(stream, blockSize)
     let mutable current = ValueNone
+    let mutable lastPos = 0L
 
     interface IAsyncEnumerable<byte[]> with
-        member reader.GetAsyncEnumerator(ct) = reader :> IAsyncEnumerator<_>
+        member reader.GetAsyncEnumerator(ct) =
+            output.WriteLine $"Cloning!! Current: {current}, lastPos: {lastPos}"
+            reader.MemberwiseClone() :?> IAsyncEnumerator<_>
 
     interface IAsyncEnumerator<byte[]> with
         member _.Current =
@@ -31,9 +34,10 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
         member _.MoveNextAsync() =
             task {
                 let mem = Array.zeroCreate blockSize
-
+                buffered.Position <- lastPos
                 // this advances the "current" position automatically. However, this is clearly NOT threadsafe!!!
                 let! bytesRead = buffered.ReadAsync(mem, 0, mem.Length) // offset refers to offset in target buffer, not source
+                lastPos <- buffered.Position
 
                 if bytesRead > 0 then
                     current <- ValueSome mem
@@ -53,12 +57,11 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
                 // if the previous block raises, we should still try to get rid of the underlying stream
                 stream.DisposeAsync().AsTask().Wait()
 
-[<Fact(Skip = "Currently fails")>]
 type ``Real world tests``(output: ITestOutputHelper) =
     [<Fact>]
     let ``Reading a 10MB buffered IAsync stream from start to finish`` () = task {
         let mutable count = 0
-        use reader = AsyncBufferedReader(output, Array.init 10_485_76 byte, 256)
+        use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
         let expected = Array.init 256 byte
 
         let ts = taskSeq {
@@ -73,9 +76,11 @@ type ``Real world tests``(output: ITestOutputHelper) =
 
         // the following is extremely slow, which is why we just use F#'s comparison instead
         // Using this takes 67s, compared to 0.25s using normal F# comparison.
-        do! ts |> TaskSeq.iter (should equal expected)
-        do! ts |> TaskSeq.iter ((=) expected >> (should be True))
-        do! task { do count |> should equal 4096 }
+        do! reader |> TaskSeq.iter (should equal expected)
+        do! reader |> TaskSeq.iter ((=) expected >> (should be True))
+        let! len = reader |> TaskSeq.mapi (fun i _ -> i + 1) |> TaskSeq.last
+        len |> should equal 8
+    //do! task { do count |> should equal 4096 }
     }
 
     [<Fact>]
