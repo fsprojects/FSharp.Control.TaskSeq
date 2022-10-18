@@ -153,23 +153,8 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         member ts.GetResult(token: int16) =
             match ts.hijack () with
-            | Some tg ->
-                if verbose then
-                    printfn "Getting result for token on 'Some' branch: %i" token
-
-                (tg :> IValueTaskSource<bool>).GetResult(token)
-            | None ->
-                try
-                    if verbose then
-                        printfn "Getting result for token on 'None' branch: %i" token
-
-                    ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
-                with e ->
-                    if verbose then
-                        printfn "Error for token: %i" token
-
-                    //reraise ()
-                    true
+            | Some tg -> (tg :> IValueTaskSource<bool>).GetResult(token)
+            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
 
         member ts.OnCompleted(continuation, state, token, flags) =
             match ts.hijack () with
