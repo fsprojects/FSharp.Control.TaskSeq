@@ -379,11 +379,15 @@ type TaskSeqBuilder() =
                 let __stack_vtask = condition ()
 
                 if __stack_vtask.IsCompleted then
-                    printfn "Returning completed task (in while)"
+                    if verbose then
+                        printfn "Returning completed task (in while)"
+
                     __stack_condition_fin <- true
                     condition_res <- __stack_vtask.Result
                 else
-                    printfn "Awaiting non-completed task (in while)"
+                    if verbose then
+                        printfn "Awaiting non-completed task (in while)"
+
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
                     // This will yield with __stack_fin = false
