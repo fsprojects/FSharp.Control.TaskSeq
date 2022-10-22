@@ -336,6 +336,12 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             if verbose then
                 printfn "at MoveNextAsyncResult: case succeeded..."
             let result = data.promiseOfValueOrEnd.GetResult(version)
+
+            if not result then
+                // if beyond the end of the stream, ensure we unset
+                // the Current value
+                data.current <- ValueNone
+
             ValueTask<bool>(result)
 
         | ValueTaskSourceStatus.Faulted
