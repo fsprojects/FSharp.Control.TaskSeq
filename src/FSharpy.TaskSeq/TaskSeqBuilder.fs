@@ -239,16 +239,18 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
                 let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 data.taken <- true
+                clone.Machine.Data <- TaskSeqStateMachineData()
                 clone.Machine.Data.cancellationToken <- ct
                 clone.Machine.Data.taken <- true
                 clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
-                // calling reset causes NRE in IValueTaskSource.GetResult above
-                clone.Machine.Data.promiseOfValueOrEnd.Reset()
-                clone.Machine.Data.boxed <- clone
-                clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
-                //clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
-                clone.Machine.Data.awaiter <- null
-                clone.Machine.Data.current <- ValueNone
+                //// calling reset causes NRE in IValueTaskSource.GetResult above
+                //clone.Machine.Data.promiseOfValueOrEnd.Reset()
+                //clone.Machine.Data.boxed <- clone
+                ////clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
+                //////clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
+                //clone.Machine.Data.awaiter <- null
+                //clone.Machine.Data.current <- ValueNone
+                //clone.Machine.Data.completed <- false
 
                 if verbose then
                     printfn
