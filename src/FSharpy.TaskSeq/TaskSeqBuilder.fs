@@ -391,10 +391,12 @@ type TaskSeqBuilder() =
                                 printfn $"at Run.MoveNext, done"
                             sm.Data.promiseOfValueOrEnd.SetResult(false)
                             sm.Data.builder.Complete()
+
                         elif sm.Data.current.IsSome then
                             if verbose then
                                 printfn $"at Run.MoveNext, yield"
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
+
                         else
                             // Goto request
                             match sm.Data.tailcallTarget with
@@ -403,6 +405,7 @@ type TaskSeqBuilder() =
                                     printfn $"at Run.MoveNext, hijack"
                                 let mutable tg = tg
                                 moveNextRef &tg
+
                             | None ->
                                 if verbose then
                                     printfn $"at Run.MoveNext, await"
