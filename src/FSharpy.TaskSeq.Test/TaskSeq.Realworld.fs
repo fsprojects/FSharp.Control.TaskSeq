@@ -22,8 +22,14 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
 
     interface IAsyncEnumerable<byte[]> with
         member reader.GetAsyncEnumerator(ct) =
-            output.WriteLine $"Cloning!! Current: {current}, lastPos: {lastPos}"
-            reader.MemberwiseClone() :?> IAsyncEnumerator<_>
+            { new IAsyncEnumerator<_> with
+                member this.Current = (reader :> IAsyncEnumerator<_>).Current
+                member this.MoveNextAsync() = (reader :> IAsyncEnumerator<_>).MoveNextAsync()
+              interface IAsyncDisposable with
+                  member this.DisposeAsync() = ValueTask()
+            }
+    //output.WriteLine $"Cloning!! Current: {current}, lastPos: {lastPos}"
+    //reader.MemberwiseClone() :?> IAsyncEnumerator<_>
 
     interface IAsyncEnumerator<byte[]> with
         member _.Current =
@@ -39,6 +45,8 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
                 let! bytesRead = buffered.ReadAsync(mem, 0, mem.Length) // offset refers to offset in target buffer, not source
                 lastPos <- buffered.Position
 
+                let x: seq<Guid> = seq { 1 } |> Seq.cast
+
                 if bytesRead > 0 then
                     current <- ValueSome mem
                     return true
@@ -48,7 +56,6 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
             }
             |> Task.toValueTask
 
-    interface IAsyncDisposable with
         member _.DisposeAsync() =
             try
                 // this disposes of the mem stream
@@ -57,7 +64,43 @@ type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
                 // if the previous block raises, we should still try to get rid of the underlying stream
                 stream.DisposeAsync().AsTask().Wait()
 
+
 type ``Real world tests``(output: ITestOutputHelper) =
+    [<Fact>]
+    let ``Reading a 10MB buffered IAsync through TaskSeq.toArray non-async should succeed`` () = task {
+        use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
+        // unreadable error with 'use'
+        //use bla = seq { 1}
+        let expected = Array.init 256 byte |> Array.replicate 8
+        let results = reader |> TaskSeq.toArray
+
+        (results, expected)
+        ||> Array.iter2 (fun a b -> should equal a b)
+    }
+
+    [<Fact>]
+    let ``Reading a user-code IAsync multiple times with TaskSeq.toArrayAsync should succeed`` () = task {
+        use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
+        let expected = Array.init 256 byte |> Array.replicate 8
+        // read four times
+        let! results1 = reader |> TaskSeq.toArrayAsync
+        let! results2 = reader |> TaskSeq.toArrayAsync
+        let! results3 = reader |> TaskSeq.toArrayAsync
+        let! results4 = reader |> TaskSeq.toArrayAsync
+
+        (results1, expected)
+        ||> Array.iter2 (fun a b -> should equal a b)
+
+        (results2, expected)
+        ||> Array.iter2 (fun a b -> should equal a b)
+
+        (results3, expected)
+        ||> Array.iter2 (fun a b -> should equal a b)
+
+        (results4, expected)
+        ||> Array.iter2 (fun a b -> should equal a b)
+    }
+
     [<Fact>]
     let ``Reading a 10MB buffered IAsync stream from start to finish`` () = task {
         let mutable count = 0
@@ -76,6 +119,8 @@ type ``Real world tests``(output: ITestOutputHelper) =
 
         // the following is extremely slow, which is why we just use F#'s comparison instead
         // Using this takes 67s, compared to 0.25s using normal F# comparison.
+        // reader |> TaskSeq.toArray |> should equal expected // VERY SLOW!!
+
         do! reader |> TaskSeq.iter (should equal expected)
         do! reader |> TaskSeq.iter ((=) expected >> (should be True))
         let! len = reader |> TaskSeq.mapi (fun i _ -> i + 1) |> TaskSeq.last
