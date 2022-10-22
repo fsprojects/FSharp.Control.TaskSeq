@@ -41,6 +41,17 @@ let moveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IAsyncEnu
     enumerator.Current |> should equal expectedValue
 }
 
+/// Call MoveNext() and check if Current has the expected value. Uses untyped 'should equal'
+let seqMoveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IEnumerator<_>) =
+    let (hasNext: bool) = enumerator.MoveNext()
+
+    if successMoveNext then
+        hasNext |> should be True
+    else
+        hasNext |> should be False
+
+    enumerator.Current |> should equal expectedValue
+
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     let tskSeq = taskSeq { do ignore () }
@@ -211,7 +222,32 @@ let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have 
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have equal behavior -- in lockstep`` () = task {
+let ``CE seq with two items, cal GetEnumerator twice`` () = task {
+    // this test is for behavioral comparisoni between the same Async test above with TaskSeq
+    let sq = seq {
+        yield 1
+        yield 2
+    }
+
+    let enum1 = sq.GetEnumerator()
+    let enum2 = sq.GetEnumerator()
+
+    // enum1
+    do seqMoveNextAndCheckCurrent true 1 enum1 // first item
+    do seqMoveNextAndCheckCurrent true 2 enum1 // second item
+    do seqMoveNextAndCheckCurrent false 0 enum1 // third item: false
+    do seqMoveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+
+    // enum2
+    do seqMoveNextAndCheckCurrent true 1 enum2 // first item
+    do seqMoveNextAndCheckCurrent true 2 enum2 // second item
+    do seqMoveNextAndCheckCurrent false 0 enum2 // third item: false
+    do seqMoveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+}
+
+
+[<Fact>]
+let ``CE taskSeq with two items, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -270,7 +306,7 @@ let ``CE taskSeq with two items, call mapAsync multiple times over its own resul
 
 [<Fact>]
 let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
-    let tq = createDummyTaskSeq 10
+    let tq = taskSeq { yield! [ 1..10 ] }
     let (results1: _[]) = tq |> TaskSeq.toArray
     let (results2: _[]) = tq |> TaskSeq.toArray
     let (results3: _[]) = tq |> TaskSeq.toArray
