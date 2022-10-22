@@ -103,12 +103,10 @@ module TaskSeq =
     val collectSeq: binder: ('T -> #seq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
-    val collectAsync:
-        binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
+    val collectAsync: binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
 
     /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
-    val collectSeqAsync:
-        binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
+    val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
 
     /// <summary>
     /// Returns the first element of the <see cref="taskSeq" />, or <see cref="None" /> if the sequence is empty.
@@ -275,5 +273,4 @@ module TaskSeq =
     /// threading an accumulator argument of type <paramref name="'State" /> through the computation.
     /// If the accumulator function <paramref name="folder" /> does not need to be asynchronous, consider using <see cref="TaskSeq.fold" />.
     /// </summary>
-    val foldAsync:
-        folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
+    val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
