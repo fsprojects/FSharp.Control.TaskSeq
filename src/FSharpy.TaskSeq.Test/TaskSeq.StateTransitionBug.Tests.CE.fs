@@ -91,7 +91,7 @@ let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE  empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
+let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
     let! isNext = enumerator.MoveNextAsync()
@@ -102,7 +102,7 @@ let ``CE  empty taskSeq, call Current after MoveNextAsync returns false`` varian
     current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
 }
 
-[<Theory>]
+[<Fact>]
 let ``CE taskSeq with two items, call Current before MoveNextAsync`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
@@ -116,8 +116,8 @@ let ``CE taskSeq with two items, call Current before MoveNextAsync`` () = task {
     current |> should be Null // we return Unchecked.defaultof
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`` variant = task {
+[<Fact>]
+let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
         yield "bar"
