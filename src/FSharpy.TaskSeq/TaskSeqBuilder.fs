@@ -112,8 +112,8 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     [<DefaultValue(false)>]
     val mutable Machine: 'Machine
 
-    member internal ts.hijack() =
-        let res = ts.Machine.Data.tailcallTarget
+    member internal this.hijack() =
+        let res = this.Machine.Data.tailcallTarget
 
         match res with
         | Some tg ->
@@ -121,57 +121,57 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             | None -> res
             | (Some tg2 as res2) ->
                 // Cut out chains of tailcalls
-                ts.Machine.Data.tailcallTarget <- Some tg2
+                this.Machine.Data.tailcallTarget <- Some tg2
                 res2
         | None -> res
 
     // Note: Not entirely clear if this is needed, everything still compiles without it
     interface IValueTaskSource with
-        member ts.GetResult(token: int16) =
-            match ts.hijack () with
+        member this.GetResult(token: int16) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource).GetResult(token)
             | None ->
-                ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+                this.Machine.Data.promiseOfValueOrEnd.GetResult(token)
                 |> ignore
 
-        member ts.GetStatus(token: int16) =
-            match ts.hijack () with
+        member this.GetStatus(token: int16) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
+            | None -> this.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
-        member ts.OnCompleted(continuation, state, token, flags) =
-            match ts.hijack () with
+        member this.OnCompleted(continuation, state, token, flags) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource).OnCompleted(continuation, state, token, flags)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            | None -> this.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     // Needed for MoveNextAsync to return a ValueTask
     interface IValueTaskSource<bool> with
-        member ts.GetStatus(token: int16) =
-            match ts.hijack () with
+        member this.GetStatus(token: int16) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
+            | None -> this.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
-        member ts.GetResult(token: int16) =
-            match ts.hijack () with
+        member this.GetResult(token: int16) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).GetResult(token)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+            | None -> this.Machine.Data.promiseOfValueOrEnd.GetResult(token)
 
-        member ts.OnCompleted(continuation, state, token, flags) =
-            match ts.hijack () with
+        member this.OnCompleted(continuation, state, token, flags) =
+            match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).OnCompleted(continuation, state, token, flags)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            | None -> this.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     interface IAsyncStateMachine with
-        member ts.MoveNext() =
-            match ts.hijack () with
+        member this.MoveNext() =
+            match this.hijack () with
             | Some tg -> (tg :> IAsyncStateMachine).MoveNext()
-            | None -> MoveNext(&ts.Machine)
+            | None -> MoveNext(&this.Machine)
 
         member _.SetStateMachine(_state) = () // not needed for reference type
 
     interface IAsyncEnumerable<'T> with
-        member ts.GetAsyncEnumerator(ct) =
-            let data = ts.Machine.Data
+        member this.GetAsyncEnumerator(ct) =
+            let data = this.Machine.Data
 
             if
                 (not data.taken
@@ -180,31 +180,31 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 data.taken <- true
                 data.cancellationToken <- ct
                 data.builder <- AsyncIteratorMethodBuilder.Create()
-                (ts :> IAsyncEnumerator<_>)
+                (this :> IAsyncEnumerator<_>)
             else
                 if verbose then
                     printfn "GetAsyncEnumerator, cloning..."
 
-                let clone = ts.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
+                let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 data.taken <- true
                 clone.Machine.Data.cancellationToken <- ct
                 (clone :> System.Collections.Generic.IAsyncEnumerator<'T>)
 
     interface IAsyncDisposable with
-        member ts.DisposeAsync() =
-            match ts.hijack () with
+        member this.DisposeAsync() =
+            match this.hijack () with
             | Some tg -> (tg :> IAsyncDisposable).DisposeAsync()
             | None ->
                 if verbose then
                     printfn "DisposeAsync..."
 
                 task {
-                    match ts.Machine.Data.disposalStack with
+                    match this.Machine.Data.disposalStack with
                     | null -> ()
                     | _ ->
                         let mutable exn = None
 
-                        for d in Seq.rev ts.Machine.Data.disposalStack do
+                        for d in Seq.rev this.Machine.Data.disposalStack do
                             try
                                 do! d ()
                             with e ->
@@ -218,36 +218,38 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 |> ValueTask
 
     interface System.Collections.Generic.IAsyncEnumerator<'T> with
-        member ts.Current =
-            match ts.hijack () with
+        member this.Current =
+            match this.hijack () with
             | Some tg -> (tg :> IAsyncEnumerator<'T>).Current
             | None ->
-                match ts.Machine.Data.current with
+                match this.Machine.Data.current with
                 | ValueSome x -> x
                 | ValueNone -> failwith "no current value"
 
-        member ts.MoveNextAsync() =
-            match ts.hijack () with
+        member this.MoveNextAsync() =
+            match this.hijack () with
             | Some tg -> (tg :> IAsyncEnumerator<'T>).MoveNextAsync()
             | None ->
                 if verbose then
                     printfn "MoveNextAsync..."
 
-                if ts.Machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
+                if this.Machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
                     ValueTask<bool>()
                 else
-                    let data = ts.Machine.Data
+                    let data = this.Machine.Data
                     data.promiseOfValueOrEnd.Reset()
-                    let mutable ts = ts
+                    let mutable ts = this
+
                     data.builder.MoveNext(&ts)
 
                     // If the move did a hijack then get the result from the final one
-                    match ts.hijack () with
+                    match this.hijack () with
                     | Some tg -> tg.MoveNextAsyncResult()
-                    | None -> ts.MoveNextAsyncResult()
+                    | None -> this.MoveNextAsyncResult()
 
-    override ts.MoveNextAsyncResult() =
-        let data = ts.Machine.Data
+
+    override this.MoveNextAsyncResult() =
+        let data = this.Machine.Data
         let version = data.promiseOfValueOrEnd.Version
         let status = data.promiseOfValueOrEnd.GetStatus(version)
 
@@ -258,7 +260,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             if verbose then
                 printfn "MoveNextAsync pending/faulted/cancelled..."
 
-            ValueTask<bool>(ts, version) // uses IValueTaskSource<'T>
+            ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
 
     override cr.TailcallTarget = cr.hijack ()
 
