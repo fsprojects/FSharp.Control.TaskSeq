@@ -271,6 +271,28 @@ let ``CE taskSeq with two items, cal GetAsyncEnumerator twice -- in lockstep`` (
 }
 
 [<Fact>]
+let ``CE taskSeq with two items, call GetAsyncEnumerator twice -- after full iteration`` () = task {
+    let tskSeq = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    // enum1
+    let enum1 = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheckCurrent true 1 enum1 // first item
+    do! moveNextAndCheckCurrent true 2 enum1 // second item
+    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+
+    // enum2
+    let enum2 = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheckCurrent true 1 enum2 // first item
+    do! moveNextAndCheckCurrent true 2 enum2 // second item
+    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
+    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+}
+
+[<Fact>]
 let ``CE taskSeq with two items, call map multiple times over its own result`` () = task {
     let tskSeq = taskSeq {
         yield 1
