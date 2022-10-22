@@ -81,6 +81,16 @@ let ``CE  empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant 
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+let ``CE  empty taskSeq, call Current before MoveNextAsync`` variant = task {
+    let tskSeq = getEmptyVariant variant
+    let enumerator = tskSeq.GetAsyncEnumerator()
+
+    // call Current before MoveNextAsync
+    let current = enumerator.Current
+    current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
+}
+
+[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE taskSeq with two items, MoveNext once too far`` variant = task {
     let tskSeq = taskSeq {
         yield 1
