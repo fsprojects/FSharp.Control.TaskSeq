@@ -29,6 +29,7 @@
     <Compile Include="TaskSeq.OfXXX.Tests.fs" />
     <Compile Include="TaskSeq.Tests.Other.fs" />
     <Compile Include="TaskSeq.Tests.CE.fs" />
+    <Compile Include="TaskSeq.StateTransitionBug.Tests.CE.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="TaskSeq.Realworld.fs" />
     <Compile Include="Program.fs" />
