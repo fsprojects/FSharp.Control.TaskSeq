@@ -241,19 +241,19 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 data.taken <- true
                 clone.Machine.Data.cancellationToken <- ct
                 clone.Machine.Data.taken <- true
-                //clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
+                clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
                 // calling reset causes NRE in IValueTaskSource.GetResult above
-                //clone.Machine.Data.promiseOfValueOrEnd.Reset()
-                //clone.Machine.Data.boxed <- clone
-                //clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
+                clone.Machine.Data.promiseOfValueOrEnd.Reset()
+                clone.Machine.Data.boxed <- clone
+                clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
                 //clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
-                //clone.Machine.Data.awaiter <- null
-                //clone.Machine.Data.current <- ValueNone
+                clone.Machine.Data.awaiter <- null
+                clone.Machine.Data.current <- ValueNone
 
                 if verbose then
                     printfn
                         "Cloning, resumption point original: %i, clone: %i"
-                        ts.Machine.ResumptionPoint
+                        this.Machine.ResumptionPoint
                         clone.Machine.ResumptionPoint
 
                 (clone :> System.Collections.Generic.IAsyncEnumerator<'T>)
@@ -311,9 +311,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                         printfn "at MoveNextAsync: Resumption point = -1"
                     ValueTask<bool>()
 
-                elif ts.Machine.Data.completed then
+                elif this.Machine.Data.completed then
                     // return False when beyond the last item
-                    ts.Machine.Data.promiseOfValueOrEnd.Reset()
+                    this.Machine.Data.promiseOfValueOrEnd.Reset()
                     ValueTask<bool>()
 
                 else
