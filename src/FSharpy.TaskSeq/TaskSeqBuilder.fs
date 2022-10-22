@@ -73,6 +73,9 @@ type TaskSeqStateMachineData<'T>() =
     val mutable taken: bool
 
     [<DefaultValue(false)>]
+    val mutable completed: bool
+
+    [<DefaultValue(false)>]
     val mutable current: ValueOption<'T>
 
     [<DefaultValue(false)>]
@@ -307,6 +310,12 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     if verbose then
                         printfn "at MoveNextAsync: Resumption point = -1"
                     ValueTask<bool>()
+
+                elif ts.Machine.Data.completed then
+                    // return False when beyond the last item
+                    ts.Machine.Data.promiseOfValueOrEnd.Reset()
+                    ValueTask<bool>()
+
                 else
                     if verbose then
                         printfn "at MoveNextAsync: normal resumption scenario"
@@ -320,6 +329,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     if verbose then
                         printfn "at MoveNextAsync: done calling builder.MoveNext()"
 
+                    data.builder.MoveNext(&ts)
                     // If the move did a hijack then get the result from the final one
                     match this.hijack () with
                     | Some tg -> tg.MoveNextAsyncResult()
@@ -391,6 +401,7 @@ type TaskSeqBuilder() =
                                 printfn $"at Run.MoveNext, done"
                             sm.Data.promiseOfValueOrEnd.SetResult(false)
                             sm.Data.builder.Complete()
+                            sm.Data.completed <- true
 
                         elif sm.Data.current.IsSome then
                             if verbose then
