@@ -1,13 +1,15 @@
 module FSharpy.Tests.``State transition bug and InvalidState``
 
+open System
+open System.Threading.Tasks
+open System.Diagnostics
+open System.Collections.Generic
+
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
 open FSharpy
-open System.Threading.Tasks
-open System.Diagnostics
-open System.Collections.Generic
 
 let getEmptyVariant variant : IAsyncEnumerable<int> =
     match variant with
@@ -17,6 +19,15 @@ let getEmptyVariant variant : IAsyncEnumerable<int> =
     | "yield! (taskseq)" -> taskSeq { yield! taskSeq { do ignore () } }
     | _ -> failwith "Uncovered variant of test"
 
+/// Call MoveNextAsync() and check if return value is the expected value
+let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
+    let! (hasNext: bool) = enumerator.MoveNextAsync()
+
+    if expected then
+        hasNext |> should be True
+    else
+        hasNext |> should be False
+}
 
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
@@ -25,8 +36,7 @@ let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     Assert.IsAssignableFrom<IAsyncEnumerable<obj>>(tskSeq)
     |> ignore
 
-    let! noNext = tskSeq.GetAsyncEnumerator().MoveNextAsync()
-    noNext |> should be False
+    do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
@@ -36,16 +46,15 @@ let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
     Assert.IsAssignableFrom<IAsyncEnumerable<int>>(tskSeq)
     |> ignore
 
-    let! noNext = tskSeq.GetAsyncEnumerator().MoveNextAsync()
-    noNext |> should be False
+    do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     let tskSeq = getEmptyVariant variant
-    use enumerator = tskSeq.GetAsyncEnumerator()
-    use enumerator = tskSeq.GetAsyncEnumerator()
-    use enumerator = tskSeq.GetAsyncEnumerator()
+    use _e = tskSeq.GetAsyncEnumerator()
+    use _e = tskSeq.GetAsyncEnumerator()
+    use _e = tskSeq.GetAsyncEnumerator()
     ()
 }
 
@@ -54,18 +63,19 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
     let tskSeq = getEmptyVariant variant
     use enumerator = tskSeq.GetAsyncEnumerator()
     use enumerator = tskSeq.GetAsyncEnumerator()
-    let! isNext = enumerator.MoveNextAsync()
-    ()
+    do! moveNextAndCheck false enumerator
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
     let tskSeq = getEmptyVariant variant
-    use enumerator = tskSeq.GetAsyncEnumerator()
-    let! isNext = enumerator.MoveNextAsync()
-    use enumerator = tskSeq.GetAsyncEnumerator()
-    let! isNext = enumerator.MoveNextAsync()
-    ()
+    use enumerator1 = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheck false enumerator1
+
+    // getting the enumerator again
+    use enumerator2 = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheck false enumerator1 // original should still work without raising
+    do! moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
@@ -73,11 +83,9 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant =
     let tskSeq = getEmptyVariant variant
 
     // let's get the enumerator a few times
-    for i in 0..10 do
-        printfn "Calling GetAsyncEnumerator for the #%i time" i
+    for i in 0..100 do
         use enumerator = tskSeq.GetAsyncEnumerator()
-        let! isNext = enumerator.MoveNextAsync()
-        isNext |> should be False
+        do! moveNextAndCheck false enumerator // these are all empty
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
@@ -85,7 +93,7 @@ let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
 
-    // call Current before MoveNextAsync
+    // call Current *before* MoveNextAsync
     let current = enumerator.Current
     current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
 }
@@ -94,12 +102,10 @@ let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
 let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
-    let! isNext = enumerator.MoveNextAsync()
-    isNext |> should be False // empty sequence
+    do! moveNextAndCheck false enumerator // false for empty seq
 
     // call Current *after* MoveNextAsync returns false
-    let current = enumerator.Current
-    current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
+    enumerator.Current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
 }
 
 [<Fact>]
@@ -123,15 +129,13 @@ let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`
         yield "bar"
     }
 
-    let enumerator = tskSeq.GetAsyncEnumerator()
-    let! _ = enumerator.MoveNextAsync()
-    let! _ = enumerator.MoveNextAsync()
-    let! isNext = enumerator.MoveNextAsync()
-    isNext |> should be False // moved twice, third time returns False
+    let enum = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheck true enum // first item
+    do! moveNextAndCheck true enum // second item
+    do! moveNextAndCheck false enum // third item: false
 
     // call Current *after* MoveNextAsync returns false
-    let current = enumerator.Current
-    current |> should be Null // we return Unchecked.defaultof
+    enum.Current |> should be Null // we return Unchecked.defaultof
 }
 
 [<Fact>]
@@ -142,28 +146,33 @@ let ``CE taskSeq with two items, MoveNext once too far`` () = task {
     }
 
     let enum = tskSeq.GetAsyncEnumerator()
-    let! isNext = enum.MoveNextAsync() // true
-    let! isNext = enum.MoveNextAsync() // true
-    let! isNext = enum.MoveNextAsync() // false
-    let! isNext = enum.MoveNextAsync() // error here, see
-    ()
+    do! moveNextAndCheck true enum // first item
+    do! moveNextAndCheck true enum // second item
+    do! moveNextAndCheck false enum // third item: false
+    do! moveNextAndCheck false enum // this used to be an error, see issue #39 and PR #42
 }
 
 [<Fact>]
 let ``CE taskSeq with two items, MoveNext too far`` () = task {
     let tskSeq = taskSeq {
-        yield 1
-        yield 2
+        yield Guid.NewGuid()
+        yield Guid.NewGuid()
     }
 
     // let's call MoveNext multiple times on an empty sequence
     let enum = tskSeq.GetAsyncEnumerator()
 
-    for i in 0..10 do
-        printfn "Calling MoveNext for the #%i time" i
-        let! isNext = enum.MoveNextAsync()
-        //isNext |> should be False
-        ()
+    // first get past the post
+    do! moveNextAndCheck true enum // first item
+    do! moveNextAndCheck true enum // second item
+    do! moveNextAndCheck false enum // third item: false
+
+    // then call it bunch of times to ensure we don't get an InvalidOperationException, see issue #39 and PR #42
+    for i in 0..100 do
+        do! moveNextAndCheck false enum
+
+    // after whatever amount of time MoveNextAsync, we can still safely call Current
+    enum.Current |> should equal Guid.Empty // we return Unchecked.defaultof, which is Guid.Empty for guids
 }
 
 [<Fact>]
