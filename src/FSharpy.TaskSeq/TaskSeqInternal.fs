@@ -47,13 +47,13 @@ module internal TaskSeqInternal =
         |> raise
 
     let isEmpty (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         return not step
     }
 
     let tryExactlyOne (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
 
         match! e.MoveNextAsync() with
         | true ->
@@ -70,7 +70,7 @@ module internal TaskSeqInternal =
     }
 
     let iter action (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
         go <- step
@@ -111,7 +111,7 @@ module internal TaskSeqInternal =
     }
 
     let fold folder initial (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable result = initial
         let! step = e.MoveNextAsync()
@@ -182,8 +182,8 @@ module internal TaskSeqInternal =
                     invalidArg "taskSequence2" "The task sequences have different lengths."
 
 
-        let e1 = source1.GetAsyncEnumerator(CancellationToken())
-        let e2 = source2.GetAsyncEnumerator(CancellationToken())
+        use e1 = source1.GetAsyncEnumerator(CancellationToken())
+        use e2 = source2.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step1 = e1.MoveNextAsync()
         let! step2 = e2.MoveNextAsync()
@@ -221,7 +221,7 @@ module internal TaskSeqInternal =
     }
 
     let tryLast (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable last = ValueNone
         let! step = e.MoveNextAsync()
@@ -238,7 +238,7 @@ module internal TaskSeqInternal =
     }
 
     let tryHead (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
         go <- step
@@ -252,7 +252,7 @@ module internal TaskSeqInternal =
             // to prevent side effects hitting unnecessarily
             return None
         else
-            let e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator(CancellationToken())
             let mutable go = true
             let mutable idx = 0
             let mutable foundItem = None
@@ -271,7 +271,7 @@ module internal TaskSeqInternal =
     }
 
     let tryPick chooser (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
         let mutable foundItem = None
@@ -303,7 +303,7 @@ module internal TaskSeqInternal =
     }
 
     let tryFind chooser (source: taskSeq<_>) = task {
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
         let mutable foundItem = None
