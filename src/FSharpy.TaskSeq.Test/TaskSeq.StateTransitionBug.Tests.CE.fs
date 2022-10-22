@@ -69,7 +69,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE  empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant = task {
+let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant = task {
     let tskSeq = getEmptyVariant variant
 
     // let's get the enumerator a few times
@@ -81,7 +81,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant 
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE  empty taskSeq, call Current before MoveNextAsync`` variant = task {
+let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
 
@@ -91,7 +91,51 @@ let ``CE  empty taskSeq, call Current before MoveNextAsync`` variant = task {
 }
 
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE taskSeq with two items, MoveNext once too far`` variant = task {
+let ``CE  empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
+    let tskSeq = getEmptyVariant variant
+    let enumerator = tskSeq.GetAsyncEnumerator()
+    let! isNext = enumerator.MoveNextAsync()
+    isNext |> should be False // empty sequence
+
+    // call Current *after* MoveNextAsync returns false
+    let current = enumerator.Current
+    current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
+}
+
+[<Theory>]
+let ``CE taskSeq with two items, call Current before MoveNextAsync`` () = task {
+    let tskSeq = taskSeq {
+        yield "foo"
+        yield "bar"
+    }
+
+    let enumerator = tskSeq.GetAsyncEnumerator()
+
+    // call Current before MoveNextAsync
+    let current = enumerator.Current
+    current |> should be Null // we return Unchecked.defaultof
+}
+
+[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`` variant = task {
+    let tskSeq = taskSeq {
+        yield "foo"
+        yield "bar"
+    }
+
+    let enumerator = tskSeq.GetAsyncEnumerator()
+    let! _ = enumerator.MoveNextAsync()
+    let! _ = enumerator.MoveNextAsync()
+    let! isNext = enumerator.MoveNextAsync()
+    isNext |> should be False // moved twice, third time returns False
+
+    // call Current *after* MoveNextAsync returns false
+    let current = enumerator.Current
+    current |> should be Null // we return Unchecked.defaultof
+}
+
+[<Fact>]
+let ``CE taskSeq with two items, MoveNext once too far`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -105,8 +149,8 @@ let ``CE taskSeq with two items, MoveNext once too far`` variant = task {
     ()
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE taskSeq with two items, MoveNext too far`` variant = task {
+[<Fact>]
+let ``CE taskSeq with two items, MoveNext too far`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -122,8 +166,8 @@ let ``CE taskSeq with two items, MoveNext too far`` variant = task {
         ()
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE taskSeq with two items, multiple TaskSeq.map`` variant = task {
+[<Fact>]
+let ``CE taskSeq with two items, multiple TaskSeq.map`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -137,8 +181,8 @@ let ``CE taskSeq with two items, multiple TaskSeq.map`` variant = task {
     ()
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
-let ``CE taskSeq with two items, multiple TaskSeq.mapAsync`` variant = task {
+[<Fact>]
+let ``CE taskSeq with two items, multiple TaskSeq.mapAsync`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
