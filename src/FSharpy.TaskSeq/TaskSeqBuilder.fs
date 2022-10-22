@@ -289,7 +289,12 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             | None ->
                 match this.Machine.Data.current with
                 | ValueSome x -> x
-                | ValueNone -> failwith "no current value"
+                | ValueNone ->
+                    // Returning a default value is similar to how F#'s seq<'T> behaves
+                    // According to the docs, behavior is Unspecified in case of a call
+                    // to Current, which means that this is certainly fine, and arguably
+                    // better than raising an exception.
+                    Unchecked.defaultof<'T>
 
         member this.MoveNextAsync() =
             match this.hijack () with
