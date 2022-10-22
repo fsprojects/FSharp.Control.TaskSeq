@@ -153,8 +153,25 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         member ts.GetResult(token: int16) =
             match ts.hijack () with
-            | Some tg -> (tg :> IValueTaskSource<bool>).GetResult(token)
-            | None -> ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+            | Some tg ->
+                if verbose then
+                    printfn "Getting result for token on 'Some' branch: %i" token
+
+                (tg :> IValueTaskSource<bool>).GetResult(token)
+            | None ->
+                try
+                    if verbose then
+                        printfn "Getting result for token on 'None' branch: %i" token
+
+                    ts.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+                with e ->
+                    // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
+                    // We're just logging here because the following error would also be caught right here:
+                    // "An attempt was made to transition a task to a final state when it had already completed."
+                    if verbose then
+                        printfn "Error '%s' for token: %i" e.Message token
+
+                    reraise ()
 
         member ts.OnCompleted(continuation, state, token, flags) =
             match ts.hijack () with
@@ -165,7 +182,12 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         member ts.MoveNext() =
             match ts.hijack () with
             | Some tg -> (tg :> IAsyncStateMachine).MoveNext()
-            | None -> MoveNext(&ts.Machine)
+            | None ->
+                printfn "Before: resumption point: %A" ts.Machine.ResumptionPoint
+                printfn "Before: machine data: \n%A" ts.Machine.Data
+                MoveNext(&ts.Machine)
+                printfn "After: resumption point: %A" ts.Machine.ResumptionPoint
+                printfn "After: machine data: \n%A" ts.Machine.Data
 
         member _.SetStateMachine(_state) = () // not needed for reference type
 
