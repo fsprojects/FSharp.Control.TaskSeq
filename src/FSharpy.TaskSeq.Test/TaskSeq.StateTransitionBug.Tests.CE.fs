@@ -29,6 +29,18 @@ let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
         hasNext |> should be False
 }
 
+/// Call MoveNextAsync() and check if Current has the expected value. Uses untyped 'should equal'
+let moveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IAsyncEnumerator<_>) = task {
+    let! (hasNext: bool) = enumerator.MoveNextAsync()
+
+    if successMoveNext then
+        hasNext |> should be True
+    else
+        hasNext |> should be False
+
+    enumerator.Current |> should equal expectedValue
+}
+
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     let tskSeq = taskSeq { do ignore () }
@@ -176,33 +188,84 @@ let ``CE taskSeq with two items, MoveNext too far`` () = task {
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, multiple TaskSeq.map`` () = task {
+let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
     }
 
-    // let's call MoveNext multiple times on an empty sequence
+    let enum1 = tskSeq.GetAsyncEnumerator()
+    let enum2 = tskSeq.GetAsyncEnumerator()
+
+    // enum1
+    do! moveNextAndCheckCurrent true 1 enum1 // first item
+    do! moveNextAndCheckCurrent true 2 enum1 // second item
+    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+
+    // enum2
+    do! moveNextAndCheckCurrent true 1 enum2 // first item
+    do! moveNextAndCheckCurrent true 2 enum2 // second item
+    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
+    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+}
+
+[<Fact>]
+let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have equal behavior -- in lockstep`` () = task {
+    let tskSeq = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    let enum1 = tskSeq.GetAsyncEnumerator()
+    let enum2 = tskSeq.GetAsyncEnumerator()
+
+    // enum1 & enum2 in lock step
+    do! moveNextAndCheckCurrent true 1 enum1 // first item
+    do! moveNextAndCheckCurrent true 1 enum2 // first item
+
+    do! moveNextAndCheckCurrent true 2 enum1 // second item
+    do! moveNextAndCheckCurrent true 2 enum2 // second item
+
+    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
+
+    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+}
+
+[<Fact>]
+let ``CE taskSeq with two items, call map multiple times over its own result`` () = task {
+    let tskSeq = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    // let's map once, and then again on the new sequence
     let ts1 = tskSeq |> TaskSeq.map (fun i -> i + 1)
     let result1 = TaskSeq.toArray ts1
     let ts2 = ts1 |> TaskSeq.map (fun i -> i + 1)
     let result2 = TaskSeq.toArray ts2
-    ()
+
+    tskSeq |> TaskSeq.toArray |> should equal [| 1; 2 |]
+    result1 |> should equal [| 2; 3 |]
+    result2 |> should equal [| 3; 4 |]
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, multiple TaskSeq.mapAsync`` () = task {
+let ``CE taskSeq with two items, call mapAsync multiple times over its own result`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
     }
 
-    // let's call MoveNext multiple times on an empty sequence
+    // let's map once, and then again on the new sequence
     let ts1 = tskSeq |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
     let result1 = TaskSeq.toArray ts1
     let ts2 = ts1 |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
     let result2 = TaskSeq.toArray ts2
-    ()
+    result1 |> should equal [| 2; 3 |]
+    result2 |> should equal [| 3; 4 |]
 }
 
 [<Fact>]
