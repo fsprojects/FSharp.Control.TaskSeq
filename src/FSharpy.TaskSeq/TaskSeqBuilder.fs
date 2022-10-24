@@ -239,10 +239,27 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
                 let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 data.taken <- true
+
+                // Explanation for resetting Machine use brute-force
+                //
+                // This appears to fix the problem that ResumptionPoint was not reset. I'd prefer
+                // a less drastical method. It solves a scenario like the following:
+                // let ts = taskSeq { yield 1; yield 2 }
+                // let e1 = ts.GetAsyncEnumerator()
+                // let! hasNext = e.MoveNextAsync()
+                // let e2 = ts.GetAsyncEnumerator()
+                // let! hasNext = e.MoveNextAsync()  // without this hack, it would continue where e1 left off
+                // let a = e1.Current
+                // let b = e2.Current
+                // let isTrue = a = b  // true with this, false without it
+                clone.Machine <- Unchecked.defaultof<_>
+
+                // the following lines just re-initialize the key data fields State.
                 clone.Machine.Data <- TaskSeqStateMachineData()
                 clone.Machine.Data.cancellationToken <- ct
                 clone.Machine.Data.taken <- true
                 clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
+
                 //// calling reset causes NRE in IValueTaskSource.GetResult above
                 //clone.Machine.Data.promiseOfValueOrEnd.Reset()
                 //clone.Machine.Data.boxed <- clone
@@ -314,6 +331,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     ValueTask<bool>()
 
                 elif this.Machine.Data.completed then
+                    if verbose then
+                        printfn "at MoveNextAsync: completed = true"
+
                     // return False when beyond the last item
                     this.Machine.Data.promiseOfValueOrEnd.Reset()
                     ValueTask<bool>()
@@ -332,6 +352,10 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                         printfn "at MoveNextAsync: done calling builder.MoveNext()"
 
                     data.builder.MoveNext(&ts)
+
+                    if verbose then
+                        printfn "at MoveNextAsync: done calling builder.MoveNext()"
+
                     // If the move did a hijack then get the result from the final one
                     match this.hijack () with
                     | Some tg -> tg.MoveNextAsyncResult()
@@ -669,4 +693,5 @@ type TaskSeqBuilder() =
                 sm.Data.current <- ValueNone
                 // For tailcalls we return 'false' and re-run from the entry (trampoline)
                 false
+
             | _ -> b.YieldFrom(other).Invoke(&sm))
