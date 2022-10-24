@@ -179,6 +179,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     printfn
                         "Getting result for token on 'Some' branch, status: %A"
                         ((tg :> IValueTaskSource<bool>).GetStatus(token))
+
                 (tg :> IValueTaskSource<bool>).GetResult(token)
             | None ->
                 try
@@ -186,6 +187,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                         printfn
                             "Getting result for token on 'None' branch, status: %A"
                             (this.Machine.Data.promiseOfValueOrEnd.GetStatus(token))
+
                     this.Machine.Data.promiseOfValueOrEnd.GetResult(token)
                 with e ->
                     // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
@@ -195,6 +197,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                         printfn "Error '%s' for token: %i" e.Message token
 
                     reraise ()
+
         member this.OnCompleted(continuation, state, token, flags) =
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).OnCompleted(continuation, state, token, flags)
@@ -213,6 +216,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         member _.SetStateMachine(_state) =
             if verbose then
                 printfn "Setting state machine -- ignored"
+
             () // not needed for reference type
 
     interface IAsyncEnumerable<'T> with
@@ -226,8 +230,10 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 data.taken <- true
                 data.cancellationToken <- ct
                 data.builder <- AsyncIteratorMethodBuilder.Create()
+
                 if verbose then
                     printfn "No cloning, resumption point: %i" this.Machine.ResumptionPoint
+
                 (this :> IAsyncEnumerator<_>)
             else
                 if verbose then
@@ -328,6 +334,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 if this.Machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
                     if verbose then
                         printfn "at MoveNextAsync: Resumption point = -1"
+
                     ValueTask<bool>()
 
                 elif this.Machine.Data.completed then
@@ -341,15 +348,13 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 else
                     if verbose then
                         printfn "at MoveNextAsync: normal resumption scenario"
+
                     let data = this.Machine.Data
                     data.promiseOfValueOrEnd.Reset()
                     let mutable ts = this
 
                     if verbose then
                         printfn "at MoveNextAsync: start calling builder.MoveNext()"
-                    data.builder.MoveNext(&ts)
-                    if verbose then
-                        printfn "at MoveNextAsync: done calling builder.MoveNext()"
 
                     data.builder.MoveNext(&ts)
 
@@ -371,6 +376,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         | ValueTaskSourceStatus.Succeeded ->
             if verbose then
                 printfn "at MoveNextAsyncResult: case succeeded..."
+
             let result = data.promiseOfValueOrEnd.GetResult(version)
 
             if not result then
@@ -415,16 +421,20 @@ type TaskSeqBuilder() =
 
                     if verbose then
                         printfn "Resuming at resumption point %i" sm.ResumptionPoint
+
                     try
                         if verbose then
                             printfn "at Run.MoveNext start"
 
                         let __stack_code_fin = code.Invoke(&sm)
+
                         if verbose then
                             printfn $"at Run.MoveNext, __stack_code_fin={__stack_code_fin}"
+
                         if __stack_code_fin then
                             if verbose then
                                 printfn $"at Run.MoveNext, done"
+
                             sm.Data.promiseOfValueOrEnd.SetResult(false)
                             sm.Data.builder.Complete()
                             sm.Data.completed <- true
@@ -432,6 +442,7 @@ type TaskSeqBuilder() =
                         elif sm.Data.current.IsSome then
                             if verbose then
                                 printfn $"at Run.MoveNext, yield"
+
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
 
                         else
@@ -440,12 +451,14 @@ type TaskSeqBuilder() =
                             | Some tg ->
                                 if verbose then
                                     printfn $"at Run.MoveNext, hijack"
+
                                 let mutable tg = tg
                                 moveNextRef &tg
 
                             | None ->
                                 if verbose then
                                     printfn $"at Run.MoveNext, await"
+
                                 let boxed = sm.Data.boxed
 
                                 sm.Data.awaiter.UnsafeOnCompleted(
@@ -457,6 +470,7 @@ type TaskSeqBuilder() =
                     with exn ->
                         if verbose then
                             printfn "Setting exception of PromiseOfValueOrEnd to: %s" exn.Message
+
                         sm.Data.promiseOfValueOrEnd.SetException(exn)
                         sm.Data.builder.Complete()
                 //-- RESUMABLE CODE END
@@ -464,10 +478,12 @@ type TaskSeqBuilder() =
                 (SetStateMachineMethodImpl<_>(fun sm state ->
                     if verbose then
                         printfn "at SetStatemachingMethodImpl, ignored"
+
                     ()))
                 (AfterCode<_, _>(fun sm ->
                     if verbose then
                         printfn "at AfterCode<_, _>, setting the Machine field to the StateMachine"
+
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
                     ts.Machine <- sm
                     ts.Machine.Data <- TaskSeqStateMachineData()
@@ -506,11 +522,13 @@ type TaskSeqBuilder() =
                 if __stack_vtask.IsCompleted then
                     if verbose then
                         printfn "Returning completed task (in while)"
+
                     __stack_condition_fin <- true
                     condition_res <- __stack_vtask.Result
                 else
                     if verbose then
                         printfn "Awaiting non-completed task (in while)"
+
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
                     // This will yield with __stack_fin = false
