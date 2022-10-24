@@ -347,6 +347,64 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
 }
 
 [<Fact>]
+let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration with Task-Delay`` () = task {
+    let delayRandom () = task { do! Task.Delay(Random().Next(100, 500)) }
+
+    let tskSeq = taskSeq {
+        yield 1
+        do! delayRandom ()
+        yield 2
+        do! delayRandom ()
+        yield 3
+    }
+
+    // enum1
+    let enum1 = tskSeq.GetAsyncEnumerator()
+
+    // move #1
+    do! moveNextAndCheckCurrent true 1 enum1 // first item
+
+    // enum2
+    let enum2 = tskSeq.GetAsyncEnumerator()
+    enum1.Current |> should equal 1 // remains the same
+    enum2.Current |> should equal 0 // should be at default location
+
+    // move #2
+    do! moveNextAndCheckCurrent true 1 enum2
+    enum1.Current |> should equal 1
+    enum2.Current |> should equal 1
+
+    // move #2
+    do! moveNextAndCheckCurrent true 2 enum2
+    enum1.Current |> should equal 1
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent true 2 enum1
+    enum1.Current |> should equal 2
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent true 3 enum1
+    enum1.Current |> should equal 3
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent false 0 enum1
+    enum1.Current |> should equal 0
+    enum2.Current |> should equal 2
+
+    // move #2
+    do! moveNextAndCheckCurrent true 3 enum2
+    enum1.Current |> should equal 0
+    enum2.Current |> should equal 3
+
+    // move #2
+    do! moveNextAndCheckCurrent false 0 enum2
+    enum1.Current |> should equal 0
+}
+
+[<Fact>]
 let ``CE taskSeq with two items, call map multiple times over its own result`` () = task {
     let tskSeq = taskSeq {
         yield 1
