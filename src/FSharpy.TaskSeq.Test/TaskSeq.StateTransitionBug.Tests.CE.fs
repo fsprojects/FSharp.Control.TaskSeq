@@ -132,7 +132,7 @@ let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call Current before MoveNextAsync`` () = task {
+let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
         yield "bar"
@@ -146,7 +146,7 @@ let ``CE taskSeq with two items, call Current before MoveNextAsync`` () = task {
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`` () = task {
+let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
         yield "bar"
@@ -162,7 +162,7 @@ let ``CE taskSeq with two items, call Current after MoveNextAsync returns false`
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, MoveNext once too far`` () = task {
+let ``CE taskSeq, MoveNext once too far`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -176,7 +176,7 @@ let ``CE taskSeq with two items, MoveNext once too far`` () = task {
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, MoveNext too far`` () = task {
+let ``CE taskSeq, MoveNext too far`` () = task {
     let tskSeq = taskSeq {
         yield Guid.NewGuid()
         yield Guid.NewGuid()
@@ -199,7 +199,7 @@ let ``CE taskSeq with two items, MoveNext too far`` () = task {
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have equal behavior`` () = task {
+let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -222,7 +222,7 @@ let ``CE taskSeq with two items, cal GetAsyncEnumerator twice, both should have 
 }
 
 [<Fact>]
-let ``CE seq with two items, cal GetEnumerator twice`` () = task {
+let ``CE seq -- comparison --, call GetEnumerator twice`` () = task {
     // this test is for behavioral comparisoni between the same Async test above with TaskSeq
     let sq = seq {
         yield 1
@@ -247,7 +247,7 @@ let ``CE seq with two items, cal GetEnumerator twice`` () = task {
 
 
 [<Fact>]
-let ``CE taskSeq with two items, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
+let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -271,7 +271,7 @@ let ``CE taskSeq with two items, cal GetAsyncEnumerator twice -- in lockstep`` (
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call GetAsyncEnumerator twice -- after full iteration`` () = task {
+let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -290,6 +290,60 @@ let ``CE taskSeq with two items, call GetAsyncEnumerator twice -- after full ite
     do! moveNextAndCheckCurrent true 2 enum2 // second item
     do! moveNextAndCheckCurrent false 0 enum2 // third item: false
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+}
+
+[<Fact>]
+let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () = task {
+    let tskSeq = taskSeq {
+        yield 1
+        yield 2
+        yield 3
+    }
+
+    // enum1
+    let enum1 = tskSeq.GetAsyncEnumerator()
+
+    // move #1
+    do! moveNextAndCheckCurrent true 1 enum1 // first item
+
+    // enum2
+    let enum2 = tskSeq.GetAsyncEnumerator()
+    enum1.Current |> should equal 1 // remains the same
+    enum2.Current |> should equal 0 // should be at default location
+
+    // move #2
+    do! moveNextAndCheckCurrent true 1 enum2
+    enum1.Current |> should equal 1
+    enum2.Current |> should equal 1
+
+    // move #2
+    do! moveNextAndCheckCurrent true 2 enum2
+    enum1.Current |> should equal 1
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent true 2 enum1
+    enum1.Current |> should equal 2
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent true 3 enum1
+    enum1.Current |> should equal 3
+    enum2.Current |> should equal 2
+
+    // move #1
+    do! moveNextAndCheckCurrent false 0 enum1
+    enum1.Current |> should equal 0
+    enum2.Current |> should equal 2
+
+    // move #2
+    do! moveNextAndCheckCurrent true 3 enum2
+    enum1.Current |> should equal 0
+    enum2.Current |> should equal 3
+
+    // move #2
+    do! moveNextAndCheckCurrent false 0 enum2
+    enum1.Current |> should equal 0
 }
 
 [<Fact>]
