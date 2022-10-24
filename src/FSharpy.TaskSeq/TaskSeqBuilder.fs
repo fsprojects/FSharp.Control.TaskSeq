@@ -15,7 +15,7 @@ open FSharp.Core.CompilerServices.StateMachineHelpers
 
 [<AutoOpen>]
 module Internal = // cannot be marked with 'internal' scope
-    let verbose = true
+    let verbose = false
 
     let inline MoveNext (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
 
