@@ -8,6 +8,8 @@ open System.Diagnostics
 open FsToolkit.ErrorHandling
 
 open FSharpy
+open System.Collections.Generic
+open FsUnit.Xunit
 
 /// Milliseconds
 [<Measure>]
@@ -117,6 +119,41 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 
 [<AutoOpen>]
 module TestUtils =
+    /// Delays (no spin-wait!) between 20 and 200ms, assuming a 15.6ms resolution clock
+    let delayRandom () = task { do! Task.Delay(Random().Next(20, 200)) }
+
+    /// Call MoveNextAsync() and check if return value is the expected value
+    let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
+        let! (hasNext: bool) = enumerator.MoveNextAsync()
+
+        if expected then
+            hasNext |> should be True
+        else
+            hasNext |> should be False
+    }
+
+    /// Call MoveNextAsync() and check if Current has the expected value. Uses untyped 'should equal'
+    let moveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IAsyncEnumerator<_>) = task {
+        let! (hasNext: bool) = enumerator.MoveNextAsync()
+
+        if successMoveNext then
+            hasNext |> should be True
+        else
+            hasNext |> should be False
+
+        enumerator.Current |> should equal expectedValue
+    }
+
+    /// Call MoveNext() and check if Current has the expected value. Uses untyped 'should equal'
+    let seqMoveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IEnumerator<_>) =
+        let (hasNext: bool) = enumerator.MoveNext()
+
+        if successMoveNext then
+            hasNext |> should be True
+        else
+            hasNext |> should be False
+
+        enumerator.Current |> should equal expectedValue
 
     /// Joins two tasks using merely BCL methods. This approach is what you can use to
     /// properly, sequentially execute a chain of tasks in a non-blocking, non-overlapping way.

@@ -1,4 +1,4 @@
-module FSharpy.Tests.``Bug #42`` // see PR #42
+module FSharpy.Tests.``Bug #42 -- delayed`` // see PR #42
 
 open System
 open System.Threading.Tasks
@@ -11,18 +11,25 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+// Module contains same tests as its previous file
+// except that each item is delayed randomly to force
+// an async Await behavior.
+
 let getEmptyVariant variant : IAsyncEnumerable<int> =
     match variant with
-    | "do" -> taskSeq { do ignore () }
-    | "do!" -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
-    | "yield! (seq)" -> taskSeq { yield! Seq.empty<int> }
-    | "yield! (taskseq)" -> taskSeq { yield! taskSeq { do ignore () } }
+    | "do" -> taskSeq { do! delayRandom () }
+    | "do!" -> taskSeq { do! task { return! delayRandom () } } // TODO: this doesn't work with Task, only Task<unit>...
+    | "yield! (seq)" -> taskSeq {
+        do! delayRandom ()
+        yield! Seq.empty<int>
+      }
+    | "yield! (taskseq)" -> taskSeq { yield! taskSeq { do! delayRandom () } }
     | _ -> failwith "Uncovered variant of test"
 
 
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
-    let tskSeq = taskSeq { do ignore () }
+    let tskSeq = taskSeq { do! delayRandom () }
 
     Assert.IsAssignableFrom<IAsyncEnumerable<obj>>(tskSeq)
     |> ignore
@@ -102,7 +109,9 @@ let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant
 [<Fact>]
 let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield "foo"
+        do! delayRandom ()
         yield "bar"
     }
 
@@ -116,7 +125,9 @@ let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
 [<Fact>]
 let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield "foo"
+        do! delayRandom ()
         yield "bar"
     }
 
@@ -132,7 +143,9 @@ let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
 [<Fact>]
 let ``CE taskSeq, MoveNext once too far`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield 1
+        do! delayRandom ()
         yield 2
     }
 
@@ -146,7 +159,9 @@ let ``CE taskSeq, MoveNext once too far`` () = task {
 [<Fact>]
 let ``CE taskSeq, MoveNext too far`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield Guid.NewGuid()
+        do! delayRandom ()
         yield Guid.NewGuid()
     }
 
@@ -169,7 +184,9 @@ let ``CE taskSeq, MoveNext too far`` () = task {
 [<Fact>]
 let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield 1
+        do! delayRandom ()
         yield 2
     }
 
@@ -190,34 +207,11 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
 }
 
 [<Fact>]
-let ``CE seq -- comparison --, call GetEnumerator twice`` () = task {
-    // this test is for behavioral comparisoni between the same Async test above with TaskSeq
-    let sq = seq {
-        yield 1
-        yield 2
-    }
-
-    let enum1 = sq.GetEnumerator()
-    let enum2 = sq.GetEnumerator()
-
-    // enum1
-    do seqMoveNextAndCheckCurrent true 1 enum1 // first item
-    do seqMoveNextAndCheckCurrent true 2 enum1 // second item
-    do seqMoveNextAndCheckCurrent false 0 enum1 // third item: false
-    do seqMoveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
-
-    // enum2
-    do seqMoveNextAndCheckCurrent true 1 enum2 // first item
-    do seqMoveNextAndCheckCurrent true 2 enum2 // second item
-    do seqMoveNextAndCheckCurrent false 0 enum2 // third item: false
-    do seqMoveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
-}
-
-
-[<Fact>]
 let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
+        do! delayRandom ()
         yield 1
+        do! delayRandom ()
         yield 2
     }
 
@@ -264,7 +258,9 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = t
 let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
+        do! delayRandom ()
         yield 2
+        do! delayRandom ()
         yield 3
     }
 
@@ -315,42 +311,14 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call map multiple times over its own result`` () = task {
-    let tskSeq = taskSeq {
-        yield 1
-        yield 2
-    }
-
-    // let's map once, and then again on the new sequence
-    let ts1 = tskSeq |> TaskSeq.map (fun i -> i + 1)
-    let result1 = TaskSeq.toArray ts1
-    let ts2 = ts1 |> TaskSeq.map (fun i -> i + 1)
-    let result2 = TaskSeq.toArray ts2
-
-    tskSeq |> TaskSeq.toArray |> should equal [| 1; 2 |]
-    result1 |> should equal [| 2; 3 |]
-    result2 |> should equal [| 3; 4 |]
-}
-
-[<Fact>]
-let ``CE taskSeq with two items, call mapAsync multiple times over its own result`` () = task {
-    let tskSeq = taskSeq {
-        yield 1
-        yield 2
-    }
-
-    // let's map once, and then again on the new sequence
-    let ts1 = tskSeq |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
-    let result1 = TaskSeq.toArray ts1
-    let ts2 = ts1 |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
-    let result2 = TaskSeq.toArray ts2
-    result1 |> should equal [| 2; 3 |]
-    result2 |> should equal [| 3; 4 |]
-}
-
-[<Fact>]
 let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
-    let tq = taskSeq { yield! [ 1..10 ] }
+    let tq = taskSeq {
+        yield! [ 1..3 ]
+        do! delayRandom ()
+        yield! [ 4..7 ]
+        do! delayRandom ()
+    }
+
     let (results1: _[]) = tq |> TaskSeq.toArray
     let (results2: _[]) = tq |> TaskSeq.toArray
     let (results3: _[]) = tq |> TaskSeq.toArray
