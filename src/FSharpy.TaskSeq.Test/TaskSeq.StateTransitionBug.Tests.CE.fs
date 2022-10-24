@@ -1,4 +1,4 @@
-module FSharpy.Tests.``Bug #42`` // see PR #42
+module FSharpy.Tests.``Bug #42 -- synchronous`` // see PR #42
 
 open System
 open System.Threading.Tasks
