@@ -15,7 +15,24 @@ open FSharp.Core.CompilerServices.StateMachineHelpers
 
 [<AutoOpen>]
 module Internal = // cannot be marked with 'internal' scope
-    let verbose = false
+
+    /// Setting from environment variable TASKSEQ_LOG_VERBOSE, which,
+    /// when set, enables (very) verbose printing of flow and state
+    let verbose =
+        try
+            match Environment.GetEnvironmentVariable "TASKSEQ_LOG_VERBOSE" with
+            | null -> false
+            | x ->
+                match x.ToLowerInvariant().Trim() with
+                | "1"
+                | "true"
+                | "on"
+                | "yes" -> true
+                | _ -> false
+
+        with _ ->
+            false
+
 
     /// Call MoveNext on an IAsyncStateMachine by reference
     let inline moveNextRef (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
