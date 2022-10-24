@@ -315,7 +315,10 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call map multiple times over its own result`` () = task {
+let ``CE taskSeq, call map multiple times over its own result`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -325,7 +328,7 @@ let ``CE taskSeq with two items, call map multiple times over its own result`` (
     let ts1 = tskSeq |> TaskSeq.map (fun i -> i + 1)
     let result1 = TaskSeq.toArray ts1
     let ts2 = ts1 |> TaskSeq.map (fun i -> i + 1)
-    let result2 = TaskSeq.toArray ts2
+    let result2 = TaskSeq.toArray ts2 // NRE here
 
     tskSeq |> TaskSeq.toArray |> should equal [| 1; 2 |]
     result1 |> should equal [| 2; 3 |]
@@ -333,7 +336,165 @@ let ``CE taskSeq with two items, call map multiple times over its own result`` (
 }
 
 [<Fact>]
-let ``CE taskSeq with two items, call mapAsync multiple times over its own result`` () = task {
+let ``CE taskSeq, call map multiple times over its own result - alternative #1`` () = task {
+    let tskSeq1 = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    // [ 2; 3]
+    let tskSeq2 = taskSeq {
+        for i in tskSeq1 do
+            yield i + 1
+    }
+
+    // [ 3; 4]
+    let tskSeq3 = taskSeq {
+        for i in tskSeq2 do
+            yield i + 1
+    }
+
+    let result3 = TaskSeq.toArray tskSeq3
+
+    result3 |> should equal [| 3; 4 |]
+}
+
+[<Fact>]
+let ``CE taskSeq, call map multiple times over its own result - alternative #2`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
+    let tskSeq1 = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    let result1 = TaskSeq.toArray tskSeq1
+    result1 |> should equal [| 1; 2 |]
+
+    // [ 2; 3]
+    let tskSeq2 = taskSeq {
+        for i in tskSeq1 do
+            yield i + 1
+    }
+
+    let result2 = TaskSeq.toArray tskSeq2
+    result2 |> should equal [| 2; 3 |]
+
+    // [ 3; 4]
+    let tskSeq3 = taskSeq {
+        for i in tskSeq2 do // NRE here
+            yield i + 1
+    }
+
+    let! result3 = TaskSeq.toArrayAsync tskSeq3 // from here
+    result3 |> should equal [| 3; 4 |]
+}
+
+[<Fact>]
+let ``CE taskSeq, call map multiple times over its own result - alternative #3`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
+    let tskSeq1 = taskSeq {
+        yield 1
+        yield 2
+    }
+
+    let result1 = TaskSeq.toArray tskSeq1
+    result1 |> should equal [| 1; 2 |]
+
+    // [ 2; 3]
+    let tskSeq2 = taskSeq {
+        yield! taskSeq {
+            for i in tskSeq1 do
+                yield i + 1
+        }
+    }
+
+    let result2 = TaskSeq.toArray tskSeq2
+    result2 |> should equal [| 2; 3 |]
+
+    // [ 3; 4]
+    let tskSeq3 = taskSeq {
+        yield! taskSeq { // NRE here
+            for i in tskSeq2 do
+                yield i + 1
+        }
+    }
+
+    let result3 = TaskSeq.toArray tskSeq3 // from here
+    result3 |> should equal [| 3; 4 |]
+}
+
+[<Fact>]
+let ``CE taskSeq, call map multiple times over its own result - alternative #4`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
+    let sequence = seq {
+        yield 1
+        yield 2
+    }
+
+    // [ 2; 3]
+    let tskSeq2 = taskSeq {
+        for i in sequence do
+            yield i + 1
+    }
+
+    let result2 = TaskSeq.toArray tskSeq2
+    result2 |> should equal [| 2; 3 |]
+
+    // [ 3; 4]
+    let tskSeq3 = taskSeq {
+        for i in tskSeq2 do
+            yield i + 1 // NRE here
+    }
+
+    let result3 = TaskSeq.toArray tskSeq3 // NRE from here
+    result3 |> should equal [| 3; 4 |]
+}
+
+[<Fact>]
+let ``CE taskSeq, call map multiple times over its own result - alternative #5`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
+    let sequence = seq {
+        yield 1
+        yield 2
+    }
+
+    // [ 2; 3]
+    let tskSeq2 = taskSeq {
+        yield! taskSeq {
+            for i in sequence do
+                yield i + 1
+        }
+    }
+
+    let result2 = TaskSeq.toArray tskSeq2
+    result2 |> should equal [| 2; 3 |]
+
+    // [ 3; 4]
+    let tskSeq3 = taskSeq {
+        yield! taskSeq { // NRE here
+            for i in tskSeq2 do
+                yield i + 1
+        }
+    }
+
+    let result3 = TaskSeq.toArray tskSeq3 // from here
+    result3 |> should equal [| 3; 4 |]
+}
+
+
+[<Fact>]
+let ``CE taskSeq, call mapAsync multiple times over its own result`` () = task {
+    // Bug #42: System.NullReferenceException: Object reference not set to an instance of an object.
+    // whether using TaskSeq.toArray or toArrayAsync, or another version that uses GetAsyncEnumerator() under the hood doesn't matter
+
     let tskSeq = taskSeq {
         yield 1
         yield 2
@@ -343,7 +504,7 @@ let ``CE taskSeq with two items, call mapAsync multiple times over its own resul
     let ts1 = tskSeq |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
     let result1 = TaskSeq.toArray ts1
     let ts2 = ts1 |> TaskSeq.mapAsync (fun i -> task { return i + 1 })
-    let result2 = TaskSeq.toArray ts2
+    let result2 = TaskSeq.toArray ts2 // NRE here
     result1 |> should equal [| 2; 3 |]
     result2 |> should equal [| 3; 4 |]
 }
