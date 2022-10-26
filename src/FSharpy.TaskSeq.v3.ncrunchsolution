@@ -1,9 +1,6 @@
 ﻿<SolutionConfiguration>
   <Settings>
     <AllowParallelTestExecution>True</AllowParallelTestExecution>
-    <CustomEnvironmentVariables>
-      <Value>TASKSEQ_LOG_VERBOSE = true</Value>
-    </CustomEnvironmentVariables>
     <SolutionConfigured>True</SolutionConfigured>
   </Settings>
 </SolutionConfiguration>
