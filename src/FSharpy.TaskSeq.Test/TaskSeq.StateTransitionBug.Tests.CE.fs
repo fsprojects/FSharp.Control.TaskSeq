@@ -100,6 +100,37 @@ let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant
 }
 
 [<Fact>]
+let ``CE taskSeq, proper two-item task sequence`` () = task {
+    let tskSeq = taskSeq {
+        yield "foo"
+        yield "bar"
+    }
+
+    let enum = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheck true enum // first item
+    enum.Current |> should equal "foo"
+    do! moveNextAndCheck true enum // second item
+    enum.Current |> should equal "bar"
+    do! moveNextAndCheck false enum // third item: false
+}
+
+[<Fact>]
+let ``CE taskSeq, proper two-item task sequence -- async variant`` () = task {
+    let tskSeq = taskSeq {
+        yield "foo"
+        do! delayRandom ()
+        yield "bar"
+    }
+
+    let enum = tskSeq.GetAsyncEnumerator()
+    do! moveNextAndCheck true enum // first item
+    enum.Current |> should equal "foo"
+    do! moveNextAndCheck true enum // second item
+    enum.Current |> should equal "bar"
+    do! moveNextAndCheck false enum // third item: false
+}
+
+[<Fact>]
 let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
