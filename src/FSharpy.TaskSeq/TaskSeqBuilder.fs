@@ -100,6 +100,7 @@ type TaskSeqStateMachineData<'T>() =
 
     [<DefaultValue(false)>]
     val mutable boxed: TaskSeq<'T>
+
     // For tailcalls using 'return!'
     [<DefaultValue(false)>]
     val mutable tailcallTarget: TaskSeq<'T> option
@@ -244,16 +245,14 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
     interface IAsyncEnumerable<'T> with
         member this.GetAsyncEnumerator(ct) =
-            let data = this.Machine.Data
-
-            if
-                (not data.taken
-                 && initialThreadId = Environment.CurrentManagedThreadId)
-            then
-                let data = this.Machine.Data
+            match box this.Machine.Data with
+            | null when initialThreadId = Environment.CurrentManagedThreadId ->
+                let data = TaskSeqStateMachineData<'T>()
+                data.boxed <- this
                 data.taken <- true
                 data.cancellationToken <- ct
                 data.builder <- AsyncIteratorMethodBuilder.Create()
+                this.Machine.Data <- data
 
                 if verbose then
                     printfn "All data (no clone):"
@@ -263,20 +262,15 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     printfn "No cloning, resumption point: %i" this.Machine.ResumptionPoint
 
                 this :> IAsyncEnumerator<_>
-            else
-                if verbose then
-                    printfn "GetAsyncEnumerator, cloning..."
-
-                if verbose then
-                    printfn "All data before clone:"
-                    data.LogDump()
+            | _ ->
 
                 // it appears that the issue is possibly caused by the problem
                 // of having ValueTask all over the place, and by going over the
                 // iteration twice, we are trying to *await* twice, which is not allowed
                 // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
-                let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
-                clone.Machine <- clone.InitialMachine
+                let clone = TaskSeq<'Machine, 'T>()
+                clone.InitialMachine <- this.InitialMachine
+                clone.Machine <- this.InitialMachine
                 clone.Machine.Data <- TaskSeqStateMachineData()
                 clone.Machine.Data.cancellationToken <- ct
                 clone.Machine.Data.taken <- true
@@ -507,8 +501,6 @@ type TaskSeqBuilder() =
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
                     ts.InitialMachine <- sm
                     ts.Machine <- sm
-                    ts.Machine.Data <- TaskSeqStateMachineData()
-                    ts.Machine.Data.boxed <- ts
                     ts :> IAsyncEnumerable<'T>))
         else
             failwith "no dynamic implementation as yet"

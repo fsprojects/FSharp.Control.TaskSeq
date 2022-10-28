@@ -164,7 +164,7 @@ type ``Real world tests``(output: ITestOutputHelper) =
     //--- End of stack trace from previous location ---
     //   at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction) in /_/src/xunit.execution/Sdk/Frameworks/ExecutionTimer.cs:line 48
     //   at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 90\
-    [<Fact(Skip = "Currently fails")>]
+    [<Fact()>]
     let ``Reading a 1MB buffered IAsync stream from start to finish InvalidOperationException`` () = task {
         let mutable count = 0
         use reader = AsyncBufferedReader(output, Array.init 1_048_576 byte, 256)
