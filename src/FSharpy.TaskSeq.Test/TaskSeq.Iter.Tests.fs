@@ -46,7 +46,7 @@ let ``TaskSeq-iter multiple iterations over same sequence`` () = task {
     do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
     do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
     do! tq |> TaskSeq.iter (fun item -> sum <- sum + item)
-    sum |> should equal 220 // task-dummies started at 1
+    sum |> should equal 820 // task-dummies started at 1
 }
 
 [<Fact>]
