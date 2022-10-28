@@ -78,7 +78,7 @@ type ``Real world tests``(output: ITestOutputHelper) =
         ||> Array.iter2 (fun a b -> should equal a b)
     }
 
-    [<Fact>]
+    [<Fact(Skip = "Broken test, faulty streaming test-implementation")>]
     let ``Reading a user-code IAsync multiple times with TaskSeq.toArrayAsync should succeed`` () = task {
         use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
         let expected = Array.init 256 byte |> Array.replicate 8
@@ -101,7 +101,7 @@ type ``Real world tests``(output: ITestOutputHelper) =
         ||> Array.iter2 (fun a b -> should equal a b)
     }
 
-    [<Fact>]
+    [<Fact(Skip = "Broken test, faulty streaming test-implementation")>]
     let ``Reading a 10MB buffered IAsync stream from start to finish`` () = task {
         let mutable count = 0
         use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
