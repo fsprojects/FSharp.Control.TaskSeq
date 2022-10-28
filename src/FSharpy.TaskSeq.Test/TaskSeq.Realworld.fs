@@ -158,13 +158,17 @@ type ``Real world tests``(output: ITestOutputHelper) =
     }
 
 
+    // This test used to have the following, which has since been solved through #42
+    // please leave this test in, as it tests a case that's quite easily reached if we
+    // introduce mistakes in the resumable code.
+    //
     //System.InvalidOperationException: An attempt was made to transition a task to a final state when it had already completed.
     //   at <StartupCode$FSharpy-TaskSeq-Test>.$TaskSeq.Realworld.clo@58-4.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq.Test\TaskSeq.Realworld.fs:line 77
     //   at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass48_0.<<InvokeTestMethodAsync>b__1>d.MoveNext() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 264
     //--- End of stack trace from previous location ---
     //   at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction) in /_/src/xunit.execution/Sdk/Frameworks/ExecutionTimer.cs:line 48
     //   at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 90\
-    [<Fact(Skip = "Currently fails")>]
+    [<Fact>]
     let ``Reading a 1MB buffered IAsync stream from start to finish InvalidOperationException`` () = task {
         let mutable count = 0
         use reader = AsyncBufferedReader(output, Array.init 1_048_576 byte, 256)

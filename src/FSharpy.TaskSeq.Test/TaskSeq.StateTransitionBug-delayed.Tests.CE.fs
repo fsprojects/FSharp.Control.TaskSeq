@@ -56,11 +56,8 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     ()
 }
 
-[<Theory(Skip = "Test hangs");
-  InlineData "do";
-  InlineData "do!";
-  InlineData "yield! (seq)";
-  InlineData "yield! (taskseq)">]
+// Note: this test used to hang (#42), please leave it in, no matter how silly it looks
+[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
     use enumerator = tskSeq.GetAsyncEnumerator()
@@ -68,11 +65,8 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
     do! moveNextAndCheck false enumerator
 }
 
-[<Theory(Skip = "Weird behavior");
-  InlineData "do";
-  InlineData "do!";
-  InlineData "yield! (seq)";
-  InlineData "yield! (taskseq)">]
+// Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
+[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
     let tskSeq = getEmptyVariant variant
     use enumerator1 = tskSeq.GetAsyncEnumerator()
@@ -84,11 +78,8 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
     do! moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
-[<Theory(Skip = "Weird behavior");
-  InlineData "do";
-  InlineData "do!";
-  InlineData "yield! (seq)";
-  InlineData "yield! (taskseq)">]
+// Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
+[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant = task {
     let tskSeq = getEmptyVariant variant
 
@@ -193,7 +184,8 @@ let ``CE taskSeq, MoveNext too far`` () = task {
     enum.Current |> should equal Guid.Empty // we return Unchecked.defaultof, which is Guid.Empty for guids
 }
 
-[<Fact(Skip = "Weird behavior")>]
+// Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
+[<Fact>]
 let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
         do! delayRandom ()
@@ -218,7 +210,8 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Weird behavior")>]
+// Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
+[<Fact>]
 let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
         do! delayRandom ()
@@ -244,7 +237,8 @@ let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Weird behavior")>]
+// Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
+[<Fact>]
 let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
@@ -267,7 +261,8 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = t
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Test hangs")>]
+// Note: this test used to hang (#42), please leave it in, no matter how silly it looks
+[<Fact>]
 let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
@@ -323,7 +318,8 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
     enum1.Current |> should equal 0
 }
 
-[<Fact(Skip = "Timeout expires")>]
+// Note: this test used to hang (#42), please leave it in, no matter how silly it looks
+[<Fact>]
 let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
     let tq = taskSeq {
         yield! [ 1..3 ]
@@ -336,7 +332,36 @@ let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
     let (results2: _[]) = tq |> TaskSeq.toArray
     let (results3: _[]) = tq |> TaskSeq.toArray
     let (results4: _[]) = tq |> TaskSeq.toArray
-    results1 |> should equal [| 1..10 |]
-    results2 |> should equal [| 1..10 |]
-    results3 |> should equal [| 1..10 |]
-    results4 |> should equal [| 1..10 |]
+    results1 |> should equal [| 1..7 |]
+    results2 |> should equal [| 1..7 |] // no mutable state in taskSeq, multi iter remains stable
+    results3 |> should equal [| 1..7 |] // id
+    results4 |> should equal [| 1..7 |] // id
+
+// Note: this test used to hang (#42), please leave it in, no matter how silly it looks
+[<Fact>]
+let ``TaskSeq-toArray can be applied multiple times to the same sequence -- mutable state`` () =
+    let mutable before, middle, after = (0, 0, 0)
+
+    let tq = taskSeq {
+        before <- before + 1
+        yield before
+        yield! [ 100..120 ]
+        do! delayRandom ()
+        middle <- middle + 1
+        yield middle
+        yield! [ 100..120 ]
+        do! delayRandom ()
+        after <- after + 1
+        yield after
+    }
+
+    let (results1: _ list) = tq |> TaskSeq.toList
+    let (results2: _ list) = tq |> TaskSeq.toList
+    let (results3: _ list) = tq |> TaskSeq.toList
+    let (results4: _ list) = tq |> TaskSeq.toList
+
+    let expectMutatedTo a = (a :: [ 100..120 ] @ [ a ] @ [ 100..120 ] @ [ a ])
+    results1 |> should equal (expectMutatedTo 1)
+    results2 |> should equal (expectMutatedTo 2)
+    results3 |> should equal (expectMutatedTo 3)
+    results4 |> should equal (expectMutatedTo 4)
