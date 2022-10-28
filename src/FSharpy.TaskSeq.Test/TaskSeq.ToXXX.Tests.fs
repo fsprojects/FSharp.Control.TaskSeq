@@ -35,9 +35,9 @@ let ``TaskSeq-toArrayAsync can be applied multiple times to the same sequence`` 
     let! (results3: _[]) = tq |> TaskSeq.toArrayAsync
     let! (results4: _[]) = tq |> TaskSeq.toArrayAsync
     results1 |> should equal [| 1..10 |]
-    results2 |> should equal [| 1..10 |]
-    results3 |> should equal [| 1..10 |]
-    results4 |> should equal [| 1..10 |]
+    results2 |> should equal [| 11..20 |]
+    results3 |> should equal [| 21..30 |]
+    results4 |> should equal [| 31..40 |]
 }
 
 [<Fact>]

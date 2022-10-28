@@ -149,6 +149,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     let initialThreadId = Environment.CurrentManagedThreadId
 
     [<DefaultValue(false)>]
+    val mutable InitialMachine: 'Machine
+
+    [<DefaultValue(false)>]
     val mutable Machine: 'Machine
 
     member internal this.hijack() =
@@ -247,7 +250,6 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 (not data.taken
                  && initialThreadId = Environment.CurrentManagedThreadId)
             then
-                //let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
                 let data = this.Machine.Data
                 data.taken <- true
                 data.cancellationToken <- ct
@@ -274,24 +276,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // iteration twice, we are trying to *await* twice, which is not allowed
                 // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
                 let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
-                data.taken <- true
-
-                // Explanation for resetting Machine use brute-force
-                //
-                // This appears to fix the problem that ResumptionPoint was not reset. I'd prefer
-                // a less drastical method. It solves a scenario like the following:
-                // let ts = taskSeq { yield 1; yield 2 }
-                // let e1 = ts.GetAsyncEnumerator()
-                // let! hasNext = e.MoveNextAsync()
-                // let e2 = ts.GetAsyncEnumerator()
-                // let! hasNext = e.MoveNextAsync()  // without this hack, it would continue where e1 left off
-                // let a = e1.Current
-                // let b = e2.Current
-                // let isTrue = a = b  // true with this, false without it
-                clone.Machine <- Unchecked.defaultof<_>
-                //clone.Machine.ResumptionPoint <- 0
-
-                // the following lines just re-initialize the key data fields State.
+                clone.Machine <- clone.InitialMachine
                 clone.Machine.Data <- TaskSeqStateMachineData()
                 clone.Machine.Data.cancellationToken <- ct
                 clone.Machine.Data.taken <- true
@@ -301,10 +286,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     printfn "All data after clone:"
                     clone.Machine.Data.LogDump()
 
-
                 //// calling reset causes NRE in IValueTaskSource.GetResult above
                 //clone.Machine.Data.promiseOfValueOrEnd.Reset()
-                //clone.Machine.Data.boxed <- clone
+                clone.Machine.Data.boxed <- clone
                 ////clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
                 //////clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
                 //clone.Machine.Data.awaiter <- null
@@ -521,6 +505,7 @@ type TaskSeqBuilder() =
                         printfn "at AfterCode<_, _>, setting the Machine field to the StateMachine"
 
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
+                    ts.InitialMachine <- sm
                     ts.Machine <- sm
                     ts.Machine.Data <- TaskSeqStateMachineData()
                     ts.Machine.Data.boxed <- ts
