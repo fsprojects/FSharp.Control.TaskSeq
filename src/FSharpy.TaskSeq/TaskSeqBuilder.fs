@@ -54,25 +54,6 @@ type IPriority2 =
 
 [<NoComparison; NoEquality>]
 type TaskSeqStateMachineData<'T>() =
-    member this.LogDump() =
-        printfn "    CancellationToken: %A" this.cancellationToken
-
-        printfn
-            "    Disposal stack count: %A"
-            (if isNull this.disposalStack then
-                 0
-             else
-                 this.disposalStack.Count)
-
-        printfn "    Awaiter: %A" this.awaiter
-
-        printfn "    Promise status: %A"
-        <| this.promiseOfValueOrEnd.GetStatus(this.promiseOfValueOrEnd.Version)
-
-        printfn "    Builder hash: %A" <| this.builder.GetHashCode()
-        printfn "    Taken: %A" this.taken
-        printfn "    Completed: %A" this.completed
-        printfn "    Current: %A" this.current
 
     [<DefaultValue(false)>]
     val mutable cancellationToken: CancellationToken
@@ -149,13 +130,13 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     let initialThreadId = Environment.CurrentManagedThreadId
 
     [<DefaultValue(false)>]
-    val mutable InitialMachine: 'Machine
+    val mutable _initialMachine: 'Machine
 
     [<DefaultValue(false)>]
-    val mutable Machine: 'Machine
+    val mutable _machine: 'Machine
 
     member internal this.hijack() =
-        let res = this.Machine.Data.tailcallTarget
+        let res = this._machine.Data.tailcallTarget
 
         match res with
         | Some tg ->
@@ -165,7 +146,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             | None -> res
             | (Some tg2 as res2) ->
                 // Cut out chains of tailcalls
-                this.Machine.Data.tailcallTarget <- Some tg2
+                this._machine.Data.tailcallTarget <- Some tg2
                 res2
         | None -> res
 
@@ -175,25 +156,25 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource).GetResult(token)
             | None ->
-                this.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+                this._machine.Data.promiseOfValueOrEnd.GetResult(token)
                 |> ignore
 
         member this.GetStatus(token: int16) =
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> this.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
+            | None -> this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
         member this.OnCompleted(continuation, state, token, flags) =
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource).OnCompleted(continuation, state, token, flags)
-            | None -> this.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            | None -> this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     // Needed for MoveNextAsync to return a ValueTask
     interface IValueTaskSource<bool> with
         member this.GetStatus(token: int16) =
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> this.Machine.Data.promiseOfValueOrEnd.GetStatus(token)
+            | None -> this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
         member this.GetResult(token: int16) =
             match this.hijack () with
@@ -209,9 +190,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     if verbose then
                         printfn
                             "Getting result for token on 'None' branch, status: %A"
-                            (this.Machine.Data.promiseOfValueOrEnd.GetStatus(token))
+                            (this._machine.Data.promiseOfValueOrEnd.GetStatus(token))
 
-                    this.Machine.Data.promiseOfValueOrEnd.GetResult(token)
+                    this._machine.Data.promiseOfValueOrEnd.GetResult(token)
                 with e ->
                     // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
                     // We're just logging here because the following error would also be caught right here:
@@ -224,7 +205,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         member this.OnCompleted(continuation, state, token, flags) =
             match this.hijack () with
             | Some tg -> (tg :> IValueTaskSource<bool>).OnCompleted(continuation, state, token, flags)
-            | None -> this.Machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            | None -> this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     interface IAsyncStateMachine with
         /// The MoveNext method is called by builder.MoveNext() in the resumable code
@@ -233,7 +214,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             | Some tg ->
                 // jump to the hijacked method
                 (tg :> IAsyncStateMachine).MoveNext()
-            | None -> moveNextRef &this.Machine
+            | None -> moveNextRef &this._machine
 
         /// SetStatemachine is (currently) never called
         member _.SetStateMachine(_state) =
@@ -244,62 +225,41 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
     interface IAsyncEnumerable<'T> with
         member this.GetAsyncEnumerator(ct) =
-            let data = this.Machine.Data
+            let data = this._machine.Data
 
             if
                 (not data.taken
                  && initialThreadId = Environment.CurrentManagedThreadId)
             then
-                let data = this.Machine.Data
+                let data = this._machine.Data
                 data.taken <- true
                 data.cancellationToken <- ct
                 data.builder <- AsyncIteratorMethodBuilder.Create()
-
-                if verbose then
-                    printfn "All data (no clone):"
-                    data.LogDump()
-
-                if verbose then
-                    printfn "No cloning, resumption point: %i" this.Machine.ResumptionPoint
 
                 this :> IAsyncEnumerator<_>
             else
                 if verbose then
                     printfn "GetAsyncEnumerator, cloning..."
 
-                if verbose then
-                    printfn "All data before clone:"
-                    data.LogDump()
-
                 // it appears that the issue is possibly caused by the problem
                 // of having ValueTask all over the place, and by going over the
                 // iteration twice, we are trying to *await* twice, which is not allowed
                 // see, for instance: https://itnext.io/why-can-a-valuetask-only-be-awaited-once-31169b324fa4
                 let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
-                clone.Machine <- clone.InitialMachine
-                clone.Machine.Data <- TaskSeqStateMachineData()
-                clone.Machine.Data.cancellationToken <- ct
-                clone.Machine.Data.taken <- true
-                clone.Machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
-
-                if verbose then
-                    printfn "All data after clone:"
-                    clone.Machine.Data.LogDump()
+                clone._machine <- clone._initialMachine
+                clone._machine.Data <- TaskSeqStateMachineData()
+                clone._machine.Data.cancellationToken <- ct
+                clone._machine.Data.taken <- true
+                clone._machine.Data.builder <- AsyncIteratorMethodBuilder.Create()
 
                 //// calling reset causes NRE in IValueTaskSource.GetResult above
                 //clone.Machine.Data.promiseOfValueOrEnd.Reset()
-                clone.Machine.Data.boxed <- clone
+                clone._machine.Data.boxed <- clone
                 ////clone.Machine.Data.disposalStack <- null // reference type, would otherwise still reference original stack
                 //////clone.Machine.Data.tailcallTarget <- Some clone  // this will lead to an SO exception
                 //clone.Machine.Data.awaiter <- null
                 //clone.Machine.Data.current <- ValueNone
                 //clone.Machine.Data.completed <- false
-
-                if verbose then
-                    printfn
-                        "Cloning, resumption point original: %i, clone: %i"
-                        this.Machine.ResumptionPoint
-                        clone.Machine.ResumptionPoint
 
                 clone :> System.Collections.Generic.IAsyncEnumerator<'T>
 
@@ -312,12 +272,12 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                     printfn "DisposeAsync..."
 
                 task {
-                    match this.Machine.Data.disposalStack with
+                    match this._machine.Data.disposalStack with
                     | null -> ()
                     | _ ->
                         let mutable exn = None
 
-                        for d in Seq.rev this.Machine.Data.disposalStack do
+                        for d in Seq.rev this._machine.Data.disposalStack do
                             try
                                 do! d ()
                             with e ->
@@ -335,7 +295,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             match this.hijack () with
             | Some tg -> (tg :> IAsyncEnumerator<'T>).Current
             | None ->
-                match this.Machine.Data.current with
+                match this._machine.Data.current with
                 | ValueSome x -> x
                 | ValueNone ->
                     // Returning a default value is similar to how F#'s seq<'T> behaves
@@ -351,25 +311,25 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 if verbose then
                     printfn "MoveNextAsync..."
 
-                if this.Machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
+                if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
                     if verbose then
                         printfn "at MoveNextAsync: Resumption point = -1"
 
                     ValueTask<bool>()
 
-                elif this.Machine.Data.completed then
+                elif this._machine.Data.completed then
                     if verbose then
                         printfn "at MoveNextAsync: completed = true"
 
                     // return False when beyond the last item
-                    this.Machine.Data.promiseOfValueOrEnd.Reset()
+                    this._machine.Data.promiseOfValueOrEnd.Reset()
                     ValueTask<bool>()
 
                 else
                     if verbose then
                         printfn "at MoveNextAsync: normal resumption scenario"
 
-                    let data = this.Machine.Data
+                    let data = this._machine.Data
                     data.promiseOfValueOrEnd.Reset()
                     let mutable ts = this
 
@@ -388,7 +348,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
 
     override this.MoveNextAsyncResult() =
-        let data = this.Machine.Data
+        let data = this._machine.Data
         let version = data.promiseOfValueOrEnd.Version
         let status = data.promiseOfValueOrEnd.GetStatus(version)
 
@@ -502,13 +462,13 @@ type TaskSeqBuilder() =
                     ()))
                 (AfterCode<_, _>(fun sm ->
                     if verbose then
-                        printfn "at AfterCode<_, _>, setting the Machine field to the StateMachine"
+                        printfn "at AfterCode<_, _>, after F# inits the sm, and we can attach extra info"
 
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
-                    ts.InitialMachine <- sm
-                    ts.Machine <- sm
-                    ts.Machine.Data <- TaskSeqStateMachineData()
-                    ts.Machine.Data.boxed <- ts
+                    ts._initialMachine <- sm
+                    ts._machine <- sm
+                    ts._machine.Data <- TaskSeqStateMachineData()
+                    ts._machine.Data.boxed <- ts
                     ts :> IAsyncEnumerable<'T>))
         else
             failwith "no dynamic implementation as yet"
