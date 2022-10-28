@@ -6,11 +6,24 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+/// Asserts that a sequence contains the char values 'A'..'J'.
 let validateSequence sequence =
     sequence
     |> Seq.map string
     |> String.concat ""
     |> should equal "ABCDEFGHIJ"
+
+/// Validates for "ABCDEFGHIJ" char sequence, or any amount of char-value higher
+let validateSequenceWithOffset offset sequence =
+    let expected =
+        [ 'A' .. 'J' ]
+        |> List.map (int >> (+) offset >> char >> string)
+        |> String.concat ""
+
+    sequence
+    |> Seq.map string
+    |> String.concat ""
+    |> should equal expected
 
 [<Fact>]
 let ``TaskSeq-map maps in correct order`` () = task {
@@ -80,22 +93,17 @@ let ``TaskSeq-mapAsync can map the same sequence multiple times`` () = task {
 
     let ts = createDummyDirectTaskSeq 10
 
-    let! result1 =
-        printfn "starting first"
-        mapAndCache ts
-    //let! result3 = mapAndCache ts
-    //let! result4 = mapAndCache ts
-
+    let! result1 = mapAndCache ts
+    let! result2 = mapAndCache ts
+    let! result3 = mapAndCache ts
+    let! result4 = mapAndCache ts
     validateSequence result1
 
-    let! result2 =
-        printfn "starting second"
-        mapAndCache ts
-
-    validateSequence result2
-    //validateSequence result3
-    //validateSequence result4
-    ()
+    // each time we do GetAsyncEnumerator(), and go through the whole sequence,
+    // the whole sequence gets re-evaluated, causing our +1 side-effect to run again.
+    validateSequenceWithOffset 10 result2 // the mutable is 10 higher
+    validateSequenceWithOffset 20 result3 // again
+    validateSequenceWithOffset 30 result4 // again
 }
 
 [<Fact>]
