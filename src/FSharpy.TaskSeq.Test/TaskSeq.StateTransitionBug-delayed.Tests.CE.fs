@@ -56,7 +56,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     ()
 }
 
-[<Theory(Skip = "Test hangs");
+[<Theory();
   InlineData "do";
   InlineData "do!";
   InlineData "yield! (seq)";
@@ -68,7 +68,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
     do! moveNextAndCheck false enumerator
 }
 
-[<Theory(Skip = "Weird behavior");
+[<Theory();
   InlineData "do";
   InlineData "do!";
   InlineData "yield! (seq)";
@@ -84,7 +84,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
     do! moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
-[<Theory(Skip = "Weird behavior");
+[<Theory();
   InlineData "do";
   InlineData "do!";
   InlineData "yield! (seq)";
@@ -193,7 +193,7 @@ let ``CE taskSeq, MoveNext too far`` () = task {
     enum.Current |> should equal Guid.Empty // we return Unchecked.defaultof, which is Guid.Empty for guids
 }
 
-[<Fact(Skip = "Weird behavior")>]
+[<Fact()>]
 let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
         do! delayRandom ()
@@ -218,7 +218,7 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Weird behavior")>]
+[<Fact>]
 let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
         do! delayRandom ()
@@ -244,7 +244,7 @@ let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Weird behavior")>]
+[<Fact()>]
 let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
@@ -267,7 +267,7 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = t
     do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
-[<Fact(Skip = "Test hangs")>]
+[<Fact()>]
 let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
@@ -323,7 +323,7 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
     enum1.Current |> should equal 0
 }
 
-[<Fact(Skip = "Timeout expires")>]
+[<Fact()>]
 let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
     let tq = taskSeq {
         yield! [ 1..3 ]
@@ -336,7 +336,7 @@ let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
     let (results2: _[]) = tq |> TaskSeq.toArray
     let (results3: _[]) = tq |> TaskSeq.toArray
     let (results4: _[]) = tq |> TaskSeq.toArray
-    results1 |> should equal [| 1..10 |]
-    results2 |> should equal [| 1..10 |]
-    results3 |> should equal [| 1..10 |]
-    results4 |> should equal [| 1..10 |]
+    results1 |> should equal [| 1..7 |]
+    results2 |> should equal [| 1..7 |]
+    results3 |> should equal [| 1..7 |]
+    results4 |> should equal [| 1..7 |]
