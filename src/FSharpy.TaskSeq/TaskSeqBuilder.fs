@@ -264,6 +264,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // Solution: we shadow the initial machine, which we then re-assign here:
                 //
                 let clone = TaskSeq<'Machine, 'T>() // we used MemberwiseClone, TODO: test difference in perf, but this should be faster
+
+                // _machine will change, _initialMachine will not, which can be used in a new clone.
+                // we still need to copy _initialMachine, as it has been initialized by the F# compiler in AfterCode<_, _>.
                 clone._machine <- this._initialMachine
                 clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
                 clone.InitMachineData(ct, &clone._machine)
