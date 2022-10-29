@@ -60,7 +60,10 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
 [<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
-    use enumerator = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
     use enumerator = tskSeq.GetAsyncEnumerator()
     do! moveNextAndCheck false enumerator
 }
@@ -75,7 +78,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
     // getting the enumerator again
     use enumerator2 = tskSeq.GetAsyncEnumerator()
     do! moveNextAndCheck false enumerator1 // original should still work without raising
-    do! moveNextAndCheck false enumerator2 // new hone should also work without raising
+    do! moveNextAndCheck false enumerator2 // new one should also work without raising
 }
 
 // Note: this test used to cause xUnit to crash (#42), please leave it in, no matter how silly it looks
