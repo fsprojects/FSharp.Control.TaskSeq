@@ -79,9 +79,6 @@ type TaskSeqStateMachineData<'T>() =
     /// Used by the AsyncEnumerator interface to return the Current value when
     /// IAsyncEnumerator.Current is called
     [<DefaultValue(false)>]
-    val mutable completed: bool
-
-    [<DefaultValue(false)>]
     val mutable current: ValueOption<'T>
 
     /// A reference to 'self', because otherwise we can't use byref in the resumable code.
@@ -255,11 +252,6 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 this.InitMachineData(ct, &this._machine)
                 this // just return 'self' here
 
-            | _ ->
-                if verbose then
-                    printfn "No cloning, resumption point: %i" this.Machine.ResumptionPoint
-
-                this :> IAsyncEnumerator<_>
             | _ ->
 
                 // We need to reset state, but only to the "initial machine", resetting the _machine to
