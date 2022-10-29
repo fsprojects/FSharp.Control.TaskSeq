@@ -263,8 +263,9 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 //
                 // Solution: we shadow the initial machine, which we then re-assign here:
                 //
-                let clone = this.MemberwiseClone() :?> TaskSeq<'Machine, 'T>
-                clone._machine <- clone._initialMachine
+                let clone = TaskSeq<'Machine, 'T>() // we used MemberwiseClone, TODO: test difference in perf, but this should be faster
+                clone._machine <- this._initialMachine
+                clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
                 clone.InitMachineData(ct, &clone._machine)
                 clone
 
