@@ -18,9 +18,9 @@ open FSharpy
 [<Fact>]
 let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield "foo"
-        do! delayRandom ()
+        do! longDelay ()
         yield "bar"
     }
 
@@ -34,9 +34,9 @@ let ``CE taskSeq, call Current before MoveNextAsync`` () = task {
 [<Fact>]
 let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield "foo"
-        do! delayRandom ()
+        do! longDelay ()
         yield "bar"
     }
 
@@ -52,9 +52,9 @@ let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
 [<Fact>]
 let ``CE taskSeq, MoveNext once too far`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield 1
-        do! delayRandom ()
+        do! longDelay ()
         yield 2
     }
 
@@ -68,9 +68,9 @@ let ``CE taskSeq, MoveNext once too far`` () = task {
 [<Fact>]
 let ``CE taskSeq, MoveNext too far`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield Guid.NewGuid()
-        do! delayRandom ()
+        do! longDelay ()
         yield Guid.NewGuid()
     }
 
@@ -94,9 +94,9 @@ let ``CE taskSeq, MoveNext too far`` () = task {
 [<Fact>]
 let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield 1
-        do! delayRandom ()
+        do! longDelay ()
         yield 2
     }
 
@@ -120,9 +120,9 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
 [<Fact>]
 let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let tskSeq = taskSeq {
-        do! delayRandom ()
+        do! longDelay ()
         yield 1
-        do! delayRandom ()
+        do! longDelay ()
         yield 2
     }
 
@@ -148,7 +148,7 @@ let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
 let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
-        do! delayRandom ()
+        do! longDelay ()
         yield 2
     }
 
@@ -172,9 +172,9 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = t
 let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () = task {
     let tskSeq = taskSeq {
         yield 1
-        do! delayRandom ()
+        do! longDelay ()
         yield 2
-        do! delayRandom ()
+        do! longDelay ()
         yield 3
     }
 
@@ -229,9 +229,9 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
 let ``TaskSeq-toArray can be applied multiple times to the same sequence`` () =
     let tq = taskSeq {
         yield! [ 1..3 ]
-        do! delayRandom ()
+        do! longDelay ()
         yield! [ 4..7 ]
-        do! delayRandom ()
+        do! longDelay ()
     }
 
     let (results1: _[]) = tq |> TaskSeq.toArray
@@ -252,11 +252,11 @@ let ``TaskSeq-toArray can be applied multiple times to the same sequence -- muta
         before <- before + 1
         yield before
         yield! [ 100..120 ]
-        do! delayRandom ()
+        do! longDelay ()
         middle <- middle + 1
         yield middle
         yield! [ 100..120 ]
-        do! delayRandom ()
+        do! longDelay ()
         after <- after + 1
         yield after
     }
