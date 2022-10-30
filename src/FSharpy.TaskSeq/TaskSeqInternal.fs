@@ -69,21 +69,19 @@ module internal TaskSeqInternal =
 
         | Some (Predicate predicate) ->
             while go do
-                let! step = e.MoveNextAsync()
-
                 if predicate e.Current then
                     i <- i + 1
 
+                let! step = e.MoveNextAsync()
                 go <- step
 
         | Some (PredicateAsync predicate) ->
             while go do
-                let! step = e.MoveNextAsync()
-
                 match! predicate e.Current with
                 | true -> i <- i + 1
                 | false -> ()
 
+                let! step = e.MoveNextAsync()
                 go <- step
 
         return i
