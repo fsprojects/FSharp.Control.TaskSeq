@@ -10,6 +10,11 @@ open FsToolkit.ErrorHandling
 open FSharpy
 open System.Collections.Generic
 open FsUnit.Xunit
+open Xunit
+open Xunit.Abstractions
+open System.Runtime.Serialization
+open System.Reflection
+open Microsoft.FSharp.Reflection
 
 /// Milliseconds
 [<Measure>]
@@ -223,3 +228,90 @@ module TestUtils =
 
     /// Create a bunch of dummy tasks, each lasting between 10-30ms with spin-wait delays.
     let createDummyTaskSeq = createDummyTaskSeqWith 10_000L<µs> 30_000L<µs>
+
+    // TODO: figure out a way to make IXunitSerializable work with DU types
+    type CustomSerializable<'T>(value: 'T) =
+        let mutable _value: 'T = value
+
+        new() = CustomSerializable(Unchecked.defaultof<'T>)
+
+        member this.Value = _value
+
+        interface IXunitSerializable with
+            member this.Deserialize info = _value <- info.GetValue<'T>("Value")
+
+            member this.Serialize info = info.AddValue("Value", _value)
+
+        override this.ToString() = "Value = " + string _value
+
+    // NOTE: using enum instead of DU because *even if* we use CustomSerializable above, the
+    // VS test runner will hang, and NCrunch will (properly) show that the type does not implement
+    // a default constructor. See https://github.com/xunit/xunit/issues/429, amongst others.
+    type EmptyVariant =
+        | CallEmpty = 0
+        | Do = 1
+        | DoBang = 2
+        | YieldBang = 3
+        | YieldBangNested = 4
+        | DelayDo = 5
+        | DelayDoBang = 6
+        | DelayYieldBang = 7
+        | DelayYieldBangNested = 8
+
+    /// Returns any of a set of variants that each create an empty sequence in a creative way.
+    /// Please extend this with more cases.
+    let getEmptyVariant variant : IAsyncEnumerable<int> =
+        match variant with
+        | EmptyVariant.CallEmpty -> TaskSeq.empty
+        | EmptyVariant.Do -> taskSeq { do ignore () }
+        | EmptyVariant.DoBang -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
+        | EmptyVariant.YieldBang -> taskSeq { yield! Seq.empty<int> }
+        | EmptyVariant.YieldBangNested -> taskSeq { yield! taskSeq { do ignore () } }
+        | EmptyVariant.DelayDo -> taskSeq {
+            do! delayRandom ()
+            do! delayRandom ()
+            do! delayRandom ()
+          }
+        | EmptyVariant.DelayDoBang -> taskSeq {
+            do! task { return! delayRandom () }
+            do! task { return! delayRandom () }
+            do! task { return! delayRandom () }
+          }
+        | EmptyVariant.DelayYieldBang -> taskSeq {
+            do! delayRandom ()
+            yield! Seq.empty<int>
+            do! delayRandom ()
+            yield! Seq.empty<int>
+            do! delayRandom ()
+          }
+
+        | EmptyVariant.DelayYieldBangNested -> taskSeq {
+            yield! taskSeq {
+                do! delayRandom ()
+                yield! taskSeq { do! delayRandom () }
+                do! delayRandom ()
+            }
+
+            yield! TaskSeq.empty
+
+            yield! taskSeq {
+                do! delayRandom ()
+                yield! taskSeq { do! delayRandom () }
+                do! delayRandom ()
+            }
+          }
+        | x -> failwithf "Invalid test variant: %A" x
+
+    type TestEmptyVariants() as this =
+        inherit TheoryData<EmptyVariant>()
+
+        do
+            this.Add EmptyVariant.CallEmpty
+            this.Add EmptyVariant.Do
+            this.Add EmptyVariant.DoBang
+            this.Add EmptyVariant.YieldBang
+            this.Add EmptyVariant.YieldBangNested
+            this.Add EmptyVariant.DelayDo
+            this.Add EmptyVariant.DelayDoBang
+            this.Add EmptyVariant.DelayYieldBang
+            this.Add EmptyVariant.DelayYieldBangNested
