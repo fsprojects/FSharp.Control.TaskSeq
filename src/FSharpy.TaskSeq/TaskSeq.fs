@@ -56,7 +56,7 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     }
 
-    // FIXME: incomplete and incorrect code!!!
+    // FIXME: incomplete and incorrect code!!! TODO: still needed?
     let toSeqOfTasks (source: taskSeq<'T>) = seq {
         let e = source.GetAsyncEnumerator(CancellationToken())
 
@@ -151,29 +151,27 @@ module TaskSeq =
             yield c
     }
 
+    //
+    // Utility functions
+    //
+
+    let length source = Internal.lengthBy None source
+    let lengthBy predicate source = Internal.lengthBy (Some(Predicate predicate)) source
+    let lengthByAsync predicate source = Internal.lengthBy (Some(PredicateAsync predicate)) source
 
     //
     // iter/map/collect functions
     //
 
     let iter action source = Internal.iter (SimpleAction action) source
-
     let iteri action source = Internal.iter (CountableAction action) source
-
     let iterAsync action source = Internal.iter (AsyncSimpleAction action) source
-
     let iteriAsync action source = Internal.iter (AsyncCountableAction action) source
-
     let map (mapper: 'T -> 'U) source = Internal.map (SimpleAction mapper) source
-
     let mapi (mapper: int -> 'T -> 'U) source = Internal.map (CountableAction mapper) source
-
     let mapAsync mapper source = Internal.map (AsyncSimpleAction mapper) source
-
     let mapiAsync mapper source = Internal.map (AsyncCountableAction mapper) source
-
     let collect (binder: 'T -> #IAsyncEnumerable<'U>) source = Internal.collect binder source
-
     let collectSeq (binder: 'T -> #seq<'U>) source = Internal.collectSeq binder source
 
     let collectAsync (binder: 'T -> #Task<#IAsyncEnumerable<'U>>) source : taskSeq<'U> =
@@ -223,12 +221,12 @@ module TaskSeq =
 
     let choose chooser source = Internal.choose (TryPick chooser) source
     let chooseAsync chooser source = Internal.choose (TryPickAsync chooser) source
-    let filter predicate source = Internal.filter (TryFilter predicate) source
-    let filterAsync predicate source = Internal.filter (TryFilterAsync predicate) source
+    let filter predicate source = Internal.filter (Predicate predicate) source
+    let filterAsync predicate source = Internal.filter (PredicateAsync predicate) source
     let tryPick chooser source = Internal.tryPick (TryPick chooser) source
     let tryPickAsync chooser source = Internal.tryPick (TryPickAsync chooser) source
-    let tryFind predicate source = Internal.tryFind (TryFilter predicate) source
-    let tryFindAsync predicate source = Internal.tryFind (TryFilterAsync predicate) source
+    let tryFind predicate source = Internal.tryFind (Predicate predicate) source
+    let tryFindAsync predicate source = Internal.tryFind (PredicateAsync predicate) source
 
     let pick chooser source = task {
         match! Internal.tryPick (TryPick chooser) source with
@@ -243,13 +241,13 @@ module TaskSeq =
     }
 
     let find predicate source = task {
-        match! Internal.tryFind (TryFilter predicate) source with
+        match! Internal.tryFind (Predicate predicate) source with
         | Some item -> return item
         | None -> return Internal.raiseNotFound ()
     }
 
     let findAsync predicate source = task {
-        match! Internal.tryFind (TryFilterAsync predicate) source with
+        match! Internal.tryFind (PredicateAsync predicate) source with
         | Some item -> return item
         | None -> return Internal.raiseNotFound ()
     }

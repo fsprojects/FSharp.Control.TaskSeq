@@ -29,9 +29,9 @@ type ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
 
 [<Struct>]
-type FilterAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
-    | TryFilter of try_filter: ('T -> bool)
-    | TryFilterAsync of async_try_filter: ('T -> 'TaskBool)
+type PredicateAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
+    | Predicate of try_filter: ('T -> bool)
+    | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
 
 module internal TaskSeqInternal =
     let inline raiseEmptySeq () =
@@ -50,6 +50,43 @@ module internal TaskSeqInternal =
         use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         return not step
+    }
+
+    /// Returns length unconditionally, or based on a predicate
+    let lengthBy predicate (source: taskSeq<_>) = task {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let mutable go = true
+        let mutable i = 0
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        match predicate with
+        | None ->
+            while go do
+                let! step = e.MoveNextAsync()
+                i <- i + 1
+                go <- step
+
+        | Some (Predicate predicate) ->
+            while go do
+                let! step = e.MoveNextAsync()
+
+                if predicate e.Current then
+                    i <- i + 1
+
+                go <- step
+
+        | Some (PredicateAsync predicate) ->
+            while go do
+                let! step = e.MoveNextAsync()
+
+                match! predicate e.Current with
+                | true -> i <- i + 1
+                | false -> ()
+
+                go <- step
+
+        return i
     }
 
     let tryExactlyOne (source: taskSeq<_>) = task {
@@ -302,7 +339,7 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
-    let tryFind chooser (source: taskSeq<_>) = task {
+    let tryFind predicate (source: taskSeq<_>) = task {
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
@@ -310,12 +347,12 @@ module internal TaskSeqInternal =
         let! step = e.MoveNextAsync()
         go <- step
 
-        match chooser with
-        | TryFilter filterer ->
+        match predicate with
+        | Predicate predicate ->
             while go do
                 let current = e.Current
 
-                match filterer current with
+                match predicate current with
                 | true ->
                     foundItem <- Some current
                     go <- false
@@ -323,11 +360,11 @@ module internal TaskSeqInternal =
                     let! step = e.MoveNextAsync()
                     go <- step
 
-        | TryFilterAsync filterer ->
+        | PredicateAsync predicate ->
             while go do
                 let current = e.Current
 
-                match! filterer current with
+                match! predicate current with
                 | true ->
                     foundItem <- Some current
                     go <- false
@@ -353,16 +390,16 @@ module internal TaskSeqInternal =
                 | None -> ()
     }
 
-    let filter chooser (source: taskSeq<_>) = taskSeq {
-        match chooser with
-        | TryFilter filterer ->
+    let filter predicate (source: taskSeq<_>) = taskSeq {
+        match predicate with
+        | Predicate predicate ->
             for item in source do
-                if filterer item then
+                if predicate item then
                     yield item
 
-        | TryFilterAsync filterer ->
+        | PredicateAsync predicate ->
             for item in source do
-                match! filterer item with
+                match! predicate item with
                 | true -> yield item
                 | false -> ()
     }

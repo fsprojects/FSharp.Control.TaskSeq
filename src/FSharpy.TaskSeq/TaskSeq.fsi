@@ -13,6 +13,25 @@ module TaskSeq =
     /// </summary>
     val isEmpty: source: taskSeq<'T> -> Task<bool>
 
+    /// <summary>
+    /// Returns the length of the sequence. This operation requires the whole sequence to be evaluated and
+    /// should not be used on potentially infinite sequences.
+    /// </summary>
+    val length: source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
+    /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
+    /// </summary>
+    val lengthBy: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
+    /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.lengthBy" />.
+    /// </summary>
+    val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
+
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: source: taskSeq<'T> -> 'T list
 
