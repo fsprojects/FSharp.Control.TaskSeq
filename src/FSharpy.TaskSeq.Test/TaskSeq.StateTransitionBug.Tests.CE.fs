@@ -11,15 +11,6 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-let getEmptyVariant variant : IAsyncEnumerable<int> =
-    match variant with
-    | "do" -> taskSeq { do ignore () }
-    | "do!" -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
-    | "yield! (seq)" -> taskSeq { yield! Seq.empty<int> }
-    | "yield! (taskseq)" -> taskSeq { yield! taskSeq { do ignore () } }
-    | _ -> failwith "Uncovered variant of test"
-
-
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     let tskSeq = taskSeq { do ignore () }
@@ -30,7 +21,7 @@ let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
     let tskSeq = getEmptyVariant variant
 
@@ -40,7 +31,7 @@ let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
     do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     let tskSeq = getEmptyVariant variant
     use _e = tskSeq.GetAsyncEnumerator()
@@ -49,7 +40,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     ()
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
     use enumerator = tskSeq.GetAsyncEnumerator()
@@ -57,7 +48,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
     do! moveNextAndCheck false enumerator
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
     let tskSeq = getEmptyVariant variant
     use enumerator1 = tskSeq.GetAsyncEnumerator()
@@ -69,7 +60,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
     do! moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant = task {
     let tskSeq = getEmptyVariant variant
 
@@ -79,7 +70,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant =
         do! moveNextAndCheck false enumerator // these are all empty
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
@@ -89,7 +80,7 @@ let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
     current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
 }
 
-[<Theory; InlineData "do"; InlineData "do!"; InlineData "yield! (seq)"; InlineData "yield! (taskseq)">]
+[<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
     let tskSeq = getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
