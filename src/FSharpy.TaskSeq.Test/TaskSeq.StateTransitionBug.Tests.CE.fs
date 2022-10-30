@@ -48,6 +48,9 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
     do! Assert.moveNextAndCheck false enumerator
 }
 
+// TODO: shaky test? Appears that this occasionally raises a NullReferenceException,
+// esp when there's stress (i.e. run all at the same time).
+// See TRACE_FAIL/SUCCESS in Traces folder.
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant

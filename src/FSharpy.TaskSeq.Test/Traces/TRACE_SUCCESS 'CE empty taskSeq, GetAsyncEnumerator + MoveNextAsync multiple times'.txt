@@ -1,0 +1,76 @@
+at AfterCode<_, _>, after F# inits the sm, and we can attach extra info
+MoveNextAsync...
+at MoveNextAsync: normal resumption scenario
+at MoveNextAsync: start calling builder.MoveNext()
+Resuming at resumption point 0
+at Run.MoveNext start
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at MoveNextAsync: done calling builder.MoveNext()
+at MoveNextAsyncResult: case pending/faulted/cancelled...
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Zero()
+at Run.MoveNext, __stack_code_fin=True
+at Run.MoveNext, done
+Getting result for token on 'None' branch, status: Succeeded
+GetAsyncEnumerator, cloning...
+MoveNextAsync...
+at MoveNextAsync: completed = true
+MoveNextAsync...
+at MoveNextAsync: normal resumption scenario
+at MoveNextAsync: start calling builder.MoveNext()
+Resuming at resumption point 0
+at Run.MoveNext start
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at MoveNextAsync: done calling builder.MoveNext()
+at MoveNextAsyncResult: case pending/faulted/cancelled...
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Bind
+at Bind: with __stack_fin = false
+at Bind: calling AwaitUnsafeOnCompleted
+at Run.MoveNext, __stack_code_fin=False
+at Run.MoveNext, await
+at Bind: with __stack_fin = true
+at Bind: with getting result from awaiter
+at Bind: calling continuation
+at Zero()
+at Run.MoveNext, __stack_code_fin=True
+at Run.MoveNext, done
+Getting result for token on 'None' branch, status: Succeeded
+DisposeAsync...
+DisposeAsync...
