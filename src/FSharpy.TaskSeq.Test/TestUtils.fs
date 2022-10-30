@@ -318,13 +318,13 @@ module TestUtils =
         | SmallVariant.ThreadSpinWait -> taskSeq {
             for i in 0..9 do
                 let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
-                yield x
+                yield x + 1
           }
 
         | SmallVariant.ThreadYielded -> taskSeq {
             for i in 0..9 do
                 let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
-                yield x
+                yield x + 1
           }
 
         | SmallVariant.SideEffect_NoThreadYield ->

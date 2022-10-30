@@ -10,7 +10,7 @@ module Task =
     let inline ofTask (task': Task) = task { do! task' }
 
     /// Convert a non-task function into a task-returning function
-    let inline ofLambda (func: _ -> _) = func >> Task.FromResult
+    let inline apply (func: _ -> _) = func >> Task.FromResult
 
     /// Convert a Task<'T> into an Async<'T>
     let inline toAsync (task: Task<'T>) = Async.AwaitTask task
