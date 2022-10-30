@@ -61,7 +61,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync in a loop`` variant = task {
+let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync 100x in a loop`` variant = task {
     let tskSeq = getEmptyVariant variant
 
     // let's get the enumerator a few times
@@ -109,7 +109,7 @@ let ``CE taskSeq, proper two-item task sequence`` () = task {
 let ``CE taskSeq, proper two-item task sequence -- async variant`` () = task {
     let tskSeq = taskSeq {
         yield "foo"
-        do! delayRandom ()
+        do! longDelay ()
         yield "bar"
     }
 

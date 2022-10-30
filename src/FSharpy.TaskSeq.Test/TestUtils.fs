@@ -53,6 +53,28 @@ module DelayHelper =
             while Stopwatch.GetTimestamp() - start < minimumTicks do
                 Thread.SpinWait(1)
 
+    let delayTask (µsecMin: int64<µs>) (µsecMax: int64<µs>) f = task {
+        let rnd = Random()
+        let rnd () = rnd.NextInt64(int64 µsecMin, int64 µsecMax) * 1L<µs>
+
+        // ensure unequal running lengths and points-in-time for assigning the variable
+        // DO NOT use Thead.Sleep(), it's blocking!
+        // WARNING: Task.Delay only has a 15ms timer resolution!!!
+
+        // TODO: check this! The following comment may not be correct
+        // this creates a resume state, which seems more efficient than SpinWait.SpinOnce, see DelayHelper.
+        let! _ = Task.Delay 0
+        let delay = rnd ()
+
+        // typical minimum accuracy of Task.Delay is 15.6ms
+        // for delay-cases shorter than that, we use SpinWait
+        if delay < 15_000L<µs> then
+            do spinWaitDelay (rnd ()) false
+        else
+            do! Task.Delay(int <| float delay / 1_000.0)
+
+        return f ()
+    }
 
 /// <summary>
 /// Creates dummy backgroundTasks with a randomized delay and a mutable state,
@@ -65,29 +87,11 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     let rnd = Random()
     let rnd () = rnd.NextInt64(int64 µsecMin, int64 µsecMax) * 1L<µs>
 
-    let runTaskDelayed i = backgroundTask {
-        // ensure unequal running lengths and points-in-time for assigning the variable
-        // DO NOT use Thead.Sleep(), it's blocking!
-        // WARNING: Task.Delay only has a 15ms timer resolution!!!
-        //let! _ = Task.Delay(rnd ())
-
-        // TODO: check this! The following comment may not be correct
-        // this creates a resume state, which seems more efficient than SpinWait.SpinOnce, see DelayHelper.
-        let! _ = Task.Delay 0
-        let delay = rnd ()
-
-        // typical minimum accuracy of Task.Delay is 15.6ms
-        // for delay-cases shorter than that, we use SpinWait
-        if delay < 15_000L<µs> then
-            do DelayHelper.spinWaitDelay (rnd ()) false
-        else
-            do! Task.Delay(int <| float delay / 1_000.0)
-
-        Interlocked.Increment &x |> ignore
-        return x // this dereferences the variable
+    let runTaskDelayed () = backgroundTask {
+        return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> Interlocked.Increment &x)
     }
 
-    let runTaskDirect i = backgroundTask {
+    let runTaskDirect () = backgroundTask {
         Interlocked.Increment &x |> ignore
         return x
     }
@@ -113,19 +117,22 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     /// Bunch of delayed tasks that randomly have a yielding delay of 10-30ms, therefore having overlapping execution times.
     member _.CreateDelayedTasks total = [
         for i in 0 .. total - 1 do
-            fun () -> runTaskDelayed i
+            fun () -> runTaskDelayed ()
     ]
 
     /// Bunch of delayed tasks without internally using Task.Delay, therefore hot-started and immediately finished.
     member _.CreateDirectTasks total = [
         for i in 0 .. total - 1 do
-            fun () -> runTaskDirect i
+            fun () -> runTaskDirect ()
     ]
 
 [<AutoOpen>]
 module TestUtils =
-    /// Delays (no spin-wait!) between 20 and 200ms, assuming a 15.6ms resolution clock
-    let delayRandom () = task { do! Task.Delay(Random().Next(20, 200)) }
+    /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
+    let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
+
+    /// Spin-waits, occasionally normal delay, between 50µs - 18,000µs
+    let microDelay () = task { do! DelayHelper.delayTask 50L<µs> 18_000L<µs> (fun _ -> ()) }
 
     /// Call MoveNextAsync() and check if return value is the expected value
     let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
@@ -216,7 +223,7 @@ module TestUtils =
 
     /// Create a bunch of dummy tasks, which are sequentially hot-started, WITHOUT artificial spin-wait delays.
     let createDummyDirectTaskSeq count =
-        /// Set of delayed tasks in the form of `unit -> Task<int>`
+        // Set of non-delayed tasks in the form of `unit -> Task<int>`
         let tasks = DummyTaskFactory().CreateDirectTasks count
 
         taskSeq {
@@ -253,10 +260,17 @@ module TestUtils =
         | DoBang = 2
         | YieldBang = 3
         | YieldBangNested = 4
-        | DelayDo = 5
         | DelayDoBang = 6
         | DelayYieldBang = 7
         | DelayYieldBangNested = 8
+
+    type SmallVariant =
+        | NoThreadYield = 1
+        | ThreadSpinWait = 2
+        | ThreadYielded = 3
+        | SideEffect_NoThreadYield = 4
+        | SideEffect_ThreadSpinWait = 5
+        | SideEffect_ThreadYield = 6
 
     /// Returns any of a set of variants that each create an empty sequence in a creative way.
     /// Please extend this with more cases.
@@ -267,39 +281,63 @@ module TestUtils =
         | EmptyVariant.DoBang -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
         | EmptyVariant.YieldBang -> taskSeq { yield! Seq.empty<int> }
         | EmptyVariant.YieldBangNested -> taskSeq { yield! taskSeq { do ignore () } }
-        | EmptyVariant.DelayDo -> taskSeq {
-            do! delayRandom ()
-            do! delayRandom ()
-            do! delayRandom ()
-          }
         | EmptyVariant.DelayDoBang -> taskSeq {
-            do! task { return! delayRandom () }
-            do! task { return! delayRandom () }
-            do! task { return! delayRandom () }
+            do! longDelay ()
+            do! longDelay ()
+            do! longDelay ()
           }
         | EmptyVariant.DelayYieldBang -> taskSeq {
-            do! delayRandom ()
+            do! microDelay ()
             yield! Seq.empty<int>
-            do! delayRandom ()
+            do! longDelay ()
             yield! Seq.empty<int>
-            do! delayRandom ()
+            do! microDelay ()
           }
 
         | EmptyVariant.DelayYieldBangNested -> taskSeq {
             yield! taskSeq {
-                do! delayRandom ()
-                yield! taskSeq { do! delayRandom () }
-                do! delayRandom ()
+                do! microDelay ()
+                yield! taskSeq { do! microDelay () }
+                do! microDelay ()
             }
 
             yield! TaskSeq.empty
 
             yield! taskSeq {
-                do! delayRandom ()
-                yield! taskSeq { do! delayRandom () }
-                do! delayRandom ()
+                do! microDelay ()
+                yield! taskSeq { do! microDelay () }
+                do! microDelay ()
             }
           }
+        | x -> failwithf "Invalid test variant: %A" x
+
+    /// Returns a small TaskSeq of 1..10
+    let getSmallVariant variant : IAsyncEnumerable<int> =
+        match variant with
+        | SmallVariant.NoThreadYield -> taskSeq { yield! [ 1..10 ] }
+        | SmallVariant.ThreadSpinWait -> taskSeq {
+            for i in 0..9 do
+                let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
+                yield x
+          }
+
+        | SmallVariant.ThreadYielded -> taskSeq {
+            for i in 0..9 do
+                let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
+                yield x
+          }
+
+        | SmallVariant.SideEffect_NoThreadYield ->
+            let mutable i = 0
+
+            taskSeq {
+                // F# BUG? coloring disappears?
+                for x = 0 to 9 do
+                    i <- i + 1
+                    yield i
+            }
+        | SmallVariant.SideEffect_ThreadSpinWait -> createDummyTaskSeqWith 50L<µs> 5_000L<µs> 10
+        | SmallVariant.SideEffect_ThreadYield -> createDummyTaskSeqWith 15_000L<µs> 50_000L<µs> 10
         | x -> failwithf "Invalid test variant: %A" x
 
     type TestEmptyVariants() as this =
@@ -311,7 +349,17 @@ module TestUtils =
             this.Add EmptyVariant.DoBang
             this.Add EmptyVariant.YieldBang
             this.Add EmptyVariant.YieldBangNested
-            this.Add EmptyVariant.DelayDo
             this.Add EmptyVariant.DelayDoBang
             this.Add EmptyVariant.DelayYieldBang
             this.Add EmptyVariant.DelayYieldBangNested
+
+    type TestSmallVariants() as this =
+        inherit TheoryData<SmallVariant>()
+
+        do
+            this.Add SmallVariant.NoThreadYield
+            this.Add SmallVariant.ThreadSpinWait
+            this.Add SmallVariant.ThreadYielded
+            this.Add SmallVariant.SideEffect_NoThreadYield
+            this.Add SmallVariant.SideEffect_ThreadSpinWait
+            this.Add SmallVariant.SideEffect_ThreadYield
