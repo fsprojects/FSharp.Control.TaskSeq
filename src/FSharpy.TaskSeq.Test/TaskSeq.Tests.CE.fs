@@ -111,21 +111,6 @@ let ``CE taskSeq with nested deeply yield! perf test 8521 nested tasks`` () = ta
 }
 
 [<Fact>]
-let ``CE taskSeq with several return!`` () = task {
-    // TODO: should we even support this? Traditional 'seq' doesn't.
-    let tskSeq = taskSeq {
-        return! Gen.sideEffectTaskSeq 10
-        return! Gen.sideEffectTaskSeq 5
-    }
-
-    let! data = tskSeq |> TaskSeq.toListAsync
-
-    // FIXME!!! This behavior is *probably* not correct
-    data |> should equal [ 1..10 ]
-}
-
-
-[<Fact>]
 let ``CE taskSeq with mixing yield! and yield`` () = task {
     let tskSeq = taskSeq {
         yield! Gen.sideEffectTaskSeq 10
