@@ -76,6 +76,55 @@ module Immutable =
     }
 
 module SideSeffects =
+    [<Fact>]
+    let ``TaskSeq-length with sequence that changes length`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 10
+            yield! [ 1..i ]
+        }
+
+        do! TaskSeq.length ts |> Task.map (should equal 10)
+        do! TaskSeq.length ts |> Task.map (should equal 20) // mutable state dangers!!
+        do! TaskSeq.length ts |> Task.map (should equal 30) // id
+        do! TaskSeq.length ts |> Task.map (should equal 40) // id
+        do! TaskSeq.length ts |> Task.map (should equal 50) // id
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthBy with sequence that changes length`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 10
+            yield! [ 1..i ]
+        }
+
+        do! TaskSeq.lengthBy ((<) 10) ts |> Task.map (should equal 0)
+        do! TaskSeq.lengthBy ((<) 20) ts |> Task.map (should equal 0) // mutable state dangers!!
+        do! TaskSeq.lengthBy ((<) 30) ts |> Task.map (should equal 0) // id
+        do! TaskSeq.lengthBy ((<) 10) ts |> Task.map (should equal 30) // id
+        do! TaskSeq.lengthBy ((<) 10) ts |> Task.map (should equal 40) // id
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthByAsync with sequence that changes length`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 10
+            yield! [ 1..i ]
+        }
+
+        let notBefore x = TaskSeq.lengthByAsync (Task.apply ((<) x)) ts
+        do! notBefore 10 |> Task.map (should equal 0)
+        do! notBefore 20 |> Task.map (should equal 0) // mutable state dangers!!
+        do! notBefore 30 |> Task.map (should equal 0) // id
+        do! notBefore 10 |> Task.map (should equal 30) // id
+        do! notBefore 10 |> Task.map (should equal 40) // id
+    }
+
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-length returns proper length`` variant = task {
         let! len = Gen.getSeqWithSideEffect variant |> TaskSeq.length
