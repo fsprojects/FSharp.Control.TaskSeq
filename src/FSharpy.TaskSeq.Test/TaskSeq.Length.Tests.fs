@@ -77,13 +77,13 @@ module Immutable =
 
 module SideSeffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-length returns proper length - side-effect`` variant = task {
+    let ``TaskSeq-length returns proper length`` variant = task {
         let! len = Gen.getSeqWithSideEffect variant |> TaskSeq.length
         len |> should equal 10
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-lengthBy returns proper length - side-effect`` variant = task {
+    let ``TaskSeq-lengthBy returns proper length`` variant = task {
         let! len =
             Gen.getSeqWithSideEffect variant
             |> TaskSeq.lengthBy (fun _ -> true)
@@ -92,7 +92,7 @@ module SideSeffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-lengthByAsync returns proper length - side-effect`` variant = task {
+    let ``TaskSeq-lengthByAsync returns proper length`` variant = task {
         let! len =
             Gen.getSeqWithSideEffect variant
             |> TaskSeq.lengthByAsync (Task.apply (fun _ -> true))
@@ -102,7 +102,7 @@ module SideSeffects =
 
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-lengthBy returns proper length when filtering - side-effect`` variant = task {
+    let ``TaskSeq-lengthBy returns proper length when filtering`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
         let run f = ts |> TaskSeq.lengthBy f
 
