@@ -163,6 +163,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     interface IValueTaskSource with
         member this.GetResult token =
             let canMoveNext = this._machine.Data.promiseOfValueOrEnd.GetResult token
+
             if not canMoveNext then
                 // see below in generic version for explanation
                 this._machine.Data.completed <- true
@@ -196,15 +197,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
     interface IAsyncStateMachine with
         /// The MoveNext method is called by builder.MoveNext() in the resumable code
-        member this.MoveNext() =
-            log "at IAsyncStateMatchine.MoveNext"
-
-            try
-                moveNextRef &this._machine
-            with e ->
-                log "at IAsyncStatemachine EXCEPTION!!!"
-                log "%A" e
-
+        member this.MoveNext() = moveNextRef &this._machine
 
         /// SetStatemachine is (currently) never called
         member _.SetStateMachine(_state) = () // not needed for reference type
@@ -213,30 +206,30 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         member this.GetAsyncEnumerator(ct) =
             // if this is null, it means it's the first time for this Enumerable to create an Enumerator
             // so, to prevent extra allocations, we just return 'self', with the iterator vars set appropriately.
-            //match this._machine.Data :> obj with
-            //| null when initialThreadId = Environment.CurrentManagedThreadId ->
-            //    this.InitMachineData(ct, &this._machine)
-            //    this // just return 'self' here
+            match this._machine.Data :> obj with
+            | null when initialThreadId = Environment.CurrentManagedThreadId ->
+                this.InitMachineData(ct, &this._machine)
+                this // just return 'self' here
 
-            //| _ ->
-            log "GetAsyncEnumerator, start cloning..."
+            | _ ->
+                log "GetAsyncEnumerator, start cloning..."
 
-            // We need to reset state, but only to the "initial machine", resetting the _machine to
-            // Unchecked.defaultof<_> is wrong, as the compiler uses this to track state. However,
-            // we do need a zeroed ResumptionPoint, otherwise we would continue after the last iteration
-            // returning an empty sequence.
-            //
-            // Solution: we shadow the initial machine, which we then re-assign here:
-            //
-            let clone = TaskSeq<'Machine, 'T>() // we used MemberwiseClone, TODO: test difference in perf, but this should be faster
+                // We need to reset state, but only to the "initial machine", resetting the _machine to
+                // Unchecked.defaultof<_> is wrong, as the compiler uses this to track state. However,
+                // we do need a zeroed ResumptionPoint, otherwise we would continue after the last iteration
+                // returning an empty sequence.
+                //
+                // Solution: we shadow the initial machine, which we then re-assign here:
+                //
+                let clone = TaskSeq<'Machine, 'T>() // we used MemberwiseClone, TODO: test difference in perf, but this should be faster
 
-            // _machine will change, _initialMachine will not, which can be used in a new clone.
-            // we still need to copy _initialMachine, as it has been initialized by the F# compiler in AfterCode<_, _>.
-            clone._machine <- this._initialMachine
-            clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
-            clone.InitMachineData(ct, &clone._machine)
-            log "GetAsyncEnumerator, finished cloning..."
-            clone
+                // _machine will change, _initialMachine will not, which can be used in a new clone.
+                // we still need to copy _initialMachine, as it has been initialized by the F# compiler in AfterCode<_, _>.
+                clone._machine <- this._initialMachine
+                clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
+                clone.InitMachineData(ct, &clone._machine)
+                log "GetAsyncEnumerator, finished cloning..."
+                clone
 
     interface System.Collections.Generic.IAsyncEnumerator<'T> with
         member this.Current =
@@ -350,14 +343,10 @@ type TaskSeqBuilder() =
                     //-- RESUMABLE CODE START
                     __resumeAt sm.ResumptionPoint
 
-                    log "Resuming at resumption point %i" sm.ResumptionPoint
-
                     try
                         log "at Run.MoveNext start"
 
                         let __stack_code_fin = code.Invoke(&sm)
-
-                        log $"at Run.MoveNext, __stack_code_fin={__stack_code_fin}"
 
                         if __stack_code_fin then
                             log $"at Run.MoveNext, done"
@@ -371,14 +360,14 @@ type TaskSeqBuilder() =
                             sm.Data.completed <- true
 
                         elif sm.Data.current.IsSome then
-                            log $"at Run.MoveNext, yield"
+                            log $"at Run.MoveNext, still more items in enumerator"
 
                             // Signal there's more data:
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
 
                         else
                             // Goto request
-                            log $"at Run.MoveNext, await"
+                            log $"at Run.MoveNext, await, MoveNextAsync has not completed yet"
 
                             // don't capture the full object in the next closure (won't work because: byref)
                             // but only a reference to itself.
@@ -391,12 +380,10 @@ type TaskSeqBuilder() =
                             )
 
                     with exn ->
-                        log "Exception dump:"
-                        log "%A" exn
                         log "Setting exception of PromiseOfValueOrEnd to: %s" exn.Message
-
                         sm.Data.promiseOfValueOrEnd.SetException(exn)
                         sm.Data.builder.Complete()
+
                 //-- RESUMABLE CODE END
                 ))
                 (SetStateMachineMethodImpl<_>(fun sm state -> ())) // not used in reference impl
@@ -408,16 +395,16 @@ type TaskSeqBuilder() =
                     ts._machine <- sm
                     ts :> IAsyncEnumerable<'T>))
         else
+            //    let initialResumptionFunc = TaskSeqResumptionFunc<'T>(fun sm -> code.Invoke(&sm))
+            //    let resumptionFuncExecutor = TaskSeqResumptionExecutor<'T>(fun sm f ->
+            //            // TODO: add exception handling?
+            //            if f.Invoke(&sm) then
+            //                sm.ResumptionPoint <- -2)
+            //    let setStateMachine = SetStateMachineMethodImpl<_>(fun sm f -> ())
+            //    sm.Machine.ResumptionFuncInfo <- (initialResumptionFunc, resumptionFuncExecutor, setStateMachine)
+            //sm.Start()
             NotImplementedException "No dynamic implementation for TaskSeq yet."
             |> raise
-    //    let initialResumptionFunc = TaskSeqResumptionFunc<'T>(fun sm -> code.Invoke(&sm))
-    //    let resumptionFuncExecutor = TaskSeqResumptionExecutor<'T>(fun sm f ->
-    //            // TODO: add exception handling?
-    //            if f.Invoke(&sm) then
-    //                sm.ResumptionPoint <- -2)
-    //    let setStateMachine = SetStateMachineMethodImpl<_>(fun sm f -> ())
-    //    sm.Machine.ResumptionFuncInfo <- (initialResumptionFunc, resumptionFuncExecutor, setStateMachine)
-    //sm.Start()
 
 
     member inline _.Zero() : TaskSeqCode<'T> =
@@ -457,8 +444,6 @@ type TaskSeqBuilder() =
                     let __stack_yield_fin = ResumableCode.Yield().Invoke(&sm)
                     __stack_condition_fin <- __stack_yield_fin
 
-                    log "at WhileAsync: after Yield().Invoke(sm), __stack_condition_fin=%b" __stack_condition_fin
-
                     if __stack_condition_fin then
                         condition_res <- task.Result
                     else
@@ -472,9 +457,11 @@ type TaskSeqBuilder() =
         )
 
     member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        log "at While(...), calling WhileAsync()"
+        log "at While(...)"
 
-        b.WhileAsync((fun () -> ValueTask<bool>(condition ())), body)
+        // was this:
+        // b.WhileAsync((fun () -> ValueTask<bool>(condition ())), body)
+        ResumableCode.While(condition, body)
 
     member inline _.TryWith(body: TaskSeqCode<'T>, catch: exn -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
         ResumableCode.TryWith(body, catch)
@@ -578,12 +565,9 @@ type TaskSeqBuilder() =
         TaskSeqCode<'T>(fun sm ->
             // This will yield with __stack_fin = false
             // This will resume with __stack_fin = true
-            log "at Yield, before Yield().Invoke(sm)"
+            log "at Yield"
 
             let __stack_fin = ResumableCode.Yield().Invoke(&sm)
-
-            log "at Yield, __stack_fin = %b" __stack_fin
-
             sm.Data.current <- ValueSome v
             sm.Data.awaiter <- null
             __stack_fin)
@@ -610,30 +594,9 @@ type TaskSeqBuilder() =
             log "at Bind: this.completed = %b" sm.Data.completed
 
             if __stack_fin then
-                let uninitialized = Unchecked.defaultof<TaskAwaiter<'TResult1>>
-                log "at Bind: awaiter is initialized: %b" (uninitialized <> awaiter)
+                let result = awaiter.GetResult()
+                (continuation result).Invoke(&sm)
 
-                if uninitialized = awaiter then
-                    log "at Bind: task is null: %b" (isNull task)
-                    awaiter <- task.GetAwaiter()
-
-                log "at Bind: awaiter is initialized: %b" (uninitialized <> awaiter)
-                log "at Bind: with getting result from awaiter, completed: %b" awaiter.IsCompleted
-
-                let result =
-                    try
-                        awaiter.GetResult()
-                    with e ->
-                        log "at Bind: EXCEPTION getting result from awaiter: %A" e
-                        Unchecked.defaultof<_>
-
-                log "at Bind: calling continuation"
-
-                try
-                    (continuation result).Invoke(&sm)
-                with e ->
-                    printfn "Exception!!! %s" e.Message
-                    reraise ()
             else
                 log "at Bind: calling AwaitUnsafeOnCompleted"
 
