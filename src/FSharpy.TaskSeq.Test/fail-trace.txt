@@ -1,0 +1,60 @@
+6 (false): at AfterCode<_, _>, after F# inits the sm, and we can attach extra info
+6 (false): GetAsyncEnumerator, start cloning...
+6 (false): GetAsyncEnumerator, finished cloning...
+6 (false): MoveNextAsync...
+6 (false): at MoveNextAsync: normal resumption scenario
+6 (false): at MoveNextAsync: start calling builder.MoveNext()
+6 (false): at IAsyncStateMatchine.MoveNext
+6 (false): Resuming at resumption point 0
+6 (false): at Run.MoveNext start
+6 (false): at Bind
+6 (false): at Bind: with __stack_fin = false
+6 (false): at Bind: calling AwaitUnsafeOnCompleted
+6 (false): at Run.MoveNext, __stack_code_fin=False
+6 (false): at Run.MoveNext, await
+6 (false): at MoveNextAsync: done calling builder.MoveNext()
+6 (false): at MoveNextAsyncResult: case Pending...
+13 (false): at IAsyncStateMatchine.MoveNext
+13 (false): at Bind: with __stack_fin = true
+13 (false): at Bind: with getting result from awaiter
+13 (false): at Bind: calling continuation
+13 (false): at Zero()
+13 (false): at Run.MoveNext, __stack_code_fin=True
+13 (false): at Run.MoveNext, done
+14 (false): Getting result for token on 'None' branch, status: Succeeded
+15 (false): GetAsyncEnumerator, start cloning...
+15 (false): GetAsyncEnumerator, finished cloning...
+15 (false): MoveNextAsync...
+15 (false): at MoveNextAsync: normal resumption scenario
+15 (false): at MoveNextAsync: start calling builder.MoveNext()
+15 (false): at IAsyncStateMatchine.MoveNext
+15 (false): at Bind: with __stack_fin = true
+15 (false): at Bind: with getting result from awaiter
+15 (false): Exception dump:
+15 (false): System.NullReferenceException: Object reference not set to an instance of an object.
+   at FSharpy.Tests.TestUtils.Gen.getEmptyVariant@308-15.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq.Test\TestUtils.fs:line 309
+15 (false): Setting exception of PromiseOfValueOrEnd to: Object reference not set to an instance of an object.
+15 (false): at MoveNextAsync: done calling builder.MoveNext()
+15 (false): at MoveNextAsyncResult: case Faulted...
+15 (false): Getting result for token on 'None' branch, status: Faulted
+15 (false): Error 'Object reference not set to an instance of an object.' for token: 3
+15 (false): DisposeAsync...
+15 (false): DisposeAsync...
+13 (false): Exception dump:
+13 (false): System.InvalidOperationException: An attempt was made to transition a task to a final state when it had already completed.
+   at System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1.SetExistingTaskResult(Task`1 task, TResult result)
+   at System.Runtime.CompilerServices.AsyncIteratorMethodBuilder.Complete()
+   at FSharpy.Tests.TestUtils.Gen.getEmptyVariant@308-15.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq.Test\TestUtils.fs:line 309
+13 (false): Setting exception of PromiseOfValueOrEnd to: An attempt was made to transition a task to a final state when it had already completed.
+13 (false): at IAsyncStatemachine EXCEPTION!!!
+13 (false): System.InvalidOperationException: Operation is not valid due to the current state of the object.
+   at System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1.SignalCompletion()
+   at System.Threading.Tasks.Sources.ManualResetValueTaskSourceCore`1.SetException(Exception error)
+   at FSharpy.Tests.TestUtils.Gen.getEmptyVariant@308-15.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq.Test\TestUtils.fs:line 309
+   at FSharpy.TaskSeqBuilders.TaskSeq`2.System.Runtime.CompilerServices.IAsyncStateMachine.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq\TaskSeqBuilder.fs:line 249
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at FSharpy.Tests.Bug #42 -- synchronous.CE empty taskSeq\, GetAsyncEnumerator - MoveNextAsync multiple times@52.MoveNext() in D:\Projects\OpenSource\Abel\TaskSeq\src\FSharpy.TaskSeq.Test\TaskSeq.StateTransitionBug.Tests.CE.fs:line 60
+   at Xunit.Sdk.TestInvoker`1.<>c__DisplayClass48_0.<<InvokeTestMethodAsync>b__1>d.MoveNext() in /_/src/xunit.execution/Sdk/Frameworks/Runners/TestInvoker.cs:line 264
+--- End of stack trace from previous location ---
+   at Xunit.Sdk.ExecutionTimer.AggregateAsync(Func`1 asyncAction) in /_/src/xunit.execution/Sdk/Frameworks/ExecutionTimer.cs:line 48
+   at Xunit.Sdk.ExceptionAggregator.RunAsync(Func`1 code) in /_/src/xunit.core/Sdk/ExceptionAggregator.cs:line 90
