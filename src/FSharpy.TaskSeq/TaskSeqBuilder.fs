@@ -1,5 +1,7 @@
 namespace FSharpy.TaskSeqBuilders
 
+open System.Diagnostics
+
 #nowarn "57" // note: this is *not* an experimental feature, but they forgot to switch off the flag
 
 open System
@@ -32,6 +34,20 @@ module Internal = // cannot be marked with 'internal' scope
 
         with _ ->
             false
+
+    type Debug =
+
+        [<Conditional("DEBUG")>]
+        static member private print value =
+            // don't use ksprintf here, because the compiler does not remove all allocations due to
+            // the way PrintfFormat types are compiled, even if we set the Conditional attribute.
+            printfn "%i (%b): %s" Thread.CurrentThread.ManagedThreadId Thread.CurrentThread.IsThreadPoolThread value
+
+        [<Conditional("DEBUG")>]
+        static member logInfo(str) = Debug.print str
+
+        [<Conditional("DEBUG")>]
+        static member logInfo(str, data) = Debug.print $"%s{str}{data}"
 
     let log format =
         if verbose then
