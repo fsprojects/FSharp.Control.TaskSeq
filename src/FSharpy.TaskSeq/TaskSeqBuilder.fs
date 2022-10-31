@@ -20,7 +20,7 @@ module Internal = // cannot be marked with 'internal' scope
 
     /// Setting from environment variable TASKSEQ_LOG_VERBOSE, which,
     /// when set, enables (very) verbose printing of flow and state
-    let verbose =
+    let initVerbose () =
         try
             match Environment.GetEnvironmentVariable "TASKSEQ_LOG_VERBOSE" with
             | null -> false
@@ -37,27 +37,48 @@ module Internal = // cannot be marked with 'internal' scope
 
     type Debug =
 
+        [<DefaultValue(false)>]
+        static val mutable private verbose: bool option
+
+        /// Setting from environment variable TASKSEQ_LOG_VERBOSE, which,
+        /// when set, enables (very) verbose printing of flow and state
+        static member private getVerboseSetting() =
+            match Debug.verbose with
+            | None ->
+                let verboseEnv =
+                    try
+                        match Environment.GetEnvironmentVariable "TASKSEQ_LOG_VERBOSE" with
+                        | null -> false
+                        | x ->
+                            match x.ToLowerInvariant().Trim() with
+                            | "1"
+                            | "true"
+                            | "on"
+                            | "yes" -> true
+                            | _ -> false
+
+                    with _ ->
+                        false
+
+                Debug.verbose <- Some verboseEnv
+                verboseEnv
+
+            | Some setting -> setting
+
         [<Conditional("DEBUG")>]
         static member private print value =
-            // don't use ksprintf here, because the compiler does not remove all allocations due to
-            // the way PrintfFormat types are compiled, even if we set the Conditional attribute.
-            printfn "%i (%b): %s" Thread.CurrentThread.ManagedThreadId Thread.CurrentThread.IsThreadPoolThread value
+            match Debug.getVerboseSetting () with
+            | false -> ()
+            | true ->
+                // don't use ksprintf here, because the compiler does not remove all allocations due to
+                // the way PrintfFormat types are compiled, even if we set the Conditional attribute.
+                printfn "%i (%b): %s" Thread.CurrentThread.ManagedThreadId Thread.CurrentThread.IsThreadPoolThread value
 
         [<Conditional("DEBUG")>]
         static member logInfo(str) = Debug.print str
 
         [<Conditional("DEBUG")>]
         static member logInfo(str, data) = Debug.print $"%s{str}{data}"
-
-    let log format =
-        if verbose then
-            Printf.ksprintf
-                (fun s ->
-                    printfn "%i (%b): %s" Thread.CurrentThread.ManagedThreadId Thread.CurrentThread.IsThreadPoolThread s)
-                format
-        else
-            Printf.ksprintf ignore format
-
 
     /// Call MoveNext on an IAsyncStateMachine by reference
     let inline moveNextRef (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
@@ -66,6 +87,8 @@ module Internal = // cannot be marked with 'internal' scope
     let inline raiseNotImpl () =
         NotImplementedException "Abstract Class: method or property not implemented"
         |> raise
+
+open type Debug
 
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
@@ -228,7 +251,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 this // just return 'self' here
 
             | _ ->
-                log "GetAsyncEnumerator, start cloning..."
+                logInfo "GetAsyncEnumerator, start cloning..."
 
                 // We need to reset state, but only to the "initial machine", resetting the _machine to
                 // Unchecked.defaultof<_> is wrong, as the compiler uses this to track state. However,
@@ -244,7 +267,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 clone._machine <- this._initialMachine
                 clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
                 clone.InitMachineData(ct, &clone._machine)
-                log "GetAsyncEnumerator, finished cloning..."
+                logInfo "GetAsyncEnumerator, finished cloning..."
                 clone
 
     interface System.Collections.Generic.IAsyncEnumerator<'T> with
@@ -259,39 +282,39 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 Unchecked.defaultof<'T>
 
         member this.MoveNextAsync() =
-            log "MoveNextAsync..."
+            logInfo "MoveNextAsync..."
 
             if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
-                log "at MoveNextAsync: Resumption point = -1"
+                logInfo "at MoveNextAsync: Resumption point = -1"
 
                 ValueTask<bool>()
 
             elif this._machine.Data.completed then
-                log "at MoveNextAsync: completed = true"
+                logInfo "at MoveNextAsync: completed = true"
 
                 // return False when beyond the last item
                 this._machine.Data.promiseOfValueOrEnd.Reset()
                 ValueTask<bool>()
 
             else
-                log "at MoveNextAsync: normal resumption scenario"
+                logInfo "at MoveNextAsync: normal resumption scenario"
 
                 let data = this._machine.Data
                 data.promiseOfValueOrEnd.Reset()
                 let mutable ts = this
 
-                log "at MoveNextAsync: start calling builder.MoveNext()"
+                logInfo "at MoveNextAsync: start calling builder.MoveNext()"
 
                 data.builder.MoveNext(&ts)
 
-                log "at MoveNextAsync: finished calling builder.MoveNext()"
+                logInfo "at MoveNextAsync: finished calling builder.MoveNext()"
 
                 this.MoveNextAsyncResult()
 
         /// Disposes of the IAsyncEnumerator (*not* the IAsyncEnumerable!!!)
         member this.DisposeAsync() =
             task {
-                log "DisposeAsync..."
+                logInfo "DisposeAsync..."
 
                 match this._machine.Data.disposalStack with
                 | null -> ()
@@ -319,7 +342,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         match status with
         | ValueTaskSourceStatus.Succeeded ->
-            log "at MoveNextAsyncResult: case succeeded..."
+            logInfo "at MoveNextAsyncResult: case succeeded..."
 
             let result = data.promiseOfValueOrEnd.GetResult(version)
 
@@ -333,11 +356,11 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         | ValueTaskSourceStatus.Faulted
         | ValueTaskSourceStatus.Canceled
         | ValueTaskSourceStatus.Pending as state ->
-            log "at MoveNextAsyncResult: case %A..." state
+            logInfo ("at MoveNextAsyncResult: case ", state)
 
             ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
         | _ ->
-            log "at MoveNextAsyncResult: Unexpected state"
+            logInfo "at MoveNextAsyncResult: Unexpected state"
             // assume it's a possibly new, not yet supported case, treat as default
             ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
 
@@ -360,12 +383,12 @@ type TaskSeqBuilder() =
                     __resumeAt sm.ResumptionPoint
 
                     try
-                        log "at Run.MoveNext start"
+                        logInfo "at Run.MoveNext start"
 
                         let __stack_code_fin = code.Invoke(&sm)
 
                         if __stack_code_fin then
-                            log $"at Run.MoveNext, done"
+                            logInfo $"at Run.MoveNext, done"
 
                             // Signal we're at the end
                             // NOTE: if we don't do it here, as well as in IValueTaskSource<bool>.GetResult
@@ -376,14 +399,14 @@ type TaskSeqBuilder() =
                             sm.Data.completed <- true
 
                         elif sm.Data.current.IsSome then
-                            log $"at Run.MoveNext, still more items in enumerator"
+                            logInfo $"at Run.MoveNext, still more items in enumerator"
 
                             // Signal there's more data:
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
 
                         else
                             // Goto request
-                            log $"at Run.MoveNext, await, MoveNextAsync has not completed yet"
+                            logInfo $"at Run.MoveNext, await, MoveNextAsync has not completed yet"
 
                             // don't capture the full object in the next closure (won't work because: byref)
                             // but only a reference to itself.
@@ -396,7 +419,7 @@ type TaskSeqBuilder() =
                             )
 
                     with exn ->
-                        log "Setting exception of PromiseOfValueOrEnd to: %s" exn.Message
+                        logInfo ("Setting exception of PromiseOfValueOrEnd to: ", exn.Message)
                         sm.Data.promiseOfValueOrEnd.SetException(exn)
                         sm.Data.builder.Complete()
 
@@ -404,7 +427,7 @@ type TaskSeqBuilder() =
                 ))
                 (SetStateMachineMethodImpl<_>(fun sm state -> ())) // not used in reference impl
                 (AfterCode<_, _>(fun sm ->
-                    log "at AfterCode<_, _>, after F# inits the sm, and we can attach extra info"
+                    logInfo "at AfterCode<_, _>, after F# inits the sm, and we can attach extra info"
 
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
                     ts._initialMachine <- sm
@@ -424,11 +447,11 @@ type TaskSeqBuilder() =
 
 
     member inline _.Zero() : TaskSeqCode<'T> =
-        log "at Zero()"
+        logInfo "at Zero()"
         ResumableCode.Zero()
 
     member inline _.Combine(task1: TaskSeqCode<'T>, task2: TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        log "at Combine(.., ..)"
+        logInfo "at Combine(.., ..)"
 
         ResumableCode.Combine(task1, task2)
 
@@ -446,12 +469,12 @@ type TaskSeqBuilder() =
                 let __stack_vtask = condition ()
 
                 if __stack_vtask.IsCompleted then
-                    log "at WhileAsync: returning completed task"
+                    logInfo "at WhileAsync: returning completed task"
 
                     __stack_condition_fin <- true
                     condition_res <- __stack_vtask.Result
                 else
-                    log "at WhileAsync: awaiting non-completed task"
+                    logInfo "at WhileAsync: awaiting non-completed task"
 
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
@@ -473,7 +496,7 @@ type TaskSeqBuilder() =
         )
 
     member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        log "at While(...)"
+        logInfo "at While(...)"
 
         // was this:
         // b.WhileAsync((fun () -> ValueTask<bool>(condition ())), body)
@@ -581,7 +604,7 @@ type TaskSeqBuilder() =
         TaskSeqCode<'T>(fun sm ->
             // This will yield with __stack_fin = false
             // This will resume with __stack_fin = true
-            log "at Yield"
+            logInfo "at Yield"
 
             let __stack_fin = ResumableCode.Yield().Invoke(&sm)
             sm.Data.current <- ValueSome v
@@ -598,7 +621,7 @@ type TaskSeqBuilder() =
             let mutable awaiter = task.GetAwaiter()
             let mutable __stack_fin = true
 
-            log "at Bind"
+            logInfo "at Bind"
 
             if not awaiter.IsCompleted then
                 // This will yield with __stack_fin2 = false
@@ -606,15 +629,15 @@ type TaskSeqBuilder() =
                 let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
                 __stack_fin <- __stack_fin2
 
-            log "at Bind: with __stack_fin = %b" __stack_fin
-            log "at Bind: this.completed = %b" sm.Data.completed
+            logInfo ("at Bind: with __stack_fin = ", __stack_fin)
+            logInfo ("at Bind: this.completed = ", sm.Data.completed)
 
             if __stack_fin then
                 let result = awaiter.GetResult()
                 (continuation result).Invoke(&sm)
 
             else
-                log "at Bind: calling AwaitUnsafeOnCompleted"
+                logInfo "at Bind: calling AwaitUnsafeOnCompleted"
 
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone
@@ -625,7 +648,7 @@ type TaskSeqBuilder() =
             let mutable awaiter = task.GetAwaiter()
             let mutable __stack_fin = true
 
-            log "at BindV"
+            logInfo "at BindV"
 
             if not awaiter.IsCompleted then
                 // This will yield with __stack_fin2 = false
@@ -637,7 +660,7 @@ type TaskSeqBuilder() =
                 let result = awaiter.GetResult()
                 (continuation result).Invoke(&sm)
             else
-                log "at BindV: calling AwaitUnsafeOnCompleted"
+                logInfo "at BindV: calling AwaitUnsafeOnCompleted"
 
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone
