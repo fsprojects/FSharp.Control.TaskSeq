@@ -32,7 +32,7 @@ let ``TaskSeq-chooseAsync on an empty sequence`` () = task {
 [<Fact>]
 let ``TaskSeq-choose can convert and filter`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
         |> TaskSeq.toArrayAsync
 
@@ -42,7 +42,7 @@ let ``TaskSeq-choose can convert and filter`` () = task {
 [<Fact>]
 let ``TaskSeq-chooseAsync can convert and filter`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.chooseAsync (fun number -> task { return if number <= 26 then Some(char number + '@') else None })
         |> TaskSeq.toArrayAsync
 

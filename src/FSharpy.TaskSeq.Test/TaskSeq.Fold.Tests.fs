@@ -11,7 +11,7 @@ open FSharpy
 [<Fact>]
 let ``TaskSeq-fold folds with every item`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 26
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 26
         |> TaskSeq.fold (fun (state: StringBuilder) item -> state.Append(char item + '@')) (StringBuilder())
 
     alphabet.ToString()
@@ -21,7 +21,7 @@ let ``TaskSeq-fold folds with every item`` () = task {
 [<Fact>]
 let ``TaskSeq-foldAsync folds with every item`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 26
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 26
         |> TaskSeq.foldAsync
             (fun (state: StringBuilder) item -> task { return state.Append(char item + '@') })
             (StringBuilder())

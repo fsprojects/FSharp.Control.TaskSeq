@@ -10,19 +10,19 @@ open FSharpy
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``TaskSeq-last throws on empty sequences`` variant = task {
-    fun () -> getEmptyVariant variant |> TaskSeq.last |> Task.ignore
+    fun () -> Gen.getEmptyVariant variant |> TaskSeq.last |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``TaskSeq-tryLast returns None on empty sequences`` variant = task {
-    let! nothing = getEmptyVariant variant |> TaskSeq.tryLast
+    let! nothing = Gen.getEmptyVariant variant |> TaskSeq.tryLast
     nothing |> should be None'
 }
 
-[<Theory; ClassData(typeof<TestSmallVariants>)>]
+[<Theory; ClassData(typeof<TestImmTaskSeq>)>]
 let ``TaskSeq-last gets the last item in a longer sequence`` variant = task {
-    let! last = getSmallVariant variant |> TaskSeq.last
+    let! last = Gen.getSeqImmutable variant |> TaskSeq.last
     last |> should equal 10
 }
 
@@ -32,9 +32,9 @@ let ``TaskSeq-last gets the only item in a singleton sequence`` () = task {
     last |> should equal 42
 }
 
-[<Theory; ClassData(typeof<TestSmallVariants>)>]
+[<Theory; ClassData(typeof<TestImmTaskSeq>)>]
 let ``TaskSeq-tryLast gets the last item in a longer sequence`` variant = task {
-    let! last = getSmallVariant variant |> TaskSeq.tryLast
+    let! last = Gen.getSeqImmutable variant |> TaskSeq.tryLast
 
     last |> should be Some'
     last |> should equal (Some 10)

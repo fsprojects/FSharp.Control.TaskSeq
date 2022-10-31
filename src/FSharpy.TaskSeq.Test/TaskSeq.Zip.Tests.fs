@@ -9,8 +9,8 @@ open FSharpy
 
 [<Fact>]
 let ``TaskSeq-zip zips in correct order`` () = task {
-    let one = createDummyTaskSeq 10
-    let two = createDummyTaskSeq 10
+    let one = Gen.sideEffectTaskSeq 10
+    let two = Gen.sideEffectTaskSeq 10
     let combined = TaskSeq.zip one two
     let! combined = TaskSeq.toArrayAsync combined
 
@@ -26,8 +26,8 @@ let ``TaskSeq-zip zips in correct order`` () = task {
 
 [<Fact>]
 let ``TaskSeq-zip zips in correct order for differently delayed sequences`` () = task {
-    let one = createDummyDirectTaskSeq 10
-    let two = createDummyTaskSeq 10
+    let one = Gen.sideEffectTaskSeq_Sequential 10
+    let two = Gen.sideEffectTaskSeq 10
     let combined = TaskSeq.zip one two
     let! combined = TaskSeq.toArrayAsync combined
 
@@ -43,8 +43,8 @@ let ``TaskSeq-zip zips in correct order for differently delayed sequences`` () =
 
 [<Theory; InlineData 100; InlineData 1_000; InlineData 10_000; InlineData 100_000>]
 let ``TaskSeq-zip zips large sequences just fine`` length = task {
-    let one = createDummyTaskSeqWith 10L<µs> 50L<µs> length
-    let two = createDummyDirectTaskSeq length
+    let one = Gen.sideEffectTaskSeqMicro 10L<µs> 50L<µs> length
+    let two = Gen.sideEffectTaskSeq_Sequential length
     let combined = TaskSeq.zip one two
     let! combined = TaskSeq.toArrayAsync combined
 
@@ -76,8 +76,8 @@ let ``TaskSeq-zip zips different types`` () = task {
 
 [<Theory; InlineData true; InlineData false>]
 let ``TaskSeq-zip throws on unequal lengths, variant`` leftThrows = task {
-    let long = createDummyTaskSeq 11
-    let short = createDummyTaskSeq 10
+    let long = Gen.sideEffectTaskSeq 11
+    let short = Gen.sideEffectTaskSeq 10
 
     let combined =
         if leftThrows then
@@ -91,7 +91,7 @@ let ``TaskSeq-zip throws on unequal lengths, variant`` leftThrows = task {
 
 [<Theory; InlineData true; InlineData false>]
 let ``TaskSeq-zip throws on unequal lengths with empty seq`` leftThrows = task {
-    let one = createDummyTaskSeq 1
+    let one = Gen.sideEffectTaskSeq 1
 
     let combined =
         if leftThrows then

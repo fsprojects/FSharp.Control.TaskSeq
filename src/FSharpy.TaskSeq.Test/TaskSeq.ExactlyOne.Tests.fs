@@ -41,7 +41,7 @@ let ``TaskSeq-exactlyOne throws for a sequence of length = two`` () = task {
 [<Fact>]
 let ``TaskSeq-exactlyOne throws for a sequence of length = two - variant`` () = task {
     fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 2
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 2
         |> TaskSeq.exactlyOne
         |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
@@ -51,7 +51,7 @@ let ``TaskSeq-exactlyOne throws for a sequence of length = two - variant`` () = 
 [<Fact>]
 let ``TaskSeq-exactlyOne throws with a larger sequence`` () = task {
     fun () ->
-        createDummyTaskSeqWith 50L<µs> 300L<µs> 200
+        Gen.sideEffectTaskSeqMicro 50L<µs> 300L<µs> 200
         |> TaskSeq.exactlyOne
         |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
@@ -60,7 +60,7 @@ let ``TaskSeq-exactlyOne throws with a larger sequence`` () = task {
 [<Fact>]
 let ``TaskSeq-tryExactlyOne returns None with a larger sequence`` () = task {
     let! nothing =
-        createDummyTaskSeqWith 50L<µs> 300L<µs> 20
+        Gen.sideEffectTaskSeqMicro 50L<µs> 300L<µs> 20
         |> TaskSeq.tryExactlyOne
 
     nothing |> should be None'
@@ -82,7 +82,7 @@ let ``TaskSeq-tryExactlyOne gets the only item in a singleton sequence`` () = ta
 [<Fact>]
 let ``TaskSeq-exactlyOne gets the only item in a singleton sequence - variant`` () = task {
     let! exactlyOne =
-        createLongerDummyTaskSeq 50<ms> 300<ms> 1
+        Gen.sideEffectTaskSeqMs 50<ms> 300<ms> 1
         |> TaskSeq.exactlyOne
 
     exactlyOne |> should equal 1
@@ -91,7 +91,7 @@ let ``TaskSeq-exactlyOne gets the only item in a singleton sequence - variant`` 
 [<Fact>]
 let ``TaskSeq-tryExactlyOne gets the only item in a singleton sequence - variant`` () = task {
     let! exactlyOne =
-        createLongerDummyTaskSeq 50<ms> 300<ms> 1
+        Gen.sideEffectTaskSeqMs 50<ms> 300<ms> 1
         |> TaskSeq.tryExactlyOne
 
     exactlyOne |> should be Some'
