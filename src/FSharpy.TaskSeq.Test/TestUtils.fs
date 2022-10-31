@@ -465,11 +465,11 @@ module TestUtils =
                 yield i
                 do i <- i + 1
                 yield! seq { i .. i + 3 }
-                i <- 10 // ensure we inc 'i' to 10 for a potential next iteration
+                i <- i + 3 // ensure we inc 'i' to 10 for a potential next iteration
               }
 
             | SeqWithSideEffect.Sequential_Zero -> taskSeq {
-                if inc &i = 1 then
+                if inc &i % 10 = 1 then // always true UNLESS NOT FULLY EVALUATED!!!
                     yield! [ 1..3 ]
                 // absent 'else' triggers CE.Zero
 
