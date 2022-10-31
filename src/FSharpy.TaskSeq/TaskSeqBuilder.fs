@@ -161,35 +161,35 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
     // Note: Not entirely clear if this is needed, everything still compiles without it
     interface IValueTaskSource with
-        member this.GetResult(token: int16) =
-            this._machine.Data.promiseOfValueOrEnd.GetResult(token)
-            |> ignore
+        member this.GetResult token =
+            let canMoveNext = this._machine.Data.promiseOfValueOrEnd.GetResult token
+            if not canMoveNext then
+                // see below in generic version for explanation
+                this._machine.Data.completed <- true
 
-        member this.GetStatus(token: int16) = this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
+        member this.GetStatus token = this._machine.Data.promiseOfValueOrEnd.GetStatus token
 
         member this.OnCompleted(continuation, state, token, flags) =
             this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
-    // Needed for MoveNextAsync to return a ValueTask
+    // Needed for MoveNextAsync to return a ValueTask, this manages the source of the ValueTask
+    // in combination with the ManualResetValueTaskSourceCore (in promiseOfValueOrEnd).
     interface IValueTaskSource<bool> with
-        member this.GetStatus(token: int16) = this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
+        member this.GetStatus token = this._machine.Data.promiseOfValueOrEnd.GetStatus token
 
-        member this.GetResult(token: int16) =
-            try
-                log
-                    "Getting result for token on normal branch, status: %A"
-                    (this._machine.Data.promiseOfValueOrEnd.GetStatus(token))
+        /// Returning the boolean value that is used as a result for MoveNextAsync()
+        member this.GetResult token =
+            let canMoveNext = this._machine.Data.promiseOfValueOrEnd.GetResult token
 
-                let x = this._machine.Data.promiseOfValueOrEnd.GetResult(token)
-                this._machine.Data.promiseOfValueOrEnd.Reset()
-                x
-            with e ->
-                // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
-                // We're just logging here because the following error would also be caught right here:
-                // "An attempt was made to transition a task to a final state when it had already completed."
-                log "Error '%s' for token: %i" e.Message token
-                reraise ()
+            // This ensures that, esp. in cases where there's no actual iteration (i.e. empty seq)
+            // we can still detect completeness and prevent an incorrect jump in the resumable code.
+            // See https://github.com/abelbraaksma/TaskSeq/pull/54
+            if not canMoveNext then
+                // Signal we reached the end.
+                // DO NOT call Data.builder.Complete() here, ONLY do that in the Run method.
+                this._machine.Data.completed <- true
 
+            canMoveNext
 
         member this.OnCompleted(continuation, state, token, flags) =
             this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
@@ -362,6 +362,10 @@ type TaskSeqBuilder() =
                         if __stack_code_fin then
                             log $"at Run.MoveNext, done"
 
+                            // Signal we're at the end
+                            // NOTE: if we don't do it here, as well as in IValueTaskSource<bool>.GetResult
+                            // we either end up in an endless loop, or we'll get NRE on empty sequences.
+                            // see: https://github.com/abelbraaksma/TaskSeq/pull/54
                             sm.Data.promiseOfValueOrEnd.SetResult(false)
                             sm.Data.builder.Complete()
                             sm.Data.completed <- true
@@ -369,6 +373,7 @@ type TaskSeqBuilder() =
                         elif sm.Data.current.IsSome then
                             log $"at Run.MoveNext, yield"
 
+                            // Signal there's more data:
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
 
                         else
