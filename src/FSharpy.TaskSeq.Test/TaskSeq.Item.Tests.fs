@@ -23,7 +23,7 @@ let ``TaskSeq-item throws on empty sequence - variant`` () = task {
 [<Fact>]
 let ``TaskSeq-item throws when not found`` () = task {
     fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.item 51
         |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
@@ -32,7 +32,7 @@ let ``TaskSeq-item throws when not found`` () = task {
 [<Fact>]
 let ``TaskSeq-item throws when not found - variant`` () = task {
     fun () ->
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.item Int32.MaxValue
         |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
@@ -46,7 +46,7 @@ let ``TaskSeq-item throws when accessing 2nd item in singleton sequence`` () = t
 
 [<Fact>]
 let ``TaskSeq-item always throws with negative values`` () = task {
-    let make50 () = createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+    let make50 () = Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
 
     fun () -> make50 () |> TaskSeq.item -1 |> Task.ignore
     |> should throwAsyncExact typeof<ArgumentException>
@@ -85,7 +85,7 @@ let ``TaskSeq-tryItem returns None on empty sequence - variant`` () = task {
 [<Fact>]
 let ``TaskSeq-tryItem returns None when not found`` () = task {
     let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.tryItem 50 // zero-based index, so a sequence of 50 items has its last item at index 49
 
     nothing |> should be None'
@@ -94,7 +94,7 @@ let ``TaskSeq-tryItem returns None when not found`` () = task {
 [<Fact>]
 let ``TaskSeq-tryItem returns None when not found - variant`` () = task {
     let! nothing =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.tryItem Int32.MaxValue
 
     nothing |> should be None'
@@ -108,7 +108,7 @@ let ``TaskSeq-tryItem returns None when accessing 2nd item in singleton sequence
 
 [<Fact>]
 let ``TaskSeq-tryItem returns None throws with negative values`` () = task {
-    let make50 () = createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+    let make50 () = Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
 
     let! nothing = make50 () |> TaskSeq.tryItem -1
     nothing |> should be None'
@@ -132,7 +132,7 @@ let ``TaskSeq-tryItem returns None throws with negative values`` () = task {
 [<Fact>]
 let ``TaskSeq-item can get the first item in a longer sequence`` () = task {
     let! head =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.item 0
 
     head |> should equal 1
@@ -141,7 +141,7 @@ let ``TaskSeq-item can get the first item in a longer sequence`` () = task {
 [<Fact>]
 let ``TaskSeq-item can get the last item in a longer sequence`` () = task {
     let! head =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.item 49
 
     head |> should equal 50
@@ -156,7 +156,7 @@ let ``TaskSeq-item can get the first item in a singleton sequence`` () = task {
 [<Fact>]
 let ``TaskSeq-tryItem can get the first item in a longer sequence`` () = task {
     let! head =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.tryItem 0 // zero-based!
 
     head |> should be Some'
@@ -165,7 +165,7 @@ let ``TaskSeq-tryItem can get the first item in a longer sequence`` () = task {
 
 [<Fact>]
 let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () = task {
-    let! head = createDummyDirectTaskSeq 5_001 |> TaskSeq.tryItem 5_000 // zero-based!
+    let! head = Gen.sideEffectTaskSeq_Sequential 5_001 |> TaskSeq.tryItem 5_000 // zero-based!
 
     head |> should be Some'
     head |> should equal (Some 5_001)
@@ -173,7 +173,7 @@ let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () 
 
 [<Fact>]
 let ``TaskSeq-tryItem in a very long sequence (50_000 items - slow variant)`` () = task {
-    let! head = createDummyDirectTaskSeq 50_001 |> TaskSeq.tryItem 50_000 // zero-based!
+    let! head = Gen.sideEffectTaskSeq_Sequential 50_001 |> TaskSeq.tryItem 50_000 // zero-based!
 
     head |> should be Some'
     head |> should equal (Some 50_001)

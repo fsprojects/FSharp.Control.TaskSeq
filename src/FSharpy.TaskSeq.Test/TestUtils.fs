@@ -91,6 +91,8 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
         return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> Interlocked.Increment &x)
     }
 
+    let runTaskDelayedImmutable i = backgroundTask { return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> i + 1) }
+
     let runTaskDirect () = backgroundTask {
         Interlocked.Increment &x |> ignore
         return x
@@ -115,13 +117,19 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 
 
     /// Bunch of delayed tasks that randomly have a yielding delay of 10-30ms, therefore having overlapping execution times.
-    member _.CreateDelayedTasks total = [
+    member _.CreateDelayedTasks_SideEffect total = [
         for i in 0 .. total - 1 do
             fun () -> runTaskDelayed ()
     ]
 
+    /// Bunch of delayed tasks that randomly have a yielding delay of 10-30ms, therefore having overlapping execution times.
+    member _.CreateDelayedTasks_Immutable total = [
+        for i in 0 .. total - 1 do
+            fun () -> runTaskDelayedImmutable i
+    ]
+
     /// Bunch of delayed tasks without internally using Task.Delay, therefore hot-started and immediately finished.
-    member _.CreateDirectTasks total = [
+    member _.CreateDirectTasks_SideEffect total = [
         for i in 0 .. total - 1 do
             fun () -> runTaskDirect ()
     ]
@@ -134,107 +142,39 @@ module TestUtils =
     /// Spin-waits, occasionally normal delay, between 50µs - 18,000µs
     let microDelay () = task { do! DelayHelper.delayTask 50L<µs> 18_000L<µs> (fun _ -> ()) }
 
-    /// Call MoveNextAsync() and check if return value is the expected value
-    let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
-        let! (hasNext: bool) = enumerator.MoveNextAsync()
+    module Assert =
+        /// Call MoveNextAsync() and check if return value is the expected value
+        let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
+            let! (hasNext: bool) = enumerator.MoveNextAsync()
 
-        if expected then
-            hasNext |> should be True
-        else
-            hasNext |> should be False
-    }
-
-    /// Call MoveNextAsync() and check if Current has the expected value. Uses untyped 'should equal'
-    let moveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IAsyncEnumerator<_>) = task {
-        let! (hasNext: bool) = enumerator.MoveNextAsync()
-
-        if successMoveNext then
-            hasNext |> should be True
-        else
-            hasNext |> should be False
-
-        enumerator.Current |> should equal expectedValue
-    }
-
-    /// Call MoveNext() and check if Current has the expected value. Uses untyped 'should equal'
-    let seqMoveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IEnumerator<_>) =
-        let (hasNext: bool) = enumerator.MoveNext()
-
-        if successMoveNext then
-            hasNext |> should be True
-        else
-            hasNext |> should be False
-
-        enumerator.Current |> should equal expectedValue
-
-    /// Joins two tasks using merely BCL methods. This approach is what you can use to
-    /// properly, sequentially execute a chain of tasks in a non-blocking, non-overlapping way.
-    let joinWithContinuation tasks =
-        let simple (t: unit -> Task<_>) (source: unit -> Task<_>) : unit -> Task<_> =
-            fun () ->
-                source()
-                    .ContinueWith((fun (_: Task) -> t ()), TaskContinuationOptions.OnlyOnRanToCompletion)
-                    .Unwrap()
-                :?> Task<_>
-
-        let rec combine acc (tasks: (unit -> Task<_>) list) =
-            match tasks with
-            | [] -> acc
-            | t :: tail -> combine (simple t acc) tail
-
-        match tasks with
-        | first :: rest -> combine first rest
-        | [] -> failwith "oh oh, no tasks given!"
-
-    let joinIdentityHotStarted tasks () = task { return tasks |> List.map (fun t -> t ()) }
-
-    let joinIdentityDelayed tasks () = task { return tasks }
-
-    let createAndJoinMultipleTasks total joiner : Task<_> =
-        // the actual creation of tasks
-        let tasks = DummyTaskFactory().CreateDelayedTasks total
-        let combinedTask = joiner tasks
-        // start the combined tasks
-        combinedTask ()
-
-    /// Create a bunch of dummy tasks, with varying microsecond delays.
-    let createDummyTaskSeqWith (min: int64<µs>) max count =
-        /// Set of delayed tasks in the form of `unit -> Task<int>`
-        let tasks = DummyTaskFactory(min, max).CreateDelayedTasks count
-
-        taskSeq {
-            for task in tasks do
-                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
-                let! x = task ()
-                yield x
+            if expected then
+                hasNext |> should be True
+            else
+                hasNext |> should be False
         }
 
-    /// Create a bunch of dummy tasks, with varying millisecond delays.
-    let createLongerDummyTaskSeq (min: int<ms>) max count =
-        /// Set of delayed tasks in the form of `unit -> Task<int>`
-        let tasks = DummyTaskFactory(min, max).CreateDelayedTasks count
+        /// Call MoveNextAsync() and check if Current has the expected value. Uses untyped 'should equal'
+        let moveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IAsyncEnumerator<_>) = task {
+            let! (hasNext: bool) = enumerator.MoveNextAsync()
 
-        taskSeq {
-            for task in tasks do
-                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
-                let! x = task ()
-                yield x
+            if successMoveNext then
+                hasNext |> should be True
+            else
+                hasNext |> should be False
+
+            enumerator.Current |> should equal expectedValue
         }
 
-    /// Create a bunch of dummy tasks, which are sequentially hot-started, WITHOUT artificial spin-wait delays.
-    let createDummyDirectTaskSeq count =
-        // Set of non-delayed tasks in the form of `unit -> Task<int>`
-        let tasks = DummyTaskFactory().CreateDirectTasks count
+        /// Call MoveNext() and check if Current has the expected value. Uses untyped 'should equal'
+        let seqMoveNextAndCheckCurrent successMoveNext expectedValue (enumerator: IEnumerator<_>) =
+            let (hasNext: bool) = enumerator.MoveNext()
 
-        taskSeq {
-            for task in tasks do
-                // cannot use `yield!` here, as `taskSeq` expects it to return a seq
-                let! x = task ()
-                yield x
-        }
+            if successMoveNext then
+                hasNext |> should be True
+            else
+                hasNext |> should be False
 
-    /// Create a bunch of dummy tasks, each lasting between 10-30ms with spin-wait delays.
-    let createDummyTaskSeq = createDummyTaskSeqWith 10_000L<µs> 30_000L<µs>
+            enumerator.Current |> should equal expectedValue
 
     // TODO: figure out a way to make IXunitSerializable work with DU types
     type CustomSerializable<'T>(value: 'T) =
@@ -264,81 +204,321 @@ module TestUtils =
         | DelayYieldBang = 7
         | DelayYieldBangNested = 8
 
-    type SmallVariant =
-        | NoThreadYield = 1
-        | ThreadSpinWait = 2
-        | ThreadYielded = 3
-        | SideEffect_NoThreadYield = 4
-        | SideEffect_ThreadSpinWait = 5
-        | SideEffect_ThreadYield = 6
+    type SeqImmutable =
+        | Sequential_YieldBang = 0
+        | Sequential_Yield = 1
+        | Sequential_For = 2
+        | Sequential_Combine = 3
+        | Sequential_Zero = 4
+        | ThreadSpinWait = 5
+        | AsyncYielded = 6
+        | AsyncYielded_Nested = 7
 
-    /// Returns any of a set of variants that each create an empty sequence in a creative way.
-    /// Please extend this with more cases.
-    let getEmptyVariant variant : IAsyncEnumerable<int> =
-        match variant with
-        | EmptyVariant.CallEmpty -> TaskSeq.empty
-        | EmptyVariant.Do -> taskSeq { do ignore () }
-        | EmptyVariant.DoBang -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
-        | EmptyVariant.YieldBang -> taskSeq { yield! Seq.empty<int> }
-        | EmptyVariant.YieldBangNested -> taskSeq { yield! taskSeq { do ignore () } }
-        | EmptyVariant.DelayDoBang -> taskSeq {
-            do! longDelay ()
-            do! longDelay ()
-            do! longDelay ()
-          }
-        | EmptyVariant.DelayYieldBang -> taskSeq {
-            do! microDelay ()
-            yield! Seq.empty<int>
-            do! longDelay ()
-            yield! Seq.empty<int>
-            do! microDelay ()
-          }
+    type SeqWithSideEffect =
+        | Sequential_YieldBang = 0
+        | Sequential_Yield = 1
+        | Sequential_For = 2
+        | Sequential_Combine = 3
+        | Sequential_Zero = 4
+        | ThreadSpinWait = 5
+        | AsyncYielded = 6
+        | AsyncYielded_Nested = 7
 
-        | EmptyVariant.DelayYieldBangNested -> taskSeq {
-            yield! taskSeq {
-                do! microDelay ()
-                yield! taskSeq { do! microDelay () }
-                do! microDelay ()
-            }
+    /// Several task generators, with artificial delays,
+    /// mostly to ensure sequential async operation of side effects.
+    module Gen =
+        /// Joins two tasks using merely BCL methods. This approach is what you can use to
+        /// properly, sequentially execute a chain of tasks in a non-blocking, non-overlapping way.
+        let joinWithContinuation tasks =
+            let simple (t: unit -> Task<_>) (source: unit -> Task<_>) : unit -> Task<_> =
+                fun () ->
+                    source()
+                        .ContinueWith((fun (_: Task) -> t ()), TaskContinuationOptions.OnlyOnRanToCompletion)
+                        .Unwrap()
+                    :?> Task<_>
 
-            yield! TaskSeq.empty
+            let rec combine acc (tasks: (unit -> Task<_>) list) =
+                match tasks with
+                | [] -> acc
+                | t :: tail -> combine (simple t acc) tail
 
-            yield! taskSeq {
-                do! microDelay ()
-                yield! taskSeq { do! microDelay () }
-                do! microDelay ()
-            }
-          }
-        | x -> failwithf "Invalid test variant: %A" x
+            match tasks with
+            | first :: rest -> combine first rest
+            | [] -> failwith "oh oh, no tasks given!"
 
-    /// Returns a small TaskSeq of 1..10
-    let getSmallVariant variant : IAsyncEnumerable<int> =
-        match variant with
-        | SmallVariant.NoThreadYield -> taskSeq { yield! [ 1..10 ] }
-        | SmallVariant.ThreadSpinWait -> taskSeq {
-            for i in 0..9 do
-                let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
-                yield x + 1
-          }
+        let joinIdentityHotStarted tasks () = task { return tasks |> List.map (fun t -> t ()) }
 
-        | SmallVariant.ThreadYielded -> taskSeq {
-            for i in 0..9 do
-                let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
-                yield x + 1
-          }
+        let joinIdentityDelayed tasks () = task { return tasks }
 
-        | SmallVariant.SideEffect_NoThreadYield ->
-            let mutable i = 0
+        let createAndJoinMultipleTasks total joiner : Task<_> =
+            // the actual creation of tasks
+            let tasks = DummyTaskFactory().CreateDelayedTasks_SideEffect total
+            let combinedTask = joiner tasks
+            // start the combined tasks
+            combinedTask ()
+
+        /// Create a bunch of dummy tasks, with varying microsecond delays.
+        let sideEffectTaskSeqMicro (min: int64<µs>) max count =
+            /// Set of delayed tasks in the form of `unit -> Task<int>`
+            let tasks = DummyTaskFactory(min, max).CreateDelayedTasks_SideEffect count
 
             taskSeq {
+                for task in tasks do
+                    // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                    let! x = task ()
+                    yield x
+            }
+
+        /// Create a bunch of dummy tasks, with varying millisecond delays.
+        let sideEffectTaskSeqMs (min: int<ms>) max count =
+            /// Set of delayed tasks in the form of `unit -> Task<int>`
+            let tasks = DummyTaskFactory(min, max).CreateDelayedTasks_SideEffect count
+
+            taskSeq {
+                for task in tasks do
+                    // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                    let! x = task ()
+                    yield x
+            }
+
+        /// Create a bunch of dummy tasks, which are sequentially hot-started, WITHOUT artificial spin-wait delays.
+        let sideEffectTaskSeq_Sequential count =
+            // Set of non-delayed tasks in the form of `unit -> Task<int>`
+            let tasks = DummyTaskFactory().CreateDirectTasks_SideEffect count
+
+            taskSeq {
+                for task in tasks do
+                    // cannot use `yield!` here, as `taskSeq` expects it to return a seq
+                    let! x = task ()
+                    yield x
+            }
+
+        /// Create a bunch of dummy tasks, each lasting between 10-30ms with spin-wait delays.
+        let sideEffectTaskSeq = sideEffectTaskSeqMicro 10_000L<µs> 30_000L<µs>
+
+        /// Returns any of a set of variants that each create an empty sequence in a creative way.
+        /// Please extend this with more cases.
+        let getEmptyVariant variant : IAsyncEnumerable<int> =
+            match variant with
+            | EmptyVariant.CallEmpty -> TaskSeq.empty
+            | EmptyVariant.Do -> taskSeq { do ignore () }
+            | EmptyVariant.DoBang -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
+            | EmptyVariant.YieldBang -> taskSeq { yield! Seq.empty<int> }
+            | EmptyVariant.YieldBangNested -> taskSeq { yield! taskSeq { do ignore () } }
+            | EmptyVariant.DelayDoBang -> taskSeq {
+                do! longDelay ()
+                do! longDelay ()
+                do! longDelay ()
+              }
+            | EmptyVariant.DelayYieldBang -> taskSeq {
+                do! microDelay ()
+                yield! Seq.empty<int>
+                do! longDelay ()
+                yield! Seq.empty<int>
+                do! microDelay ()
+              }
+
+            | EmptyVariant.DelayYieldBangNested -> taskSeq {
+                yield! taskSeq {
+                    do! microDelay ()
+                    yield! taskSeq { do! microDelay () }
+                    do! microDelay ()
+                }
+
+                yield! TaskSeq.empty
+
+                yield! taskSeq {
+                    do! microDelay ()
+                    yield! taskSeq { do! microDelay () }
+                    do! microDelay ()
+                }
+              }
+            | x -> failwithf "Invalid test variant: %A" x
+
+        /// Returns a small TaskSeq of 1..10
+        let getSeqImmutable variant : IAsyncEnumerable<int> =
+            match variant with
+            | SeqImmutable.Sequential_YieldBang -> taskSeq { yield! [ 1..10 ] }
+            | SeqImmutable.Sequential_Yield -> taskSeq {
+                yield 1
+                yield 2
+                yield 3
+                yield 4
+                yield 5
+                yield 6
+                yield 7
+                yield 8
+                yield 9
+                yield 10
+              }
+
+            | SeqImmutable.Sequential_For -> taskSeq {
+                // F# BUG? coloring disappears?
+                for x = 0 to 9 do
+                    yield x + 1
+              }
+
+            | SeqImmutable.Sequential_Combine -> taskSeq {
+                do Environment.GetEnvironmentVariable "test" |> ignore
+                yield! [ 1..4 ]
+                do Environment.GetEnvironmentVariable "test" |> ignore
+                do Environment.GetEnvironmentVariable "test" |> ignore
+                yield 5
+                yield! seq { 6..10 }
+              }
+
+            | SeqImmutable.Sequential_Zero -> taskSeq {
+                if
+                    isNull
+                    <| Environment.GetEnvironmentVariable "i_do_not_exist"
+                then
+                    yield! [ 1..4 ]
+                // absent 'else' triggers CE.Zero
+
+                if false then
+                    yield 24
+                elif 10 = 12 then
+                    yield 42
+                // absent 'else' triggers CE.Zero
+
+                yield! seq { 5..10 }
+              }
+
+            | SeqImmutable.ThreadSpinWait -> taskSeq {
+                for i in 0..9 do
+                    // delay just enough with a spin-wait to occasionally cause a thread-yield
+                    let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
+                    yield x + 1
+              }
+
+            | SeqImmutable.AsyncYielded -> sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+            | SeqImmutable.AsyncYielded_Nested ->
+                // let's deeply nest the sequence, which should not cause extra side effects being executed.
+                taskSeq {
+                    yield! taskSeq {
+                        yield! taskSeq {
+                            yield! taskSeq {
+                                yield! taskSeq {
+                                    yield! taskSeq {
+                                        yield! taskSeq {
+                                            yield! taskSeq {
+                                                yield! taskSeq {
+                                                    yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            | x -> failwithf "Invalid test variant: %A" x
+
+        let inline inc (x: int outref) = // using byref!
+            x <- x + 1
+            x
+
+        /// Returns a small TaskSeq of 1..10, created with a side effect that should increase on next iteration.
+        let getSeqWithSideEffect variant : IAsyncEnumerable<int> =
+            match variant with
+            | SeqWithSideEffect.Sequential_YieldBang -> taskSeq {
+                // captured side-effect, should *not* be captured by GetAsyncEnumerator()
+                let mutable i = 0
+
+                yield!
+                    List.init 10 (fun _ ->
+                        i <- i + 1
+                        i)
+              }
+            | SeqWithSideEffect.Sequential_Yield ->
+                // side-effect captured in closure of CE from outer var.
+                let mutable i = 0
+
+                taskSeq {
+                    yield inc &i // 1
+                    yield inc &i
+                    yield inc &i
+                    yield inc &i
+                    yield inc &i // 5
+                    yield inc &i
+                    yield inc &i
+                    yield inc &i
+                    yield inc &i
+                    yield inc &i // 10
+                }
+
+            | SeqWithSideEffect.Sequential_For -> taskSeq {
+                let mutable i = 0
                 // F# BUG? coloring disappears?
                 for x = 0 to 9 do
                     i <- i + 1
                     yield i
-            }
-        | SmallVariant.SideEffect_ThreadSpinWait -> createDummyTaskSeqWith 50L<µs> 5_000L<µs> 10
-        | SmallVariant.SideEffect_ThreadYield -> createDummyTaskSeqWith 15_000L<µs> 50_000L<µs> 10
-        | x -> failwithf "Invalid test variant: %A" x
+              }
+
+            | SeqWithSideEffect.Sequential_Combine -> taskSeq {
+                let mutable i = 0
+                do i <- i + 1
+                yield! [ i .. i + 4 ]
+                do i <- i + 4
+                yield i
+                do i <- i + 1
+                yield! seq { i .. i + 4 }
+              }
+
+            | SeqWithSideEffect.Sequential_Zero -> taskSeq {
+                let mutable i = 0
+
+                if inc &i = 1 then
+                    yield! [ 1..3 ]
+                // absent 'else' triggers CE.Zero
+
+                if inc &i = -24 then // never true
+                    yield 24
+                elif inc &i = -42 then // never true
+                    yield 42
+                // absent 'else' triggers CE.Zero
+
+                yield inc &i
+                yield! [ inc &i; inc &i; inc &i ]
+                inc &i |> ignore
+                yield i // 8
+                yield! [ i + 1; i + 2 ]
+              }
+
+            | SeqWithSideEffect.ThreadSpinWait -> taskSeq {
+                // delay just enough with a spin-wait to occasionally cause a thread-yield
+                for i in sideEffectTaskSeqMicro 50L<µs> 5_000L<µs> 10 do
+                    yield i
+              }
+
+            | SeqWithSideEffect.AsyncYielded -> sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+            | SeqWithSideEffect.AsyncYielded_Nested ->
+                // let's deeply nest the sequence, which should not cause extra side effects being executed.
+                taskSeq {
+                    yield! taskSeq {
+                        yield! taskSeq {
+                            yield! taskSeq {
+                                yield! taskSeq {
+                                    yield! taskSeq {
+                                        yield! taskSeq {
+                                            yield! taskSeq {
+                                                yield! taskSeq {
+                                                    yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            | x -> failwithf "Invalid test variant: %A" x
+
+    //
+    // following types can be used with Theory & TestData
+    //
 
     type TestEmptyVariants() as this =
         inherit TheoryData<EmptyVariant>()
@@ -353,13 +533,28 @@ module TestUtils =
             this.Add EmptyVariant.DelayYieldBang
             this.Add EmptyVariant.DelayYieldBangNested
 
-    type TestSmallVariants() as this =
-        inherit TheoryData<SmallVariant>()
+    type TestImmTaskSeq() as this =
+        inherit TheoryData<SeqImmutable>()
 
         do
-            this.Add SmallVariant.NoThreadYield
-            this.Add SmallVariant.ThreadSpinWait
-            this.Add SmallVariant.ThreadYielded
-            this.Add SmallVariant.SideEffect_NoThreadYield
-            this.Add SmallVariant.SideEffect_ThreadSpinWait
-            this.Add SmallVariant.SideEffect_ThreadYield
+            this.Add SeqImmutable.Sequential_YieldBang
+            this.Add SeqImmutable.Sequential_Yield
+            this.Add SeqImmutable.Sequential_For
+            this.Add SeqImmutable.Sequential_Combine
+            this.Add SeqImmutable.Sequential_Zero
+            this.Add SeqImmutable.ThreadSpinWait
+            this.Add SeqImmutable.AsyncYielded
+            this.Add SeqImmutable.AsyncYielded_Nested
+
+    type TestSideEffectTaskSeq() as this =
+        inherit TheoryData<SeqWithSideEffect>()
+
+        do
+            this.Add SeqWithSideEffect.Sequential_YieldBang
+            this.Add SeqWithSideEffect.Sequential_Yield
+            this.Add SeqWithSideEffect.Sequential_For
+            this.Add SeqWithSideEffect.Sequential_Combine
+            this.Add SeqWithSideEffect.Sequential_Zero
+            this.Add SeqWithSideEffect.ThreadSpinWait
+            this.Add SeqWithSideEffect.AsyncYielded
+            this.Add SeqWithSideEffect.AsyncYielded_Nested

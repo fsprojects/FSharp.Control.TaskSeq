@@ -18,22 +18,22 @@ let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
     Assert.IsAssignableFrom<IAsyncEnumerable<obj>>(tskSeq)
     |> ignore
 
-    do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
+    do! Assert.moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
 
     Assert.IsAssignableFrom<IAsyncEnumerable<int>>(tskSeq)
     |> ignore
 
-    do! moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
+    do! Assert.moveNextAndCheck false (tskSeq.GetAsyncEnumerator())
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
     use _e = tskSeq.GetAsyncEnumerator()
     use _e = tskSeq.GetAsyncEnumerator()
     use _e = tskSeq.GetAsyncEnumerator()
@@ -42,37 +42,37 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
     use enumerator = tskSeq.GetAsyncEnumerator()
     use enumerator = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck false enumerator
+    do! Assert.moveNextAndCheck false enumerator
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
     use enumerator1 = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck false enumerator1
+    do! Assert.moveNextAndCheck false enumerator1
 
     // getting the enumerator again
     use enumerator2 = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck false enumerator1 // original should still work without raising
-    do! moveNextAndCheck false enumerator2 // new hone should also work without raising
+    do! Assert.moveNextAndCheck false enumerator1 // original should still work without raising
+    do! Assert.moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync 100x in a loop`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
 
     // let's get the enumerator a few times
     for i in 0..100 do
         use enumerator = tskSeq.GetAsyncEnumerator()
-        do! moveNextAndCheck false enumerator // these are all empty
+        do! Assert.moveNextAndCheck false enumerator // these are all empty
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
 
     // call Current *before* MoveNextAsync
@@ -82,9 +82,9 @@ let ``CE empty taskSeq, call Current before MoveNextAsync`` variant = task {
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, call Current after MoveNextAsync returns false`` variant = task {
-    let tskSeq = getEmptyVariant variant
+    let tskSeq = Gen.getEmptyVariant variant
     let enumerator = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck false enumerator // false for empty seq
+    do! Assert.moveNextAndCheck false enumerator // false for empty seq
 
     // call Current *after* MoveNextAsync returns false
     enumerator.Current |> should equal 0 // we return Unchecked.defaultof, which is Zero in the case of an integer
@@ -98,11 +98,11 @@ let ``CE taskSeq, proper two-item task sequence`` () = task {
     }
 
     let enum = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck true enum // first item
+    do! Assert.moveNextAndCheck true enum // first item
     enum.Current |> should equal "foo"
-    do! moveNextAndCheck true enum // second item
+    do! Assert.moveNextAndCheck true enum // second item
     enum.Current |> should equal "bar"
-    do! moveNextAndCheck false enum // third item: false
+    do! Assert.moveNextAndCheck false enum // third item: false
 }
 
 [<Fact>]
@@ -114,11 +114,11 @@ let ``CE taskSeq, proper two-item task sequence -- async variant`` () = task {
     }
 
     let enum = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck true enum // first item
+    do! Assert.moveNextAndCheck true enum // first item
     enum.Current |> should equal "foo"
-    do! moveNextAndCheck true enum // second item
+    do! Assert.moveNextAndCheck true enum // second item
     enum.Current |> should equal "bar"
-    do! moveNextAndCheck false enum // third item: false
+    do! Assert.moveNextAndCheck false enum // third item: false
 }
 
 [<Fact>]
@@ -143,9 +143,9 @@ let ``CE taskSeq, call Current after MoveNextAsync returns false`` () = task {
     }
 
     let enum = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck true enum // first item
-    do! moveNextAndCheck true enum // second item
-    do! moveNextAndCheck false enum // third item: false
+    do! Assert.moveNextAndCheck true enum // first item
+    do! Assert.moveNextAndCheck true enum // second item
+    do! Assert.moveNextAndCheck false enum // third item: false
 
     // call Current *after* MoveNextAsync returns false
     enum.Current |> should be Null // we return Unchecked.defaultof
@@ -159,10 +159,10 @@ let ``CE taskSeq, MoveNext once too far`` () = task {
     }
 
     let enum = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheck true enum // first item
-    do! moveNextAndCheck true enum // second item
-    do! moveNextAndCheck false enum // third item: false
-    do! moveNextAndCheck false enum // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheck true enum // first item
+    do! Assert.moveNextAndCheck true enum // second item
+    do! Assert.moveNextAndCheck false enum // third item: false
+    do! Assert.moveNextAndCheck false enum // this used to be an error, see issue #39 and PR #42
 }
 
 [<Fact>]
@@ -176,13 +176,13 @@ let ``CE taskSeq, MoveNext too far`` () = task {
     let enum = tskSeq.GetAsyncEnumerator()
 
     // first get past the post
-    do! moveNextAndCheck true enum // first item
-    do! moveNextAndCheck true enum // second item
-    do! moveNextAndCheck false enum // third item: false
+    do! Assert.moveNextAndCheck true enum // first item
+    do! Assert.moveNextAndCheck true enum // second item
+    do! Assert.moveNextAndCheck false enum // third item: false
 
     // then call it bunch of times to ensure we don't get an InvalidOperationException, see issue #39 and PR #42
     for i in 0..100 do
-        do! moveNextAndCheck false enum
+        do! Assert.moveNextAndCheck false enum
 
     // after whatever amount of time MoveNextAsync, we can still safely call Current
     enum.Current |> should equal Guid.Empty // we return Unchecked.defaultof, which is Guid.Empty for guids
@@ -199,16 +199,16 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
     let enum2 = tskSeq.GetAsyncEnumerator()
 
     // enum1
-    do! moveNextAndCheckCurrent true 1 enum1 // first item
-    do! moveNextAndCheckCurrent true 2 enum1 // second item
-    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
-    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent true 1 enum1 // first item
+    do! Assert.moveNextAndCheckCurrent true 2 enum1 // second item
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
 
     // enum2
-    do! moveNextAndCheckCurrent true 1 enum2 // first item
-    do! moveNextAndCheckCurrent true 2 enum2 // second item
-    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
-    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent true 1 enum2 // first item
+    do! Assert.moveNextAndCheckCurrent true 2 enum2 // second item
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
 [<Fact>]
@@ -223,16 +223,16 @@ let ``CE seq -- comparison --, call GetEnumerator twice`` () = task {
     let enum2 = sq.GetEnumerator()
 
     // enum1
-    do seqMoveNextAndCheckCurrent true 1 enum1 // first item
-    do seqMoveNextAndCheckCurrent true 2 enum1 // second item
-    do seqMoveNextAndCheckCurrent false 0 enum1 // third item: false
-    do seqMoveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+    do Assert.seqMoveNextAndCheckCurrent true 1 enum1 // first item
+    do Assert.seqMoveNextAndCheckCurrent true 2 enum1 // second item
+    do Assert.seqMoveNextAndCheckCurrent false 0 enum1 // third item: false
+    do Assert.seqMoveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
 
     // enum2
-    do seqMoveNextAndCheckCurrent true 1 enum2 // first item
-    do seqMoveNextAndCheckCurrent true 2 enum2 // second item
-    do seqMoveNextAndCheckCurrent false 0 enum2 // third item: false
-    do seqMoveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+    do Assert.seqMoveNextAndCheckCurrent true 1 enum2 // first item
+    do Assert.seqMoveNextAndCheckCurrent true 2 enum2 // second item
+    do Assert.seqMoveNextAndCheckCurrent false 0 enum2 // third item: false
+    do Assert.seqMoveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
 
@@ -247,17 +247,17 @@ let ``CE taskSeq, cal GetAsyncEnumerator twice -- in lockstep`` () = task {
     let enum2 = tskSeq.GetAsyncEnumerator()
 
     // enum1 & enum2 in lock step
-    do! moveNextAndCheckCurrent true 1 enum1 // first item
-    do! moveNextAndCheckCurrent true 1 enum2 // first item
+    do! Assert.moveNextAndCheckCurrent true 1 enum1 // first item
+    do! Assert.moveNextAndCheckCurrent true 1 enum2 // first item
 
-    do! moveNextAndCheckCurrent true 2 enum1 // second item
-    do! moveNextAndCheckCurrent true 2 enum2 // second item
+    do! Assert.moveNextAndCheckCurrent true 2 enum1 // second item
+    do! Assert.moveNextAndCheckCurrent true 2 enum2 // second item
 
-    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
-    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // third item: false
 
-    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
-    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
 [<Fact>]
@@ -269,17 +269,17 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- after full iteration`` () = t
 
     // enum1
     let enum1 = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheckCurrent true 1 enum1 // first item
-    do! moveNextAndCheckCurrent true 2 enum1 // second item
-    do! moveNextAndCheckCurrent false 0 enum1 // third item: false
-    do! moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent true 1 enum1 // first item
+    do! Assert.moveNextAndCheckCurrent true 2 enum1 // second item
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum1 // this used to be an error, see issue #39 and PR #42
 
     // enum2
     let enum2 = tskSeq.GetAsyncEnumerator()
-    do! moveNextAndCheckCurrent true 1 enum2 // first item
-    do! moveNextAndCheckCurrent true 2 enum2 // second item
-    do! moveNextAndCheckCurrent false 0 enum2 // third item: false
-    do! moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
+    do! Assert.moveNextAndCheckCurrent true 1 enum2 // first item
+    do! Assert.moveNextAndCheckCurrent true 2 enum2 // second item
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // third item: false
+    do! Assert.moveNextAndCheckCurrent false 0 enum2 // this used to be an error, see issue #39 and PR #42
 }
 
 [<Fact>]
@@ -294,7 +294,7 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
     let enum1 = tskSeq.GetAsyncEnumerator()
 
     // move #1
-    do! moveNextAndCheckCurrent true 1 enum1 // first item
+    do! Assert.moveNextAndCheckCurrent true 1 enum1 // first item
 
     // enum2
     let enum2 = tskSeq.GetAsyncEnumerator()
@@ -302,37 +302,37 @@ let ``CE taskSeq, call GetAsyncEnumerator twice -- random mixed iteration`` () =
     enum2.Current |> should equal 0 // should be at default location
 
     // move #2
-    do! moveNextAndCheckCurrent true 1 enum2
+    do! Assert.moveNextAndCheckCurrent true 1 enum2
     enum1.Current |> should equal 1
     enum2.Current |> should equal 1
 
     // move #2
-    do! moveNextAndCheckCurrent true 2 enum2
+    do! Assert.moveNextAndCheckCurrent true 2 enum2
     enum1.Current |> should equal 1
     enum2.Current |> should equal 2
 
     // move #1
-    do! moveNextAndCheckCurrent true 2 enum1
+    do! Assert.moveNextAndCheckCurrent true 2 enum1
     enum1.Current |> should equal 2
     enum2.Current |> should equal 2
 
     // move #1
-    do! moveNextAndCheckCurrent true 3 enum1
+    do! Assert.moveNextAndCheckCurrent true 3 enum1
     enum1.Current |> should equal 3
     enum2.Current |> should equal 2
 
     // move #1
-    do! moveNextAndCheckCurrent false 0 enum1
+    do! Assert.moveNextAndCheckCurrent false 0 enum1
     enum1.Current |> should equal 0
     enum2.Current |> should equal 2
 
     // move #2
-    do! moveNextAndCheckCurrent true 3 enum2
+    do! Assert.moveNextAndCheckCurrent true 3 enum2
     enum1.Current |> should equal 0
     enum2.Current |> should equal 3
 
     // move #2
-    do! moveNextAndCheckCurrent false 0 enum2
+    do! Assert.moveNextAndCheckCurrent false 0 enum2
     enum1.Current |> should equal 0
 }
 

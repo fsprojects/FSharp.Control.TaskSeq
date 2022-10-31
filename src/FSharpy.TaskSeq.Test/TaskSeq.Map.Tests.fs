@@ -28,7 +28,7 @@ let validateSequenceWithOffset offset sequence =
 [<Fact>]
 let ``TaskSeq-map maps in correct order`` () = task {
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.map (fun item -> char (item + 64))
         |> TaskSeq.toSeqCachedAsync
 
@@ -38,7 +38,7 @@ let ``TaskSeq-map maps in correct order`` () = task {
 [<Fact>]
 let ``TaskSeq-mapi maps in correct order`` () = task {
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapi (fun i _ -> char (i + 65))
         |> TaskSeq.toSeqCachedAsync
 
@@ -50,7 +50,7 @@ let ``TaskSeq-map can access mutables which are mutated in correct order`` () = 
     let mutable sum = 0
 
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.map (fun item ->
             sum <- sum + 1
             char (sum + 64))
@@ -65,7 +65,7 @@ let ``TaskSeq-mapi can access mutables which are mutated in correct order`` () =
     let mutable sum = 0
 
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapi (fun i _ ->
             sum <- i + 1
             char (sum + 64))
@@ -78,7 +78,7 @@ let ``TaskSeq-mapi can access mutables which are mutated in correct order`` () =
 [<Fact>]
 let ``TaskSeq-mapAsync maps in correct order`` () = task {
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
         |> TaskSeq.toSeqCachedAsync
 
@@ -91,7 +91,7 @@ let ``TaskSeq-mapAsync can map the same sequence multiple times`` () = task {
         TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
         >> TaskSeq.toSeqCachedAsync
 
-    let ts = createDummyDirectTaskSeq 10
+    let ts = Gen.sideEffectTaskSeq_Sequential 10
 
     let! result1 = mapAndCache ts
     let! result2 = mapAndCache ts
@@ -109,7 +109,7 @@ let ``TaskSeq-mapAsync can map the same sequence multiple times`` () = task {
 [<Fact>]
 let ``TaskSeq-mapiAsync maps in correct order`` () = task {
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapiAsync (fun i _ -> task { return char (i + 65) })
         |> TaskSeq.toSeqCachedAsync
 
@@ -122,7 +122,7 @@ let ``TaskSeq-mapAsync can access mutables which are mutated in correct order`` 
     let mutable sum = 0
 
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapAsync (fun item -> task {
             sum <- sum + 1
             return char (sum + 64)
@@ -138,7 +138,7 @@ let ``TaskSeq-mapiAsync can access mutables which are mutated in correct order``
     let mutable data = '0'
 
     let! sq =
-        createDummyTaskSeq 10
+        Gen.sideEffectTaskSeq 10
         |> TaskSeq.mapiAsync (fun i _ -> task {
             data <- char (i + 65)
             return data

@@ -30,7 +30,7 @@ let ``TaskSeq-filterAsync on an empty sequence`` () = task {
 [<Fact>]
 let ``TaskSeq-filter filters correctly`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.filter ((<=) 26) // lambda of '>' etc inverts order of args, so this means 'greater than'
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
@@ -43,7 +43,7 @@ let ``TaskSeq-filter filters correctly`` () = task {
 [<Fact>]
 let ``TaskSeq-filterAsync filters correctly`` () = task {
     let! alphabet =
-        createDummyTaskSeqWith 50L<µs> 1000L<µs> 50
+        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
         |> TaskSeq.filterAsync (fun x -> task { return x <= 26 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
