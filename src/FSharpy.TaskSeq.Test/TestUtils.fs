@@ -461,10 +461,10 @@ module TestUtils =
             | SeqWithSideEffect.Sequential_Combine -> taskSeq {
                 do i <- i + 1
                 yield! [ i .. i + 4 ]
-                do i <- i + 4
+                do i <- i + 5
                 yield i
                 do i <- i + 1
-                yield! seq { i .. i + 4 }
+                yield! seq { i .. i + 3 }
                 i <- 10 // ensure we inc 'i' to 10 for a potential next iteration
               }
 

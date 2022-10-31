@@ -165,7 +165,9 @@ let ``TaskSeq-tryItem can get the first item in a longer sequence`` () = task {
 
 [<Fact>]
 let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () = task {
-    let! head = Gen.sideEffectTaskSeq_Sequential 5_001 |> TaskSeq.tryItem 5_000 // zero-based!
+    let! head =
+        Gen.sideEffectTaskSeq_Sequential 5_001
+        |> TaskSeq.tryItem 5_000 // zero-based!
 
     head |> should be Some'
     head |> should equal (Some 5_001)
@@ -173,7 +175,9 @@ let ``TaskSeq-tryItem in a very long sequence (5_000 items - slow variant)`` () 
 
 [<Fact>]
 let ``TaskSeq-tryItem in a very long sequence (50_000 items - slow variant)`` () = task {
-    let! head = Gen.sideEffectTaskSeq_Sequential 50_001 |> TaskSeq.tryItem 50_000 // zero-based!
+    let! head =
+        Gen.sideEffectTaskSeq_Sequential 50_001
+        |> TaskSeq.tryItem 50_000 // zero-based!
 
     head |> should be Some'
     head |> should equal (Some 50_001)
