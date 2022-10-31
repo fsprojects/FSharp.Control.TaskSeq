@@ -77,9 +77,7 @@ let ``TaskSeq-isEmpty returns false for non-empty`` () = task {
 
 [<Fact>]
 let ``TaskSeq-isEmpty returns false for delayed non-empty sequence`` () = task {
-    let! isEmpty =
-        Gen.sideEffectTaskSeqMs 200<ms> 400<ms> 3
-        |> TaskSeq.isEmpty
+    let! isEmpty = Gen.sideEffectTaskSeqMs 200<ms> 400<ms> 3 |> TaskSeq.isEmpty
 
     isEmpty |> should be False
 }
