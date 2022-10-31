@@ -94,10 +94,6 @@ type TaskSeqStateMachineData<'T>() =
     [<DefaultValue(false)>]
     val mutable boxedSelf: TaskSeq<'T>
 
-    /// If set, used for tailcalls using 'return!', contains the target.
-    [<DefaultValue(false)>]
-    val mutable tailcallTarget: TaskSeq<'T> option
-
     member data.PushDispose(disposer: unit -> Task) =
         if isNull data.disposalStack then
             data.disposalStack <- null
@@ -110,7 +106,6 @@ type TaskSeqStateMachineData<'T>() =
 
 and [<AbstractClass; NoEquality; NoComparison>] TaskSeq<'T>() =
 
-    abstract TailcallTarget: TaskSeq<'T> option
     abstract MoveNextAsyncResult: unit -> ValueTask<bool>
 
     /// Initializes the machine data on 'self'
@@ -164,96 +159,51 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         data.builder <- AsyncIteratorMethodBuilder.Create()
         machine.Data <- data
 
-
-    member internal this.hijack() =
-        let res = this._machine.Data.tailcallTarget
-
-        match res with
-        | Some tg ->
-            // We get here only when there are multiple ReturnFroms
-            // which allows us to do tailcalls.
-
-            // This recurses itself, e.g. tg.TailcallTarget calls this.hijack().
-            match tg.TailcallTarget with
-            | None -> res
-            | Some tg2 as res2 ->
-                // Cut out chains of tailcalls
-                this._machine.Data.tailcallTarget <- Some tg2
-                res2
-        | None -> res
-
     // Note: Not entirely clear if this is needed, everything still compiles without it
     interface IValueTaskSource with
         member this.GetResult(token: int16) =
-            match this.hijack () with
-            | Some tg -> (tg :> IValueTaskSource).GetResult(token)
-            | None ->
-                this._machine.Data.promiseOfValueOrEnd.GetResult(token)
-                |> ignore
+            this._machine.Data.promiseOfValueOrEnd.GetResult(token)
+            |> ignore
 
-        member this.GetStatus(token: int16) =
-            match this.hijack () with
-            | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
+        member this.GetStatus(token: int16) = this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
         member this.OnCompleted(continuation, state, token, flags) =
-            match this.hijack () with
-            | Some tg -> (tg :> IValueTaskSource).OnCompleted(continuation, state, token, flags)
-            | None -> this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     // Needed for MoveNextAsync to return a ValueTask
     interface IValueTaskSource<bool> with
-        member this.GetStatus(token: int16) =
-            match this.hijack () with
-            | Some tg -> (tg :> IValueTaskSource<bool>).GetStatus(token)
-            | None -> this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
+        member this.GetStatus(token: int16) = this._machine.Data.promiseOfValueOrEnd.GetStatus(token)
 
         member this.GetResult(token: int16) =
-            match this.hijack () with
-            | Some tg ->
+            try
                 log
-                    "Getting result for token on hijacked branch, status: %A"
-                    ((tg :> IValueTaskSource<bool>).GetStatus(token))
+                    "Getting result for token on normal branch, status: %A"
+                    (this._machine.Data.promiseOfValueOrEnd.GetStatus(token))
 
-                (tg :> IValueTaskSource<bool>).GetResult(token)
-            | None ->
-                try
-                    log
-                        "Getting result for token on normal branch, status: %A"
-                        (this._machine.Data.promiseOfValueOrEnd.GetStatus(token))
-
-                    let x = this._machine.Data.promiseOfValueOrEnd.GetResult(token)
-                    this._machine.Data.promiseOfValueOrEnd.Reset()
-                    x
-                with e ->
-                    // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
-                    // We're just logging here because the following error would also be caught right here:
-                    // "An attempt was made to transition a task to a final state when it had already completed."
-                    log "Error '%s' for token: %i" e.Message token
-                    reraise ()
+                let x = this._machine.Data.promiseOfValueOrEnd.GetResult(token)
+                this._machine.Data.promiseOfValueOrEnd.Reset()
+                x
+            with e ->
+                // FYI: an exception here is usually caused by the CE statement (user code) throwing an exception
+                // We're just logging here because the following error would also be caught right here:
+                // "An attempt was made to transition a task to a final state when it had already completed."
+                log "Error '%s' for token: %i" e.Message token
+                reraise ()
 
 
         member this.OnCompleted(continuation, state, token, flags) =
-            match this.hijack () with
-            | Some tg -> (tg :> IValueTaskSource<bool>).OnCompleted(continuation, state, token, flags)
-            | None -> this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+            this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
 
     interface IAsyncStateMachine with
         /// The MoveNext method is called by builder.MoveNext() in the resumable code
         member this.MoveNext() =
-            match this.hijack () with
-            | None ->
-                log "at IAsyncStateMatchine.MoveNext"
+            log "at IAsyncStateMatchine.MoveNext"
 
-                try
-                    moveNextRef &this._machine
-                with e ->
-                    log "at IAsyncStatemachine EXCEPTION!!!"
-                    log "%A" e
-
-            | Some tg ->
-                // jump to the hijacked method
-                (tg :> IAsyncStateMachine).MoveNext()
+            try
+                moveNextRef &this._machine
+            with e ->
+                log "at IAsyncStatemachine EXCEPTION!!!"
+                log "%A" e
 
 
         /// SetStatemachine is (currently) never called
@@ -290,87 +240,67 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
     interface System.Collections.Generic.IAsyncEnumerator<'T> with
         member this.Current =
-            match this.hijack () with
-            | Some tg ->
-                // recurse, but not really: we jump to a different instance of our taskSeq
-                // in case there's a tail call target.
-                (tg :> IAsyncEnumerator<'T>).Current
-
-            | None ->
-                match this._machine.Data.current with
-                | ValueSome x -> x
-                | ValueNone ->
-                    // Returning a default value is similar to how F#'s seq<'T> behaves
-                    // According to the docs, behavior is Unspecified in case of a call
-                    // to Current, which means that this is certainly fine, and arguably
-                    // better than raising an exception.
-                    Unchecked.defaultof<'T>
+            match this._machine.Data.current with
+            | ValueSome x -> x
+            | ValueNone ->
+                // Returning a default value is similar to how F#'s seq<'T> behaves
+                // According to the docs, behavior is Unspecified in case of a call
+                // to Current, which means that this is certainly fine, and arguably
+                // better than raising an exception.
+                Unchecked.defaultof<'T>
 
         member this.MoveNextAsync() =
-            match this.hijack () with
-            | Some tg ->
-                // recurse, but not really: we jump to a different instance of our taskSeq
-                // in case there's a tail call target.
-                (tg :> IAsyncEnumerator<'T>).MoveNextAsync()
+            log "MoveNextAsync..."
 
-            | None ->
-                log "MoveNextAsync..."
+            if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
+                log "at MoveNextAsync: Resumption point = -1"
 
-                if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
-                    log "at MoveNextAsync: Resumption point = -1"
+                ValueTask<bool>()
 
-                    ValueTask<bool>()
+            elif this._machine.Data.completed then
+                log "at MoveNextAsync: completed = true"
 
-                elif this._machine.Data.completed then
-                    log "at MoveNextAsync: completed = true"
+                // return False when beyond the last item
+                this._machine.Data.promiseOfValueOrEnd.Reset()
+                ValueTask<bool>()
 
-                    // return False when beyond the last item
-                    this._machine.Data.promiseOfValueOrEnd.Reset()
-                    ValueTask<bool>()
+            else
+                log "at MoveNextAsync: normal resumption scenario"
 
-                else
-                    log "at MoveNextAsync: normal resumption scenario"
+                let data = this._machine.Data
+                data.promiseOfValueOrEnd.Reset()
+                let mutable ts = this
 
-                    let data = this._machine.Data
-                    data.promiseOfValueOrEnd.Reset()
-                    let mutable ts = this
+                log "at MoveNextAsync: start calling builder.MoveNext()"
 
-                    log "at MoveNextAsync: start calling builder.MoveNext()"
+                data.builder.MoveNext(&ts)
 
-                    data.builder.MoveNext(&ts)
+                log "at MoveNextAsync: finished calling builder.MoveNext()"
 
-                    log "at MoveNextAsync: done calling builder.MoveNext()"
-
-                    // If the move did a hijack then get the result from the final one
-                    match this.hijack () with
-                    | Some tg -> tg.MoveNextAsyncResult()
-                    | None -> this.MoveNextAsyncResult()
+                this.MoveNextAsyncResult()
 
         /// Disposes of the IAsyncEnumerator (*not* the IAsyncEnumerable!!!)
         member this.DisposeAsync() =
-            match this.hijack () with
-            | Some tg -> (tg :> IAsyncDisposable).DisposeAsync()
-            | None ->
+            task {
                 log "DisposeAsync..."
 
-                task {
-                    match this._machine.Data.disposalStack with
-                    | null -> ()
-                    | _ ->
-                        let mutable exn = None
+                match this._machine.Data.disposalStack with
+                | null -> ()
+                | _ ->
+                    let mutable exn = None
 
-                        for d in Seq.rev this._machine.Data.disposalStack do
-                            try
-                                do! d ()
-                            with e ->
-                                if exn.IsNone then
-                                    exn <- Some e
+                    for d in Seq.rev this._machine.Data.disposalStack do
+                        try
+                            do! d ()
+                        with e ->
+                            if exn.IsNone then
+                                exn <- Some e
 
-                        match exn with
-                        | None -> ()
-                        | Some e -> raise e
-                }
-                |> ValueTask
+                    match exn with
+                    | None -> ()
+                    | Some e -> raise e
+            }
+            |> ValueTask
 
 
     override this.MoveNextAsyncResult() =
@@ -401,8 +331,6 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             log "at MoveNextAsyncResult: Unexpected state"
             // assume it's a possibly new, not yet supported case, treat as default
             ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
-
-    override cr.TailcallTarget = cr.hijack ()
 
 and TaskSeqCode<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
@@ -445,25 +373,17 @@ type TaskSeqBuilder() =
 
                         else
                             // Goto request
-                            match sm.Data.tailcallTarget with
-                            | Some tg ->
-                                log $"at Run.MoveNext, hijack"
+                            log $"at Run.MoveNext, await"
 
-                                let mutable tg = tg
-                                moveNextRef &tg
+                            // don't capture the full object in the next closure (won't work because: byref)
+                            // but only a reference to itself.
+                            let boxed = sm.Data.boxedSelf
 
-                            | None ->
-                                log $"at Run.MoveNext, await"
-
-                                // don't capture the full object in the next closure (won't work because: byref)
-                                // but only a reference to itself.
-                                let boxed = sm.Data.boxedSelf
-
-                                sm.Data.awaiter.UnsafeOnCompleted(
-                                    Action(fun () ->
-                                        let mutable boxed = boxed
-                                        moveNextRef &boxed)
-                                )
+                            sm.Data.awaiter.UnsafeOnCompleted(
+                                Action(fun () ->
+                                    let mutable boxed = boxed
+                                    moveNextRef &boxed)
+                            )
 
                     with exn ->
                         log "Exception dump:"
@@ -556,10 +476,13 @@ type TaskSeqBuilder() =
 
     member inline _.TryFinallyAsync(body: TaskSeqCode<'T>, compensation: unit -> Task) : TaskSeqCode<'T> =
         ResumableCode.TryFinallyAsync(
+
             TaskSeqCode<'T>(fun sm ->
                 sm.Data.PushDispose(fun () -> compensation ())
                 body.Invoke(&sm)),
+
             ResumableCode<_, _>(fun sm ->
+
                 sm.Data.PopDispose()
                 let mutable __stack_condition_fin = true
                 let __stack_vtask = compensation ()
@@ -583,6 +506,7 @@ type TaskSeqBuilder() =
                     Task.CompletedTask)
 
                 body.Invoke(&sm)),
+
             ResumableCode<_, _>(fun sm ->
                 sm.Data.PopDispose()
                 compensation ()
@@ -595,11 +519,15 @@ type TaskSeqBuilder() =
             body: #IDisposable -> TaskSeqCode<'T>,
             ?priority: IPriority2
         ) : TaskSeqCode<'T> =
+
+        // FIXME: what about priority?
         ignore priority
+
         // A using statement is just a try/finally with the finally block disposing if non-null.
         this.TryFinally(
             (fun sm -> (body disp).Invoke(&sm)),
             (fun () ->
+                // yes, this can be null from time to time
                 if not (isNull (box disp)) then
                     disp.Dispose())
         )
@@ -610,7 +538,10 @@ type TaskSeqBuilder() =
             body: #IAsyncDisposable -> TaskSeqCode<'T>,
             ?priority: IPriority1
         ) : TaskSeqCode<'T> =
+
+        // FIXME: what about priorities?
         ignore priority
+
         // A using statement is just a try/finally with the finally block disposing if non-null.
         this.TryFinallyAsync(
             (fun sm -> (body disp).Invoke(&sm)),
@@ -727,27 +658,3 @@ type TaskSeqBuilder() =
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone
                 false)
-
-    // TODO: using return! for tailcalls is wrong.  We should use yield! and have F#
-    // desugar to a different builder method when in tailcall position
-    //
-    // Because of this using return! from non-tailcall position e.g. in a try-finally or try-with will
-    // giv incorrect results (escaping the exception handler - 'close up shop and draw results from somewhere else')
-    member inline b.ReturnFrom(other: IAsyncEnumerable<'T>) : TaskSeqCode<'T> =
-        TaskSeqCode<_>(fun sm ->
-            match other with
-            | :? TaskSeq<'T> as other ->
-                // in cases that this is null
-                other.InitMachineDataForTailcalls(sm.Data.cancellationToken)
-
-                // set 'self' to point to the 'other', and unset Current
-                sm.Data.tailcallTarget <- Some other
-                sm.Data.awaiter <- null
-                sm.Data.current <- ValueNone
-
-                // For tailcalls we return 'false' and re-run from the entry (trampoline)
-                false
-
-            | _ ->
-                // other types of IAsyncEnumerable, just yield
-                b.YieldFrom(other).Invoke(&sm))
