@@ -385,13 +385,19 @@ module TestUtils =
               }
 
             | SeqImmutable.ThreadSpinWait -> taskSeq {
+                // delay just enough with a spin-wait to occasionally cause a thread-yield
                 for i in 0..9 do
-                    // delay just enough with a spin-wait to occasionally cause a thread-yield
+
+                    // by returning the 'side effect seq' from the closure of the CE,
+                    // the side-effect will NOT execute again
                     let! x = DelayHelper.delayTask 50L<µs> 5_000L<µs> (fun _ -> i)
                     yield x + 1
               }
 
-            | SeqImmutable.AsyncYielded -> sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+            | SeqImmutable.AsyncYielded ->
+                // by returning the 'side effect seq' from the closure of the CE,
+                // the side-effect will NOT execute again
+                taskSeq { yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10 }
             | SeqImmutable.AsyncYielded_Nested ->
                 // let's deeply nest the sequence, which should not cause extra side effects being executed.
                 taskSeq {
@@ -403,6 +409,8 @@ module TestUtils =
                                         yield! taskSeq {
                                             yield! taskSeq {
                                                 yield! taskSeq {
+                                                    // by returning the 'side effect seq' from the closure of the CE,
+                                                    // the side-effect will NOT execute again
                                                     yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
                                                 }
                                             }
@@ -421,35 +429,29 @@ module TestUtils =
 
         /// Returns a small TaskSeq of 1..10, created with a side effect that should increase on next iteration.
         let getSeqWithSideEffect variant : IAsyncEnumerable<int> =
+
+            // captured side-effect, should *not* be captured by GetAsyncEnumerator()
+            // NOTE: this side-effect numerator DOES NOT work if the 'let mutable' were inside
+            //       the taskSeq CE. Just like the 'seq' CE, the mutated state will be kept
+            //       and future iterations will not change it.
+            let mutable i = 0
+
             match variant with
-            | SeqWithSideEffect.Sequential_YieldBang -> taskSeq {
-                // captured side-effect, should *not* be captured by GetAsyncEnumerator()
-                let mutable i = 0
-
-                yield!
-                    List.init 10 (fun _ ->
-                        i <- i + 1
-                        i)
+            | SeqWithSideEffect.Sequential_YieldBang -> taskSeq { yield! List.init 10 (fun _ -> inc &i) }
+            | SeqWithSideEffect.Sequential_Yield -> taskSeq {
+                yield inc &i // 1
+                yield inc &i
+                yield inc &i
+                yield inc &i
+                yield inc &i // 5
+                yield inc &i
+                yield inc &i
+                yield inc &i
+                yield inc &i
+                yield inc &i // 10
               }
-            | SeqWithSideEffect.Sequential_Yield ->
-                // side-effect captured in closure of CE from outer var.
-                let mutable i = 0
-
-                taskSeq {
-                    yield inc &i // 1
-                    yield inc &i
-                    yield inc &i
-                    yield inc &i
-                    yield inc &i // 5
-                    yield inc &i
-                    yield inc &i
-                    yield inc &i
-                    yield inc &i
-                    yield inc &i // 10
-                }
 
             | SeqWithSideEffect.Sequential_For -> taskSeq {
-                let mutable i = 0
                 // F# BUG? coloring disappears?
                 for x = 0 to 9 do
                     i <- i + 1
@@ -457,18 +459,16 @@ module TestUtils =
               }
 
             | SeqWithSideEffect.Sequential_Combine -> taskSeq {
-                let mutable i = 0
                 do i <- i + 1
                 yield! [ i .. i + 4 ]
                 do i <- i + 4
                 yield i
                 do i <- i + 1
                 yield! seq { i .. i + 4 }
+                i <- 10 // ensure we inc 'i' to 10 for a potential next iteration
               }
 
             | SeqWithSideEffect.Sequential_Zero -> taskSeq {
-                let mutable i = 0
-
                 if inc &i = 1 then
                     yield! [ 1..3 ]
                 // absent 'else' triggers CE.Zero
@@ -484,30 +484,25 @@ module TestUtils =
                 inc &i |> ignore
                 yield i // 8
                 yield! [ i + 1; i + 2 ]
+                i <- i + 2 // ensure we inc 'i' to 10 for a potential next iteration
               }
 
-            | SeqWithSideEffect.ThreadSpinWait -> taskSeq {
-                // delay just enough with a spin-wait to occasionally cause a thread-yield
-                for i in sideEffectTaskSeqMicro 50L<µs> 5_000L<µs> 10 do
-                    yield i
-              }
-
+            // delay just enough with a spin-wait to occasionally cause a thread-yield
+            | SeqWithSideEffect.ThreadSpinWait -> sideEffectTaskSeqMicro 50L<µs> 5_000L<µs> 10
             | SeqWithSideEffect.AsyncYielded -> sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
             | SeqWithSideEffect.AsyncYielded_Nested ->
                 // let's deeply nest the sequence, which should not cause extra side effects being executed.
+                // NOTE: this list of tasks must be defined OUTSIDE the scope, otherwise, mutability on 2nd
+                //       iteration will not kick in!
+                let nestedTaskSeq = sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+
                 taskSeq {
                     yield! taskSeq {
                         yield! taskSeq {
                             yield! taskSeq {
                                 yield! taskSeq {
                                     yield! taskSeq {
-                                        yield! taskSeq {
-                                            yield! taskSeq {
-                                                yield! taskSeq {
-                                                    yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
-                                                }
-                                            }
-                                        }
+                                        yield! taskSeq { yield! taskSeq { yield! taskSeq { yield! nestedTaskSeq } } }
                                     }
                                 }
                             }
