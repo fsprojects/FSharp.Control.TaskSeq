@@ -470,7 +470,7 @@ module TestUtils =
 
             | SeqWithSideEffect.Sequential_Zero -> taskSeq {
                 if inc &i % 10 = 1 then // always true UNLESS NOT FULLY EVALUATED!!!
-                    yield! [ 1..3 ]
+                    yield! [ i .. i + 2 ]
                 // absent 'else' triggers CE.Zero
 
                 if inc &i = -24 then // never true
