@@ -63,6 +63,29 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
     do! Assert.moveNextAndCheck false enumerator2 // new hone should also work without raising
 }
 
+[<Fact>]
+let ``BUG CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` () = task {
+    //for i in 1..10 do
+    //    printfn "\nSTART TEST"
+
+    let tskSeq = taskSeq {
+        do! Task.Delay(50) |> Task.ofTask
+    //yield 10
+    }
+
+    use enumerator1 = tskSeq.GetAsyncEnumerator()
+    printfn ">>> FIRST MOVENEXT"
+    let! (hasNext: bool) = enumerator1.MoveNextAsync()
+
+    use enumerator1 = tskSeq.GetAsyncEnumerator()
+    printfn ">>> SECOND MOVENEXT"
+    let! (hasNext: bool) = enumerator1.MoveNextAsync()
+    printfn ">>> THIRD MOVENEXT"
+    let! (hasNext: bool) = enumerator1.MoveNextAsync()
+    printfn ">>> END"
+    ()
+}
+
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync 100x in a loop`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
