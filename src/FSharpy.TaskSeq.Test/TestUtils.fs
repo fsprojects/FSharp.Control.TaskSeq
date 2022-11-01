@@ -302,12 +302,12 @@ module TestUtils =
             match variant with
             | EmptyVariant.CallEmpty -> TaskSeq.empty
             | EmptyVariant.Do -> taskSeq { do ignore () }
-            | EmptyVariant.DoBang -> taskSeq { do! task { return () } } // TODO: this doesn't work with Task, only Task<unit>...
+            | EmptyVariant.DoBang -> taskSeq { do! task { return () } }
             | EmptyVariant.YieldBang -> taskSeq { yield! Seq.empty<int> }
             | EmptyVariant.YieldBangNested -> taskSeq { yield! taskSeq { do ignore () } }
             | EmptyVariant.DelayDoBang -> taskSeq {
-                do! longDelay ()
-                do! longDelay ()
+                do! microDelay ()
+                do! microDelay ()
                 do! longDelay ()
               }
             | EmptyVariant.DelayYieldBang -> taskSeq {
@@ -322,7 +322,7 @@ module TestUtils =
                 yield! taskSeq {
                     do! microDelay ()
                     yield! taskSeq { do! microDelay () }
-                    do! microDelay ()
+                    do! longDelay ()
                 }
 
                 yield! TaskSeq.empty
