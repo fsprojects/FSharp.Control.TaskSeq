@@ -9,42 +9,77 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact>]
-let ``TaskSeq-choose on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.choose (fun _ -> Some 42)
-        |> TaskSeq.toListAsync
+module EmptySeq =
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-choose`` variant = task {
+        let! empty =
+            Gen.getEmptyVariant variant
+            |> TaskSeq.choose (fun _ -> Some 42)
+            |> TaskSeq.toListAsync
 
-    List.isEmpty empty |> should be True
-}
+        List.isEmpty empty |> should be True
+    }
 
-[<Fact>]
-let ``TaskSeq-chooseAsync on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
-        |> TaskSeq.chooseAsync (fun _ -> task { return Some 42 })
-        |> TaskSeq.toListAsync
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-chooseAsync`` variant = task {
+        let! empty =
+            Gen.getEmptyVariant variant
+            |> TaskSeq.chooseAsync (fun _ -> task { return Some 42 })
+            |> TaskSeq.toListAsync
 
-    List.isEmpty empty |> should be True
-}
+        List.isEmpty empty |> should be True
+    }
 
-[<Fact>]
-let ``TaskSeq-choose can convert and filter`` () = task {
-    let! alphabet =
-        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
-        |> TaskSeq.choose (fun number -> if number <= 26 then Some(char number + '@') else None)
-        |> TaskSeq.toArrayAsync
+module Immutable =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-choose can convert and filter`` variant = task {
+        let chooser number = if number <= 5 then Some(char number + '@') else None
+        let ts = Gen.getSeqImmutable variant
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+        let! letters1 = TaskSeq.choose chooser ts |> TaskSeq.toArrayAsync
+        let! letters2 = TaskSeq.choose chooser ts |> TaskSeq.toArrayAsync
 
-[<Fact>]
-let ``TaskSeq-chooseAsync can convert and filter`` () = task {
-    let! alphabet =
-        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
-        |> TaskSeq.chooseAsync (fun number -> task { return if number <= 26 then Some(char number + '@') else None })
-        |> TaskSeq.toArrayAsync
+        String letters1 |> should equal "ABCDE"
+        String letters2 |> should equal "ABCDE"
+    }
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-chooseAsync can convert and filter`` variant = task {
+        let chooser number = task { return if number <= 5 then Some(char number + '@') else None }
+        let ts = Gen.getSeqImmutable variant
+
+        let! letters1 = TaskSeq.chooseAsync chooser ts |> TaskSeq.toArrayAsync
+        let! letters2 = TaskSeq.chooseAsync chooser ts |> TaskSeq.toArrayAsync
+
+        String letters1 |> should equal "ABCDE"
+        String letters2 |> should equal "ABCDE"
+    }
+
+module SideEffects =
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-choose applied multiple times`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let chooser x number = if number <= x then Some(char number + '@') else None
+
+        let! lettersA = ts |> TaskSeq.choose (chooser 5) |> TaskSeq.toArrayAsync
+        let! lettersK = ts |> TaskSeq.choose (chooser 15) |> TaskSeq.toArrayAsync
+        let! lettersU = ts |> TaskSeq.choose (chooser 25) |> TaskSeq.toArrayAsync
+
+        String lettersA |> should equal "ABCDE"
+        String lettersK |> should equal "KLMNO"
+        String lettersU |> should equal "UVWXY"
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-chooseAsync applied multiple times`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let chooser x number = task { return if number <= x then Some(char number + '@') else None }
+
+        let! lettersA = TaskSeq.chooseAsync (chooser 5) ts |> TaskSeq.toArrayAsync
+        let! lettersK = TaskSeq.chooseAsync (chooser 15) ts |> TaskSeq.toArrayAsync
+        let! lettersU = TaskSeq.chooseAsync (chooser 25) ts |> TaskSeq.toArrayAsync
+
+        String lettersA |> should equal "ABCDE"
+        String lettersK |> should equal "KLMNO"
+        String lettersU |> should equal "UVWXY"
+    }
