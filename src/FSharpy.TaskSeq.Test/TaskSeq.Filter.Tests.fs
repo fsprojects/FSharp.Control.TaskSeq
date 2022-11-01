@@ -7,47 +7,55 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
-[<Fact>]
-let ``TaskSeq-filter on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
+module EmptySeq =
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-filter has no effect`` variant =
+        Gen.getEmptyVariant variant
         |> TaskSeq.filter ((=) 12)
         |> TaskSeq.toListAsync
+        |> Task.map (List.isEmpty >> should be True)
 
-    List.isEmpty empty |> should be True
-}
-
-[<Fact>]
-let ``TaskSeq-filterAsync on an empty sequence`` () = task {
-    let! empty =
-        TaskSeq.empty
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-filterAsync has no effect`` variant =
+        Gen.getEmptyVariant variant
         |> TaskSeq.filterAsync (fun x -> task { return x = 12 })
         |> TaskSeq.toListAsync
+        |> Task.map (List.isEmpty >> should be True)
 
-    List.isEmpty empty |> should be True
-}
-
-[<Fact>]
-let ``TaskSeq-filter filters correctly`` () = task {
-    let! alphabet =
-        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
-        |> TaskSeq.filter ((<=) 26) // lambda of '>' etc inverts order of args, so this means 'greater than'
+module Immutable =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filter filters correctly`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filter ((<=) 5) // greater than
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "EFGHIJ")
 
-    // we filtered all digits above-or-equal-to 26
-    String alphabet |> should equal "Z[\]^_`abcdefghijklmnopqr"
-}
-
-[<Fact>]
-let ``TaskSeq-filterAsync filters correctly`` () = task {
-    let! alphabet =
-        Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
-        |> TaskSeq.filterAsync (fun x -> task { return x <= 26 })
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filterAsync filters correctly`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filterAsync (fun x -> task { return x <= 5 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "ABCDE")
 
-    String alphabet |> should equal "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-}
+module SideEffects =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filter filters correctly`` variant =
+        Gen.getSeqWithSideEffect variant
+        |> TaskSeq.filter ((<=) 5) // greater than
+        |> TaskSeq.map char
+        |> TaskSeq.map ((+) '@')
+        |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "EFGHIJ")
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filterAsync filters correctly`` variant =
+        Gen.getSeqWithSideEffect variant
+        |> TaskSeq.filterAsync (fun x -> task { return x <= 5 })
+        |> TaskSeq.map char
+        |> TaskSeq.map ((+) '@')
+        |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "ABCDE")
