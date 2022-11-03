@@ -129,6 +129,104 @@ module Immutable =
     }
 
 module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-exactlyOne prove we don't iterate further than necessary`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            yield 1
+            i <- i + 1 // to test we're "exactly one", we need to read until 2nd item
+            yield 2
+            i <- i + 1 // we never get here
+        }
+
+        fun () -> ts |> TaskSeq.exactlyOne |> Task.ignore
+        |> should throwAsyncExact typeof<ArgumentException>
+
+        i |> should equal 2 // last side effect is not executed
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryExactlyOne prove we don't iterate further than necessary`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            yield 1
+            i <- i + 1 // to test we're "exactly one", we need to read until 2nd item
+            yield 2
+            i <- i + 1 // we never get here
+        }
+
+        do! ts |> TaskSeq.tryExactlyOne |> Task.map (should be None')
+        i |> should equal 2 // last side effect is not executed
+    }
+
+    [<Fact>]
+    let ``TaskSeq-exactlyOne prove we execute side-effects in empty seq`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            i <- i + 1 // we should get here
+        }
+
+        fun () -> ts |> TaskSeq.exactlyOne |> Task.ignore
+        |> should throwAsyncExact typeof<ArgumentException>
+
+        i |> should equal 3 // last side effect is ALSO executed
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryExactlyOne prove we execute side-effects in empty seq`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            i <- i + 1 // we should get here
+        }
+
+        do! ts |> TaskSeq.tryExactlyOne |> Task.map (should be None')
+        i |> should equal 3 // last side effect is ALSO executed
+    }
+
+    [<Fact>]
+    let ``TaskSeq-exactlyOne prove we execute side-effects in singleton seq`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            yield 42
+            i <- i + 1 // we should get here
+        }
+
+        do! ts |> TaskSeq.exactlyOne |> Task.map (should equal 42)
+        i |> should equal 3 // last side effect is ALSO executed
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryExactlyOne prove we execute side-effects in singleton seq`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            yield 42
+            i <- i + 1 // we should get here
+        }
+
+        do!
+            ts
+            |> TaskSeq.tryExactlyOne
+            |> Task.map (should equal (Some 42))
+
+        i |> should equal 3 // last side effect is ALSO executed
+    }
+
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-exactlyOne throws`` variant =
         fun () ->
