@@ -88,12 +88,23 @@ module TaskSeq =
     val ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
 
     /// <summary>
-    /// Casts each item in the <paramref name="source" /> sequence asynchyronously. This function does unconstrainted casting,
-    /// by boxing the value and then casting it to the target type. For non-reference types, it is recommended
-    /// to use <see cref="TaskSeq.map" /> instead.
+    /// Boxes as type <see cref="obj" /> each item in the <paramref name="source" /> sequence asynchyronously.
+    /// </summary>
+    val box: source: taskSeq<'T> -> taskSeq<obj>
+
+    /// <summary>
+    /// Unboxes to the target type <see cref="'U" /> each item in the <paramref name="source" /> sequence asynchyronously.
+    /// The target type must be a <see cref="struct" /> or a built-in value type.
     /// </summary>
     /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
-    val cast: source: taskSeq<'T> -> taskSeq<'U>
+    val unbox<'U when 'U: struct> : source: taskSeq<obj> -> taskSeq<'U>
+
+    /// <summary>
+    /// Casts each item in the untyped <paramref name="source" /> sequence asynchyronously. If your types are boxed struct types
+    /// it is recommended to use <see cref="TaskSeq.unbox" /> instead.
+    /// </summary>
+    /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
+    val cast: source: taskSeq<obj> -> taskSeq<'T>
 
     /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking
     /// exhausts the sequence as soon as the task is evaluated.

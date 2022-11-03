@@ -48,6 +48,9 @@ module Task =
     /// Bind a Task<'T>
     let inline bind binder (task: Task<'T>) : Task<'U> = TaskBuilder.task { return! binder task }
 
+    /// Create a task from a value
+    let inline fromResult (value: 'U) : Task<'U> = TaskBuilder.task { return value }
+
 module Async =
     /// Convert an Task<'T> into an Async<'T>
     let inline ofTask (task: Task<'T>) = Async.AwaitTask task
