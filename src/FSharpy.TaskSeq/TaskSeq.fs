@@ -254,6 +254,18 @@ module TaskSeq =
     let tryFindIndex predicate source = Internal.tryFindIndex (Predicate predicate) source
     let tryFindIndexAsync predicate source = Internal.tryFindIndex (PredicateAsync predicate) source
 
+    let exists predicate source =
+        Internal.tryFind (Predicate predicate) source
+        |> Task.map (Option.isSome)
+
+    let existsAsync predicate source =
+        Internal.tryFind (PredicateAsync predicate) source
+        |> Task.map (Option.isSome)
+
+    let contains value source =
+        Internal.tryFind (Predicate((=) value)) source
+        |> Task.map (Option.isSome)
+
     let pick chooser source = task {
         match! Internal.tryPick (TryPick chooser) source with
         | Some item -> return item

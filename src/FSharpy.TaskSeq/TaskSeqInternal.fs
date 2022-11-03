@@ -29,7 +29,7 @@ type ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
 
 [<Struct>]
-type PredicateAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
+type PredicateAction<'T, 'TaskBool when 'TaskBool :> Task<bool>> =
     | Predicate of try_filter: ('T -> bool)
     | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
 
