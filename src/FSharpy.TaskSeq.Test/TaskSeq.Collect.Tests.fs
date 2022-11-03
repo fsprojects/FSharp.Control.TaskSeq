@@ -158,3 +158,88 @@ module Immutable =
         Gen.getSeqImmutable variant
         |> TaskSeq.collectSeqAsync (fun item -> task { return [| char (item + 64); char (item + 65) |] })
         |> validateSequence
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-collect prove that it has no effect until executed`` () =
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1 // we should not get here
+            i <- i + 1
+            yield 42
+            i <- i + 1
+        }
+
+        // point of this test: just calling 'map' won't execute anything of the sequence!
+        let _ =
+            ts
+            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
+            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
+            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
+
+        // multiple maps have no effect unless executed
+        i |> should equal 0
+
+    [<Fact>]
+    let ``TaskSeq-collectAsync prove that it has no effect until executed`` () =
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1 // we should not get here
+            i <- i + 1
+            yield 42
+            i <- i + 1
+        }
+
+        // point of this test: just calling 'map' won't execute anything of the sequence!
+        let _ =
+            ts
+            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
+            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
+            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
+
+        // multiple maps have no effect unless executed
+        i |> should equal 0
+
+    [<Fact>]
+    let ``TaskSeq-collectSeq prove that it has no effect until executed`` () =
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1 // we should not get here
+            i <- i + 1
+            yield 42
+            i <- i + 1
+        }
+
+        // point of this test: just calling 'map' won't execute anything of the sequence!
+        let _ =
+            ts
+            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
+            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
+            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
+
+        // multiple maps have no effect unless executed
+        i |> should equal 0
+
+    [<Fact>]
+    let ``TaskSeq-collectSeqAsync prove that it has no effect until executed`` () =
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1 // we should not get here
+            i <- i + 1
+            yield 42
+            i <- i + 1
+        }
+
+        // point of this test: just calling 'map' won't execute anything of the sequence!
+        let _ =
+            ts
+            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
+            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
+            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
+
+        // multiple maps have no effect unless executed
+        i |> should equal 0
