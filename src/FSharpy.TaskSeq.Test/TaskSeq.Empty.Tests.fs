@@ -1,4 +1,4 @@
-module FSharpy.Tests.``Other functions``
+module FSharpy.Tests.Empty
 
 open System.Threading.Tasks
 open Xunit
@@ -61,23 +61,4 @@ let ``TaskSeq-empty multiple times in a taskSeq context`` () = task {
         |> TaskSeq.toArrayAsync
 
     Array.isEmpty sq |> should be True
-}
-
-[<Fact>]
-let ``TaskSeq-isEmpty returns true for empty`` () = task {
-    let! isEmpty = TaskSeq.empty<string> |> TaskSeq.isEmpty
-    isEmpty |> should be True
-}
-
-[<Fact>]
-let ``TaskSeq-isEmpty returns false for non-empty`` () = task {
-    let! isEmpty = taskSeq { yield 42 } |> TaskSeq.isEmpty
-    isEmpty |> should be False
-}
-
-[<Fact>]
-let ``TaskSeq-isEmpty returns false for delayed non-empty sequence`` () = task {
-    let! isEmpty = Gen.sideEffectTaskSeqMs 200<ms> 400<ms> 3 |> TaskSeq.isEmpty
-
-    isEmpty |> should be False
 }
