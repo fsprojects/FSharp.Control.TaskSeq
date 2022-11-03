@@ -125,6 +125,16 @@ module TaskSeq =
     /// Maps over the taskSeq, applying the mapper function to each item. This function is non-blocking.
     val map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 
+    /// <summary>
+    /// Builds a new task sequence whose elements are the corresponding elements of the input task
+    /// sequence <paramref name="source" /> paired with the integer index (from 0) of each element.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence of tuples.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val indexed: source: taskSeq<'T> -> taskSeq<int * 'T>
+
     /// Maps over the taskSeq with an index, applying the mapper function to each item. This function is non-blocking.
     val mapi: mapper: (int -> 'T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 

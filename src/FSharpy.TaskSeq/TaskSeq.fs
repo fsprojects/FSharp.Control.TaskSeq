@@ -165,7 +165,10 @@ module TaskSeq =
 
     let cast source : taskSeq<'T> = Internal.map (SimpleAction(fun (x: obj) -> x :?> 'T)) source
     let box source = Internal.map (SimpleAction(fun x -> box x)) source
-    let unbox<'U when 'U: struct> (source: taskSeq<obj>) : taskSeq<'U> = Internal.map (SimpleAction(fun x -> unbox x)) source
+
+    let unbox<'U when 'U: struct> (source: taskSeq<obj>) : taskSeq<'U> =
+        Internal.map (SimpleAction(fun x -> unbox x)) source
+
     let iter action source = Internal.iter (SimpleAction action) source
     let iteri action source = Internal.iter (CountableAction action) source
     let iterAsync action source = Internal.iter (AsyncSimpleAction action) source
@@ -220,6 +223,14 @@ module TaskSeq =
         match! Internal.tryExactlyOne source with
         | Some item -> return item
         | None -> return invalidArg (nameof source) "The input sequence contains more than one element."
+    }
+
+    let indexed (source: taskSeq<'T>) = taskSeq {
+        let mutable i = 0
+
+        for x in source do
+            yield i, x
+            i <- i + 1
     }
 
     let choose chooser source = Internal.choose (TryPick chooser) source
