@@ -33,9 +33,18 @@ type PredicateAction<'T, 'U, 'TaskBool when 'TaskBool :> Task<bool>> =
     | Predicate of try_filter: ('T -> bool)
     | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
 
+[<Struct>]
+type InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
+    | InitAction of init_item: (int -> 'T)
+    | InitActionAsync of async_init_item: (int -> 'TaskT)
+
 module internal TaskSeqInternal =
     let inline raiseEmptySeq () =
         ArgumentException("The asynchronous input sequence was empty.", "source")
+        |> raise
+
+    let inline raiseCannotBeNegative (name: string) =
+        ArgumentException("The value cannot be negative", name)
         |> raise
 
     let inline raiseInsufficient () =
@@ -64,7 +73,7 @@ module internal TaskSeqInternal =
         | None ->
             while go do
                 let! step = e.MoveNextAsync()
-                i <- i + 1
+                i <- i + 1 // update before moving: we are counting, not indexing
                 go <- step
 
         | Some (Predicate predicate) ->
@@ -87,6 +96,22 @@ module internal TaskSeqInternal =
         return i
     }
 
+    /// Returns length unconditionally, or based on a predicate
+    let lengthBeforeMax max (source: taskSeq<_>) = task {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let mutable go = true
+        let mutable i = 0
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        while go && i < max do
+            i <- i + 1 // update before moving: we are counting, not indexing
+            let! step = e.MoveNextAsync()
+            go <- step
+
+        return i
+    }
+
     let tryExactlyOne (source: taskSeq<_>) = task {
         use e = source.GetAsyncEnumerator(CancellationToken())
 
@@ -102,6 +127,45 @@ module internal TaskSeqInternal =
         | false ->
             // zero items
             return None
+    }
+
+
+    let init count initializer = taskSeq {
+        let mutable i = 0
+        let mutable value: Lazy<'T> = Unchecked.defaultof<_>
+
+        let count =
+            match count with
+            | Some c -> if c >= 0 then c else raiseCannotBeNegative (nameof count)
+            | None -> Int32.MaxValue
+
+        match initializer with
+        | InitAction init ->
+            while i < count do
+                // using Lazy gives us locking and safe multiple access to the cached value, if
+                // multiple threads access the same item through the same enumerator (which is
+                // bad practice, but hey, who're we to judge).
+                if isNull value then
+                    value <- Lazy<_>.Create (fun () -> init i)
+
+                yield value.Force()
+                value <- Unchecked.defaultof<_>
+                i <- i + 1
+
+        | InitActionAsync asyncInit ->
+            while i < count do
+                // using Lazy gives us locking and safe multiple access to the cached value, if
+                // multiple threads access the same item through the same enumerator (which is
+                // bad practice, but hey, who're we to judge).
+                if isNull value then
+                    // TODO: is there a 'Lazy' we can use with Task?
+                    let! value' = asyncInit i
+                    value <- Lazy<_>.CreateFromValue value'
+
+                yield value.Force()
+                value <- Unchecked.defaultof<_>
+                i <- i + 1
+
     }
 
     let iter action (source: taskSeq<_>) = task {
