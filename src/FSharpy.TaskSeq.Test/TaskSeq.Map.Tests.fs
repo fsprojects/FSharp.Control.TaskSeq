@@ -36,25 +36,25 @@ let validateSequenceWithOffset offset ts =
 
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-map maps in correct order`` variant =
+    let ``TaskSeq-map empty`` variant =
         Gen.getEmptyVariant variant
         |> TaskSeq.map (fun item -> char (item + 64))
         |> verifyEmpty
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-mapi maps in correct order`` variant =
+    let ``TaskSeq-mapi empty`` variant =
         Gen.getEmptyVariant variant
         |> TaskSeq.mapi (fun i _ -> char (i + 65))
         |> verifyEmpty
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-mapAsync maps in correct order`` variant =
+    let ``TaskSeq-mapAsync empty`` variant =
         Gen.getEmptyVariant variant
         |> TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
         |> verifyEmpty
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-mapiAsync maps in correct order`` variant =
+    let ``TaskSeq-mapiAsync empty`` variant =
         Gen.getEmptyVariant variant
         |> TaskSeq.mapiAsync (fun i _ -> task { return char (i + 65) })
         |> verifyEmpty
