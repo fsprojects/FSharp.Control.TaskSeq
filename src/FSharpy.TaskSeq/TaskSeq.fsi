@@ -15,9 +15,16 @@ module TaskSeq =
 
     /// <summary>
     /// Returns the length of the sequence. This operation requires the whole sequence to be evaluated and
-    /// should not be used on potentially infinite sequences.
+    /// should not be used on potentially infinite sequences, see <see cref="lengthOrMax" /> for an alternative.
     /// </summary>
     val length: source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the length of the sequence, or <paramref name="max" />, whichever comes first. This operation requires the task sequence
+    /// to be evaluated in full, or until <paramref name="max" /> items have been processed. Use this method instead of
+    /// <see cref="TaskSeq.length" /> if you want to prevent too many items to be evaluated, or if the sequence is potentially infinite.
+    /// </summary>
+    val lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
@@ -31,6 +38,74 @@ module TaskSeq =
     /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.lengthBy" />.
     /// </summary>
     val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
+    /// with the current index, up to the given count. Each element is saved after its initialization for successive access to
+    /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
+    /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
+    /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
+    /// not be accessed concurrently.
+    /// </summary>
+    ///
+    /// <param name="count">The maximum number of items to generate for the sequence.</param>
+    /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:System.ArgumentException">Thrown when count is negative.</exception>
+    val init: count: int -> initializer: (int -> 'T) -> taskSeq<'T>
+
+    /// <summary>
+    /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
+    /// with the current index, up to the given count. Each element is saved after its initialization for successive access to
+    /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
+    /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
+    /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
+    /// not be accessed concurrently.
+    /// </summary>
+    ///
+    /// <param name="count">The maximum number of items to generate for the sequence.</param>
+    /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:System.ArgumentException">Thrown when count is negative.</exception>
+    val initAsync: count: int -> initializer: (int -> #Task<'T>) -> taskSeq<'T>
+
+    /// <summary>
+    /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
+    /// with the current index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
+    /// Each element is saved after its initialization for successive access to
+    /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
+    /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
+    /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
+    /// not be accessed concurrently.
+    /// </summary>
+    ///
+    /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
+    /// <returns>The resulting task sequence.</returns>
+    val initInfinite: initializer: (int -> 'T) -> taskSeq<'T>
+
+    /// <summary>
+    /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
+    /// with the current index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
+    /// Each element is saved after its initialization for successive access to
+    /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
+    /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
+    /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
+    /// not be accessed concurrently.
+    /// </summary>
+    ///
+    /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
+    /// <returns>The resulting task sequence.</returns>
+    val initInfiniteAsync: initializer: (int -> #Task<'T>) -> taskSeq<'T>
+
+    /// <summary>
+    /// Combines the given task sequence of task sequences and concatenates them end-to-end, to form a
+    /// new flattened, single task sequence. Each task sequence is awaited item by item, before the next is iterated.
+    /// </summary>
+    ///
+    /// <param name="sources">The input enumeration-of-enumerations.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: source: taskSeq<'T> -> 'T list

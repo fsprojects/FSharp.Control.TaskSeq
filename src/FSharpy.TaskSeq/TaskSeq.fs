@@ -156,8 +156,18 @@ module TaskSeq =
     //
 
     let length source = Internal.lengthBy None source
+    let lengthOrMax max source = Internal.lengthBeforeMax max source
     let lengthBy predicate source = Internal.lengthBy (Some(Predicate predicate)) source
     let lengthByAsync predicate source = Internal.lengthBy (Some(PredicateAsync predicate)) source
+    let init count initializer = Internal.init (Some count) (InitAction initializer)
+    let initInfinite initializer = Internal.init None (InitAction initializer)
+    let initAsync count initializer = Internal.init (Some count) (InitActionAsync initializer)
+    let initInfiniteAsync initializer = Internal.init None (InitActionAsync initializer)
+
+    let concat (sources: taskSeq<#taskSeq<'T>>) = taskSeq {
+        for ts in sources do
+            yield! (ts :> taskSeq<'T>)
+    }
 
     //
     // iter/map/collect functions
@@ -261,6 +271,7 @@ module TaskSeq =
         | Some item -> return item
         | None -> return Internal.raiseNotFound ()
     }
+
 
     let findAsync predicate source = task {
         match! Internal.tryFind (PredicateAsync predicate) source with

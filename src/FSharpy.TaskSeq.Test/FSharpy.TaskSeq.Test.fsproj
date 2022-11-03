@@ -15,6 +15,7 @@
     <Compile Include="TaskSeq.Cast.Tests.fs" />
     <Compile Include="TaskSeq.Choose.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
+    <Compile Include="TaskSeq.Concat.Tests.fs" />
     <Compile Include="TaskSeq.Empty.Tests.fs" />
     <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
@@ -23,6 +24,7 @@
     <Compile Include="TaskSeq.Fold.Tests.fs" />
     <Compile Include="TaskSeq.Head.Tests.fs" />
     <Compile Include="TaskSeq.Indexed.Tests.fs" />
+    <Compile Include="TaskSeq.Init.Tests.fs" />
     <Compile Include="TaskSeq.IsEmpty.fs" />
     <Compile Include="TaskSeq.Item.Tests.fs" />
     <Compile Include="TaskSeq.Iter.Tests.fs" />
