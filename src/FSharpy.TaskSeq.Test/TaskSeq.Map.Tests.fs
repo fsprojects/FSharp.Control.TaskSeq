@@ -175,7 +175,7 @@ module SideEffects =
         |> validateSequence
         |> Task.map (fun () -> sum |> should equal 10)
 
-    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-mapi can access mutables which are mutated in correct order`` variant =
         let mutable sum = 0
 
@@ -186,7 +186,7 @@ module SideEffects =
         |> validateSequence
         |> Task.map (fun () -> sum |> should equal 10)
 
-    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-mapAsync can map the same sequence multiple times`` variant = task {
         let doMap = TaskSeq.mapAsync (fun item -> task { return char (item + 64) })
         let ts = Gen.getSeqWithSideEffect variant
@@ -199,7 +199,7 @@ module SideEffects =
         do! doMap ts |> validateSequenceWithOffset 30 // again
     }
 
-    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-mapAsync can access mutables which are mutated in correct order`` variant =
         let mutable sum = 0
 
@@ -211,7 +211,7 @@ module SideEffects =
         |> validateSequence
         |> Task.map (fun () -> sum |> should equal 10)
 
-    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-mapiAsync can access mutables which are mutated in correct order`` variant =
         let mutable data = '0'
 

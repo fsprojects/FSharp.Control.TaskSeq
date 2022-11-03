@@ -42,7 +42,7 @@ module Immutable =
         |> Task.map (String >> should equal "ABCDE")
 
 module SideEffects =
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-filter filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.filter ((<=) 5) // greater than
@@ -51,7 +51,7 @@ module SideEffects =
         |> TaskSeq.toArrayAsync
         |> Task.map (String >> should equal "EFGHIJ")
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-filterAsync filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.filterAsync (fun x -> task { return x <= 5 })
