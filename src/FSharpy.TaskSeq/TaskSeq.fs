@@ -241,6 +241,8 @@ module TaskSeq =
     let tryPickAsync chooser source = Internal.tryPick (TryPickAsync chooser) source
     let tryFind predicate source = Internal.tryFind (Predicate predicate) source
     let tryFindAsync predicate source = Internal.tryFind (PredicateAsync predicate) source
+    let tryFindIndex predicate source = Internal.tryFindIndex (Predicate predicate) source
+    let tryFindIndexAsync predicate source = Internal.tryFindIndex (PredicateAsync predicate) source
 
     let pick chooser source = task {
         match! Internal.tryPick (TryPick chooser) source with
@@ -265,6 +267,20 @@ module TaskSeq =
         | Some item -> return item
         | None -> return Internal.raiseNotFound ()
     }
+
+    let findIndex predicate source = task {
+        match! Internal.tryFindIndex (Predicate predicate) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
+    let findIndexAsync predicate source = task {
+        match! Internal.tryFindIndex (PredicateAsync predicate) source with
+        | Some item -> return item
+        | None -> return Internal.raiseNotFound ()
+    }
+
+
 
     //
     // zip/unzip etc functions

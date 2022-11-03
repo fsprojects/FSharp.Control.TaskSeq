@@ -18,6 +18,7 @@
     <Compile Include="TaskSeq.Empty.Tests.fs" />
     <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
+    <Compile Include="TaskSeq.FindIndex.Tests.fs" />
     <Compile Include="TaskSeq.Find.Tests.fs" />
     <Compile Include="TaskSeq.Fold.Tests.fs" />
     <Compile Include="TaskSeq.Head.Tests.fs" />
