@@ -297,10 +297,11 @@ module internal TaskSeqInternal =
             while go && idx <= index do
                 if idx = index then
                     foundItem <- Some e.Current
-
-                let! step = e.MoveNextAsync()
-                go <- step
-                idx <- idx + 1
+                    go <- false
+                else
+                    let! step = e.MoveNextAsync()
+                    go <- step
+                    idx <- idx + 1
 
             return foundItem
     }
