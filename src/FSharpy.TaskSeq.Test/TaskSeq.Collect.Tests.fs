@@ -8,10 +8,6 @@ open FSharpy
 
 
 module EmptySeq =
-    let verifyEmpty ts =
-        ts
-        |> TaskSeq.toSeqCachedAsync
-        |> Task.map (Seq.isEmpty >> should be True)
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-collect collecting emptiness`` variant =

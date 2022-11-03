@@ -136,6 +136,11 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 
 [<AutoOpen>]
 module TestUtils =
+    let verifyEmpty ts =
+        ts
+        |> TaskSeq.toSeqCachedAsync
+        |> Task.map (Seq.isEmpty >> should be True)
+
     /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
     let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
 
@@ -195,34 +200,34 @@ module TestUtils =
     // VS test runner will hang, and NCrunch will (properly) show that the type does not implement
     // a default constructor. See https://github.com/xunit/xunit/issues/429, amongst others.
     type EmptyVariant =
-        | CallEmpty = 0
-        | Do = 1
-        | DoBang = 2
-        | YieldBang = 3
-        | YieldBangNested = 4
-        | DelayDoBang = 6
-        | DelayYieldBang = 7
-        | DelayYieldBangNested = 8
+        | CallEmpty = 10
+        | Do = 11
+        | DoBang = 12
+        | YieldBang = 13
+        | YieldBangNested = 14
+        | DelayDoBang = 16
+        | DelayYieldBang = 17
+        | DelayYieldBangNested = 18
 
     type SeqImmutable =
-        | Sequential_YieldBang = 0
-        | Sequential_Yield = 1
-        | Sequential_For = 2
-        | Sequential_Combine = 3
-        | Sequential_Zero = 4
-        | ThreadSpinWait = 5
-        | AsyncYielded = 6
-        | AsyncYielded_Nested = 7
+        | Sequential_YieldBang = 100
+        | Sequential_Yield = 101
+        | Sequential_For = 102
+        | Sequential_Combine = 103
+        | Sequential_Zero = 104
+        | ThreadSpinWait = 105
+        | AsyncYielded = 106
+        | AsyncYielded_Nested = 107
 
     type SeqWithSideEffect =
-        | Sequential_YieldBang = 0
-        | Sequential_Yield = 1
-        | Sequential_For = 2
-        | Sequential_Combine = 3
-        | Sequential_Zero = 4
-        | ThreadSpinWait = 5
-        | AsyncYielded = 6
-        | AsyncYielded_Nested = 7
+        | Sequential_YieldBang = 1000
+        | Sequential_Yield = 1001
+        | Sequential_For = 1002
+        | Sequential_Combine = 1003
+        | Sequential_Zero = 1004
+        | ThreadSpinWait = 1005
+        | AsyncYielded = 1006
+        | AsyncYielded_Nested = 1007
 
     /// Several task generators, with artificial delays,
     /// mostly to ensure sequential async operation of side effects.
