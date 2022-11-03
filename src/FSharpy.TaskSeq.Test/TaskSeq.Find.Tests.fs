@@ -7,6 +7,12 @@ open FsToolkit.ErrorHandling
 open FSharpy
 open System.Collections.Generic
 
+//
+// TaskSeq.find
+// TaskSeq.findAsync
+// TaskSeq.tryFind
+// TaskSeq.tryFindAsync
+//
 
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
@@ -156,7 +162,7 @@ module SideEffects =
         let finder = (=) 11
 
         // first: error, item is not there
-        fun () -> TaskSeq.find finder ts |> Task.ignore  
+        fun () -> TaskSeq.find finder ts |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
 
         // find again: no error, because of side effects
@@ -164,7 +170,7 @@ module SideEffects =
         found |> should equal 11
 
         // find once more: error, item is not there anymore.
-        fun () -> TaskSeq.find finder ts |> Task.ignore  
+        fun () -> TaskSeq.find finder ts |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
     }
 
@@ -174,7 +180,7 @@ module SideEffects =
         let finder x = task { return x = 11 }
 
         // first: error, item is not there
-        fun () -> TaskSeq.findAsync finder ts |> Task.ignore  
+        fun () -> TaskSeq.findAsync finder ts |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
 
         // find again: no error, because of side effects
@@ -182,44 +188,46 @@ module SideEffects =
         found |> should equal 11
 
         // find once more: error, item is not there anymore.
-        fun () -> TaskSeq.findAsync finder ts |> Task.ignore  
+        fun () -> TaskSeq.findAsync finder ts |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
     }
 
     [<Fact>]
     let ``TaskSeq-find _specialcase_ prove we don't read past the found item`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 i <- i + 1
                 yield i
         }
 
         let! found = ts |> TaskSeq.find ((=) 3)
         found |> should equal 3
-        i |> should equal 3  // only partial evaluation!
+        i |> should equal 3 // only partial evaluation!
 
         // find next item. We do get a new iterator, but mutable state is now starting at '3'
         let! found = ts |> TaskSeq.find ((=) 4)
         found |> should equal 4
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }
 
     [<Fact>]
     let ``TaskSeq-findAsync _specialcase_ prove we don't read past the found item`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 i <- i + 1
                 yield i
         }
 
-        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 3 } )
+        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 3 })
         found |> should equal 3
-        i |> should equal 3  // only partial evaluation!
+        i |> should equal 3 // only partial evaluation!
 
         // find next item. We do get a new iterator, but mutable state is now starting at '3'
-        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 4 } )
+        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 4 })
         found |> should equal 4
         i |> should equal 4
     }
@@ -227,6 +235,7 @@ module SideEffects =
     [<Fact>]
     let ``TaskSeq-find _specialcase_ prove we don't read past the found item v2`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
             yield 42
             i <- i + 1
@@ -235,59 +244,62 @@ module SideEffects =
 
         let! found = ts |> TaskSeq.find ((=) 42)
         found |> should equal 42
-        i |> should equal 0  // because no MoveNext after found item, the last statements are not executed
+        i |> should equal 0 // because no MoveNext after found item, the last statements are not executed
     }
 
     [<Fact>]
     let ``TaskSeq-findAsync _specialcase_ prove we don't read past the found item v2`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
             yield 42
             i <- i + 1
             i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 42 } )
+        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 42 })
         found |> should equal 42
-        i |> should equal 0  // because no MoveNext after found item, the last statements are not executed
+        i |> should equal 0 // because no MoveNext after found item, the last statements are not executed
     }
 
     [<Fact>]
     let ``TaskSeq-find _specialcase_ prove statement after yield is not evaluated`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 yield i
                 i <- i + 1
         }
 
         let! found = ts |> TaskSeq.find ((=) 0)
         found |> should equal 0
-        i |> should equal 0  // notice that it should be one higher if the statement after 'yield' is evaluated
+        i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
         // find some next item. We do get a new iterator, but mutable state is now starting at '1'
         let! found = ts |> TaskSeq.find ((=) 4)
         found |> should equal 4
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }
 
     [<Fact>]
     let ``TaskSeq-findAsync _specialcase_ prove statement after yield is not evaluated`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 yield i
                 i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 0 } )
+        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 0 })
         found |> should equal 0
-        i |> should equal 0  // notice that it should be one higher if the statement after 'yield' is evaluated
+        i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
         // find some next item. We do get a new iterator, but mutable state is now starting at '1'
-        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 4 } )
+        let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 4 })
         found |> should equal 4
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }
 
 
@@ -337,37 +349,39 @@ module SideEffects =
     [<Fact>]
     let ``TaskSeq-tryFind _specialcase_ prove we don't read past the found item`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 i <- i + 1
                 yield i
         }
 
         let! found = ts |> TaskSeq.tryFind ((=) 3)
         found |> should equal (Some 3)
-        i |> should equal 3  // only partial evaluation!
+        i |> should equal 3 // only partial evaluation!
 
         // find next item. We do get a new iterator, but mutable state is now starting at '3'
         let! found = ts |> TaskSeq.tryFind ((=) 4)
         found |> should equal (Some 4)
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }
 
     [<Fact>]
     let ``TaskSeq-tryFindAsync _specialcase_ prove we don't read past the found item`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 i <- i + 1
                 yield i
         }
 
-        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 3 } )
+        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 3 })
         found |> should equal (Some 3)
-        i |> should equal 3  // only partial evaluation!
+        i |> should equal 3 // only partial evaluation!
 
         // find next item. We do get a new iterator, but mutable state is now starting at '3'
-        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 4 } )
+        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 4 })
         found |> should equal (Some 4)
         i |> should equal 4
     }
@@ -375,6 +389,7 @@ module SideEffects =
     [<Fact>]
     let ``TaskSeq-tryFind _specialcase_ prove we don't read past the found item v2`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
             yield 42
             i <- i + 1
@@ -383,57 +398,60 @@ module SideEffects =
 
         let! found = ts |> TaskSeq.tryFind ((=) 42)
         found |> should equal (Some 42)
-        i |> should equal 0  // because no MoveNext after found item, the last statements are not executed
+        i |> should equal 0 // because no MoveNext after found item, the last statements are not executed
     }
 
     [<Fact>]
     let ``TaskSeq-tryFindAsync _specialcase_ prove we don't read past the found item v2`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
             yield 42
             i <- i + 1
             i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 42 } )
+        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 42 })
         found |> should equal (Some 42)
-        i |> should equal 0  // because no MoveNext after found item, the last statements are not executed
+        i |> should equal 0 // because no MoveNext after found item, the last statements are not executed
     }
 
     [<Fact>]
     let ``TaskSeq-tryFind _specialcase_ prove statement after yield is not evaluated`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 yield i
                 i <- i + 1
         }
 
         let! found = ts |> TaskSeq.tryFind ((=) 0)
         found |> should equal (Some 0)
-        i |> should equal 0  // notice that it should be one higher if the statement after 'yield' is evaluated
+        i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
         // find some next item. We do get a new iterator, but mutable state is now starting at '1'
         let! found = ts |> TaskSeq.tryFind ((=) 4)
         found |> should equal (Some 4)
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }
 
     [<Fact>]
     let ``TaskSeq-tryFindAsync _specialcase_ prove statement after yield is not evaluated`` () = task {
         let mutable i = 0
+
         let ts = taskSeq {
-            for _ in 0 .. 9 do
+            for _ in 0..9 do
                 yield i
                 i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 0 } )
+        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 0 })
         found |> should equal (Some 0)
-        i |> should equal 0  // notice that it should be one higher if the statement after 'yield' is evaluated
+        i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
         // find some next item. We do get a new iterator, but mutable state is now starting at '1'
-        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 4 } )
+        let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 4 })
         found |> should equal (Some 4)
-        i |> should equal 4  // only partial evaluation!
+        i |> should equal 4 // only partial evaluation!
     }

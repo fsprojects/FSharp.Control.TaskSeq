@@ -275,7 +275,7 @@ module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-pickAsync KeyNotFoundException only sometimes for mutated state`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
-        
+
         // first: error, item is not there
         fun () -> TaskSeq.pickAsync (pickerAsync 11) ts |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
@@ -354,7 +354,7 @@ module SideEffects =
             i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.pickAsync (pickerAsync 42 )
+        let! found = ts |> TaskSeq.pickAsync (pickerAsync 42)
         found |> should equal 42
         i |> should equal 0 // because no MoveNext after found item, the last statements are not executed
     }
@@ -389,12 +389,12 @@ module SideEffects =
                 i <- i + 1
         }
 
-        let! found = ts |> TaskSeq.pickAsync (pickerAsync 0 )
+        let! found = ts |> TaskSeq.pickAsync (pickerAsync 0)
         found |> should equal 0
         i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
         // pick some next item. We do get a new iterator, but mutable state is now starting at '1'
-        let! found = ts |> TaskSeq.pickAsync (pickerAsync 4 )
+        let! found = ts |> TaskSeq.pickAsync (pickerAsync 4)
         found |> should equal 4
         i |> should equal 4 // only partial evaluation!
     }

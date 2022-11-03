@@ -7,6 +7,11 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.exactlyOne
+// TaskSeq.tryExactlyOne
+//
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-exactlyOne throws`` variant = task {

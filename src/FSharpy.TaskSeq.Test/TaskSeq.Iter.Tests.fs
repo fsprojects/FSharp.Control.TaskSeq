@@ -5,6 +5,13 @@ open FsUnit.Xunit
 
 open FSharpy
 
+//
+// TaskSeq.iter
+// TaskSeq.iteri
+// TaskSeq.iterAsync
+// TaskSeq.iteriAsync
+//
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-iteri does nothing on empty sequences`` variant = task {

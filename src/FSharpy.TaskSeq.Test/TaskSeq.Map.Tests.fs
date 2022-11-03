@@ -6,6 +6,13 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.map
+// TaskSeq.mapi
+// TaskSeq.mapAsync
+// TaskSeq.mapiAsync
+//
+
 /// Asserts that a sequence contains the char values 'A'..'J'.
 let validateSequence ts =
     ts

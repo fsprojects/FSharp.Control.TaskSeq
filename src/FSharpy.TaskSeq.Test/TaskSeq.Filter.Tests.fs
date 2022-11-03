@@ -7,6 +7,12 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.filter
+// TaskSeq.filterAsync
+//
+
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-filter has no effect`` variant =
