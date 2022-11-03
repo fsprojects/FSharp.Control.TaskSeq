@@ -7,6 +7,11 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.fold
+// TaskSeq.foldAsync
+//
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-fold takes state when empty`` variant = task {
@@ -33,8 +38,7 @@ module Immutable =
             (StringBuilder(), Gen.getSeqImmutable variant)
             ||> TaskSeq.fold (fun state item -> state.Append(char item + '@'))
 
-        letters.ToString()
-        |> should equal "ABCDEFGHIJ"
+        letters.ToString() |> should equal "ABCDEFGHIJ"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -42,16 +46,16 @@ module Immutable =
         let! letters =
             (StringBuilder(), Gen.getSeqImmutable variant)
             ||> TaskSeq.foldAsync (fun state item -> task { return state.Append(char item + '@') })
-                
 
-        letters.ToString()
-        |> should equal "ABCDEFGHIJ"
+
+        letters.ToString() |> should equal "ABCDEFGHIJ"
     }
 
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-fold folds with every item, next fold has different state`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
+
         let! letters =
             (StringBuilder(), ts)
             ||> TaskSeq.fold (fun state item -> state.Append(char item + '@'))
@@ -68,6 +72,7 @@ module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-foldAsync folds with every item, next fold has different state`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
+
         let! letters =
             (StringBuilder(), ts)
             ||> TaskSeq.foldAsync (fun state item -> task { return state.Append(char item + '@') })
@@ -80,4 +85,3 @@ module SideEffects =
 
         string moreLetters |> should equal "ABCDEFGHIJKLMNOPQRST"
     }
-

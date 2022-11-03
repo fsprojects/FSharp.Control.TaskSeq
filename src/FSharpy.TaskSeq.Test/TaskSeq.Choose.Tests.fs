@@ -9,6 +9,13 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.map
+// TaskSeq.mapi
+// TaskSeq.mapAsync
+// TaskSeq.mapiAsync
+//
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-choose`` variant = task {

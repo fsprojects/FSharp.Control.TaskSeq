@@ -7,6 +7,12 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.length
+// TaskSeq.lengthBy
+// TaskSeq.lengthByAsync
+//
+
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-length returns zero on empty sequences`` variant = task {

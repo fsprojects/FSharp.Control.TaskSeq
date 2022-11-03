@@ -7,6 +7,10 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.head
+// TaskSeq.tryHead
+//
 
 module EmptySeq =
 
@@ -109,7 +113,7 @@ module SideEffects =
         let! fortytwo = one |> TaskSeq.tryHead
         fortytwo |> should equal (Some 42)
 
-         // the statement after 'yield' will never be reached, the mutable will not be updated
+        // the statement after 'yield' will never be reached, the mutable will not be updated
         let! stillFortyTwo = one |> TaskSeq.tryHead
         stillFortyTwo |> should equal (Some 42)
 
@@ -123,7 +127,7 @@ module SideEffects =
             x <- x + 1
             x <- x + 1
             yield 42
-            x <- x + 200  // we won't get here!
+            x <- x + 200 // we won't get here!
         }
 
         let! fortyTwo = one |> TaskSeq.head
@@ -142,7 +146,7 @@ module SideEffects =
             x <- x + 1
             x <- x + 1
             yield 42
-            x <- x + 200  // we won't get here!
+            x <- x + 200 // we won't get here!
         }
 
         let! fortyTwo = one |> TaskSeq.tryHead

@@ -7,6 +7,11 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.last
+// TaskSeq.tryLast
+//
+
 module EmptySeq =
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]

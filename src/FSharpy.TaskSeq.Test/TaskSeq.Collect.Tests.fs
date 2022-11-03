@@ -6,6 +6,10 @@ open FsToolkit.ErrorHandling
 
 open FSharpy
 
+//
+// TaskSeq.collect
+// TaskSeq.collectAsync
+//
 
 module EmptySeq =
 
