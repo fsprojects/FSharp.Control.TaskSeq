@@ -405,9 +405,50 @@ module TaskSeq =
     /// asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
     /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.findIndex" />.
     /// </summary>
+    ///
     /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
     /// evaluated by the <paramref name="predicate" /> function.</exception>
     val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Tests if the sequence contains the specified element. Returns <see cref="true" />
+    /// if <paramref name="source" /> contains the specified element; <see cref="false" />
+    /// otherwise.
+    /// </summary>
+    ///
+    /// <param name="value">The value to locate in the input sequence.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>True if the input sequence contains the specified element; false otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val contains<'T when 'T: equality> : value: 'T -> source: taskSeq<'T> -> Task<bool>
+
+    /// <summary>
+    /// Tests if any element of the task sequence in <paramref name="source" /> satisfies
+    /// the given <paramref name="predicate" />.
+    /// The <paramref name="predicate" /> function is applied to the elements of the input sequence. If any application
+    /// returns <see cref="true" /> then the overall result is <see cref="true" /> and no further elements are evaluated and tested.
+    /// Otherwise, <see cref="false" /> is returned.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test each item of the input sequence.</param>
+    /// <param name="source">The input sequence.</param>    ///
+    /// <returns>True if any result from the predicate is true; false otherwise.</returns>    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val exists: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<bool>
+
+    /// <summary>
+    /// Tests if any element of the task sequence in <paramref name="source" /> satisfies
+    /// the given async <paramref name="predicate" />.
+    /// The <paramref name="predicate" /> function is applied to the elements of the input sequence. If any application
+    /// returns <see cref="true" /> then the overall result is <see cref="true" /> and no further elements are evaluated and tested.
+    /// Otherwise, <see cref="false" /> is returned.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test each item of the input sequence.</param>
+    /// <param name="source">The input sequence.</param>    ///
+    /// <returns>True if any result from the predicate is true; false otherwise.</returns>    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val existsAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
