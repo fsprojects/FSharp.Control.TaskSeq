@@ -206,7 +206,7 @@ module SideEffects =
         found |> should equal 3
         i |> should equal 3 // only partial evaluation!
 
-        // find next item. We do get a new iterator, but mutable state is now starting at '3'
+        // find next item. We do get a new iterator, but mutable state is now starting at '3', so first item now returned is '4'.
         let! found = ts |> TaskSeq.find ((=) 4)
         found |> should equal 4
         i |> should equal 4 // only partial evaluation!
@@ -226,7 +226,7 @@ module SideEffects =
         found |> should equal 3
         i |> should equal 3 // only partial evaluation!
 
-        // find next item. We do get a new iterator, but mutable state is now starting at '3'
+        // find next item. We do get a new iterator, but mutable state is now starting at '3', so first item now returned is '4'.
         let! found = ts |> TaskSeq.findAsync (fun x -> task { return x = 4 })
         found |> should equal 4
         i |> should equal 4
@@ -360,7 +360,7 @@ module SideEffects =
         found |> should equal (Some 3)
         i |> should equal 3 // only partial evaluation!
 
-        // find next item. We do get a new iterator, but mutable state is now starting at '3'
+        // find next item. We do get a new iterator, but mutable state is now starting at '3', so first item now returned is '4'.
         let! found = ts |> TaskSeq.tryFind ((=) 4)
         found |> should equal (Some 4)
         i |> should equal 4 // only partial evaluation!
@@ -380,7 +380,7 @@ module SideEffects =
         found |> should equal (Some 3)
         i |> should equal 3 // only partial evaluation!
 
-        // find next item. We do get a new iterator, but mutable state is now starting at '3'
+        // find next item. We do get a new iterator, but mutable state is now starting at '3', so first item now returned is '4'.
         let! found = ts |> TaskSeq.tryFindAsync (fun x -> task { return x = 4 })
         found |> should equal (Some 4)
         i |> should equal 4

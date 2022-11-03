@@ -265,6 +265,20 @@ module TaskSeq =
     /// </summary>
     val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
 
+    /// <summary>
+    /// Returns the index, starting from zero, of the task sequence in <paramref name="source" /> for which the given function
+    /// <paramref name="predicate" /> returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.tryFindIndexAsync" />.
+    /// </summary>
+    val tryFindIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int option>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the task sequence in <paramref name="source" /> for which the given asynchronous function
+    /// <paramref name="predicate" /> returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.tryFindIndex" />.
+    /// </summary>
+    val tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int option>
+
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements of the task sequence
@@ -301,6 +315,24 @@ module TaskSeq =
     /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
     /// evaluated by the <paramref name="predicate" /> function.</exception>
     val findAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the first element of the task sequence in <paramref name="source" /> for which
+    /// the given function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findIndexAsync" />.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
+    /// evaluated by the <paramref name="predicate" /> function.</exception>
+    val findIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the task sequence in <paramref name="source" /> for which the given
+    /// asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.findIndex" />.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException">Thrown if no element returns <see cref="true" /> when
+    /// evaluated by the <paramref name="predicate" /> function.</exception>
+    val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException

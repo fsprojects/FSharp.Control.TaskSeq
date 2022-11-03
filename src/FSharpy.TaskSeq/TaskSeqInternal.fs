@@ -374,6 +374,38 @@ module internal TaskSeqInternal =
         return foundItem
     }
 
+    let tryFindIndex predicate (source: taskSeq<_>) = task {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+
+        let mutable go = true
+        let mutable isFound = false
+        let mutable index = -1
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        match predicate with
+        | Predicate predicate ->
+            while go && not isFound do
+                index <- index + 1
+                isFound <- predicate e.Current
+
+                if not isFound then
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+        | PredicateAsync predicate ->
+            while go && not isFound do
+                index <- index + 1
+                let! predicateResult = predicate e.Current
+                isFound <- predicateResult
+
+                if not isFound then
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+        if isFound then return Some index else return None
+    }
+
     let choose chooser (source: taskSeq<_>) = taskSeq {
         match chooser with
         | TryPick picker ->
