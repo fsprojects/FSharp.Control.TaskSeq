@@ -147,9 +147,6 @@ and [<AbstractClass; NoEquality; NoComparison>] TaskSeq<'T>() =
 
     abstract MoveNextAsyncResult: unit -> ValueTask<bool>
 
-    /// Initializes the machine data on 'self'
-    abstract InitMachineDataForTailcalls: ct: CancellationToken -> unit
-
     interface IAsyncEnumerator<'T> with
         member _.Current = raiseNotImpl ()
         member _.MoveNextAsync() = raiseNotImpl ()
@@ -185,11 +182,6 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     /// Keeps the active state machine.
     [<DefaultValue(false)>]
     val mutable _machine: 'Machine
-
-    override this.InitMachineDataForTailcalls(ct) =
-        match this._machine.Data :> obj with
-        | null -> this.InitMachineData(ct, &this._machine)
-        | _ -> ()
 
     member this.InitMachineData(ct, machine: 'Machine byref) =
         let data = TaskSeqStateMachineData()
