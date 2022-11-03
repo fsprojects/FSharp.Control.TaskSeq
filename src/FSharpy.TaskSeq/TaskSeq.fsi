@@ -87,6 +87,14 @@ module TaskSeq =
     /// Create a taskSeq of an array of async.
     val ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
 
+    /// <summary>
+    /// Casts each item in the <paramref name="source" /> sequence asynchyronously. This function does unconstrainted casting,
+    /// by boxing the value and then casting it to the target type. For non-reference types, it is recommended
+    /// to use <see cref="TaskSeq.map" /> instead.
+    /// </summary>
+    /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
+    val cast: source: taskSeq<'T> -> taskSeq<'U>
+
     /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking
     /// exhausts the sequence as soon as the task is evaluated.
     val iter: action: ('T -> unit) -> source: taskSeq<'T> -> Task<unit>
