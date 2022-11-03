@@ -163,6 +163,7 @@ module TaskSeq =
     // iter/map/collect functions
     //
 
+    let cast source : taskSeq<'U> = Internal.map (SimpleAction(fun x -> box x :?> 'U)) source
     let iter action source = Internal.iter (SimpleAction action) source
     let iteri action source = Internal.iter (CountableAction action) source
     let iterAsync action source = Internal.iter (AsyncSimpleAction action) source
