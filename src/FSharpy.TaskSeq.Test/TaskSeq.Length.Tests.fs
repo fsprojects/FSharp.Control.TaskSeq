@@ -77,6 +77,62 @@ module Immutable =
 
 module SideSeffects =
     [<Fact>]
+    let ``TaskSeq-length prove we execute after-effects`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            yield 42
+            i <- i + 1 // we should get here
+        }
+
+        do! ts |> TaskSeq.length |> Task.ignore
+        do! ts |> TaskSeq.length |> Task.ignore
+        do! ts |> TaskSeq.length |> Task.ignore
+        i |> should equal 9
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthBy prove we execute after-effects`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            yield 42
+            i <- i + 1 // we should get here
+        }
+
+        do! ts |> TaskSeq.lengthBy (fun _ -> true) |> Task.ignore
+        do! ts |> TaskSeq.lengthBy (fun _ -> true) |> Task.ignore
+        do! ts |> TaskSeq.lengthBy (fun _ -> true) |> Task.ignore
+        i |> should equal 9
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthByAsync prove we execute after-effects`` () = task {
+        let mutable i = 0
+
+        let ts = taskSeq {
+            i <- i + 1
+            i <- i + 1
+            yield 42
+            i <- i + 1 // we should get here
+        }
+
+        let lenBy =
+            TaskSeq.lengthByAsync (fun _ -> task { return true })
+            >> Task.ignore
+
+        do! lenBy ts
+        do! lenBy ts
+        do! lenBy ts
+
+        i |> should equal 9
+    }
+
+    [<Fact>]
     let ``TaskSeq-length with sequence that changes length`` () = task {
         let mutable i = 0
 
