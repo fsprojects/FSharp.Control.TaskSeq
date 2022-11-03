@@ -227,7 +227,7 @@ module SideEffects =
         i |> should equal 3 // last side effect is ALSO executed
     }
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-exactlyOne throws`` variant =
         fun () ->
             Gen.getSeqWithSideEffect variant
@@ -235,7 +235,7 @@ module SideEffects =
             |> Task.ignore
         |> should throwAsyncExact typeof<ArgumentException>
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-exactlyOne throws, but sequence remains accessible`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
@@ -255,7 +255,7 @@ module SideEffects =
         head1 |> should not' (equal 1)
     }
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-tryExactlyOne returns None`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
         let! head1 = TaskSeq.tryExactlyOne ts

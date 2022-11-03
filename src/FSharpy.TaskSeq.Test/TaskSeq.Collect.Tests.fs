@@ -58,7 +58,7 @@ module EmptySeq =
         |> TaskSeq.collectAsync (fun _ -> task { return taskSeq { yield 10 } })
         |> verifyEmpty
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-collectSeq collecting emptiness`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.collectSeq (fun _ -> Seq.empty<int>)
