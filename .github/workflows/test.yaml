@@ -24,7 +24,7 @@ jobs:
         with:
           name: Report release tests
           # this path glob pattern requires forward slashes!
-          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-release.trx
+          path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-release.trx
           reporter: dotnet-trx
 
   test-debug:
@@ -48,5 +48,5 @@ jobs:
         with:
           name: Report debug tests
           # this path glob pattern requires forward slashes!
-          path: ./src/FSharpy.TaskSeq.Test/TestResults/test-results-debug.trx
+          path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-debug.trx
           reporter: dotnet-trx
