@@ -1,10 +1,10 @@
-module FSharpy.Tests.Find
+module TaskSeq.Tests.Find
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 open System.Collections.Generic
 
 //

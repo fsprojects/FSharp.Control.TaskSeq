@@ -1,10 +1,10 @@
-module FSharpy.Tests.``taskSeq Computation Expression``
+module TaskSeq.Tests.``taskSeq Computation Expression``
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 [<Fact>]
 let ``CE taskSeq with several yield!`` () = task {

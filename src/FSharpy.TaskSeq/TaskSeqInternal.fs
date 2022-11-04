@@ -1,10 +1,10 @@
-namespace FSharpy
+namespace FSharp.Control
 
 open System
 open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
-open FSharpy.TaskSeqBuilders
+open FSharp.Control.TaskSeqBuilders
 
 [<AutoOpen>]
 module ExtraTaskSeqOperators =

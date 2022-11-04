@@ -1,10 +1,10 @@
-module FSharpy.Tests.``Conversion-From``
+module TaskSeq.Tests.``Conversion-From``
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 let validateSequence sq =
     TaskSeq.toArrayAsync sq

@@ -116,7 +116,7 @@ to be used as a quick ref.
 module TaskSeq =
     open System.Collections.Generic
     open System.Threading.Tasks
-    open FSharpy.TaskSeqBuilders
+    open FSharp.Control.TaskSeqBuilders
 
     /// Initialize an empty taskSeq.
     val empty<'T> : taskSeq<'T>

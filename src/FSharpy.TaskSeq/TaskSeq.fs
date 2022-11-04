@@ -1,4 +1,4 @@
-namespace FSharpy
+namespace FSharp.Control
 
 open System.Collections.Generic
 open System.Threading
@@ -6,7 +6,7 @@ open System.Threading.Tasks
 
 module TaskSeq =
     // F# BUG: the following module is 'AutoOpen' and this isn't needed in the Tests project. Why do we need to open it?
-    open FSharpy.TaskSeqBuilders
+    open FSharp.Control.TaskSeqBuilders
 
     // Just for convenience
     module Internal = TaskSeqInternal

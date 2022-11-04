@@ -1,10 +1,10 @@
-namespace FSharpy.Tests
+namespace TaskSeq.Tests
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 /////////////////////////////////////////////////////////////////////////////
 ///                                                                       ///
