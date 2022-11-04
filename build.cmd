@@ -12,7 +12,7 @@ SET DOTNET_TEST_PROJECT_LOCATION=
 
 SET DOTNET_CI_ARGS=--blame-hang-timeout 60000ms --logger "console;verbosity=detailed"
 SET DOTNET_TEST_ARGS=--logger "console;verbosity=detailed"
-SET DOTNET_TEST_PROJECT_LOCATION=".\src\FSharpy.TaskSeq.Test\FSharpy.TaskSeq.Test.fsproj"
+SET DOTNET_TEST_PROJECT_LOCATION=".\src\FSharp.Control.TaskSeq.Test\FSharp.Control.TaskSeq.Test.fsproj"
 
 REM This is used to get a 'rest of arguments' list, which allows passing 
 REM other arguments to the dotnet build and test commands
@@ -105,7 +105,7 @@ GOTO :EOF
 
 REM Normal building
 :runBuild
-SET BUILD_COMMAND=dotnet build src/FSharpy.TaskSeq.sln -c %BUILD_CONFIG% %REST_ARGS%
+SET BUILD_COMMAND=dotnet build src/FSharp.Control.TaskSeq.sln -c %BUILD_CONFIG% %REST_ARGS%
 ECHO Building for %BUILD_CONFIG% configuration...
 ECHO.
 ECHO Executing:
