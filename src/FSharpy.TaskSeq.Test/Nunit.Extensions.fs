@@ -10,15 +10,6 @@ open FsToolkit.ErrorHandling
 open Xunit
 open Xunit.Sdk
 
-type AlphabeticalOrderer() =
-    interface ITestCaseOrderer with
-        override this.OrderTestCases(testCases) =
-            testCases
-            |> Seq.sortBy (fun testCase ->
-                // sorting (or getting) the type fails
-                // and as soon as this method fails, no tests are discovered
-                testCase.TestMethod.Method.Name)
-
 
 [<AutoOpen>]
 module ExtraCustomMatchers =
