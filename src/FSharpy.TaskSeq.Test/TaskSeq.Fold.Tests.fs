@@ -1,11 +1,11 @@
-module FSharpy.Tests.Fold
+module TaskSeq.Tests.Fold
 
 open System.Text
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.fold

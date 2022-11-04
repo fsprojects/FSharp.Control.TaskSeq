@@ -1,11 +1,11 @@
-module FSharpy.Tests.Empty
+module TaskSeq.Tests.Empty
 
 open System.Threading.Tasks
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 
 [<Fact>]

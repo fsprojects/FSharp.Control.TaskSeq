@@ -1,4 +1,4 @@
-namespace FSharpy
+namespace FSharp.Control
 
 open System.Threading.Tasks
 

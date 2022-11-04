@@ -1,4 +1,4 @@
-module FSharpy.Tests.``Bug #42 -- synchronous`` // see PR #42
+module TaskSeq.Tests.``Bug #42 -- synchronous`` // see PR #42
 
 open System
 open System.Threading.Tasks
@@ -9,7 +9,7 @@ open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {

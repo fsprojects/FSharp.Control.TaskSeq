@@ -1,4 +1,4 @@
-namespace FSharpy.Tests
+namespace TaskSeq.Tests
 
 open System
 open System.IO
@@ -6,7 +6,7 @@ open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 open System.Threading.Tasks
 open System.Diagnostics
 open System.Collections.Generic

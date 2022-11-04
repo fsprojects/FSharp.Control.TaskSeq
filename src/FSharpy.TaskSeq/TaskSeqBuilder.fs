@@ -1,4 +1,4 @@
-namespace FSharpy.TaskSeqBuilders
+namespace FSharp.Control.TaskSeqBuilders
 
 open System.Diagnostics
 

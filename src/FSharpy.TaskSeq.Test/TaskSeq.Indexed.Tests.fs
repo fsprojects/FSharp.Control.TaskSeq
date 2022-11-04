@@ -1,10 +1,10 @@
-module FSharpy.Tests.Indexed
+module TaskSeq.Tests.Indexed
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.indexed

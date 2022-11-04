@@ -1,9 +1,9 @@
-module FSharpy.Tests.Iter
+module TaskSeq.Tests.Iter
 
 open Xunit
 open FsUnit.Xunit
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.iter

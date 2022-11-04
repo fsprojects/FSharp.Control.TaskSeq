@@ -1,11 +1,11 @@
-module FSharpy.Tests.IsEmpty
+module TaskSeq.Tests.IsEmpty
 
 open System.Threading.Tasks
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 module EmptySeq =
 

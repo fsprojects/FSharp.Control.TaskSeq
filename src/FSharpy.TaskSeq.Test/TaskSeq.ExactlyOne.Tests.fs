@@ -1,11 +1,11 @@
-module FSharpy.Tests.ExactlyOne
+module TaskSeq.Tests.ExactlyOne
 
 open System
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.exactlyOne

@@ -1,4 +1,4 @@
-module FSharpy.Tests.Init
+module TaskSeq.Tests.Init
 
 open System
 
@@ -6,7 +6,7 @@ open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.init

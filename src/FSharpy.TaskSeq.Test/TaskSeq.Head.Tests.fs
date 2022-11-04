@@ -1,11 +1,11 @@
-module FSharpy.Tests.Head
+module TaskSeq.Tests.Head
 
 open System
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.head

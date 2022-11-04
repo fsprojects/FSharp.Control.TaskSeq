@@ -1,10 +1,10 @@
-module FSharpy.Tests.Contains
+module TaskSeq.Tests.Contains
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.contains

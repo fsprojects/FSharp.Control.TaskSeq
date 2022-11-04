@@ -1,10 +1,10 @@
-module FSharpy.Tests.Map
+module TaskSeq.Tests.Map
 
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
-open FSharpy
+open FSharp.Control
 
 //
 // TaskSeq.map
