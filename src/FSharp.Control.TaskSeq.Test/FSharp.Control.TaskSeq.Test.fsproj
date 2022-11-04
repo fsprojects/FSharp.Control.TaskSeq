@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -65,7 +65,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FSharpy.TaskSeq\FSharpy.TaskSeq.fsproj" />
+    <ProjectReference Include="..\FSharp.Control.TaskSeq\FSharp.Control.TaskSeq.fsproj" />
   </ItemGroup>
 
 </Project>
