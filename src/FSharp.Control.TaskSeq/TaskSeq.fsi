@@ -232,21 +232,30 @@ module TaskSeq =
     val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
 
     /// <summary>
-    /// Returns the first element of the <see cref="taskSeq" />, or <see cref="None" /> if the sequence is empty.
+    /// Returns the first element of the task sequence from <paramref name="source" />, or <see cref="None" /> if the sequence is empty.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
     val tryHead: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the first element of the <see cref="taskSeq" />.
+    /// Returns the first elementof the task sequence from <paramref name="source" />
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
     val head: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
-    /// Returns the last element of the <see cref="taskSeq" />, or <see cref="None" /> if the sequence is empty.
+    /// Returns the whole task sequence from <paramref name="source" />, minus its first element, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
+    val tryTail: source: taskSeq<'T> -> Task<taskSeq<'T> option>
+
+    /// <summary>
+    /// Returns the whole task sequence from <paramref name="source" />, minus its first element.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
+
+    /// <summary>
+    /// Returns the last element of the task sequence from <paramref name="source" />, or <see cref="None" /> if the sequence is empty.
+    /// </summary>
     val tryLast: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
