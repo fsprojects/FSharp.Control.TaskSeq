@@ -2,9 +2,20 @@
 [![test][teststatus_img]][teststatus]
 
 # TaskSeq
+
 An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
 
 The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
+
+## Implementation progress
+
+The _resumable state machine_ backing the `taskSeq` CE is considered stable. While bugs are always possible, we will mostly focus on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
+
+We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided from `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
+
+The following is the progress report:
+
+TODO!
 
 ### Futher reading `IAsyncEnumerable`
 
@@ -33,10 +44,10 @@ TLDR: just run `build`. Or load the `sln` file in Visual Studio or VS Code and c
 ### Prerequisites
 
 * .NET 6 or .NET 7 Preview
-* F# 6.0 compiler
+* F# 6.0 or 7.0 compiler
 * To use `build.cmd`, the `dotnet` command must be accessible from your path.
 
-Just checkout this repo locally. Then, from the root of the repo, you can do:
+Just check-out this repo locally. Then, from the root of the repo, you can do:
 
 ### Build the solution
 
