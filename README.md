@@ -7,15 +7,151 @@ An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with acco
 
 The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
 
+## Short-term feature planning
+
+Not necessarily in order of importance:
+
+* [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
+* [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
+* [ ] Packaging and publishing on Nuget, **PLANNED: 13 November 2022**.
+* [x] Add `Async` variants for functions taking HOF arguments. **DONE**
+* [ ] Expand surface area based on `AsyncSeq`.
+* [ ] User requests?
+
 ## Implementation progress
 
-The _resumable state machine_ backing the `taskSeq` CE is considered stable. While bugs are always possible, we will mostly focus on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
+### `taskSeq` CE
+
+The _resumable state machine_ backing the `taskSeq` CE is now finished. Focus is now on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
+
+### `TaskSeq` module functions
 
 We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided from `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
 
 The following is the progress report:
 
-TODO!
+| Implemented   | `Seq` function     | `TaskSeq` function | Extra `async` variant | Remarks                                   |
+|---------------|--------------------|--------------------|-----------------------|-------------------------------------------|
+|               | `allPairs`         | `allPairs`         |                       |                                           |
+|               | `append`           | `append`           |                       |                                           |
+|               | `average`          | `averageBy`        | `averageByAsync`      |                                           |
+|               | `cache`            | `cache`            |                       |                                           |
+| &#x2705;      | `cast`             | `cast`             |                       |                                           |
+| &#x2705;      |                    | `box`              |                       |                                           |
+| &#x2705;      |                    | `unbox`            |                       |                                           |
+| &#x2705;      | `choose`           | `choose`           | `chooseAsync`         |                                           |
+|               | `chunkBySize`      | `chunkBySize`      |                       |                                           |
+| &#x2705;      | `collect`          | `collect`          | `collectAsync`        |                                           |
+|               | `compareWith`      | `compareWith`      | `compareWithAsync`    |                                           |
+| &#x2705;      | `concat`           | `concat`           |                       |                                           |
+| &#x2705;      | `contains`         | `contains`         |                       |                                           |
+|               | `delay`            | `delay`            |                       |                                           |
+|               | `distinct`         | `distinct`         |                       |                                           |
+|               | `distinctBy`       | `dictinctBy`       | `distinctByAsync`     |                                           |
+| &#x2705;      | `empty`            | `empty`            |                       |                                           |
+| &#x2705;      | `exactlyOne`       | `exactlyOne`       |                       |                                           |
+|               | `except`           | `except`           |                       |                                           |
+| &#x2705;      | `exists`           | `exists`           |                       |                                           |
+|               | `exists2`          | `exists2`          |                       |                                           |
+| &#x2705;      | `filter`           | `filter`           | `filterAsync`         |                                           |
+| &#x2705;      | `find`             | `find`             | `findAsync`           |                                           |
+| _not planned_ | `findBack`         |                    |                       | _iteration from back not possible_        |
+| &#x2705;      | `findIndex`        | `findIndex`        | `findIndexAsync`      |                                           |
+| _not planned_ | `findIndexBack`    | n/a                | n/a                   | _iteration from back not possible_        |
+| &#x2705;      | `fold`             | `fold`             | `foldAsync`           |                                           |
+|               | `fold2`            | `fold2`            | `fold2Async`          |                                           |
+| _not planned_ | `foldBack`         |                    |                       | _iteration from back not possible_        |
+| _not planned_ | `foldBack2`        |                    |                       | _iteration from back not possible_        |
+|               | `forall`           | `forall`           | `forallAsync`         |                                           |
+|               | `forall2`          | `forall2`          | `forall2Async`        |                                           |
+| _maybe_       | `groupBy`          | `groupBy`          | `groupByAsync`        |                                           |
+| &#x2705;      | `head`             | `head`             |                       |                                           |
+| &#x2705;      | `indexed`          | `indexed`          |                       |                                           |
+| &#x2705;      | `init`             | `init`             | `initAsync`           |                                           |
+| &#x2705;      | `initInfinite`     | `initInfinite`     | `initInfiniteAsync`   |                                           |
+|               | `insertAt`         | `insertAt`         |                       |                                           |
+|               | `insertManyAt`     | `insertManyAt`     |                       |                                           |
+| &#x2705;      | `isEmpty`          | `isEmpty`          |                       |                                           |
+| &#x2705;      | `item`             | `item`             |                       |                                           |
+| &#x2705;      | `iter`             | `iter`             | `iterAsync`           |                                           |
+|               | `iter2`            | `iter2`            | `iter2Async`          |                                           |
+| &#x2705;      | `iteri`            | `iteri`            | `iteriAsync`          |                                           |
+|               | `iteri2`           | `iteri2`           | `iteri2Async`         |                                           |
+| &#x2705;      | `last`             | `last`             |                       |                                           |
+| &#x2705;      | `length`           | `length`           |                       |                                           |
+| &#x2705;      |                    | `lengthBy`         | `lengthByAsyn`        |                                           |
+| &#x2705;      | `map`              | `map`              | `mapAsync`            |                                           |
+|               | `map2`             | `map2`             | `map2Async`           |                                           |
+|               | `map3`             | `map3`             | `map3Async`           |                                           |
+|               | `mapFold`          | `mapFold`          | `mapFoldAsync`        |                                           |
+| _not planned_ | `mapFoldBack`      |                    |                       | _iteration from back not possible_        |
+| &#x2705;      | `mapi`             | `mapi`             | `mapiAsync`           |                                           |
+|               | `mapi2`            | `mapi2`            | `mapi2Async`          |                                           |
+|               | `max`              | `max`              |                       |                                           |
+|               | `maxBy`            | `maxBy`            | `maxByAsync`          |                                           |
+|               | `min`              | `min`              |                       |                                           |
+|               | `minBy`            | `minBy`            | `minByAsync`          |                                           |
+| &#x2705;      | `ofArray`          | `ofArray`          |                       |                                           |
+| &#x2705;      |                    | `ofAsyncArray`     |                       |                                           |
+| &#x2705;      |                    | `ofAsyncList`      |                       |                                           |
+| &#x2705;      |                    | `ofAsyncSeq`       |                       |                                           |
+| &#x2705;      | `ofList`           | `ofList`           |                       |                                           |
+| &#x2705;      |                    | `ofTaskList`       |                       |                                           |
+| &#x2705;      |                    | `ofResizeArray`    |                       |                                           |
+| &#x2705;      |                    | `ofSeq`            |                       |                                           |
+| &#x2705;      |                    | `ofTaskArray`      |                       |                                           |
+| &#x2705;      |                    | `ofTaskList`       |                       |                                           |
+| &#x2705;      |                    | `ofTaskSeq`        |                       |                                           |
+|               | `pairwise`         | `pairwise`         |                       |                                           |
+|               | `permute`          | `permute`          | `permuteAsync`        |                                           |
+| &#x2705;      | `pick`             | `pick`             | `pickAsync`           |                                           |
+| _not planned_ | `readOnly`         |                    |                       | _all TaskSeq sequences are readonly_      |
+|               | `reduce`           | `reduce`           | `reduceAsync`         |                                           |
+| _not planned_ | `reduceBack`       |                    |                       | _iteration from back not possible_        |
+|               | `removeAt`         | `removeAt`         |                       |                                           |
+|               | `removeManyAt`     | `removeManyAt`     |                       |                                           |
+|               | `replicate`        | `replicate`        |                       |                                           |
+| _maybe_       | `rev`              |                    |                       |                                           |
+|               | `scan`             | `scan`             | `scanAsync`           |                                           |
+| _not planned_ | `scanBack`         |                    |                       | _iteration from back not possible_        |
+|               | `singleton`        | `singleton`        |                       |                                           |
+|               | `skip`             | `skip`             |                       |                                           |
+|               | `skipWhile`        | `skipWhile`        | `skipWhileAsync`      |                                           |
+| _maybe_       | `sort`             |                    |                       |                                           |
+| _maybe_       | `sortBy`           |                    |                       |                                           |
+| _maybe_       | `sortByAscending`  |                    |                       |                                           |
+| _maybe_       | `sortByDescending` |                    |                       |                                           |
+| _maybe_       | `sortWith`         |                    |                       |                                           |
+|               | `splitInto`        | `splitInto`        |                       |                                           |
+|               | `sum`              | `sum`              |                       |                                           |
+|               | `sumBy`            | `sumBy`            | `sumByAsync`          |                                           |
+|               | `tail`             | `tail`             |                       |                                           |
+|               | `take`             | `take`             |                       |                                           |
+|               | `takeWhile`        | `takeWhile`        | `takeWhileAsync`      |                                           |
+| &#x2705;      | `toArray`          | `toArray`          | `toArrayAsync`        |                                           |
+| &#x2705;      |                    | `toIList`          | `toIListAsync`        |                                           |
+| &#x2705;      | `toList`           | `toList`           | `toListAsync`         |                                           |
+| &#x2705;      |                    | `toResizeArray`    | `toResizeArrayAsync`  |                                           |
+| &#x2705;      |                    | `toSeq`            | `toSeqAsync`          |                                           |
+|               |                    | […]                |                       | _more convenience conversions considered_ |
+| _maybe_       | `transpose`        |                    |                       |                                           |
+|               | `truncate`         | `truncate`         |                       |                                           |
+| &#x2705;      | `tryExactlyOne`    | `tryExactlyOne`    | `tryExactlyOneAsync`  |                                           |
+| &#x2705;      | `tryFind`          | `tryFind`          | `tryFindAsync`        |                                           |
+| _not planned_ | `tryFindBack`      |                    |                       | _iteration from back not possible_        |
+| &#x2705;      | `tryFindIndex`     | `tryFindIndex`     | `tryFindIndexAsync`   |                                           |
+| _not planned_ | `tryFindIndexBack` |                    |                       | _iteration from back not possible_        |
+| &#x2705;      | `tryHead`          | `tryHead`          |                       |                                           |
+| &#x2705;      | `tryItem`          | `tryItem`          |                       |                                           |
+| &#x2705;      | `tryLast`          | `tryLast`          |                       |                                           |
+| &#x2705;      | `tryPick`          | `tryPick`          | `tryPickAsync`        |                                           |
+|               | `unfold`           | `unfold`           | `unfoldAsync`         |                                           |
+|               | `updateAt`         | `updateAt`         |                       |                                           |
+|               | `where`            | `where`            | `whereAsync`          |                                           |
+|               | `windowed`         | `windowed`         |                       |                                           |
+| &#x2705;      | `zip`              | `zip`              |                       |                                           |
+|               | `zip3`             | `zip3`             |                       |                                           |
+|               |                    | `zip4`             |
 
 ### Futher reading `IAsyncEnumerable`
 
@@ -105,18 +241,6 @@ For more info, see this PR: https://github.com/abelbraaksma/TaskSeq/pull/29.
 
 It's based on [Don Symes `taskSeq.fs`][20]
 but expanded with useful utility functions and a few extra binding overloads.
-
-## Short-term feature planning
-
-Not necessarily in order of importance:
-
- - [x] A minimal base set of useful functions and sensible CE overloads, like `map`, `collect`, `fold`, `zip`. These functions will live in the module `TaskSeq`. The CE will be called `taskSeq`.
- - [ ] Packaging and publishing on Nuget
- - [ ] Provide the same surface area of functions as `Seq` in F# Core
- - [ ] For each function, have a "normal" function, where the operator is non-async, and an async version. I.e., `TaskSeq.map` and `TaskSeq.mapAsync`, the difference being that the `mapper` function returns a `#Task<'T>` in the second version.
- - [ ] Examples, documentation and tests
- - [ ] Expand surface area based on user requests
- - [ ] Improving the original code, adding benchmarks, and what have you.
 
 ## Current set of `TaskSeq` utility functions
 
