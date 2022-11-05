@@ -338,11 +338,30 @@ module internal TaskSeqInternal =
 
     let tryHead (source: taskSeq<_>) = task {
         use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step = e.MoveNextAsync()
-        go <- step
 
-        if go then return Some e.Current else return None
+        match! e.MoveNextAsync() with
+        | true -> return Some e.Current
+        | false -> return None
+    }
+
+    let tryTail (source: taskSeq<_>) = task {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+
+        match! e.MoveNextAsync() with
+        | false -> return None
+        | true ->
+            return
+                taskSeq {
+                    let mutable go = true
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+                    while go do
+                        yield e.Current
+                        let! step = e.MoveNextAsync()
+                        go <- step
+                }
+                |> Some
     }
 
     let tryItem index (source: taskSeq<_>) = task {

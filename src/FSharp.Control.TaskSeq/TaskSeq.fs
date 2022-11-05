@@ -215,6 +215,13 @@ module TaskSeq =
         | None -> return Internal.raiseEmptySeq ()
     }
 
+    let tryTail source = Internal.tryTail source
+
+    let tail source = task {
+        match! Internal.tryTail source with
+        | Some result -> return result
+        | None -> return Internal.raiseEmptySeq ()
+    }
     let tryItem index source = Internal.tryItem index source
 
     let item index source = task {
