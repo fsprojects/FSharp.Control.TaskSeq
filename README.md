@@ -169,6 +169,7 @@ The following is the progress report:
 | &#x2705;      | `tryItem`          | `tryItem`          |                       |                                           |
 | &#x2705;      | `tryLast`          | `tryLast`          |                       |                                           |
 | &#x2705;      | `tryPick`          | `tryPick`          | `tryPickAsync`        |                                           |
+|               |                    | `tryTail`          |                       |                                           |
 |               | `unfold`           | `unfold`           | `unfoldAsync`         |                                           |
 |               | `updateAt`         | `updateAt`         |                       |                                           |
 |               | `where`            | `where`            | `whereAsync`          |                                           |
