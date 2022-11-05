@@ -7,6 +7,29 @@ An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with acco
 
 The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
 
+-----------------------------------------
+
+## Table of contents
+
+- [Short-term feature planning](#short-term-feature-planning)
+- [Implementation progress](#implementation-progress)
+  - [`taskSeq` CE](#taskseq-ce)
+  - [`TaskSeq` module functions](#taskseq-module-functions)
+  - [Futher reading `IAsyncEnumerable`](#futher-reading-iasyncenumerable)
+  - [Futher reading on resumable state machines](#futher-reading-on-resumable-state-machines)
+  - [Further reading on computation expressions](#further-reading-on-computation-expressions)
+- [Building & testing](#building--testing)
+  - [Prerequisites](#prerequisites)
+  - [Build the solution](#build-the-solution)
+  - [Run the tests](#run-the-tests)
+  - [Run the CI command](#run-the-ci-command)
+  - [Advanced](#advanced)
+  - [Get help (duh!)](#get-help-duh)
+- [In progress!!!](#in-progress)
+- [Current set of `TaskSeq` utility functions](#current-set-of-taskseq-utility-functions)
+
+-----------------------------------------
+
 ## Short-term feature planning
 
 Not necessarily in order of importance:
@@ -15,6 +38,7 @@ Not necessarily in order of importance:
 * [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
 * [ ] Packaging and publishing on Nuget, **PLANNED: 13 November 2022**.
 * [x] Add `Async` variants for functions taking HOF arguments. **DONE**
+* [ ] Add generated docs to <https://fsprojects.github.io>
 * [ ] Expand surface area based on `AsyncSeq`.
 * [ ] User requests?
 
