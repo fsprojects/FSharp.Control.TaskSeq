@@ -41,7 +41,7 @@ module EmptySeq =
 
 module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-concat with empty sequences`` variant =
+    let ``TaskSeq-concat with three sequences of sequences`` variant =
         taskSeq {
             yield Gen.getSeqImmutable variant // not yield-bang!
             yield Gen.getSeqImmutable variant
@@ -49,3 +49,61 @@ module Immutable =
         }
         |> TaskSeq.concat
         |> validateSequence
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-concat with three sequences of sequences and few empties`` variant =
+        taskSeq {
+            yield TaskSeq.empty
+            yield Gen.getSeqImmutable variant // not yield-bang!
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield Gen.getSeqImmutable variant
+            yield TaskSeq.empty
+            yield Gen.getSeqImmutable variant
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+        }
+        |> TaskSeq.concat
+        |> validateSequence
+
+module SideEffect =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-concat consumes until the end, including side-effects`` variant =
+        let mutable i = 0
+
+        taskSeq {
+            yield Gen.getSeqImmutable variant // not yield-bang!
+            yield Gen.getSeqImmutable variant
+
+            yield taskSeq {
+                yield! [ 1..10 ]
+                i <- i + 1
+            }
+        }
+        |> TaskSeq.concat
+        |> validateSequence
+        |> Task.map (fun () -> i |> should equal 1)
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-concat consumes side effects in empty sequences`` variant =
+        let mutable i = 0
+
+        taskSeq {
+            yield taskSeq { do i <- i + 1 }
+            yield Gen.getSeqImmutable variant // not yield-bang!
+            yield TaskSeq.empty
+            yield taskSeq { do i <- i + 1 }
+            yield Gen.getSeqImmutable variant
+            yield TaskSeq.empty
+            yield Gen.getSeqImmutable variant
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield TaskSeq.empty
+            yield taskSeq { do i <- i + 1 }
+        }
+        |> TaskSeq.concat
+        |> validateSequence
+        |> Task.map (fun () -> i |> should equal 3)

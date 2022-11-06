@@ -107,6 +107,39 @@ module TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
 
+    /// <summary>
+    /// Concatenates task sequences <paramref name="source1" /> and <paramref name="source2" /> in order as a single
+    /// task sequence.
+    /// </summary>
+    ///
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
+    val append: source1: #taskSeq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Concatenates a task sequence <paramref name="source1" /> with a non-async F# <see cref="seq" /> in <paramref name="source2" />
+    /// and returns a single task sequence.
+    /// </summary>
+    ///
+    /// <param name="source1">The input task sequence.</param>
+    /// <param name="source2">The input F# <see cref="seq" /> sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
+    val appendSeq: source1: #taskSeq<'T> -> source2: #seq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Concatenates a non-async F# <see cref="seq" /> in <paramref name="source1" /> with a task sequence in <paramref name="source2" />
+    /// and returns a single task sequence.
+    /// </summary>
+    ///
+    /// <param name="source1">The input F# <see cref="seq" /> sequence.</param>
+    /// <param name="source2">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
+    val prependSeq: source1: #seq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: source: taskSeq<'T> -> 'T list
 
