@@ -1,7 +1,7 @@
 [![build][buildstatus_img]][buildstatus]
 [![test][teststatus_img]][teststatus]
 
-# TaskSeq
+# TaskSeq<!-- omit in toc -->
 
 An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
 
@@ -9,12 +9,20 @@ The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is par
 
 -----------------------------------------
 
-## Table of contents
+## Table of contents<!-- omit in toc -->
 
-- [Short-term feature planning](#short-term-feature-planning)
+<!--
+    This index can be auto-generated with VS Code's Markdown All in One extension.
+    The ToC will be updated-on-save, or can be generated on command by using
+    Ctrl-Shift-P: "Create table of contents".
+    More info: https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#table-of-contents
+-->
+
+- [Feature planning](#feature-planning)
 - [Implementation progress](#implementation-progress)
   - [`taskSeq` CE](#taskseq-ce)
   - [`TaskSeq` module functions](#taskseq-module-functions)
+- [More information](#more-information)
   - [Futher reading `IAsyncEnumerable`](#futher-reading-iasyncenumerable)
   - [Futher reading on resumable state machines](#futher-reading-on-resumable-state-machines)
   - [Further reading on computation expressions](#further-reading-on-computation-expressions)
@@ -24,29 +32,31 @@ The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is par
   - [Run the tests](#run-the-tests)
   - [Run the CI command](#run-the-ci-command)
   - [Advanced](#advanced)
-  - [Get help (duh!)](#get-help-duh)
-- [In progress!!!](#in-progress)
+  - [Get help](#get-help)
+- [Work in progress](#work-in-progress)
 - [Current set of `TaskSeq` utility functions](#current-set-of-taskseq-utility-functions)
 
 -----------------------------------------
 
-## Short-term feature planning
+## Feature planning
 
 Not necessarily in order of importance:
 
-* [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
-* [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
-* [ ] Packaging and publishing on Nuget, **PLANNED: 13 November 2022**.
-* [x] Add `Async` variants for functions taking HOF arguments. **DONE**
-* [ ] Add generated docs to <https://fsprojects.github.io>
-* [ ] Expand surface area based on `AsyncSeq`.
-* [ ] User requests?
+- [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
+- [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
+- [ ] Packaging and publishing on Nuget, **PLANNED: 13 November 2022**.
+- [x] Add `Async` variants for functions taking HOF arguments. **DONE**
+- [ ] Add generated docs to <https://fsprojects.github.io>
+- [ ] Expand surface area based on `AsyncSeq`.
+- [ ] User requests?
 
 ## Implementation progress
 
+As of 6 November 2022:
+
 ### `taskSeq` CE
 
-The _resumable state machine_ backing the `taskSeq` CE is now finished. Focus is now on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
+The _resumable state machine_ backing the `taskSeq` CE is now finished and _restartability_ (not to be confused with _resumability_) has been implemented and stabilized. Full support for empty task sequences is done. Focus is now on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
 
 ### `TaskSeq` module functions
 
@@ -54,12 +64,12 @@ We are working hard on getting a full set of module functions on `TaskSeq` that 
 
 The following is the progress report:
 
-| Implemented   | `Seq` function     | `TaskSeq` function | Extra `async` variant | Remarks                                   |
+| Done          | `Seq`              | `TaskSeq`          | `async` variant       | Remarks                                   |
 |---------------|--------------------|--------------------|-----------------------|-------------------------------------------|
-|               | `allPairs`         | `allPairs`         |                       |                                           |
+| &#x2753;      | `allPairs`         | `allPairs`         |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |               | `append`           | `append`           |                       |                                           |
 |               | `average`          | `averageBy`        | `averageByAsync`      |                                           |
-|               | `cache`            | `cache`            |                       |                                           |
+| &#x2753;      | `cache`            | `cache`            |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705;      | `cast`             | `cast`             |                       |                                           |
 | &#x2705;      |                    | `box`              |                       |                                           |
 | &#x2705;      |                    | `unbox`            |                       |                                           |
@@ -79,16 +89,16 @@ The following is the progress report:
 |               | `exists2`          | `exists2`          |                       |                                           |
 | &#x2705;      | `filter`           | `filter`           | `filterAsync`         |                                           |
 | &#x2705;      | `find`             | `find`             | `findAsync`           |                                           |
-| _not planned_ | `findBack`         |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `findBack`         |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705;      | `findIndex`        | `findIndex`        | `findIndexAsync`      |                                           |
-| _not planned_ | `findIndexBack`    | n/a                | n/a                   | _iteration from back not possible_        |
+| &#x1f6ab;     | `findIndexBack`    | n/a                | n/a                   | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705;      | `fold`             | `fold`             | `foldAsync`           |                                           |
 |               | `fold2`            | `fold2`            | `fold2Async`          |                                           |
-| _not planned_ | `foldBack`         |                    |                       | _iteration from back not possible_        |
-| _not planned_ | `foldBack2`        |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `foldBack`         |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x1f6ab;     | `foldBack2`        |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 |               | `forall`           | `forall`           | `forallAsync`         |                                           |
 |               | `forall2`          | `forall2`          | `forall2Async`        |                                           |
-| _maybe_       | `groupBy`          | `groupBy`          | `groupByAsync`        |                                           |
+| &#x2753;      | `groupBy`          | `groupBy`          | `groupByAsync`        | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705;      | `head`             | `head`             |                       |                                           |
 | &#x2705;      | `indexed`          | `indexed`          |                       |                                           |
 | &#x2705;      | `init`             | `init`             | `initAsync`           |                                           |
@@ -108,7 +118,7 @@ The following is the progress report:
 |               | `map2`             | `map2`             | `map2Async`           |                                           |
 |               | `map3`             | `map3`             | `map3Async`           |                                           |
 |               | `mapFold`          | `mapFold`          | `mapFoldAsync`        |                                           |
-| _not planned_ | `mapFoldBack`      |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `mapFoldBack`      |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705;      | `mapi`             | `mapi`             | `mapiAsync`           |                                           |
 |               | `mapi2`            | `mapi2`            | `mapi2Async`          |                                           |
 |               | `max`              | `max`              |                       |                                           |
@@ -129,27 +139,27 @@ The following is the progress report:
 |               | `pairwise`         | `pairwise`         |                       |                                           |
 |               | `permute`          | `permute`          | `permuteAsync`        |                                           |
 | &#x2705;      | `pick`             | `pick`             | `pickAsync`           |                                           |
-| _not planned_ | `readOnly`         |                    |                       | _all TaskSeq sequences are readonly_      |
+| &#x1f6ab;     | `readOnly`         |                    |                       | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
 |               | `reduce`           | `reduce`           | `reduceAsync`         |                                           |
-| _not planned_ | `reduceBack`       |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `reduceBack`       |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 |               | `removeAt`         | `removeAt`         |                       |                                           |
 |               | `removeManyAt`     | `removeManyAt`     |                       |                                           |
 |               | `replicate`        | `replicate`        |                       |                                           |
-| _maybe_       | `rev`              |                    |                       |                                           |
+| &#x2753;      | `rev`              |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |               | `scan`             | `scan`             | `scanAsync`           |                                           |
-| _not planned_ | `scanBack`         |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `scanBack`         |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 |               | `singleton`        | `singleton`        |                       |                                           |
 |               | `skip`             | `skip`             |                       |                                           |
 |               | `skipWhile`        | `skipWhile`        | `skipWhileAsync`      |                                           |
-| _maybe_       | `sort`             |                    |                       |                                           |
-| _maybe_       | `sortBy`           |                    |                       |                                           |
-| _maybe_       | `sortByAscending`  |                    |                       |                                           |
-| _maybe_       | `sortByDescending` |                    |                       |                                           |
-| _maybe_       | `sortWith`         |                    |                       |                                           |
+| &#x2753;      | `sort`             |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;      | `sortBy`           |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;      | `sortByAscending`  |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;      | `sortByDescending` |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;      | `sortWith`         |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |               | `splitInto`        | `splitInto`        |                       |                                           |
 |               | `sum`              | `sum`              |                       |                                           |
 |               | `sumBy`            | `sumBy`            | `sumByAsync`          |                                           |
-|               | `tail`             | `tail`             |                       |                                           |
+| &#x2705;      | `tail`             | `tail`             |                       |                                           |
 |               | `take`             | `take`             |                       |                                           |
 |               | `takeWhile`        | `takeWhile`        | `takeWhileAsync`      |                                           |
 | &#x2705;      | `toArray`          | `toArray`          | `toArrayAsync`        |                                           |
@@ -157,19 +167,19 @@ The following is the progress report:
 | &#x2705;      | `toList`           | `toList`           | `toListAsync`         |                                           |
 | &#x2705;      |                    | `toResizeArray`    | `toResizeArrayAsync`  |                                           |
 | &#x2705;      |                    | `toSeq`            | `toSeqAsync`          |                                           |
-|               |                    | […]                |                       | _more convenience conversions considered_ |
-| _maybe_       | `transpose`        |                    |                       |                                           |
+|               |                    | […]                |                       |                                           |
+| &#x2753;      | `transpose`        |                    |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |               | `truncate`         | `truncate`         |                       |                                           |
 | &#x2705;      | `tryExactlyOne`    | `tryExactlyOne`    | `tryExactlyOneAsync`  |                                           |
 | &#x2705;      | `tryFind`          | `tryFind`          | `tryFindAsync`        |                                           |
-| _not planned_ | `tryFindBack`      |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `tryFindBack`      |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705;      | `tryFindIndex`     | `tryFindIndex`     | `tryFindIndexAsync`   |                                           |
-| _not planned_ | `tryFindIndexBack` |                    |                       | _iteration from back not possible_        |
+| &#x1f6ab;     | `tryFindIndexBack` |                    |                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705;      | `tryHead`          | `tryHead`          |                       |                                           |
 | &#x2705;      | `tryItem`          | `tryItem`          |                       |                                           |
 | &#x2705;      | `tryLast`          | `tryLast`          |                       |                                           |
 | &#x2705;      | `tryPick`          | `tryPick`          | `tryPickAsync`        |                                           |
-|               |                    | `tryTail`          |                       |                                           |
+| &#x2705;      |                    | `tryTail`          |                       |                                           |
 |               | `unfold`           | `unfold`           | `unfoldAsync`         |                                           |
 |               | `updateAt`         | `updateAt`         |                       |                                           |
 |               | `where`            | `where`            | `whereAsync`          |                                           |
@@ -178,25 +188,31 @@ The following is the progress report:
 |               | `zip3`             | `zip3`             |                       |                                           |
 |               |                    | `zip4`             |
 
+<sup>¹⁾ <a id="note1"></a>_These functions require a form of pre-materializing through `TaskSeq.cache`, similar to the approach taken in the corresponding `Seq` functions. It doesn't make much sense to have a cached async sequence. However, `AsyncSeq` does implement these, so we'll probably do so eventually as well._</sup>  
+<sup>²⁾ <a id="note2"></a>_Because of the async nature of `TaskSeq` sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the `xxxBack` iterators._</sup>  
+<sup>³⁾ <a id="note3"></a>_The motivation for `readOnly` in `Seq` is that a cast from a mutable array or list to a `seq<_>` is valid and can be cast back, leading to a mutable sequence. Since `TaskSeq` doesn't implement `IEnumerable<_>`, such casts are not possible._</sup>
+
+## More information
+
 ### Futher reading `IAsyncEnumerable`
 
-* A good C#-based introduction [can be found in this blog][8].
-* [An MSDN article][9] written shortly after it was introduced.
-* Converting a `seq` to an `IAsyncEnumerable` [demo gist][10] as an example, though `TaskSeq` contains many more utility functions and uses a slightly different approach.
-* If you're looking for using `IAsyncEnumerable` with `async` and not `task`, the excellent [`AsyncSeq`][11] library should be used. While `TaskSeq` is intended to consume `async` just like `task` does, it won't create an `AsyncSeq` type (at least not yet). If you want classic Async and parallelism, you should get this library instead.
+- A good C#-based introduction [can be found in this blog][8].
+- [An MSDN article][9] written shortly after it was introduced.
+- Converting a `seq` to an `IAsyncEnumerable` [demo gist][10] as an example, though `TaskSeq` contains many more utility functions and uses a slightly different approach.
+- If you're looking for using `IAsyncEnumerable` with `async` and not `task`, the excellent [`AsyncSeq`][11] library should be used. While `TaskSeq` is intended to consume `async` just like `task` does, it won't create an `AsyncSeq` type (at least not yet). If you want classic Async and parallelism, you should get this library instead.
 
 ### Futher reading on resumable state machines
 
-* A state machine from a monadic perspective in F# [can be found here][12], which works with the pre-F# 6.0 non-resumable internals.
-* The [original RFC for F# 6.0 on resumable state machines][13] 
-* The [original RFC for introducing `task`][14] to F# 6.0.
-* A [pre F# 6.0 `TaskBuilder`][15] that motivated the `task` CE later added to F# Core.
-* [MSDN Documentation on `task`][16] and [`async`][17].
+- A state machine from a monadic perspective in F# [can be found here][12], which works with the pre-F# 6.0 non-resumable internals.
+- The [original RFC for F# 6.0 on resumable state machines][13]
+- The [original RFC for introducing `task`][14] to F# 6.0.
+- A [pre F# 6.0 `TaskBuilder`][15] that motivated the `task` CE later added to F# Core.
+- [MSDN Documentation on `task`][16] and [`async`][17].
 
 ### Further reading on computation expressions
 
-* [Docs on MSDN][18] form a good summary and starting point.
-* Arguably the best [step-by-step tutorial to using and building computation expressions][19] by Scott Wlaschin.
+- [Docs on MSDN][18] form a good summary and starting point.
+- Arguably the best [step-by-step tutorial to using and building computation expressions][19] by Scott Wlaschin.
 
 ## Building & testing
 
@@ -204,15 +220,17 @@ TLDR: just run `build`. Or load the `sln` file in Visual Studio or VS Code and c
 
 ### Prerequisites
 
-* .NET 6 or .NET 7 Preview
-* F# 6.0 or 7.0 compiler
-* To use `build.cmd`, the `dotnet` command must be accessible from your path.
+At the very least, to get the source to compile, you'll need:
+
+- .NET 6 or .NET 7 Preview
+- F# 6.0 or 7.0 compiler
+- To use `build.cmd`, the `dotnet` command must be accessible from your path.
 
 Just check-out this repo locally. Then, from the root of the repo, you can do:
 
 ### Build the solution
 
-```
+```bash
 build [build] [release|debug]
 ```
 
@@ -220,7 +238,7 @@ With no arguments, defaults to `release`.
 
 ### Run the tests
 
-```
+```bash
 build test [release|debug]
 ```
 
@@ -229,22 +247,22 @@ Furthermore, no TRX file is generated and the `--blame-xxx` flags aren't set.
 
 ### Run the CI command
 
-```
+```bash
 build ci [release|debug]
 ```
 
-With no arguments, defaults to `release`. This will run `dotnet test` with the `--blame-xxx` settings enabled to [prevent hanging tests][1] caused by 
+With no arguments, defaults to `release`. This will run `dotnet test` with the `--blame-xxx` settings enabled to [prevent hanging tests][1] caused by
 an [xUnit runner bug][2].
 
 There are no special CI environment variables that need to be set for running this locally.
 
 ### Advanced
 
-You can pass any additional options that are valid for `dotnet test` and `dotnet build` respectively. However, 
+You can pass any additional options that are valid for `dotnet test` and `dotnet build` respectively. However,
 these cannot be the very first argument, so you should either use `build build --myadditionalOptions fizz buzz`, or
 just specify the build-kind, i.e. this is fine:
 
-```
+```bash
 build debug --verbosity detailed
 build test --logger console;verbosity=summary
 ```
@@ -253,19 +271,20 @@ At this moment, additional options cannot have quotes in them.
 
 Command modifiers, like `release` and `debug`, can be specified with `-` or `/` if you so prefer: `dotnet build /release`.
 
-### Get help (duh!)
+### Get help
 
-```
+```bash
 build help
 ```
 
 For more info, see this PR: https://github.com/abelbraaksma/TaskSeq/pull/29.
 
 
-## In progress!!!
+## Work in progress
 
-It's based on [Don Symes `taskSeq.fs`][20]
-but expanded with useful utility functions and a few extra binding overloads.
+The `taskSeq` CE using the statically compilable _resumable state machine_ approach is based on, and draw heavily from [Don Symes `taskSeq.fs`][20] as used to test the resumable state machine in the F# core compiler.
+
+On top of that, this library adds a set of `TaskSeq` module functions, with their `Async` variants, on par with `Seq` and `AsyncSeq`.
 
 ## Current set of `TaskSeq` utility functions
 
