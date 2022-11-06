@@ -68,7 +68,8 @@ The following is the progress report:
 |---------------|--------------------|--------------------|-----------------------|-------------------------------------------|
 | &#x2753;      | `allPairs`         | `allPairs`         |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |               | `append`           | `append`           |                       |                                           |
-|               | `average`          | `averageBy`        | `averageByAsync`      |                                           |
+|               | `average`          | `average`          |                       |                                           |
+|               | `averageBy`        | `averageBy`        | `averageByAsync`      |                                           |
 | &#x2753;      | `cache`            | `cache`            |                       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705;      | `cast`             | `cast`             |                       |                                           |
 | &#x2705;      |                    | `box`              |                       |                                           |
