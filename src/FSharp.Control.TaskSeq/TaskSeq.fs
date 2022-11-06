@@ -169,6 +169,21 @@ module TaskSeq =
             yield! (ts :> taskSeq<'T>)
     }
 
+    let append (source1: #taskSeq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+        yield! (source1 :> IAsyncEnumerable<'T>)
+        yield! (source2 :> IAsyncEnumerable<'T>)
+    }
+
+    let appendSeq (source1: #taskSeq<'T>) (source2: #seq<'T>) = taskSeq {
+        yield! (source1 :> IAsyncEnumerable<'T>)
+        yield! (source2 :> seq<'T>)
+    }
+
+    let prependSeq (source1: #seq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+        yield! (source1 :> seq<'T>)
+        yield! (source2 :> IAsyncEnumerable<'T>)
+    }
+
     //
     // iter/map/collect functions
     //
@@ -222,6 +237,7 @@ module TaskSeq =
         | Some result -> return result
         | None -> return Internal.raiseEmptySeq ()
     }
+
     let tryItem index source = Internal.tryItem index source
 
     let item index source = task {

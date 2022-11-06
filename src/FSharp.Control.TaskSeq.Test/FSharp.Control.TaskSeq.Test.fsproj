@@ -12,6 +12,7 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Nunit.Extensions.fs" />
     <Compile Include="TestUtils.fs" />
+    <Compile Include="TaskSeq.Append.Tests.fs" />
     <Compile Include="TaskSeq.Cast.Tests.fs" />
     <Compile Include="TaskSeq.Choose.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
