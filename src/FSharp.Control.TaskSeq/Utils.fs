@@ -46,7 +46,11 @@ module Task =
         }
 
     /// Bind a Task<'T>
-    let inline bind binder (task: Task<'T>) : Task<'U> = TaskBuilder.task { return! binder task }
+    let inline bind binder (task: Task<'T>) : Task<'U> =
+        TaskBuilder.task {
+            let! t = task
+            return! binder t
+        }
 
     /// Create a task from a value
     let inline fromResult (value: 'U) : Task<'U> = TaskBuilder.task { return value }
