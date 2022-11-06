@@ -15,19 +15,19 @@ open FSharp.Control
 module EmptySeq =
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-last throws on empty sequences`` variant = task {
+    let ``TaskSeq-last throws`` variant = task {
         fun () -> Gen.getEmptyVariant variant |> TaskSeq.last |> Task.ignore
         |> should throwAsyncExact typeof<ArgumentException>
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-tryLast returns None on empty sequences`` variant = task {
+    let ``TaskSeq-tryLast returns None`` variant = task {
         let! nothing = Gen.getEmptyVariant variant |> TaskSeq.tryLast
         nothing |> should be None'
     }
 
     [<Fact>]
-    let ``TaskSeq-last throws on empty sequences, but side effect is executed`` () = task {
+    let ``TaskSeq-last executes side effect`` () = task {
         let mutable x = 0
 
         fun () -> taskSeq { do x <- x + 1 } |> TaskSeq.last |> Task.ignore
@@ -37,10 +37,21 @@ module EmptySeq =
         x |> should equal 1
     }
 
+    [<Fact>]
+    let ``TaskSeq-tryLast executes side effect`` () = task {
+        let mutable x = 0
+
+        let! nothing = taskSeq { do x <- x + 1 } |> TaskSeq.tryLast
+        nothing |> should be None'
+
+        // side effect must have run!
+        x |> should equal 1
+    }
+
 
 module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-last gets the last item in a longer sequence`` variant = task {
+    let ``TaskSeq-last gets the last item`` variant = task {
         let ts = Gen.getSeqImmutable variant
 
         let! last = TaskSeq.last ts
@@ -62,7 +73,7 @@ module Immutable =
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-tryLast gets the last item in a longer sequence`` variant = task {
+    let ``TaskSeq-tryLast gets the last item`` variant = task {
         let ts = Gen.getSeqImmutable variant
 
         let! last = TaskSeq.tryLast ts
@@ -86,7 +97,7 @@ module Immutable =
 
 module SideEffects =
     [<Fact>]
-    let ``TaskSeq-last gets the only item in a singleton sequence, with change`` () = task {
+    let ``TaskSeq-last executes side effect after first item`` () = task {
         let mutable x = 42
 
         let one = taskSeq {
@@ -102,7 +113,7 @@ module SideEffects =
     }
 
     [<Fact>]
-    let ``TaskSeq-tryLast gets the only item in a singleton sequence, with change`` () = task {
+    let ``TaskSeq-tryLast executes side effect after first item`` () = task {
         let mutable x = 42
 
         let one = taskSeq {
@@ -120,7 +131,7 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-last gets the last item in a longer sequence, with change`` variant = task {
+    let ``TaskSeq-last gets the last item`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! ten = TaskSeq.last ts
@@ -132,7 +143,7 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-tryLast gets the last item in a longer sequence, with change`` variant = task {
+    let ``TaskSeq-tryLast gets the last item`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! ten = TaskSeq.tryLast ts
