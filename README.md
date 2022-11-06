@@ -83,7 +83,7 @@ The following is the progress report:
 |                  | `compareWith`      | `compareWith`   | `compareWithAsync`   | |
 | &#x2705; [#69][] | `concat`           | `concat`        |                      | |
 | &#x2705; [#70][] | `contains`         | `contains`      |                      | |
-|                  | `delay`            | `delay`         |                      | |
+| &#x2705; [#82][] | `delay`            | `delay`         |                      | |
 |                  | `distinct`         | `distinct`      |                      | |
 |                  | `distinctBy`       | `dictinctBy`    | `distinctByAsync`    | |
 | &#x2705; [#2][]  | `empty`            | `empty`         |                      | |
@@ -610,4 +610,5 @@ module TaskSeq =
 [#70]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/70
 [#76]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/76
 [#81]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/81
+[#82]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/82
 
