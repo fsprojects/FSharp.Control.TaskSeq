@@ -164,6 +164,11 @@ module TaskSeq =
     let initAsync count initializer = Internal.init (Some count) (InitActionAsync initializer)
     let initInfiniteAsync initializer = Internal.init None (InitActionAsync initializer)
 
+    let delay (generator: unit -> taskSeq<'T>) =
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator(ct) = generator().GetAsyncEnumerator(ct)
+        }
+
     let concat (sources: taskSeq<#taskSeq<'T>>) = taskSeq {
         for ts in sources do
             yield! (ts :> taskSeq<'T>)

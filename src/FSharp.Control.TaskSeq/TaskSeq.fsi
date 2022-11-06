@@ -40,6 +40,14 @@ module TaskSeq =
     val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
+    /// Returns a task sequence that is given by the delayed specification of a task sequence.
+    /// </summary>
+    ///
+    /// <param name="generator">The generating function for the task sequence.</param>
+    /// <returns>The generated task sequence.</returns>
+    val delay: generator: (unit -> taskSeq<'T>) -> taskSeq<'T>
+
+    /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
     /// with the current index, up to the given count. Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
