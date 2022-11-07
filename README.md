@@ -44,7 +44,7 @@ Not necessarily in order of importance:
 
 - [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
 - [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
-- [ ] Packaging and publishing on Nuget, **PLANNED: 13 November 2022**.
+- [ ] Packaging and publishing on Nuget, **PLANNED: 7 November 2022**.
 - [x] Add `Async` variants for functions taking HOF arguments. **DONE**
 - [ ] Add generated docs to <https://fsprojects.github.io>
 - [ ] Expand surface area based on `AsyncSeq`.
