@@ -517,3 +517,103 @@ module internal TaskSeqInternal =
                 | true -> yield item
                 | false -> ()
     }
+    // Consider turning using an F# version of this instead?
+    // https://github.com/i3arnon/ConcurrentHashSet
+    type ConcurrentHashSet<'T when 'T: equality>(ct) =
+        let _rwLock = new ReaderWriterLockSlim()
+        let hashSet = HashSet<'T>(Array.empty, HashIdentity.Structural)
+
+        member _.Add item =
+            _rwLock.EnterWriteLock()
+
+            try
+                hashSet.Add item
+            finally
+                _rwLock.ExitWriteLock()
+
+        member _.AddMany items =
+            _rwLock.EnterWriteLock()
+
+            try
+                for item in items do
+                    hashSet.Add item |> ignore
+
+            finally
+                _rwLock.ExitWriteLock()
+
+        member _.AddManyAsync(source: taskSeq<'T>) = task {
+            use e = source.GetAsyncEnumerator(ct)
+            let mutable go = true
+            let! step = e.MoveNextAsync()
+            go <- step
+
+            while go do
+                // NOTE: r/w lock cannot cross thread boundaries. Should we use SemaphoreSlim instead?
+                // or alternatively, something like this: https://github.com/StephenCleary/AsyncEx/blob/8a73d0467d40ca41f9f9cf827c7a35702243abb8/src/Nito.AsyncEx.Coordination/AsyncReaderWriterLock.cs#L16
+                // not sure how they compare.
+
+                _rwLock.EnterWriteLock()
+
+                try
+                    hashSet.Add e.Current |> ignore
+                finally
+                    _rwLock.ExitWriteLock()
+
+                let! step = e.MoveNextAsync()
+                go <- step
+        }
+
+        interface IAsyncDisposable with
+            override _.DisposeAsync() =
+                if not (isNull _rwLock) then
+                    _rwLock.Dispose()
+
+                ValueTask.CompletedTask
+
+    let except itemsToExclude (source: taskSeq<_>) = taskSeq {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let mutable go = true
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        if step then
+            // only create hashset by the time we actually start iterating
+            use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+            do! hashSet.AddManyAsync itemsToExclude
+
+            while go do
+                let current = e.Current
+
+                // if true, it was added, and therefore unique, so we return it
+                // if false, it existed, and therefore a duplicate, and we skip
+                if hashSet.Add current then
+                    yield current
+
+                let! step = e.MoveNextAsync()
+                go <- step
+
+    }
+
+    let exceptOfSeq itemsToExclude (source: taskSeq<_>) = taskSeq {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let mutable go = true
+        let! step = e.MoveNextAsync()
+        go <- step
+
+        if step then
+            // only create hashset by the time we actually start iterating
+            use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+            do hashSet.AddMany itemsToExclude
+
+            while go do
+                let current = e.Current
+
+                // if true, it was added, and therefore unique, so we return it
+                // if false, it existed, and therefore a duplicate, and we skip
+                if hashSet.Add current then
+                    yield current
+
+                let! step = e.MoveNextAsync()
+                go <- step
+
+    }

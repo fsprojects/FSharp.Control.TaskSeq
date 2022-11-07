@@ -56,29 +56,6 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     }
 
-    // FIXME: incomplete and incorrect code!!! TODO: still needed?
-    let toSeqOfTasks (source: taskSeq<'T>) = seq {
-        let e = source.GetAsyncEnumerator(CancellationToken())
-
-        // TODO: check this!
-        try
-            let mutable go = false
-
-            while go do
-                yield task {
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-                    if step then
-                        return e.Current
-                    else
-                        return Unchecked.defaultof<_> // FIXME!
-                }
-
-        finally
-            e.DisposeAsync().AsTask().Wait()
-    }
-
     let toArrayAsync source =
         Internal.toResizeArrayAsync source
         |> Task.map (fun a -> a.ToArray())
@@ -281,6 +258,8 @@ module TaskSeq =
     let tryFindAsync predicate source = Internal.tryFind (PredicateAsync predicate) source
     let tryFindIndex predicate source = Internal.tryFindIndex (Predicate predicate) source
     let tryFindIndexAsync predicate source = Internal.tryFindIndex (PredicateAsync predicate) source
+    let except itemsToExclude source = Internal.except itemsToExclude source
+    let exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
     let exists predicate source =
         Internal.tryFind (Predicate predicate) source
