@@ -21,6 +21,7 @@
     <Compile Include="TaskSeq.Delay.Tests.fs" />
     <Compile Include="TaskSeq.Empty.Tests.fs" />
     <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
+    <Compile Include="TaskSeq.Except.Tests.fs" />
     <Compile Include="TaskSeq.Exists.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
     <Compile Include="TaskSeq.FindIndex.Tests.fs" />

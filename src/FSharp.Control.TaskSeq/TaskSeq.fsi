@@ -501,6 +501,44 @@ module TaskSeq =
     val existsAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
+    /// Returns a new task sequence with the distinct elements of the second task sequence which do not appear in the
+    /// <paramref name="itemsToExclude" />, using generic hash and equality comparisons to compare values.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Note that this function returns a task sequence that digests the whole of the first input task sequence as soon as
+    /// the result sequence first gets awaited or iterated. As a result this function should not be used with
+    /// large or infinite sequences in the first parameter. The function makes no assumption on the ordering of the first input
+    /// sequence.
+    /// </remarks>
+    ///
+    /// <param name="itemsToExclude">A task sequence whose elements that also occur in the second sequence will cause those elements to be removed from the returned sequence.</param>
+    /// <param name="source">A sequence whose elements that are not also in first will be returned.</param>
+    /// <returns>A sequence that contains the set difference of the elements of two sequences.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the two input sequences is null.</exception>
+    val except<'T when 'T: equality> : itemsToExclude: taskSeq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence with the distinct elements of the second task sequence which do not appear in the
+    /// <paramref name="itemsToExclude" />, using generic hash and equality comparisons to compare values.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// Note that this function returns a task sequence that digests the whole of the first input task sequence as soon as
+    /// the result sequence first gets awaited or iterated. As a result this function should not be used with
+    /// large or infinite sequences in the first parameter. The function makes no assumption on the ordering of the first input
+    /// sequence.
+    /// </remarks>
+    ///
+    /// <param name="itemsToExclude">A task sequence whose elements that also occur in the second sequence will cause those elements to be removed from the returned sequence.</param>
+    /// <param name="source">A sequence whose elements that are not also in first will be returned.</param>
+    /// <returns>A sequence that contains the set difference of the elements of two sequences.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the two input sequences is null.</exception>
+    val exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
     /// Zips two task sequences, returning a taskSeq of the tuples of each sequence, in order. May raise ArgumentException
     /// if the sequences are or unequal length.
     /// </summary>
