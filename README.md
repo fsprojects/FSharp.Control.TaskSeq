@@ -88,7 +88,8 @@ The following is the progress report:
 |                  | `distinctBy`       | `dictinctBy`    | `distinctByAsync`    | |
 | &#x2705; [#2][]  | `empty`            | `empty`         |                      | |
 | &#x2705; [#23][] | `exactlyOne`       | `exactlyOne`    |                      | |
-|                  | `except`           | `except`        |                      | |
+| &#x2705; [#83][] | `except`           | `except`        |                      | |
+| &#x2705; [#83][] |                    | `exceptOfSeq`   |                      | |
 | &#x2705; [#70][] | `exists`           | `exists`        | `existsAsync`        | |
 |                  | `exists2`          | `exists2`       |                      | |
 | &#x2705; [#23][] | `filter`           | `filter`        | `filterAsync`        | |
@@ -611,4 +612,5 @@ module TaskSeq =
 [#76]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/76
 [#81]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/81
 [#82]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/82
+[#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
 
