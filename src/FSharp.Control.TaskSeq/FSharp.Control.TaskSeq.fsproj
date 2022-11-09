@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <ApplicationIcon>TaskSeq.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\TaskSeq.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Computation expression 'taskSeq' for processing IAsyncEnumerable sequences and module functions</Title>
     <Version>$(Version)</Version>
@@ -31,15 +31,13 @@ This library brings C#'s concept of 'await foreach' to F#.</Description>
     </PackageReleaseNotes>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OtherFlags></OtherFlags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OtherFlags></OtherFlags>
-  </PropertyGroup>
-
   <ItemGroup>
+    <Content Include="..\..\assets\TaskSeq.ico" Link="TaskSeq.ico" />
+    <None Include="..\..\taskseq-icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\assets\nuget-package-readme.md" Pack="true" PackagePath="" />
     <Compile Include="Utils.fs" />
     <Compile Include="TaskSeqBuilder.fs" />
     <Compile Include="TaskSeqInternal.fs" />
@@ -47,19 +45,13 @@ This library brings C#'s concept of 'await foreach' to F#.</Description>
     <Compile Include="TaskSeq.fs" />
   </ItemGroup>
 
+  <ItemGroup />
 
 
-  <ItemGroup>
-    <None Include="..\..\taskseq-icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\assets\nuget-package-readme.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-
+  <ItemGroup />
 
   <ItemGroup>
+    <!-- maximal compatibility with minimal required FSharp.Core version for TaskSeq -->
     <PackageReference Update="FSharp.Core" Version="6.0.2" />
   </ItemGroup>
 </Project>
