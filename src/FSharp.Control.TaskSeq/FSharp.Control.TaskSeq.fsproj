@@ -1,21 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ApplicationIcon>TaskSeq.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>Computation expression `taskSeq` for processing IAsyncEnumerable sequences</Title>
+    <Title>Computation expression 'taskSeq' for processing IAsyncEnumerable sequences and module functions</Title>
     <Version>$(Version)</Version>
     <Authors>Abel Braaksma; Don Syme</Authors>
-    <Description>The `taskSeq` computation expression combines the power of `seq` and `task` of F# 6.0 to work with IAsyncEnumerable sequences seamlessly. 
-Build on top of the success of `task` using statically compiled resumable state machines under the hood.</Description>
-    <Copyright>Copyright 2022 Abel Braaksma</Copyright>
+    <Description>Provides the 'taskSeq' computation expression to support performance and statially optimized async sequences using the new F# 6.0 resumable state machines, similar to 'task'. 
+
+This library brings C#'s concept of 'await foreach' to F#.</Description>
+    <Copyright>Copyright 2022</Copyright>
     <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</RepositoryUrl>
     <PackageIcon>taskseq-icon.png</PackageIcon>
     <PackageOutputPath>..\..\packages</PackageOutputPath>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>
+      v.0.2
+       - moved from NET 6.0, to NetStandard 2.1 for greater compatibility, no functional changes
+       - updated readme with progress overview, corrected meta info, added release notes
+      v.0.1.1
+       - updated meta info in nuget package and added readme
+      v.0.1
+       - initial release
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -41,5 +53,6 @@ Build on top of the success of `task` using statically compiled resumable state 
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
