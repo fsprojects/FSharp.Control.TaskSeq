@@ -18,10 +18,11 @@ This library brings C#'s concept of 'await foreach' to F#.</Description>
     <PackageOutputPath>..\..\packages</PackageOutputPath>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <PackageReleaseNotes>
       v.0.2
        - moved from NET 6.0, to NetStandard 2.1 for greater compatibility, no functional changes
+       - move to minimally necessary FSharp.Core version: 6.0.2
        - updated readme with progress overview, corrected meta info, added release notes
       v.0.1.1
        - updated meta info in nuget package and added readme
@@ -53,6 +54,12 @@ This library brings C#'s concept of 'await foreach' to F#.</Description>
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\assets\nuget-package-readme.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.2" />
   </ItemGroup>
 </Project>
