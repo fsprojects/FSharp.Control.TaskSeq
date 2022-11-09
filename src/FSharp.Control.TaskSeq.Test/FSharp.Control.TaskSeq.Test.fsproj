@@ -1,14 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <ApplicationIcon>TaskSeq.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\assets\TaskSeq.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="..\..\assets\TaskSeq.ico" Link="TaskSeq.ico" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Nunit.Extensions.fs" />
     <Compile Include="TestUtils.fs" />
@@ -50,11 +51,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="TaskSeq.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="3.3.0" />
+    <!-- align test project with minimal required version for TaskSeq -->
+    <!-- we use 6.0.3 here and not 6.0.2 because TaskResult lib requires it-->
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
+    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="3.2.0" />
     <PackageReference Include="FsUnit.xUnit" Version="5.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
