@@ -2,6 +2,15 @@ namespace FSharp.Control
 
 open System.Threading.Tasks
 
+[<AutoOpen>]
+module ValueTaskExtensions =
+    /// Extensions for ValueTask that are not available in NetStandard 2.1, but are
+    /// available in .NET 5+.
+    type ValueTask with
+
+        /// (Extension member) Gets a task that has already completed successfully.
+        static member inline CompletedTask = Unchecked.defaultof<ValueTask>
+
 module Task =
     /// Convert an Async<'T> into a Task<'T>
     let inline ofAsync (async: Async<'T>) = task { return! async }
