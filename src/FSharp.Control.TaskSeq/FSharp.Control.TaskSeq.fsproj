@@ -13,6 +13,9 @@ Build on top of the success of `task` using statically compiled resumable state 
     <Copyright>Copyright 2022 Abel Braaksma</Copyright>
     <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
     <PackageIcon>taskseq-icon.png</PackageIcon>
+    <PackageOutputPath>..\..\packages</PackageOutputPath>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
