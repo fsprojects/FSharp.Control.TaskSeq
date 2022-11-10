@@ -15,8 +15,8 @@ open System.Collections.Generic
 
 let validateSequence ts =
     ts
-    |> TaskSeq.toSeqCachedAsync
-    |> Task.map (Seq.map string)
+    |> TaskSeq.toListAsync
+    |> Task.map (List.map string)
     |> Task.map (String.concat "")
     |> Task.map (should equal "123456789101234567891012345678910")
 

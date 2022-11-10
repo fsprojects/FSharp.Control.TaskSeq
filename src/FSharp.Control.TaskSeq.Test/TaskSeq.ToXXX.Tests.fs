@@ -36,13 +36,6 @@ module EmptySeq =
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-toSeqCachedAsync with empty`` variant = task {
-        let tq = Gen.getEmptyVariant variant
-        let! (results: seq<_>) = tq |> TaskSeq.toSeqCachedAsync
-        results |> Seq.toArray |> should be Empty
-    }
-
-    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-toIListAsync with empty`` variant = task {
         let tq = Gen.getEmptyVariant variant
         let! (results: IList<_>) = tq |> TaskSeq.toIListAsync
@@ -71,7 +64,7 @@ module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-toSeqCached with empty`` variant =
         let tq = Gen.getEmptyVariant variant
-        let (results: seq<_>) = tq |> TaskSeq.toSeqCached
+        let (results: seq<_>) = tq |> TaskSeq.toSeq
         results |> Seq.toArray |> should be Empty
 
 module Immutable =
@@ -88,13 +81,6 @@ module Immutable =
         let tq = Gen.getSeqImmutable variant
         let! (results: list<_>) = tq |> TaskSeq.toListAsync
         results |> should equal [ 1..10 ]
-    }
-
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-toSeqCachedAsync should succeed`` variant = task {
-        let tq = Gen.getSeqImmutable variant
-        let! (results: seq<_>) = tq |> TaskSeq.toSeqCachedAsync
-        results |> Seq.toArray |> should equal [| 1..10 |]
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -126,7 +112,7 @@ module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-toSeqCached should succeed and be blocking`` variant =
         let tq = Gen.getSeqImmutable variant
-        let (results: seq<_>) = tq |> TaskSeq.toSeqCached
+        let (results: seq<_>) = tq |> TaskSeq.toSeq
         results |> Seq.toArray |> should equal [| 1..10 |]
 
 
@@ -157,15 +143,6 @@ module SideEffects =
         let! (results2: list<_>) = tq |> TaskSeq.toListAsync
         results1 |> should equal [ 1..10 ]
         results2 |> should equal [ 11..20 ]
-    }
-
-    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-toSeqCachedAsync should execute side effects multiple times`` variant = task {
-        let tq = Gen.getSeqWithSideEffect variant
-        let! (results1: seq<_>) = tq |> TaskSeq.toSeqCachedAsync
-        let! (results2: seq<_>) = tq |> TaskSeq.toSeqCachedAsync
-        results1 |> Seq.toArray |> should equal [| 1..10 |]
-        results2 |> Seq.toArray |> should equal [| 11..20 |]
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
@@ -205,7 +182,7 @@ module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-toSeqCached should execute side effects multiple times`` variant =
         let tq = Gen.getSeqWithSideEffect variant
-        let (results1: seq<_>) = tq |> TaskSeq.toSeqCached
-        let (results2: seq<_>) = tq |> TaskSeq.toSeqCached
+        let (results1: seq<_>) = tq |> TaskSeq.toSeq
+        let (results2: seq<_>) = tq |> TaskSeq.toSeq
         results1 |> Seq.toArray |> should equal [| 1..10 |]
         results2 |> Seq.toArray |> should equal [| 11..20 |]

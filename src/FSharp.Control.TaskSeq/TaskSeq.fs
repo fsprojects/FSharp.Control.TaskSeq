@@ -46,7 +46,7 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     |]
 
-    let toSeqCached (source: taskSeq<'T>) = seq {
+    let toSeq (source: taskSeq<'T>) = seq {
         let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
@@ -65,8 +65,6 @@ module TaskSeq =
     let toResizeArrayAsync source = Internal.toResizeArrayAsync source
 
     let toIListAsync source = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) source
-
-    let toSeqCachedAsync source = Internal.toResizeArrayAndMapAsync (fun x -> x :> seq<_>) source
 
     //
     // Convert 'OfXXX' functions

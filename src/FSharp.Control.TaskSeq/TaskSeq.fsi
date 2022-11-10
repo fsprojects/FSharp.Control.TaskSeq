@@ -154,8 +154,16 @@ module TaskSeq =
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toArray: source: taskSeq<'T> -> 'T[]
 
-    /// Returns taskSeq as a seq, similar to Seq.cached. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
-    val toSeqCached: source: taskSeq<'T> -> seq<'T>
+    /// <summary>
+    /// Returns the task sequence <paramref name="source" /> as an F# <see cref="seq" />, that is, an
+    /// <see cref="IEnumerable&lt;'T>" />. This function is blocking at each <see cref="yield" />, but otherwise
+    /// acts as a normal delay-executed sequence.
+    /// It will then dispose of the resources.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    val toSeq: source: taskSeq<'T> -> seq<'T>
 
     /// Unwraps the taskSeq as a Task<array<_>>. This function is non-blocking.
     val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
@@ -168,10 +176,6 @@ module TaskSeq =
 
     /// Unwraps the taskSeq as a Task<IList<_>>. This function is non-blocking.
     val toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
-
-    /// Unwraps the taskSeq as a Task<seq<_>>. This function is non-blocking,
-    /// exhausts the sequence and caches the results of the tasks in the sequence.
-    val toSeqCachedAsync: source: taskSeq<'T> -> Task<seq<'T>>
 
     /// Create a taskSeq of an array.
     val ofArray: source: 'T[] -> taskSeq<'T>

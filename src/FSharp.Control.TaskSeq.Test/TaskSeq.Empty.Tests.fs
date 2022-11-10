@@ -10,7 +10,7 @@ open FSharp.Control
 
 [<Fact>]
 let ``TaskSeq-empty returns an empty sequence`` () = task {
-    let! sq = TaskSeq.empty<string> |> TaskSeq.toSeqCachedAsync
+    let! sq = TaskSeq.empty<string> |> TaskSeq.toListAsync
     Seq.isEmpty sq |> should be True
     Seq.length sq |> should equal 0
 }
