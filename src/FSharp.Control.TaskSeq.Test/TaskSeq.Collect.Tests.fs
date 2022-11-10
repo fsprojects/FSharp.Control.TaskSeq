@@ -102,8 +102,8 @@ module Immutable =
 
     let validateSequence ts =
         ts
-        |> TaskSeq.toSeqCachedAsync
-        |> Task.map (Seq.map string)
+        |> TaskSeq.toListAsync
+        |> Task.map (List.map string)
         |> Task.map (String.concat "")
         |> Task.map (should equal "ABBCCDDEEFFGGHHIIJJK")
 

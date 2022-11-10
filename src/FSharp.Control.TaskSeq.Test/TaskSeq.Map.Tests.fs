@@ -16,8 +16,8 @@ open FSharp.Control
 /// Asserts that a sequence contains the char values 'A'..'J'.
 let validateSequence ts =
     ts
-    |> TaskSeq.toSeqCachedAsync
-    |> Task.map (Seq.map string)
+    |> TaskSeq.toListAsync
+    |> Task.map (List.map string)
     |> Task.map (String.concat "")
     |> Task.map (should equal "ABCDEFGHIJ")
 
@@ -29,8 +29,8 @@ let validateSequenceWithOffset offset ts =
         |> String.concat ""
 
     ts
-    |> TaskSeq.toSeqCachedAsync
-    |> Task.map (Seq.map string)
+    |> TaskSeq.toListAsync
+    |> Task.map (List.map string)
     |> Task.map (String.concat "")
     |> Task.map (should equal expected)
 

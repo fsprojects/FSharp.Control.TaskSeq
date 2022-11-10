@@ -138,8 +138,8 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 module TestUtils =
     let verifyEmpty ts =
         ts
-        |> TaskSeq.toSeqCachedAsync
-        |> Task.map (Seq.isEmpty >> should be True)
+        |> TaskSeq.toArrayAsync
+        |> Task.map (Array.isEmpty >> should be True)
 
     /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
     let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
