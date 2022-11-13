@@ -7,6 +7,9 @@ module TaskSeq =
 
     /// Initialize an empty taskSeq.
     val empty<'T> : taskSeq<'T>
+    
+    /// Creates a taskSeq sequence that generates a single element and then ends.
+    val singleton : source: 'T -> taskSeq<'T>
 
     /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
