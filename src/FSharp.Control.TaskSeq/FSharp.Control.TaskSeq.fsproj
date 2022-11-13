@@ -8,7 +8,7 @@
     <Title>Computation expression 'taskSeq' for processing IAsyncEnumerable sequences and module functions</Title>
     <Version>$(Version)</Version>
     <Authors>Abel Braaksma; Don Syme</Authors>
-    <Description>This library brings C#'s concept of 'await foreach' to F#, with a seamless implementation of IAsyncEnumerable&lt;'T>.
+    <Description>This library brings C#'s concept of 'await foreach' to F#, with a seamless implementation of IAsyncEnumerable&lt;'T&gt;.
 
 The 'taskSeq' computation expression adds support for awaitable asyncronous sequences with a similar ease of use and performance as F#'s 'task' CE, with minimal overhead through ValueTask under the hood. TaskSeq brings 'seq' and 'task' together in a safe way.
 
@@ -50,6 +50,9 @@ Generates optimized IL code through the new resumable state machines, and comes 
        - adds zip/length
        
     </PackageReleaseNotes>
+    <PackageTags>taskseq'fsharp;f#;computation expression;IAsyncEnumerable;task;async;asyncseq;</PackageTags>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
