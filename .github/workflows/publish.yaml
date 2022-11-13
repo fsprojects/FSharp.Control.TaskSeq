@@ -1,0 +1,30 @@
+name: Pack & Publish Nuget
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish nuget (if new version)
+    runs-on: windows-latest
+    steps:
+      # checkout the code
+      - name: checkout-code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # setup dotnet based on global.json
+      - name: setup-dotnet
+        uses: actions/setup-dotnet@v3
+      # build it, test it, pack it, publish it
+      - name: Run dotnet build (release, for nuget)
+        run: ./build.cmd
+      - name: Nuget publish
+        # skip-duplicate ensures that the 409 error received when the package was already published,
+        # will just issue a warning and won't have the GH action fail.
+        # NUGET_PUBLISH_TOKEN_TASKSEQ is valid until approx. 8 Nov 2023 and will need to be updated by then.
+        # do so under https://github.com/fsprojects/FSharp.Control.TaskSeq/settings/secrets/actions
+        # select button "Add repository secret" or update the existing one under "Repository secrets"
+        run: dotnet nuget push packages\FSharp.Control.TaskSeq.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_PUBLISH_TOKEN_TASKSEQ }} --skip-duplicate
