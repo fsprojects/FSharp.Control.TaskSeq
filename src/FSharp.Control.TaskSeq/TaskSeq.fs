@@ -11,10 +11,15 @@ module TaskSeq =
     // Just for convenience
     module Internal = TaskSeqInternal
 
-    let empty<'T> = taskSeq {
-        for c: 'T in [] do
-            yield c
-    }
+    let empty<'T> =
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator (_) =
+                { new IAsyncEnumerator<'T> with
+                    member _.MoveNextAsync () = ValueTask.FromResult false
+                    member _.get_Current ()   = invalidOp "The sequence is empty."
+                    member _.DisposeAsync ()  = ValueTask.CompletedTask
+                }
+        }
 
     let isEmpty source = Internal.isEmpty source
 
