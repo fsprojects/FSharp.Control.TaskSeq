@@ -18,23 +18,3 @@ jobs:
       # build it, test it, pack it
       - name: Run dotnet build (release)
         run: ./build.cmd
-        
-  # deploy:
-  #   name: deploy
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-  #   steps:
-  #     # checkout the code
-  #     - name: checkout-code
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #     # setup dotnet based on global.json
-  #     - name: setup-dotnet
-  #       uses: actions/setup-dotnet@v3
-  #     # push it to nuget
-  #     - name: deploy
-  #       run: make cd
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

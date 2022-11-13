@@ -45,23 +45,3 @@ jobs:
           # this path glob pattern requires forward slashes!
           path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-release.trx
           reporter: dotnet-trx
-
-  # deploy:
-  #   name: deploy
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-  #   steps:
-  #     # checkout the code
-  #     - name: checkout-code
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #     # setup dotnet based on global.json
-  #     - name: setup-dotnet
-  #       uses: actions/setup-dotnet@v3
-  #     # push it to nuget
-  #     - name: deploy
-  #       run: make cd
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
