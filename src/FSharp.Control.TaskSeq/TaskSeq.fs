@@ -16,7 +16,7 @@ module TaskSeq =
             member _.GetAsyncEnumerator (_) =
                 { new IAsyncEnumerator<'T> with
                     member _.MoveNextAsync () = ValueTask.FromResult false
-                    member _.get_Current ()   = invalidOp "The sequence is empty."
+                    member _.get_Current ()   = Unchecked.defaultof<'T>
                     member _.DisposeAsync ()  = ValueTask.CompletedTask
                 }
         }
