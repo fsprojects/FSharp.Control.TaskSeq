@@ -1,11 +1,10 @@
 [![build][buildstatus_img]][buildstatus]
 [![test][teststatus_img]][teststatus]
+[![Nuget](https://img.shields.io/nuget/vpre/FSharp.Control.TaskSeq)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
 
 # TaskSeq<!-- omit in toc -->
 
-An implementation [`IAsyncEnumerable<'T>`][3] as a `taskSeq` CE for F# with accompanying `TaskSeq` module.
-
-The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, where each page is a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. It has been relatively challenging to work properly with this type and dealing with each step being asynchronous, and the enumerator implementing [`IAsyncDisposable`][7] as well, which requires careful handling.
+An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module.
 
 -----------------------------------------
 
@@ -18,10 +17,15 @@ The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is par
     More info: https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#table-of-contents
 -->
 
-- [Feature planning](#feature-planning)
-- [Implementation progress](#implementation-progress)
-  - [`taskSeq` CE](#taskseq-ce)
-  - [`TaskSeq` module functions](#taskseq-module-functions)
+- [Overview](#overview)
+  - [Module functions](#module-functions)
+  - [`taskSeq` computation expressions](#taskseq-computation-expressions)
+  - [Installation](#installation)
+  - [Examples](#examples)
+- [Status & planning](#status--planning)
+  - [Implementation progress](#implementation-progress)
+  - [Progress `taskSeq` CE](#progress-taskseq-ce)
+  - [Progress and implemented `TaskSeq` module functions](#progress-and-implemented-taskseq-module-functions)
 - [More information](#more-information)
   - [Futher reading `IAsyncEnumerable`](#futher-reading-iasyncenumerable)
   - [Futher reading on resumable state machines](#futher-reading-on-resumable-state-machines)
@@ -38,27 +42,134 @@ The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is par
 
 -----------------------------------------
 
-## Feature planning
+## Overview
 
-Not necessarily in order of importance:
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6].
+
+Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iterating over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and implements the same _resumable state machine_ approach with `taskSeq`.
+
+### Module functions
+
+As with `seq` and `Seq`, this library comes with a bunch of well-known collection functions, like `TaskSeq.empty`, `isEmpty` or `TaskSeq.map`, `iter`, `collect`, `fold` and `TaskSeq.find`, `pick`, `choose`, `filter`. Where applicable, these come with async variants, like `TaskSeq.mapAsync` `iterAsync`, `collectAsync`, `foldAsync` and `TaskSeq.findAsync`, `pickAsync`, `chooseAsync`, `filterAsync`, which allows the applied function to be asynchronous.
+
+[See below](#current-set-of-taskseq-utility-functions) for a full list of currently implemented functions and their variants.
+
+### `taskSeq` computation expressions
+
+The `taskSeq` computation expression can be used just like using `seq`. On top of that, it adds support for working with tasks through `let!` and 
+looping over a normal or asynchronous sequence (one that implements `IAsyncEnumerable<'T>'`). You can use `yield!` and `yield` and there's support
+for `use` and `use!`, `try-with` and `try-finally` and `while` loops within the task sequence expression:
+
+### Installation
+
+Dotnet Nuget
+
+```cmd
+dotnet add package FSharp.Control.TaskSeq
+```
+
+For a specific project:
+
+```cmd
+dotnet add myproject.fsproj package FSharp.Control.TaskSeq
+```
+
+F# Interactive (FSI):
+
+```f#
+// latest version
+> #r "nuget: FSharp.Control.TaskSeq"
+
+// or with specific version
+> #r "nuget: FSharp.Control.TaskSeq, 0.2.2"
+```
+
+Paket:
+
+```cmd
+dotnet paket add FSharp.Control.TaskSeq --project <project>
+```
+
+Package Manager:
+
+```cmd
+PM> NuGet\Install-Package FSharp.Control.TaskSeq
+```
+
+As package reference in `fsproj` or `csproj` file:
+
+```xml
+<!-- replace version with most recent version -->
+<PackageReference Include="FSharp.Control.TaskSeq" Version="0.2.2" />
+```
+
+### Examples
+
+```f#
+open System.IO
+
+open FSharp.Control
+
+// singleton is fine
+let hello = taskSeq { yield "Hello, World!" }
+
+// can be mixed with normal sequences
+let oneToTen = taskSeq { yield! [1..10] }
+
+// returns a delayed sequence of IAsyncEnumerable<string>
+let allFilesAsLines() = taskSeq {
+    let files = Directory.EnumerateFiles(@"c:\temp")
+    for file in files do
+        // await
+        let! contents = File.ReadAllLinesAsync file
+        // return all lines
+        yield! contents
+}
+
+let write file = 
+    allFilesAsLines()
+    
+    // synchronous map function on asynchronous task sequence
+    |> TaskSeq.map (fun x -> x.Replace("a", "b"))
+
+    // asynchronous map
+    |> TaskSeq.mapAsync (fun x -> task { return "hello: " + x })
+    
+    // asynchronous iter
+    |> TaskSeq.iterAsync (fun data -> File.WriteAllTextAsync(fileName, data))
+
+
+// infinite sequence
+let feedFromTwitter user pwd = taskSeq {
+    do! loginToTwitterAsync(user, pwd)
+    while true do
+       let! message = getNextNextTwitterMessageAsync()
+       yield message
+}
+```
+
+## Status & planning
+
+This project has stable features currently, but before we go full "version one", we'd like to complete the surface area. This section covers the status of that, with a full list of implmented functions below. Here's the short list:
 
 - [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
 - [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
 - [x] Packaging and publishing on Nuget, **DONE, PUBLISHED SINCE: 7 November 2022**. See https://www.nuget.org/packages/FSharp.Control.TaskSeq
 - [x] Add `Async` variants for functions taking HOF arguments. **DONE**
 - [ ] Add generated docs to <https://fsprojects.github.io>
-- [ ] Expand surface area based on `AsyncSeq`.
-- [ ] User requests?
+- [ ] Expand surface area based on `AsyncSeq`. **ONGOING**
 
-## Implementation progress
+### Implementation progress
 
-As of 6 November 2022:
+As of 9 November 2022: [Nuget package available][21]. In this phase, we will frequently update the package. Current:
 
-### `taskSeq` CE
+[![Nuget](https://img.shields.io/nuget/vpre/FSharp.Control.TaskSeq)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
 
-The _resumable state machine_ backing the `taskSeq` CE is now finished and _restartability_ (not to be confused with _resumability_) has been implemented and stabilized. Full support for empty task sequences is done. Focus is now on adding functionality there, like adding more useful overloads for `yield` and `let!`. Suggestions are welcome!
+### Progress `taskSeq` CE
 
-### `TaskSeq` module functions
+The _resumable state machine_ backing the `taskSeq` CE is now finished and _restartability_ (not to be confused with _resumability_) has been implemented and stabilized. Full support for empty task sequences is done. Focus is now on adding functionality there, like adding more useful overloads for `yield` and `let!`. [Suggestions are welcome!][issues].
+
+### Progress and implemented `TaskSeq` module functions
 
 We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided from `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
 
@@ -600,6 +711,7 @@ module TaskSeq =
 [18]: https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/computation-expressions
 [19]: https://fsharpforfunandprofit.com/series/computation-expressions/
 [20]: https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs
+[21]: https://www.nuget.org/packages/FSharp.Control.TaskSeq#versions-body-tab
 
 [#2]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/2
 [#11]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/11
@@ -614,3 +726,4 @@ module TaskSeq =
 [#82]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/82
 [#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
 
+[issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
