@@ -14,6 +14,7 @@ An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `t
 -->
 
 - [Overview](#overview)
+  - [Module functions](#module-functions)
   - [`taskSeq` computation expressions](#taskseq-computation-expressions)
   - [Examples](#examples)
   - [`TaskSeq` module functions](#taskseq-module-functions)
@@ -26,19 +27,21 @@ An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `t
 
 ## Overview
 
-The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6]. 
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6].
 
 Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iterating over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and implements the same _resumable state machine_ approach with `taskSeq`.
 
-As with `seq` and `Seq`, this library comes with a bunch of well-known collection functions, like `TaskSeq.empty/isEmpty` or `TaskSeq.map/iter/collect` and `TaskSeq.find/pick/choose/filter`. Where applicable, these come with async variants, like `TaskSeq.mapAsync/iterAsync/collectAsync` and `TaskSeq.findAsync/pickAsync/chooseAsync/filterAsync`, which allows the apply function to be asynchronous.
+### Module functions
 
-See below for a full list of currently implemented functions.
+As with `seq` and `Seq`, this library comes with a bunch of well-known collection functions, like `TaskSeq.empty`, `isEmpty` or `TaskSeq.map`, `iter`, `collect`, `fold` and `TaskSeq.find`, `pick`, `choose`, `filter`. Where applicable, these come with async variants, like `TaskSeq.mapAsync` `iterAsync`, `collectAsync`, `foldAsync` and `TaskSeq.findAsync`, `pickAsync`, `chooseAsync`, `filterAsync`, which allows the applied function to be asynchronous.
+
+[See below](#taskseq-module-functions) for a full list of currently implemented functions and their variants.
 
 ### `taskSeq` computation expressions
 
-The `taskSeq` computation expression can be used just like using `seq`. On top of that, it adds support for working with tasks through `let!` and 
+The `taskSeq` computation expression can be used just like using `seq`. On top of that, it adds support for working with tasks through `let!` and
 looping over a normal or asynchronous sequence (one that implements `IAsyncEnumerable<'T>'`). You can use `yield!` and `yield` and there's support
-for `use` and `use!`, `try-with` and `try-finally` and `while` loops within the task sequence expression:
+for `use` and `use!`, `try-with` and `try-finally` and `while` loops within the task sequence expression.
 
 ### Examples
 
@@ -48,7 +51,7 @@ open System.IO
 open FSharp.Control
 
 // singleton is fine
-let hello = taskSeq { yield "Hello, World!"" }
+let hello = taskSeq { yield "Hello, World!" }
 
 // can be mixed with normal sequences
 let oneToTen = taskSeq { yield! [1..10] }
