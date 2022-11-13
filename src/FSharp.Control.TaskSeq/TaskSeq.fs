@@ -17,7 +17,7 @@ module TaskSeq =
                 { new IAsyncEnumerator<'T> with
                     member _.MoveNextAsync () = ValueTask.FromResult false
                     member _.Current with get() = Unchecked.defaultof<'T>
-                    member _.DisposeAsync ()  = ValueTask.CompletedTask
+                    member _.DisposeAsync () = ValueTask.CompletedTask
                 }
         }
 
