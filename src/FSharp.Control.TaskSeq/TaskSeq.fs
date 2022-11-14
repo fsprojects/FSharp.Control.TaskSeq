@@ -4,6 +4,8 @@ open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
+#nowarn "57"
+
 module TaskSeq =
     // F# BUG: the following module is 'AutoOpen' and this isn't needed in the Tests project. Why do we need to open it?
     open FSharp.Control.TaskSeqBuilders
@@ -324,3 +326,33 @@ module TaskSeq =
     let fold folder state source = Internal.fold (FolderAction folder) state source
 
     let foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
+
+[<AutoOpen>]
+module AsyncSeqExtensions =
+    open Microsoft.FSharp.Core.CompilerServices
+
+    // Add asynchronous for loop to the 'async' computation builder
+    type Microsoft.FSharp.Control.AsyncBuilder with
+
+        member x.For(tasksq: IAsyncEnumerable<'T>, action: 'T -> Async<unit>) =
+            tasksq
+            |> TaskSeq.iterAsync (action >> Async.StartAsTask)
+            |> Async.AwaitTask
+
+    // Add asynchronous for loop to the 'task' computation builder
+    type Microsoft.FSharp.Control.TaskBuilder with
+
+        member inline this.For
+            (
+                tasksq: IAsyncEnumerable<'T>,
+                body: 'T -> TaskCode<'TOverall, unit>
+            ) : TaskCode<'TOverall, unit> =
+            TaskCode<'TOverall, unit>(fun sm ->
+                this
+                    .Using(
+                        tasksq.GetAsyncEnumerator(CancellationToken()),
+                        (fun e ->
+                            // TODO: fix 'true' with e.MoveNextAsync()
+                            this.While((fun () -> true), (fun sm -> (body e.Current).Invoke(&sm))))
+                    )
+                    .Invoke(&sm))
