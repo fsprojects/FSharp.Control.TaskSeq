@@ -2,6 +2,11 @@ name: ci-test
 
 on: [pull_request]
 
+permissions:
+  id-token: write
+  contents: read
+  checks: write
+
 jobs:
   test-release:
     name: Test Release Build
