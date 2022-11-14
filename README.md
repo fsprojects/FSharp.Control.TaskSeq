@@ -4,7 +4,9 @@
 
 # TaskSeq<!-- omit in toc -->
 
-An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module.
+An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module, that allows seamless use of asynchronous sequences similar to F#'s native `seq` and `task` CE's.
+
+Latest version [can be installed from Nuget][nuget].
 
 -----------------------------------------
 
@@ -533,3 +535,4 @@ module TaskSeq =
 [#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
+[nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
