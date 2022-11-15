@@ -61,7 +61,7 @@ let ``CE task: Using when type implements IAsyncDisposable``() =
 [<Fact>]
 let ``CE task: Using when type implements IDisposable and IAsyncDisposable``() =
     let ts = taskSeq {
-        use x = new MultiDispose()
+        use x = new MultiDispose() // Fails to compile
         yield x.Get1()
     }
 
@@ -90,7 +90,7 @@ let ``CE task: Using! when type implements IAsyncDisposable``() =
 [<Fact>]
 let ``CE task: Using! when type implements IDisposable and IAsyncDisposable``() =
     let ts = taskSeq {
-        use! x = task { return new MultiDispose() }
+        use! x = task { return new MultiDispose() } // Fails to compile
         yield x.Get1()
     }
 
