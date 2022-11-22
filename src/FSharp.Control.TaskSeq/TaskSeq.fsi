@@ -594,9 +594,9 @@ module AsyncSeqExtensions =
 
     type TaskBuilder with
 
-        member inline While:
+        member inline WhileAsync:
             condition: (unit -> System.Threading.Tasks.ValueTask<bool>) * body: TaskCode<'TOverall, unit> ->
-                TaskCode<'TOverall, 'a>
+                TaskCode<'TOverall, unit>
 
         member inline For:
             tasksq: System.Collections.Generic.IAsyncEnumerable<'T> * body: ('T -> TaskCode<'TOverall, unit>) ->
