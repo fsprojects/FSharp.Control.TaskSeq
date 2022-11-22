@@ -322,8 +322,54 @@ module TaskSeq =
 
     let foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
 
+#nowarn "1204"
+#nowarn "3513"
+
+
 [<AutoOpen>]
 module AsyncSeqExtensions =
+
+    let rec WhileDynamic
+        (
+            sm: byref<TaskStateMachine<'Data>>,
+            condition: unit -> ValueTask<bool>,
+            body: TaskCode<'Data, unit>
+        ) : bool =
+        let vt = condition ()
+        TaskBuilderBase.BindDynamic(&sm, vt, fun result ->
+            TaskCode<_,_>(fun sm ->
+                if result then
+                    if body.Invoke(&sm) then
+                        WhileDynamic(&sm, condition, body)
+                    else
+                        let rf = sm.ResumptionDynamicInfo.ResumptionFunc
+
+                        sm.ResumptionDynamicInfo.ResumptionFunc <-
+                            (TaskResumptionFunc<'Data>(fun sm -> WhileBodyDynamicAux(&sm, condition, body, rf)))
+
+                        false
+                else
+                    true
+            )
+        )
+
+
+    and WhileBodyDynamicAux
+        (
+            sm: byref<TaskStateMachine<'Data>>,
+            condition: unit -> ValueTask<bool>,
+            body: TaskCode<'Data, unit>,
+            rf: TaskResumptionFunc<_>
+        ) : bool =
+        if rf.Invoke(&sm) then
+            WhileDynamic(&sm, condition, body)
+        else
+            let rf = sm.ResumptionDynamicInfo.ResumptionFunc
+
+            sm.ResumptionDynamicInfo.ResumptionFunc <-
+                (TaskResumptionFunc<'Data>(fun sm -> WhileBodyDynamicAux(&sm, condition, body, rf)))
+
+            false
     open Microsoft.FSharp.Core.CompilerServices
 
     // Add asynchronous for loop to the 'async' computation builder
@@ -337,17 +383,35 @@ module AsyncSeqExtensions =
     // Add asynchronous for loop to the 'task' computation builder
     type Microsoft.FSharp.Control.TaskBuilder with
 
+
+        member inline this.While(condition : unit -> ValueTask<bool>,  body  : TaskCode<'TOverall,unit>) =
+            TaskCode<_,_>(fun sm ->
+                WhileDynamic(&sm, condition, body)
+
+            )
+
+
+
         member inline this.For
             (
                 tasksq: IAsyncEnumerable<'T>,
                 body: 'T -> TaskCode<'TOverall, unit>
             ) : TaskCode<'TOverall, unit> =
             TaskCode<'TOverall, unit>(fun sm ->
+
                 this
                     .Using(
                         tasksq.GetAsyncEnumerator(CancellationToken()),
                         (fun e ->
-                            // TODO: fix 'true' with e.MoveNextAsync()
-                            this.While((fun () -> true), (fun sm -> (body e.Current).Invoke(&sm))))
+                            let next () = e.MoveNextAsync()
+                            this.While(next, (fun sm -> (body e.Current).Invoke(&sm))))
                     )
                     .Invoke(&sm))
+
+    let foo () =
+        task {
+            let mutable sum = 0
+            let xs = taskSeq { 1; 2; 3}
+            for x in xs do
+                sum <- sum + x
+        }
