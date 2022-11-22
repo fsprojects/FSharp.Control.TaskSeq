@@ -30,4 +30,3 @@ module TaskBuilder =
             //     ||> TaskSeq.fold((+))
             Assert.Equal(55, sum)
         }
-
