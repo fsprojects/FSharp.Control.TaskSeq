@@ -2,12 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
     <ApplicationIcon>..\..\assets\TaskSeq.ico</ApplicationIcon>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="..\..\assets\TaskSeq.ico" Link="TaskSeq.ico" />
     <Compile Include="AssemblyInfo.fs" />
@@ -47,9 +45,9 @@
     <Compile Include="TaskSeq.StateTransitionBug-delayed.Tests.CE.fs" />
     <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="TaskSeq.Realworld.fs" />
+    <Compile Include="TaskSeq.Extensions.Tests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <!-- align test project with minimal required version for TaskSeq -->
     <!-- we use 6.0.3 here and not 6.0.2 because TaskResult lib requires it-->
@@ -67,9 +65,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\FSharp.Control.TaskSeq\FSharp.Control.TaskSeq.fsproj" />
   </ItemGroup>
-
 </Project>
