@@ -374,6 +374,8 @@ module AsyncSeqExtensions =
 
             false
     open Microsoft.FSharp.Core.CompilerServices
+    open Microsoft.FSharp.Core.CompilerServices.StateMachineHelpers
+    open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 
     // Add asynchronous for loop to the 'async' computation builder
     type Microsoft.FSharp.Control.AsyncBuilder with
@@ -387,13 +389,43 @@ module AsyncSeqExtensions =
     type Microsoft.FSharp.Control.TaskBuilder with
 
 
-        member inline this.While(condition : unit -> ValueTask<bool>,  body  : TaskCode<'TOverall,unit>) =
-            TaskCode<_,_>(fun sm ->
-                WhileDynamic(&sm, condition, body)
+        member inline _.WhileAsync
+            (
+                [<InlineIfLambda>] condition: unit -> ValueTask<bool>,
+                body: TaskCode<_,unit>
+            ) : TaskCode<_,_> =
+            let mutable condition_res = true
 
+            ResumableCode.While(
+                (fun () -> condition_res),
+                ResumableCode<_, _>(fun sm ->
+                    let mutable __stack_condition_fin = true
+                    let __stack_vtask = condition ()
+
+                    let mutable awaiter = __stack_vtask.GetAwaiter()
+                    if awaiter.IsCompleted then
+                        // logInfo "at WhileAsync: returning completed task"
+
+                        __stack_condition_fin <- true
+                        condition_res <- __stack_vtask.Result
+                    else
+                        // logInfo "at WhileAsync: awaiting non-completed task"
+
+                        // This will yield with __stack_fin = false
+                        // This will resume with __stack_fin = true
+                        let __stack_yield_fin = ResumableCode.Yield().Invoke(&sm)
+                        __stack_condition_fin <- __stack_yield_fin
+
+                        if __stack_condition_fin then
+                            condition_res <- awaiter.GetResult()
+
+
+                    if __stack_condition_fin then
+                        if condition_res then body.Invoke(&sm) else true
+                    else
+                        sm.Data.MethodBuilder.AwaitUnsafeOnCompleted(&awaiter, &sm)
+                        false)
             )
-
-
 
         member inline this.For
             (
@@ -407,7 +439,7 @@ module AsyncSeqExtensions =
                         tasksq.GetAsyncEnumerator(CancellationToken()),
                         (fun e ->
                             let next () = e.MoveNextAsync()
-                            this.While(next, (fun sm -> (body e.Current).Invoke(&sm))))
+                            this.WhileAsync(next, (fun sm -> (body e.Current).Invoke(&sm))))
                     )
                     .Invoke(&sm))
 
