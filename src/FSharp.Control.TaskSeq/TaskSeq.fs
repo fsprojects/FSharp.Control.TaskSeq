@@ -400,7 +400,7 @@ module AsyncSeqExtensions =
 
             ResumableCode.While(
                 (fun () -> condition_res),
-                ResumableCode<_, _>(fun sm ->
+                TaskCode<_, _>(fun sm ->
                     let mutable __stack_condition_fin = true
                     let __stack_vtask = condition ()
 
@@ -409,7 +409,7 @@ module AsyncSeqExtensions =
                         // logInfo "at WhileAsync: returning completed task"
 
                         __stack_condition_fin <- true
-                        condition_res <- __stack_vtask.Result
+                        condition_res <- awaiter.GetResult()
                     else
                         // logInfo "at WhileAsync: awaiting non-completed task"
 
@@ -432,16 +432,31 @@ module AsyncSeqExtensions =
         member inline this.For
             (
                 tasksq: IAsyncEnumerable<'T>,
-                body: 'T -> TaskCode<'TOverall, unit>
-            ) : TaskCode<'TOverall, unit> =
+                body: 'T -> TaskCode<_, unit>
+            ) : TaskCode<_, unit> =
+            // tasksq
+            // |> TaskSeq.iterAsync (body >> task.Run)
+            // |> task.ReturnFrom
+
+            // task.ReturnFrom <|
+            //     task {
+            //         let mutable continueWhile = true
+            //         use e = tasksq.GetAsyncEnumerator()
+            //         while continueWhile do
+            //             let! next = e.MoveNextAsync()
+            //             if next then
+            //                 do! task.Run(body e.Current)
+            //             else
+            //                 continueWhile <- false
+            //     }
+
             TaskCode<'TOverall, unit>(fun sm ->
 
                 this
                     .Using(
                         tasksq.GetAsyncEnumerator(CancellationToken()),
                         (fun e ->
-                            let next () = e.MoveNextAsync()
-                            this.WhileAsync(next, (fun sm -> (body e.Current).Invoke(&sm))))
+                            this.WhileAsync(e.MoveNextAsync, (fun sm -> (body e.Current).Invoke(&sm))))
                     )
                     .Invoke(&sm))
 
