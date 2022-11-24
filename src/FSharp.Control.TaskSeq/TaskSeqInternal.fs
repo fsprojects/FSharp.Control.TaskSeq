@@ -12,6 +12,12 @@ module ExtraTaskSeqOperators =
     let taskSeq = TaskSeqBuilder()
 
 [<Struct>]
+type AsyncEnumStatus =
+    | BeforeAll
+    | WithCurrent
+    | AfterAll
+
+[<Struct>]
 type Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
     | CountableAction of countable_action: (int -> 'T -> 'U)
     | SimpleAction of simple_action: ('T -> 'U)
@@ -64,15 +70,24 @@ module internal TaskSeqInternal =
     let singleton (source: 'T) =
         { new IAsyncEnumerable<'T> with
             member _.GetAsyncEnumerator(_) =
-                let mutable ended = false
+                let mutable status = BeforeAll
 
                 { new IAsyncEnumerator<'T> with
                     member _.MoveNextAsync() =
-                        let vt = ValueTask.FromResult(not ended)
-                        ended <- true
-                        vt
+                        match status with
+                        | BeforeAll ->
+                            status <- WithCurrent
+                            ValueTask.True
+                        | WithCurrent ->
+                            status <- AfterAll
+                            ValueTask.False
+                        | AfterAll -> ValueTask.False
 
-                    member _.Current: 'T = if ended then Unchecked.defaultof<'T> else source
+                    member _.Current: 'T =
+                        match status with
+                        | WithCurrent -> source
+                        | _ -> Unchecked.defaultof<'T>
+
                     member _.DisposeAsync() = ValueTask.CompletedTask
                 }
         }
