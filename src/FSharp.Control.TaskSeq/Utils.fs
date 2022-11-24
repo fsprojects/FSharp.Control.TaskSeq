@@ -5,11 +5,25 @@ open System.Threading.Tasks
 [<AutoOpen>]
 module ValueTaskExtensions =
     /// Extensions for ValueTask that are not available in NetStandard 2.1, but are
-    /// available in .NET 5+.
+    /// available in .NET 5+. We put them in Extension space to mimic the behavior of NetStandard 2.1
     type ValueTask with
 
         /// (Extension member) Gets a task that has already completed successfully.
         static member inline CompletedTask = Unchecked.defaultof<ValueTask>
+
+
+module ValueTask =
+    /// A successfully completed ValueTask of boolean that has the value false.
+    let False = ValueTask<bool>()
+
+    /// A successfully completed ValueTask of boolean that has the value true.
+    let True = ValueTask<bool> true
+
+    /// Creates a ValueTask with the supplied result of the successful operation.
+    let inline FromResult (x: 'T) = ValueTask<'T> x
+
+    /// Creates a ValueTask with an IValueTaskSource representing the operation
+    let inline ofIValueTaskSource taskSource version = ValueTask<bool>(taskSource, version)
 
 module Task =
     /// Convert an Async<'T> into a Task<'T>
