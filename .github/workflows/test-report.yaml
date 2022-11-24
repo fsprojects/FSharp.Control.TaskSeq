@@ -16,7 +16,7 @@ jobs:
     - uses: dorny/test-reporter@v1
       with:
         artifact: test-results-release    # artifact name
-        name: Report release tests         # Name of the check run which will be created
+        name: Report release tests        # Name of the check run which will be created
         path: '*.trx'                     # Path to test results (inside artifact .zip)
         reporter: dotnet-trx              # Format of test results
 
@@ -26,6 +26,6 @@ jobs:
     - uses: dorny/test-reporter@v1
       with:
         artifact: test-results-debug      # artifact name
-        name: Report debug tests           # Name of the check run which will be created
+        name: Report debug tests          # Name of the check run which will be created
         path: '*.trx'                     # Path to test results (inside artifact .zip)
         reporter: dotnet-trx              # Format of test results

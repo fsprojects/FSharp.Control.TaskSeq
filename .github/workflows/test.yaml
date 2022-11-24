@@ -19,6 +19,9 @@ jobs:
 
       # build it, test it
       - name: Run dotnet test - release
+        # see issue #105
+        # very important, since we use cmd scripts, the default is psh, and a bug prevents errorlevel to bubble
+        shell: cmd 
         run: ./build.cmd ci -release
 
       # upload test results
@@ -46,6 +49,9 @@ jobs:
 
       # build it, test it
       - name: Run dotnet test - debug
+        # see issue #105
+        # very important, since we use cmd scripts, the default is psh, and a bug prevents errorlevel to bubble
+        shell: cmd
         run: ./build.cmd ci -debug
 
       # upload test results
