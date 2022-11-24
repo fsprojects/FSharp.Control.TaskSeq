@@ -132,32 +132,3 @@ module Other =
 
         combined |> should equal [| ("one", 42L); ("two", 43L) |]
     }
-
-    [<Theory; InlineData true; InlineData false>]
-    let ``TaskSeq-zip throws on unequal lengths, variant`` leftThrows = task {
-        let long = Gen.sideEffectTaskSeq 11
-        let short = Gen.sideEffectTaskSeq 10
-
-        let combined =
-            if leftThrows then
-                TaskSeq.zip short long
-            else
-                TaskSeq.zip long short
-
-        fun () -> TaskSeq.toArrayAsync combined |> Task.ignore
-        |> should throwAsyncExact typeof<ArgumentException>
-    }
-
-    [<Theory; InlineData true; InlineData false>]
-    let ``TaskSeq-zip throws on unequal lengths with empty seq`` leftThrows = task {
-        let one = Gen.sideEffectTaskSeq 1
-
-        let combined =
-            if leftThrows then
-                TaskSeq.zip TaskSeq.empty one
-            else
-                TaskSeq.zip one TaskSeq.empty
-
-        fun () -> TaskSeq.toArrayAsync combined |> Task.ignore
-        |> should throwAsyncExact typeof<ArgumentException>
-    }

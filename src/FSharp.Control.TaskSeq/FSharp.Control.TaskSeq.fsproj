@@ -23,6 +23,8 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <PackageReleaseNotes>
       Release notes:
+      0.2.3
+       - do not throw exception for unequal lengths in TaskSeq.zip, fixes #32
       0.2.2
        - removes TaskSeq.toSeqCachedAsync, which was incorrectly named. Use toSeq or toListAsync instead.
        - renames TaskSeq.toSeqCached to TaskSeq.toSeq, which was its actual operational behavior.
