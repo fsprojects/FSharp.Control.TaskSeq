@@ -61,6 +61,22 @@ module internal TaskSeqInternal =
         return not step
     }
 
+    let singleton (source: 'T) =
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator(_) =
+                let mutable ended = false
+
+                { new IAsyncEnumerator<'T> with
+                    member _.MoveNextAsync() =
+                        let vt = ValueTask.FromResult(not ended)
+                        ended <- true
+                        vt
+
+                    member _.Current: 'T = if ended then Unchecked.defaultof<'T> else source
+                    member _.DisposeAsync() = ValueTask.CompletedTask
+                }
+        }
+
     /// Returns length unconditionally, or based on a predicate
     let lengthBy predicate (source: taskSeq<_>) = task {
         use e = source.GetAsyncEnumerator(CancellationToken())

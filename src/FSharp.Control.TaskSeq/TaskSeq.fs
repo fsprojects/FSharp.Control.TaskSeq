@@ -21,19 +21,7 @@ module TaskSeq =
                 }
         }
 
-    let singleton (source: 'T) =
-        { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator(_) =
-                let mutable started = false
-                { new IAsyncEnumerator<'T> with
-                    member _.MoveNextAsync () =
-                        let r = ValueTask.FromResult (not started)
-                        started <- true
-                        r
-                    member _.get_Current () : 'T = if started then source else invalidOp "Enumeration has not started. Call MoveNextAsync."
-                    member _.DisposeAsync () = ValueTask.CompletedTask
-                }
-        }
+    let singleton (source: 'T) = Internal.singleton source
 
     let isEmpty source = Internal.isEmpty source
 
