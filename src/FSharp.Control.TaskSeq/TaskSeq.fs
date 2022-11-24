@@ -13,11 +13,11 @@ module TaskSeq =
 
     let empty<'T> =
         { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator (_) =
+            member _.GetAsyncEnumerator(_) =
                 { new IAsyncEnumerator<'T> with
-                    member _.MoveNextAsync () = ValueTask.FromResult false
-                    member _.Current with get() = Unchecked.defaultof<'T>
-                    member _.DisposeAsync () = ValueTask.CompletedTask
+                    member _.MoveNextAsync() = ValueTask.False
+                    member _.Current = Unchecked.defaultof<'T>
+                    member _.DisposeAsync() = ValueTask.CompletedTask
                 }
         }
 
