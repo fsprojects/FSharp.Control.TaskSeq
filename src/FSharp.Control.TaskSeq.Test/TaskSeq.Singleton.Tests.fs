@@ -78,3 +78,19 @@ module Other =
         let defaultValue = enumerator.Current // should return the default value for int
         defaultValue |> should equal 0
     }
+
+    [<Fact>]
+    let ``TaskSeq-singleton multiple MoveNext is fine`` () = task {
+        let enumerator = (TaskSeq.singleton 42).GetAsyncEnumerator()
+        let! isNext = enumerator.MoveNextAsync()
+        isNext |> should be True
+        let! _ = enumerator.MoveNextAsync()
+        let! _ = enumerator.MoveNextAsync()
+        let! _ = enumerator.MoveNextAsync()
+        let! isNext = enumerator.MoveNextAsync()
+        isNext |> should be False
+
+        // should return the default value for int after moving past the end
+        let defaultValue = enumerator.Current
+        defaultValue |> should equal 0
+    }
