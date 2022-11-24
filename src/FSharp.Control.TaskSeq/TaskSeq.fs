@@ -39,10 +39,6 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     ]
 
-    let format x = string x
-    let f () = format 42
-
-
     let toArray (source: taskSeq<'T>) = [|
         let e = source.GetAsyncEnumerator(CancellationToken())
 
