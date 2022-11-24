@@ -13,6 +13,7 @@ open System.Threading.Tasks.Sources
 
 open FSharp.Core.CompilerServices
 open FSharp.Core.CompilerServices.StateMachineHelpers
+open FSharp.Control
 
 
 [<AutoOpen>]
@@ -279,14 +280,14 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
                 logInfo "at MoveNextAsync: Resumption point = -1"
 
-                ValueTask<bool>()
+                ValueTask.False
 
             elif this._machine.Data.completed then
                 logInfo "at MoveNextAsync: completed = true"
 
                 // return False when beyond the last item
                 this._machine.Data.promiseOfValueOrEnd.Reset()
-                ValueTask<bool>()
+                ValueTask.False
 
             else
                 logInfo "at MoveNextAsync: normal resumption scenario"
@@ -343,18 +344,18 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // the Current value
                 data.current <- ValueNone
 
-            ValueTask<bool>(result)
+            ValueTask.FromResult result
 
         | ValueTaskSourceStatus.Faulted
         | ValueTaskSourceStatus.Canceled
         | ValueTaskSourceStatus.Pending as state ->
             logInfo ("at MoveNextAsyncResult: case ", state)
 
-            ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
+            ValueTask.ofIValueTaskSource this version
         | _ ->
             logInfo "at MoveNextAsyncResult: Unexpected state"
             // assume it's a possibly new, not yet supported case, treat as default
-            ValueTask<bool>(this, version) // uses IValueTaskSource<'T>
+            ValueTask.ofIValueTaskSource this version
 
 and TaskSeqCode<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
