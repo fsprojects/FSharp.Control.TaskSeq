@@ -6,28 +6,26 @@ name: ci-report
 
 on:
   workflow_run:
-    workflows: ci-test               # runs after CI workflow
+    workflows: ['ci-test']               # runs after CI workflow
     types:
       - completed
 jobs:
   test-report-release:
     runs-on: windows-latest
-    name: Test report (release)
     steps:
     - uses: dorny/test-reporter@v1
       with:
         artifact: test-results-release    # artifact name
-        name: Dorny release tests        # Name of the check run which will be created
+        name: Report release tests         # Name of the check run which will be created
         path: '*.trx'                     # Path to test results (inside artifact .zip)
         reporter: dotnet-trx              # Format of test results
 
   test-report-debug:
     runs-on: windows-latest
-    name: Test report (debug)
     steps:
     - uses: dorny/test-reporter@v1
       with:
         artifact: test-results-debug      # artifact name
-        name: Dorny debug tests          # Name of the check run which will be created
+        name: Report debug tests           # Name of the check run which will be created
         path: '*.trx'                     # Path to test results (inside artifact .zip)
         reporter: dotnet-trx              # Format of test results
