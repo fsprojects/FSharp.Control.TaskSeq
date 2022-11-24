@@ -141,6 +141,11 @@ module TestUtils =
         |> TaskSeq.toArrayAsync
         |> Task.map (Array.isEmpty >> should be True)
 
+    let verify1To10 ts =
+        ts
+        |> TaskSeq.toArrayAsync
+        |> Task.map (should equal [| 1..10 |])
+
     /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
     let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
 
