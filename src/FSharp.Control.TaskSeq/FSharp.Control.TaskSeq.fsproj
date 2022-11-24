@@ -23,8 +23,9 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <PackageReleaseNotes>
       Release notes:
-      0.2.3
-       - improve TaskSeq.empty by not relying on resumable state, #89
+      0.2.3 (unreleased)
+       - add TaskSeq.singleton, #90 (by @gusty)
+       - improve TaskSeq.empty by not relying on resumable state, #89 (by @gusty)
        - do not throw exception for unequal lengths in TaskSeq.zip, fixes #32
       0.2.2
        - removes TaskSeq.toSeqCachedAsync, which was incorrectly named. Use toSeq or toListAsync instead.
