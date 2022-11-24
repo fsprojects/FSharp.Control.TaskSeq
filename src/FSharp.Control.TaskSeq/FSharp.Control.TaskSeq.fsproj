@@ -24,6 +24,7 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <PackageReleaseNotes>
       Release notes:
       0.2.3
+       - improve TaskSeq.empty by not relying on resumable state, #89
        - do not throw exception for unequal lengths in TaskSeq.zip, fixes #32
       0.2.2
        - removes TaskSeq.toSeqCachedAsync, which was incorrectly named. Use toSeq or toListAsync instead.
