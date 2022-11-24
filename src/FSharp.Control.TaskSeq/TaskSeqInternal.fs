@@ -272,28 +272,17 @@ module internal TaskSeqInternal =
           }
 
     let zip (source1: taskSeq<_>) (source2: taskSeq<_>) = taskSeq {
-        let inline validate step1 step2 =
-            if step1 <> step2 then
-                if step1 then
-                    invalidArg "taskSequence1" "The task sequences have different lengths."
-
-                if step2 then
-                    invalidArg "taskSequence2" "The task sequences have different lengths."
-
-
         use e1 = source1.GetAsyncEnumerator(CancellationToken())
         use e2 = source2.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step1 = e1.MoveNextAsync()
         let! step2 = e2.MoveNextAsync()
         go <- step1 && step2
-        validate step1 step2
 
         while go do
             yield e1.Current, e2.Current
             let! step1 = e1.MoveNextAsync()
             let! step2 = e2.MoveNextAsync()
-            validate step1 step2
             go <- step1 && step2
     }
 
