@@ -1,0 +1,31 @@
+name: 'Test Report'
+
+# See Dorny instructions for why we need a separate yaml for creating a test report
+# for public repositories that accept forks:
+# https://github.com/dorny/test-reporter#recommended-setup-for-public-repositories
+
+on:
+  workflow_run:
+    workflows: ['ci-test']               # runs after CI workflow
+    types:
+      - completed
+jobs:
+  test-report-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results-release    # artifact name
+        name: Report release tests        # Name of the check run which will be created
+        path: '**/*.trx'                     # Path to test results (inside artifact .zip)
+        reporter: dotnet-trx              # Format of test results
+
+  test-report-debug:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: dorny/test-reporter@v1
+      with:
+        artifact: test-results-debug      # artifact name
+        name: Report debug tests          # Name of the check run which will be created
+        path: '**/*.trx'                     # Path to test results (inside artifact .zip)
+        reporter: dotnet-trx              # Format of test results
