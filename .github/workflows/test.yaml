@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   test-release:
+    permissions: write-all
     name: Test Release Build
     runs-on: windows-latest
     steps:
@@ -33,6 +34,7 @@ jobs:
           reporter: dotnet-trx
 
   test-debug:
+    permissions: write-all
     name: Test Debug Build
     runs-on: windows-latest
     steps:
