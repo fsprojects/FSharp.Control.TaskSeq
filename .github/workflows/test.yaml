@@ -2,14 +2,8 @@ name: ci-test
 
 on: [pull_request]
 
-permissions:
-  id-token: write
-  contents: read
-  checks: write
-
 jobs:
   test-release:
-    permissions: write-all
     name: Test Release Build
     runs-on: windows-latest
     steps:
@@ -24,17 +18,15 @@ jobs:
       # build it, test it
       - name: Run dotnet test - release
         run: ./build.cmd ci -release
-      - name: Publish test results - release
-        uses: dorny/test-reporter@v1
-        if: always()
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
         with:
-          name: Report release tests
+          name: test-results-release
           # this path glob pattern requires forward slashes!
           path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-release.trx
-          reporter: dotnet-trx
+
 
   test-debug:
-    permissions: write-all
     name: Test Debug Build
     runs-on: windows-latest
     steps:
@@ -49,11 +41,9 @@ jobs:
       # build it, test it
       - name: Run dotnet test - debug
         run: ./build.cmd ci -debug
-      - name: Publish test results - debug
-        uses: dorny/test-reporter@v1
-        if: always()
+      - uses: actions/upload-artifact@v2  # upload test results
+        if: success() || failure()        # run this step even if previous step failed
         with:
-          name: Report debug tests
+          name: test-results-debug
           # this path glob pattern requires forward slashes!
           path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-debug.trx
-          reporter: dotnet-trx
