@@ -17,4 +17,7 @@ jobs:
         uses: actions/setup-dotnet@v3
       # build it, test it, pack it
       - name: Run dotnet build (release)
+        # see issue #105
+        # very important, since we use cmd scripts, the default is psh, and a bug prevents errorlevel to bubble
+        shell: cmd
         run: ./build.cmd
