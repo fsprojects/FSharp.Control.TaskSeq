@@ -71,12 +71,11 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <Compile Include="TaskSeqInternal.fs" />
     <Compile Include="TaskSeq.fsi" />
     <Compile Include="TaskSeq.fs" />
+    <Compile Include="TaskExtensions.fsi" />
+    <Compile Include="TaskExtensions.fs" />
+    <Compile Include="AsyncExtensions.fsi" />
+    <Compile Include="AsyncExtensions.fs" />
   </ItemGroup>
-
-  <ItemGroup />
-
-
-  <ItemGroup />
 
   <ItemGroup>
     <!-- maximal compatibility with minimal required FSharp.Core version for TaskSeq -->

@@ -448,6 +448,7 @@ type TaskSeqBuilder() =
 
         ResumableCode.Combine(task1, task2)
 
+    /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the CE
     member inline _.WhileAsync
         (
             [<InlineIfLambda>] condition: unit -> ValueTask<bool>,
@@ -490,9 +491,6 @@ type TaskSeqBuilder() =
 
     member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: TaskSeqCode<'T>) : TaskSeqCode<'T> =
         logInfo "at While(...)"
-
-        // was this:
-        // b.WhileAsync((fun () -> ValueTask<bool>(condition ())), body)
         ResumableCode.While(condition, body)
 
     member inline _.TryWith(body: TaskSeqCode<'T>, catch: exn -> TaskSeqCode<'T>) : TaskSeqCode<'T> =

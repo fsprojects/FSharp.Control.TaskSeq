@@ -569,35 +569,3 @@ module TaskSeq =
     /// If the accumulator function <paramref name="folder" /> does not need to be asynchronous, consider using <see cref="TaskSeq.fold" />.
     /// </summary>
     val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
-
-
-
-[<AutoOpen>]
-module AsyncSeqExtensions =
-
-    val WhileDynamic:
-        sm: byref<TaskStateMachine<'Data>> *
-        condition: (unit -> System.Threading.Tasks.ValueTask<bool>) *
-        body: TaskCode<'Data, unit> ->
-            bool
-
-    val WhileBodyDynamicAux:
-        sm: byref<TaskStateMachine<'Data>> *
-        condition: (unit -> System.Threading.Tasks.ValueTask<bool>) *
-        body: TaskCode<'Data, unit> *
-        rf: TaskResumptionFunc<'Data> ->
-            bool
-
-    type AsyncBuilder with
-
-        member For: tasksq: System.Collections.Generic.IAsyncEnumerable<'T> * action: ('T -> Async<unit>) -> Async<unit>
-
-    type TaskBuilder with
-
-        member inline WhileAsync:
-            condition: (unit -> System.Threading.Tasks.ValueTask<bool>) * body: TaskCode<'TOverall, unit> ->
-                TaskCode<'TOverall, unit>
-
-        member inline For:
-            tasksq: System.Collections.Generic.IAsyncEnumerable<'T> * body: ('T -> TaskCode<'TOverall, unit>) ->
-                TaskCode<'TOverall, unit>
