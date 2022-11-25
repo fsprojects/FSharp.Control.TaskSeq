@@ -471,6 +471,7 @@ module TaskSeq =
     val pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
     val pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
     val prependSeq: source1: #seq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+    val singleton: source: 'T -> taskSeq<'T>
     val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
     val toArray: source: taskSeq<'T> -> 'T[]
     val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
