@@ -183,7 +183,7 @@ The following is the progress report:
 | &#x2753;         | `rev`              |                 |                      | [note #1](#note-1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |                  | `scan`             | `scan`          | `scanAsync`          | |
 | &#x1f6ab;        | `scanBack`         |                 |                      | [note #2](#note-2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-|                  | `singleton`        | `singleton`     |                      | |
+| &#x2705; [#90][] | `singleton`        | `singleton`     |                      | |
 |                  | `skip`             | `skip`          |                      | |
 |                  | `skipWhile`        | `skipWhile`     | `skipWhileAsync`     | |
 | &#x2753;         | `sort`             |                 |                      | [note #1](#note-1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
