@@ -1,32 +1,39 @@
-module TaskSeq.Extenions
+module TaskSeq.Tests.Extensions
 
 open System
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 
 //
-// TaskSeq.except
-// TaskSeq.exceptOfSeq
+// Task extensions
+// Async extensions
 //
 
 
-module TaskBuilder =
-    open TaskSeq.Tests
-
+module TaskCE =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-existsAsync happy path last item of seq`` variant =
-        task {
-            let values = Gen.getSeqImmutable variant
+    let ``Task-for CE with taskSeq`` variant = task {
+        let values = Gen.getSeqImmutable variant
 
-            let mutable sum = 0
-            for x in values do
-                sum <- sum + x
+        let mutable sum = 0
 
-            // let! expected =
-            //     (0, values)
-            //     ||> TaskSeq.fold((+))
-            Assert.Equal(55, sum)
-        }
+        for x in values do
+            sum <- sum + x
+
+        sum |> should equal 55
+    }
+
+module AsyncCE =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``Async-for CE with taskSeq`` variant = async {
+        let values = Gen.getSeqImmutable variant
+
+        let mutable sum = 0
+
+        for x in values do
+            sum <- sum + x
+
+        sum |> should equal 55
+    }
