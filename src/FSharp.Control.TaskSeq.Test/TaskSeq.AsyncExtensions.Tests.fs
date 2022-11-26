@@ -115,3 +115,30 @@ module SideEffects =
 
         sum |> should equal 465 // eq to: List.sum [1..30]
     }
+
+module Other =
+    [<Fact>]
+    let ``Async-for CE must call dispose in empty taskSeq`` () = async {
+        let disposed = ref 0
+        let values = Gen.getEmptyDisposableTaskSeq disposed
+
+        for x in values do
+            ()
+
+        // the DisposeAsync should be called by now
+        disposed.Value |> should equal 1
+    }
+
+    [<Fact>]
+    let ``Async-for CE must call dispose on singleton`` () = async {
+        let disposed = ref 0
+        let mutable sum = 0
+        let values = Gen.getSingletonDisposableTaskSeq disposed
+
+        for x in values do
+            sum <- x
+
+        // the DisposeAsync should be called by now
+        disposed.Value |> should equal 1
+        sum |> should equal 42
+    }

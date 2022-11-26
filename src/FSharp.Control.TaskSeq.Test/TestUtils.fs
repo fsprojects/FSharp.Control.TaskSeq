@@ -521,6 +521,44 @@ module TestUtils =
                 }
             | x -> failwithf "Invalid test variant: %A" x
 
+        /// An empty taskSeq that can be used with tests for checking if the dispose method gets called.
+        /// Will add 1 to the passed integer upon disposing.
+        let getEmptyDisposableTaskSeq (disposed: int ref) =
+            { new IAsyncEnumerable<'T> with
+                member _.GetAsyncEnumerator(_) =
+                    { new IAsyncEnumerator<'T> with
+                        member _.MoveNextAsync() = ValueTask.False
+                        member _.Current = Unchecked.defaultof<'T>
+                        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- disposed.Value + 1 })
+                    }
+            }
+
+        /// A singleton taskSeq that can be used with tests for checking if the dispose method gets called
+        /// The singleton value is '42'. Will add 1 to the passed integer upon disposing.
+        let getSingletonDisposableTaskSeq (disposed: int ref) =
+            { new IAsyncEnumerable<int> with
+                member _.GetAsyncEnumerator(_) =
+                    let mutable status = BeforeAll
+
+                    { new IAsyncEnumerator<int> with
+                        member _.MoveNextAsync() =
+                            match status with
+                            | BeforeAll ->
+                                status <- WithCurrent
+                                ValueTask.True
+                            | WithCurrent ->
+                                status <- AfterAll
+                                ValueTask.False
+                            | AfterAll -> ValueTask.False
+
+                        member _.Current: int =
+                            match status with
+                            | WithCurrent -> 42
+                            | _ -> Unchecked.defaultof<int>
+
+                        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- disposed.Value + 1 })
+                    }
+            }
     //
     // following types can be used with Theory & TestData
     //
