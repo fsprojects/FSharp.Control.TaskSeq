@@ -36,50 +36,6 @@ module Internal = // cannot be marked with 'internal' scope
         with _ ->
             false
 
-    type Debug =
-
-        [<DefaultValue(false)>]
-        static val mutable private verbose: bool option
-
-        /// Setting from environment variable TASKSEQ_LOG_VERBOSE, which,
-        /// when set, enables (very) verbose printing of flow and state
-        static member private getVerboseSetting() =
-            match Debug.verbose with
-            | None ->
-                let verboseEnv =
-                    try
-                        match Environment.GetEnvironmentVariable "TASKSEQ_LOG_VERBOSE" with
-                        | null -> false
-                        | x ->
-                            match x.ToLowerInvariant().Trim() with
-                            | "1"
-                            | "true"
-                            | "on"
-                            | "yes" -> true
-                            | _ -> false
-
-                    with _ ->
-                        false
-
-                Debug.verbose <- Some verboseEnv
-                verboseEnv
-
-            | Some setting -> setting
-
-        [<Conditional("DEBUG")>]
-        static member private print value =
-            match Debug.getVerboseSetting () with
-            | false -> ()
-            | true ->
-                // don't use ksprintf here, because the compiler does not remove all allocations due to
-                // the way PrintfFormat types are compiled, even if we set the Conditional attribute.
-                printfn "%i (%b): %s" Thread.CurrentThread.ManagedThreadId Thread.CurrentThread.IsThreadPoolThread value
-
-        [<Conditional("DEBUG")>]
-        static member logInfo(str) = Debug.print str
-
-        [<Conditional("DEBUG")>]
-        static member logInfo(str, data) = Debug.print $"%s{str}{data}"
 
     /// Call MoveNext on an IAsyncStateMachine by reference
     let inline moveNextRef (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
@@ -88,8 +44,6 @@ module Internal = // cannot be marked with 'internal' scope
     let inline raiseNotImpl () =
         NotImplementedException "Abstract Class: method or property not implemented"
         |> raise
-
-open type Debug
 
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
@@ -244,7 +198,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 this // just return 'self' here
 
             | _ ->
-                logInfo "GetAsyncEnumerator, start cloning..."
+                Debug.logInfo "GetAsyncEnumerator, start cloning..."
 
                 // We need to reset state, but only to the "initial machine", resetting the _machine to
                 // Unchecked.defaultof<_> is wrong, as the compiler uses this to track state. However,
@@ -260,7 +214,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 clone._machine <- this._initialMachine
                 clone._initialMachine <- this._initialMachine // TODO: proof with a test that this is necessary: probably not
                 clone.InitMachineData(ct, &clone._machine)
-                logInfo "GetAsyncEnumerator, finished cloning..."
+                Debug.logInfo "GetAsyncEnumerator, finished cloning..."
                 clone
 
     interface System.Collections.Generic.IAsyncEnumerator<'T> with
@@ -275,39 +229,39 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 Unchecked.defaultof<'T>
 
         member this.MoveNextAsync() =
-            logInfo "MoveNextAsync..."
+            Debug.logInfo "MoveNextAsync..."
 
             if this._machine.ResumptionPoint = -1 then // can't use as IAsyncEnumerator before IAsyncEnumerable
-                logInfo "at MoveNextAsync: Resumption point = -1"
+                Debug.logInfo "at MoveNextAsync: Resumption point = -1"
 
                 ValueTask.False
 
             elif this._machine.Data.completed then
-                logInfo "at MoveNextAsync: completed = true"
+                Debug.logInfo "at MoveNextAsync: completed = true"
 
                 // return False when beyond the last item
                 this._machine.Data.promiseOfValueOrEnd.Reset()
                 ValueTask.False
 
             else
-                logInfo "at MoveNextAsync: normal resumption scenario"
+                Debug.logInfo "at MoveNextAsync: normal resumption scenario"
 
                 let data = this._machine.Data
                 data.promiseOfValueOrEnd.Reset()
                 let mutable ts = this
 
-                logInfo "at MoveNextAsync: start calling builder.MoveNext()"
+                Debug.logInfo "at MoveNextAsync: start calling builder.MoveNext()"
 
                 data.builder.MoveNext(&ts)
 
-                logInfo "at MoveNextAsync: finished calling builder.MoveNext()"
+                Debug.logInfo "at MoveNextAsync: finished calling builder.MoveNext()"
 
                 this.MoveNextAsyncResult()
 
         /// Disposes of the IAsyncEnumerator (*not* the IAsyncEnumerable!!!)
         member this.DisposeAsync() =
             task {
-                logInfo "DisposeAsync..."
+                Debug.logInfo "DisposeAsync..."
 
                 match this._machine.Data.disposalStack with
                 | null -> ()
@@ -335,7 +289,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
         match status with
         | ValueTaskSourceStatus.Succeeded ->
-            logInfo "at MoveNextAsyncResult: case succeeded..."
+            Debug.logInfo "at MoveNextAsyncResult: case succeeded..."
 
             let result = data.promiseOfValueOrEnd.GetResult(version)
 
@@ -349,11 +303,11 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
         | ValueTaskSourceStatus.Faulted
         | ValueTaskSourceStatus.Canceled
         | ValueTaskSourceStatus.Pending as state ->
-            logInfo ("at MoveNextAsyncResult: case ", state)
+            Debug.logInfo ("at MoveNextAsyncResult: case ", state)
 
             ValueTask.ofIValueTaskSource this version
         | _ ->
-            logInfo "at MoveNextAsyncResult: Unexpected state"
+            Debug.logInfo "at MoveNextAsyncResult: Unexpected state"
             // assume it's a possibly new, not yet supported case, treat as default
             ValueTask.ofIValueTaskSource this version
 
@@ -376,12 +330,12 @@ type TaskSeqBuilder() =
                     __resumeAt sm.ResumptionPoint
 
                     try
-                        logInfo "at Run.MoveNext start"
+                        Debug.logInfo "at Run.MoveNext start"
 
                         let __stack_code_fin = code.Invoke(&sm)
 
                         if __stack_code_fin then
-                            logInfo $"at Run.MoveNext, done"
+                            Debug.logInfo $"at Run.MoveNext, done"
 
                             // Signal we're at the end
                             // NOTE: if we don't do it here, as well as in IValueTaskSource<bool>.GetResult
@@ -392,14 +346,14 @@ type TaskSeqBuilder() =
                             sm.Data.completed <- true
 
                         elif sm.Data.current.IsSome then
-                            logInfo $"at Run.MoveNext, still more items in enumerator"
+                            Debug.logInfo $"at Run.MoveNext, still more items in enumerator"
 
                             // Signal there's more data:
                             sm.Data.promiseOfValueOrEnd.SetResult(true)
 
                         else
                             // Goto request
-                            logInfo $"at Run.MoveNext, await, MoveNextAsync has not completed yet"
+                            Debug.logInfo $"at Run.MoveNext, await, MoveNextAsync has not completed yet"
 
                             // don't capture the full object in the next closure (won't work because: byref)
                             // but only a reference to itself.
@@ -412,7 +366,7 @@ type TaskSeqBuilder() =
                             )
 
                     with exn ->
-                        logInfo ("Setting exception of PromiseOfValueOrEnd to: ", exn.Message)
+                        Debug.logInfo ("Setting exception of PromiseOfValueOrEnd to: ", exn.Message)
                         sm.Data.promiseOfValueOrEnd.SetException(exn)
                         sm.Data.builder.Complete()
 
@@ -420,7 +374,7 @@ type TaskSeqBuilder() =
                 ))
                 (SetStateMachineMethodImpl<_>(fun sm state -> ())) // not used in reference impl
                 (AfterCode<_, _>(fun sm ->
-                    logInfo "at AfterCode<_, _>, after F# inits the sm, and we can attach extra info"
+                    Debug.logInfo "at AfterCode<_, _>, after F# inits the sm, and we can attach extra info"
 
                     let ts = TaskSeq<TaskSeqStateMachine<'T>, 'T>()
                     ts._initialMachine <- sm
@@ -440,11 +394,11 @@ type TaskSeqBuilder() =
 
 
     member inline _.Zero() : TaskSeqCode<'T> =
-        logInfo "at Zero()"
+        Debug.logInfo "at Zero()"
         ResumableCode.Zero()
 
     member inline _.Combine(task1: TaskSeqCode<'T>, task2: TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        logInfo "at Combine(.., ..)"
+        Debug.logInfo "at Combine(.., ..)"
 
         ResumableCode.Combine(task1, task2)
 
@@ -463,12 +417,12 @@ type TaskSeqBuilder() =
                 let __stack_vtask = condition ()
 
                 if __stack_vtask.IsCompleted then
-                    logInfo "at WhileAsync: returning completed task"
+                    Debug.logInfo "at WhileAsync: returning completed task"
 
                     __stack_condition_fin <- true
                     condition_res <- __stack_vtask.Result
                 else
-                    logInfo "at WhileAsync: awaiting non-completed task"
+                    Debug.logInfo "at WhileAsync: awaiting non-completed task"
 
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
@@ -490,7 +444,7 @@ type TaskSeqBuilder() =
         )
 
     member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        logInfo "at While(...)"
+        Debug.logInfo "at While(...)"
         ResumableCode.While(condition, body)
 
     member inline _.TryWith(body: TaskSeqCode<'T>, catch: exn -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
@@ -595,7 +549,7 @@ type TaskSeqBuilder() =
         TaskSeqCode<'T>(fun sm ->
             // This will yield with __stack_fin = false
             // This will resume with __stack_fin = true
-            logInfo "at Yield"
+            Debug.logInfo "at Yield"
 
             let __stack_fin = ResumableCode.Yield().Invoke(&sm)
             sm.Data.current <- ValueSome v
@@ -612,7 +566,7 @@ type TaskSeqBuilder() =
             let mutable awaiter = task.GetAwaiter()
             let mutable __stack_fin = true
 
-            logInfo "at Bind"
+            Debug.logInfo "at Bind"
 
             if not awaiter.IsCompleted then
                 // This will yield with __stack_fin2 = false
@@ -620,15 +574,15 @@ type TaskSeqBuilder() =
                 let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
                 __stack_fin <- __stack_fin2
 
-            logInfo ("at Bind: with __stack_fin = ", __stack_fin)
-            logInfo ("at Bind: this.completed = ", sm.Data.completed)
+            Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
+            Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
 
             if __stack_fin then
                 let result = awaiter.GetResult()
                 (continuation result).Invoke(&sm)
 
             else
-                logInfo "at Bind: calling AwaitUnsafeOnCompleted"
+                Debug.logInfo "at Bind: calling AwaitUnsafeOnCompleted"
 
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone
@@ -639,7 +593,7 @@ type TaskSeqBuilder() =
             let mutable awaiter = task.GetAwaiter()
             let mutable __stack_fin = true
 
-            logInfo "at BindV"
+            Debug.logInfo "at BindV"
 
             if not awaiter.IsCompleted then
                 // This will yield with __stack_fin2 = false
@@ -651,7 +605,7 @@ type TaskSeqBuilder() =
                 let result = awaiter.GetResult()
                 (continuation result).Invoke(&sm)
             else
-                logInfo "at BindV: calling AwaitUnsafeOnCompleted"
+                Debug.logInfo "at BindV: calling AwaitUnsafeOnCompleted"
 
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone

@@ -16,51 +16,6 @@ open FSharp.Control.TaskSeqBuilders
 [<AutoOpen>]
 module TaskExtensions =
 
-    let rec WhileDynamic
-        (
-            sm: byref<TaskStateMachine<'Data>>,
-            condition: unit -> ValueTask<bool>,
-            body: TaskCode<'Data, unit>
-        ) : bool =
-        let vt = condition ()
-
-        TaskBuilderBase.BindDynamic(
-            &sm,
-            vt,
-            fun result ->
-                TaskCode<_, _>(fun sm ->
-                    if result then
-                        if body.Invoke(&sm) then
-                            WhileDynamic(&sm, condition, body)
-                        else
-                            let rf = sm.ResumptionDynamicInfo.ResumptionFunc
-
-                            sm.ResumptionDynamicInfo.ResumptionFunc <-
-                                (TaskResumptionFunc<'Data>(fun sm -> WhileBodyDynamicAux(&sm, condition, body, rf)))
-
-                            false
-                    else
-                        true)
-        )
-
-
-    and WhileBodyDynamicAux
-        (
-            sm: byref<TaskStateMachine<'Data>>,
-            condition: unit -> ValueTask<bool>,
-            body: TaskCode<'Data, unit>,
-            rf: TaskResumptionFunc<_>
-        ) : bool =
-        if rf.Invoke(&sm) then
-            WhileDynamic(&sm, condition, body)
-        else
-            let rf = sm.ResumptionDynamicInfo.ResumptionFunc
-
-            sm.ResumptionDynamicInfo.ResumptionFunc <-
-                (TaskResumptionFunc<'Data>(fun sm -> WhileBodyDynamicAux(&sm, condition, body, rf)))
-
-            false
-
     // Add asynchronous for loop to the 'task' computation builder
     type Microsoft.FSharp.Control.TaskBuilder with
 
@@ -73,6 +28,8 @@ module TaskExtensions =
             ) : TaskCode<_, _> =
             let mutable condition_res = true
 
+            // note that this While itself has both a dynamic and static implementation
+            // so we don't need to add that here (TODO: how to verify?).
             ResumableCode.While(
                 (fun () -> condition_res),
                 TaskCode<_, _>(fun sm ->
@@ -82,12 +39,12 @@ module TaskExtensions =
                     let mutable awaiter = __stack_vtask.GetAwaiter()
 
                     if awaiter.IsCompleted then
-                        // logInfo "at WhileAsync: returning completed task"
+                        Debug.logInfo "at Task.WhileAsync: returning completed task"
 
                         __stack_condition_fin <- true
                         condition_res <- awaiter.GetResult()
                     else
-                        // logInfo "at WhileAsync: awaiting non-completed task"
+                        Debug.logInfo "at Task.WhileAsync: awaiting non-completed task"
 
                         // This will yield with __stack_fin = false
                         // This will resume with __stack_fin = true
