@@ -8,11 +8,33 @@ open FSharp.Control
 
 //
 // Task extensions
-// Async extensions
 //
 
+module EmptySeq =
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``Task-for CE with empty taskSeq`` variant = task {
+        let values = Gen.getEmptyVariant variant
 
-module TaskCE =
+        let mutable sum = 42
+
+        for x in values do
+            sum <- sum + x
+
+        sum |> should equal 42
+    }
+
+    [<Fact>]
+    let ``Task-for CE must execute side effect in empty taskseq`` () = task {
+        let mutable data = 0
+        let values = taskSeq { do data <- 42 }
+
+        for x in values do
+            ()
+
+        data |> should equal 42
+    }
+
+module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``Task-for CE with taskSeq`` variant = task {
         let values = Gen.getSeqImmutable variant
@@ -25,9 +47,8 @@ module TaskCE =
         sum |> should equal 55
     }
 
-module AsyncCE =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``Async-for CE with taskSeq`` variant = async {
+    let ``Task-for CE with taskSeq multiple iterations`` variant = task {
         let values = Gen.getSeqImmutable variant
 
         let mutable sum = 0
@@ -35,5 +56,61 @@ module AsyncCE =
         for x in values do
             sum <- sum + x
 
+        // each following iteration should start at the beginning
+        for x in values do
+            sum <- sum + x
+
+        for x in values do
+            sum <- sum + x
+
+        sum |> should equal 165
+    }
+
+    [<Fact>]
+    let ``Task-for mixing both types of for loops`` () = async {
+        // this test ensures overload resolution is correct
+        let ts = TaskSeq.singleton 20
+        let sq = Seq.singleton 20
+        let mutable sum = 2
+
+        for x in ts do
+            sum <- sum + x
+
+        for x in sq do
+            sum <- sum + x
+
+        sum |> should equal 42
+    }
+
+module SideEffects =
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``Task-for CE with taskSeq`` variant = task {
+        let values = Gen.getSeqWithSideEffect variant
+
+        let mutable sum = 0
+
+        for x in values do
+            sum <- sum + x
+
         sum |> should equal 55
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``Task-for CE with taskSeq multiple iterations`` variant = task {
+        let values = Gen.getSeqWithSideEffect variant
+
+        let mutable sum = 0
+
+        for x in values do
+            sum <- sum + x
+
+        // each following iteration should start at the beginning
+        // with the "side effect" tests, the mutable state updates
+        for x in values do
+            sum <- sum + x // starts at 11
+
+        for x in values do
+            sum <- sum + x // starts at 21
+
+        sum |> should equal 465 // eq to: List.sum [1..30]
     }
