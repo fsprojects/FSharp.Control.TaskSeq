@@ -297,3 +297,4 @@ _The motivation for `readOnly` in `Seq` is that a cast from a mutable array or l
 [#81]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/81
 [#82]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/82
 [#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
+[#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
