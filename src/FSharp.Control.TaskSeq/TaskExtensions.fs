@@ -67,6 +67,16 @@ module TaskExtensions =
                 this
                     .Using(
                         source.GetAsyncEnumerator(CancellationToken()),
-                        (fun e -> this.WhileAsync(e.MoveNextAsync, (fun sm -> (body e.Current).Invoke(&sm))))
+                        (fun e ->
+                            this.WhileAsync(
+                                // __debugPoint is only available from FSharp.Core 6.0.4
+                                //(fun () ->
+                                //    Microsoft.FSharp.Core.CompilerServices.StateMachineHelpers.__debugPoint
+                                //        "ForLoop.InOrToKeyword"
+
+                                //    e.MoveNextAsync()),
+                                e.MoveNextAsync,
+                                (fun sm -> (body e.Current).Invoke(&sm))
+                            ))
                     )
                     .Invoke(&sm))
