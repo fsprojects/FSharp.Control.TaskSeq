@@ -1,10 +1,10 @@
 namespace FSharp.Control
 
-#nowarn "1204"
-
 [<AutoOpen>]
 module AsyncExtensions =
+    open FSharp.Control.TaskSeqBuilders
 
     type AsyncBuilder with
 
-        member For: tasksq: System.Collections.Generic.IAsyncEnumerable<'T> * action: ('T -> Async<unit>) -> Async<unit>
+        /// Iterate over all values of a taskSeq.
+        member For: source: taskSeq<'T> * action: ('T -> Async<unit>) -> Async<unit>
