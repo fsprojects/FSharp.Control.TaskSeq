@@ -4,26 +4,8 @@ namespace FSharp.Control
 
 [<AutoOpen>]
 module TaskExtensions =
-
-    val WhileDynamic:
-        sm: byref<TaskStateMachine<'Data>> *
-        condition: (unit -> System.Threading.Tasks.ValueTask<bool>) *
-        body: TaskCode<'Data, unit> ->
-            bool
-
-    val WhileBodyDynamicAux:
-        sm: byref<TaskStateMachine<'Data>> *
-        condition: (unit -> System.Threading.Tasks.ValueTask<bool>) *
-        body: TaskCode<'Data, unit> *
-        rf: TaskResumptionFunc<'Data> ->
-            bool
+    open FSharp.Control.TaskSeqBuilders
 
     type TaskBuilder with
 
-        member inline WhileAsync:
-            condition: (unit -> System.Threading.Tasks.ValueTask<bool>) * body: TaskCode<'TOverall, unit> ->
-                TaskCode<'TOverall, unit>
-
-        member inline For:
-            tasksq: System.Collections.Generic.IAsyncEnumerable<'T> * body: ('T -> TaskCode<'TOverall, unit>) ->
-                TaskCode<'TOverall, unit>
+        member inline For: source: taskSeq<'T> * body: ('T -> TaskCode<'TOverall, unit>) -> TaskCode<'TOverall, unit>

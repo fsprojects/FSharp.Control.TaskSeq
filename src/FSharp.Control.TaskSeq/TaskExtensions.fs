@@ -4,16 +4,17 @@ open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
+open Microsoft.FSharp.Core.CompilerServices
+open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
+
+open FSharp.Control.TaskSeqBuilders
+
 #nowarn "57"
 #nowarn "1204"
 #nowarn "3513"
 
-
 [<AutoOpen>]
 module TaskExtensions =
-    open Microsoft.FSharp.Core.CompilerServices
-    open Microsoft.FSharp.Core.CompilerServices.StateMachineHelpers
-    open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 
     let rec WhileDynamic
         (
@@ -104,42 +105,11 @@ module TaskExtensions =
                         false)
             )
 
-        member inline this.For(tasksq: IAsyncEnumerable<'T>, body: 'T -> TaskCode<_, unit>) : TaskCode<_, unit> =
-            // tasksq
-            // |> TaskSeq.iterAsync (body >> task.Run)
-            // |> task.ReturnFrom
-
-            // task.ReturnFrom <|
-            //     task {
-            //         let mutable continueWhile = true
-            //         use e = tasksq.GetAsyncEnumerator()
-            //         while continueWhile do
-            //             let! next = e.MoveNextAsync()
-            //             if next then
-            //                 do! task.Run(body e.Current)
-            //             else
-            //                 continueWhile <- false
-            //     }
-
+        member inline this.For(source: taskSeq<'T>, body: 'T -> TaskCode<_, unit>) : TaskCode<_, unit> =
             TaskCode<'TOverall, unit>(fun sm ->
-
                 this
                     .Using(
-                        tasksq.GetAsyncEnumerator(CancellationToken()),
+                        source.GetAsyncEnumerator(CancellationToken()),
                         (fun e -> this.WhileAsync(e.MoveNextAsync, (fun sm -> (body e.Current).Invoke(&sm))))
                     )
                     .Invoke(&sm))
-
-    // temp example
-    let foo () = task {
-        let mutable sum = 0
-
-        let xs = taskSeq {
-            1
-            2
-            3
-        }
-
-        for x in xs do
-            sum <- sum + x
-    }
