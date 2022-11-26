@@ -29,8 +29,8 @@ Latest version [can be installed from Nuget][nuget].
   - [Progress `taskSeq` CE](#progress-taskseq-ce)
   - [Progress and implemented `TaskSeq` module functions](#progress-and-implemented-taskseq-module-functions)
 - [More information](#more-information)
-  - [Futher reading `IAsyncEnumerable`](#futher-reading-iasyncenumerable)
-  - [Futher reading on resumable state machines](#futher-reading-on-resumable-state-machines)
+  - [Further reading `IAsyncEnumerable`](#further-reading-iasyncenumerable)
+  - [Further reading on resumable state machines](#further-reading-on-resumable-state-machines)
   - [Further reading on computation expressions](#further-reading-on-computation-expressions)
 - [Building & testing](#building--testing)
   - [Prerequisites](#prerequisites)
@@ -109,14 +109,24 @@ As package reference in `fsproj` or `csproj` file:
 
 ```f#
 open System.IO
-
 open FSharp.Control
 
 // singleton is fine
-let hello = taskSeq { yield "Hello, World!" }
+let helloTs = taskSeq { yield "Hello, World!" }
+
+// cold-started, that is, delay-executed
+let f() = task {
+    // using toList forces execution of whole sequence
+    let! hello = TaskSeq.toList helloTs  // toList returns a Task<'T list>
+    return List.head hello 
+}
 
 // can be mixed with normal sequences
 let oneToTen = taskSeq { yield! [1..10] }
+
+// can be used with F#'s task and async in a for-loop
+let f() = task { for x in oneToTen do printfn "Number %i" x }
+let g() = async { for x in oneToTen do printfn "Number %i" x }
 
 // returns a delayed sequence of IAsyncEnumerable<string>
 let allFilesAsLines() = taskSeq {
@@ -313,14 +323,14 @@ The following is the progress report:
 
 ## More information
 
-### Futher reading `IAsyncEnumerable`
+### Further reading `IAsyncEnumerable`
 
 - A good C#-based introduction [can be found in this blog][8].
 - [An MSDN article][9] written shortly after it was introduced.
 - Converting a `seq` to an `IAsyncEnumerable` [demo gist][10] as an example, though `TaskSeq` contains many more utility functions and uses a slightly different approach.
 - If you're looking for using `IAsyncEnumerable` with `async` and not `task`, the excellent [`AsyncSeq`][11] library should be used. While `TaskSeq` is intended to consume `async` just like `task` does, it won't create an `AsyncSeq` type (at least not yet). If you want classic Async and parallelism, you should get this library instead.
 
-### Futher reading on resumable state machines
+### Further reading on resumable state machines
 
 - A state machine from a monadic perspective in F# [can be found here][12], which works with the pre-F# 6.0 non-resumable internals.
 - The [original RFC for F# 6.0 on resumable state machines][13]

@@ -6,5 +6,7 @@ module AsyncExtensions =
 
     type AsyncBuilder with
 
-        /// Iterate over all values of a taskSeq.
+        /// <summary>
+        /// Inside <see cref="async" />, iterate over all values of a <see cref="taskSeq" />.
+        /// </summary>
         member For: source: taskSeq<'T> * action: ('T -> Async<unit>) -> Async<unit>

@@ -8,4 +8,7 @@ module TaskExtensions =
 
     type TaskBuilder with
 
+        /// <summary>
+        /// Inside <see cref="task" />, iterate over all values of a <see cref="taskSeq" />.
+        /// </summary>
         member inline For: source: taskSeq<'T> * body: ('T -> TaskCode<'TOverall, unit>) -> TaskCode<'TOverall, unit>
