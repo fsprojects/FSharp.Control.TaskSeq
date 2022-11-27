@@ -1,4 +1,4 @@
-module FSharp.Control.TaskSeq.Test
+module TaskSeq.Test.Using
 
 open System
 open System.Threading.Tasks
@@ -34,7 +34,7 @@ type private MultiDispose(disposed: int ref) =
 let private check = TaskSeq.length >> Task.map (should equal 1)
 
 [<Fact>]
-let ``CE task: Using when type implements IDisposable`` () =
+let ``CE taskSeq: Using when type implements IDisposable`` () =
     let disposed = ref false
 
     let ts = taskSeq {
@@ -46,7 +46,7 @@ let ``CE task: Using when type implements IDisposable`` () =
     |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using when type implements IAsyncDisposable`` () =
+let ``CE taskSeq: Using when type implements IAsyncDisposable`` () =
     let disposed = ref false
 
     let ts = taskSeq {
@@ -58,7 +58,7 @@ let ``CE task: Using when type implements IAsyncDisposable`` () =
     |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using when type implements IDisposable and IAsyncDisposable`` () =
+let ``CE taskSeq: Using when type implements IDisposable and IAsyncDisposable`` () =
     let disposed = ref 0
 
     let ts = taskSeq {
@@ -70,7 +70,7 @@ let ``CE task: Using when type implements IDisposable and IAsyncDisposable`` () 
     |> Task.map (fun _ -> disposed.Value |> should equal -1) // should prefer IAsyncDisposable, which returns -1
 
 [<Fact>]
-let ``CE task: Using! when type implements IDisposable`` () =
+let ``CE taskSeq: Using! when type implements IDisposable`` () =
     let disposed = ref false
 
     let ts = taskSeq {
@@ -82,7 +82,7 @@ let ``CE task: Using! when type implements IDisposable`` () =
     |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using! when type implements IAsyncDisposable`` () =
+let ``CE taskSeq: Using! when type implements IAsyncDisposable`` () =
     let disposed = ref false
 
     let ts = taskSeq {
@@ -94,7 +94,7 @@ let ``CE task: Using! when type implements IAsyncDisposable`` () =
     |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using! when type implements IDisposable and IAsyncDisposable`` () =
+let ``CE taskSeq: Using! when type implements IDisposable and IAsyncDisposable`` () =
     let disposed = ref 0
 
     let ts = taskSeq {
