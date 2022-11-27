@@ -26,10 +26,10 @@ type private MultiDispose(disposed: int ref) =
     inherit OneGetter()
 
     interface IDisposable with
-        member _.Dispose() = disposed.Value <- !disposed + 1
+        member _.Dispose() = disposed.Value <- 1
 
     interface IAsyncDisposable with
-        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- !disposed + 1 })
+        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- -1 })
 
 let private check = TaskSeq.length >> Task.map (should equal 1)
 
@@ -67,7 +67,7 @@ let ``CE task: Using when type implements IDisposable and IAsyncDisposable`` () 
     }
 
     check ts
-    |> Task.map (fun _ -> disposed.Value |> should equal 1) // only one of the two dispose method should fire
+    |> Task.map (fun _ -> disposed.Value |> should equal -1) // should prefer IAsyncDisposable, which returns -1
 
 [<Fact>]
 let ``CE task: Using! when type implements IDisposable`` () =
@@ -103,4 +103,4 @@ let ``CE task: Using! when type implements IDisposable and IAsyncDisposable`` ()
     }
 
     check ts
-    |> Task.map (fun _ -> disposed.Value |> should equal 1) // only one of the two dispose method should fire
+    |> Task.map (fun _ -> disposed.Value |> should equal -1) // should prefer IAsyncDisposable, which returns -1

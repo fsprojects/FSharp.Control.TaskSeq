@@ -482,25 +482,17 @@ type TaskSeqBuilder() =
                 true)
         )
 
-    member inline this.Using(disp: #IDisposable, body: #IDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+    member inline this.Using(disp: #IAsyncDisposable, body: #IAsyncDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
 
         // A using statement is just a try/finally with the finally block disposing if non-null.
-        this.TryFinally(
+        this.TryFinallyAsync(
             (fun sm -> (body disp).Invoke(&sm)),
             (fun () ->
-                // yes, this can be null from time to time
                 if not (isNull (box disp)) then
-                    disp.Dispose())
+                    disp.DisposeAsync().AsTask()
+                else
+                    Task.CompletedTask)
         )
-
-    member inline this.For(sequence: seq<'TElement>, body: 'TElement -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        // A for loop is just a using statement on the sequence's enumerator...
-        this.Using(
-            sequence.GetEnumerator(),
-            // ... and its body is a while loop that advances the enumerator and runs the body on each element.
-            (fun e -> this.While((fun () -> e.MoveNext()), (fun sm -> (body e.Current).Invoke(&sm))))
-        )
-
 
     member inline _.Yield(v: 'T) : TaskSeqCode<'T> =
         TaskSeqCode<'T>(fun sm ->
@@ -512,8 +504,6 @@ type TaskSeqBuilder() =
             sm.Data.current <- ValueSome v
             sm.Data.awaiter <- null
             __stack_fin)
-
-    member inline this.YieldFrom(source: seq<'T>) : TaskSeqCode<'T> = this.For(source, (fun v -> this.Yield(v)))
 
     member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
         TaskSeqCode<'T>(fun sm ->
@@ -581,21 +571,26 @@ type TaskSeqBuilder() =
 module MediumPriority =
     type TaskSeqBuilder with
 
-        member inline this.Using
-            (
-                disp: #IAsyncDisposable,
-                body: #IAsyncDisposable -> TaskSeqCode<'T>
-            ) : TaskSeqCode<'T> =
+        member inline this.Using(disp: #IDisposable, body: #IDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
 
             // A using statement is just a try/finally with the finally block disposing if non-null.
-            this.TryFinallyAsync(
+            this.TryFinally(
                 (fun sm -> (body disp).Invoke(&sm)),
                 (fun () ->
+                    // yes, this can be null from time to time
                     if not (isNull (box disp)) then
-                        disp.DisposeAsync().AsTask()
-                    else
-                        Task.CompletedTask)
+                        disp.Dispose())
             )
+
+        member inline this.For(sequence: seq<'TElement>, body: 'TElement -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+            // A for loop is just a using statement on the sequence's enumerator...
+            this.Using(
+                sequence.GetEnumerator(),
+                // ... and its body is a while loop that advances the enumerator and runs the body on each element.
+                (fun e -> this.While((fun () -> e.MoveNext()), (fun sm -> (body e.Current).Invoke(&sm))))
+            )
+
+        member inline this.YieldFrom(source: seq<'T>) : TaskSeqCode<'T> = this.For(source, (fun v -> this.Yield(v)))
 
         member inline this.For
             (
