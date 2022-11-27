@@ -28,6 +28,16 @@ module ValueTask =
     /// Creates a ValueTask with an IValueTaskSource representing the operation
     let inline ofIValueTaskSource taskSource version = ValueTask<bool>(taskSource, version)
 
+    /// Creates a ValueTask form a Task<'T>
+    let inline ofTask (task: Task<'T>) = ValueTask<'T>(task)
+
+    /// Ignore a ValueTask<'T>, returns a non-generic ValueTask.
+    let inline ignore (vtask: ValueTask<'T>) =
+        if vtask.IsCompleted then
+            ValueTask()
+        else
+            ValueTask(vtask.AsTask())
+
 module Task =
     /// Convert an Async<'T> into a Task<'T>
     let inline ofAsync (async: Async<'T>) = task { return! async }
@@ -41,14 +51,8 @@ module Task =
     /// Convert a Task<'T> into an Async<'T>
     let inline toAsync (task: Task<'T>) = Async.AwaitTask task
 
-    /// Convert a Task<unit> into a Task
-    let inline toTask (task: Task<unit>) = task :> Task
-
     /// Convert a Task<'T> into a ValueTask<'T>
     let inline toValueTask (task: Task<'T>) = ValueTask<'T> task
-
-    /// Convert a Task<unit> into a non-generic ValueTask
-    let inline toIgnoreValueTask (task: Task<unit>) = ValueTask(task :> Task)
 
     /// <summary>
     /// Convert a ValueTask&lt;'T> to a Task&lt;'T>. To use a non-generic ValueTask,
@@ -56,7 +60,7 @@ module Task =
     /// </summary>
     let inline ofValueTask (valueTask: ValueTask<'T>) = task { return! valueTask }
 
-    /// Convert a Task<'T> into a Task, ignoring the result
+    /// Convert a Task<'T> into a non-generic Task, ignoring the result
     let inline ignore (task: Task<'T>) =
         TaskBuilder.task {
             let! _ = task

@@ -136,11 +136,13 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 
 [<AutoOpen>]
 module TestUtils =
+    /// Verifies that a task sequence is empty by converting to an array and checking emptiness.
     let verifyEmpty ts =
         ts
         |> TaskSeq.toArrayAsync
         |> Task.map (Array.isEmpty >> should be True)
 
+    /// Verifies that a task sequence contains integers 1-10, by converting to an array and comparing.
     let verify1To10 ts =
         ts
         |> TaskSeq.toArrayAsync
