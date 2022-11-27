@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <ApplicationIcon>..\..\assets\TaskSeq.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Computation expression 'taskSeq' for processing IAsyncEnumerable sequences and module functions</Title>
     <Version>$(Version)</Version>
@@ -21,48 +20,14 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
-    <PackageReleaseNotes>
-      Release notes:
-      0.3.0 (unreleased)
-       - adds support for 'for .. in ..' with task sequences in F# tasks and async, #75, #93 and #99 (with help from @theangrybyrd).
-       - adds TaskSeq.singleton, #90 (by @gusty).
-       - fixes overload resolution bug with 'use' and 'use!', #97 (thanks @peterfaria).
-       - improves TaskSeq.empty by not relying on resumable state, #89 (by @gusty).
-       - does not throw exceptions anymore for unequal lengths in TaskSeq.zip, fixes #32.
-      0.2.2
-       - removes TaskSeq.toSeqCachedAsync, which was incorrectly named. Use toSeq or toListAsync instead.
-       - renames TaskSeq.toSeqCached to TaskSeq.toSeq, which was its actual operational behavior.
-      0.2.1
-       - fixes an issue with ValueTask on completed iterations.
-       - adds `TaskSeq.except` and `TaskSeq.exceptOfSeq` async set operations.
-      0.2
-       - moved from NET 6.0, to NetStandard 2.1 for greater compatibility, no functional changes.
-       - move to minimally necessary FSharp.Core version: 6.0.2.
-       - updated readme with progress overview, corrected meta info, added release notes.
-      0.1.1
-       - updated meta info in nuget package and added readme.
-      0.1
-       - initial release
-       - implements taskSeq CE using resumable state machines
-          - with support for: yield, yield!, let, let!, while, for, try-with, try-finally, use, use!
-          - and: tasks and valuetasks
-       - adds toXXX / ofXXX functions
-       - adds map/mapi/fold/iter/iteri/collect etc with async variants
-       - adds find/pick/choose/filter etc with async variants and 'try' variants
-       - adds cast/concat/append/prepend/delay/exactlyOne
-       - adds empty/isEmpty
-       - adds findIndex/indexed/init/initInfinite
-       - adds head/last/tryHead/tryLast/tail/tryTail
-       - adds zip/length
-       
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>
     <PackageTags>taskseq'fsharp;f#;computation expression;IAsyncEnumerable;task;async;asyncseq;</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\assets\TaskSeq.ico" Link="TaskSeq.ico" />
+    <Content Include="..\..\release-notes.txt" Link="release-notes.txt" />
     <None Include="..\..\assets\taskseq-icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
