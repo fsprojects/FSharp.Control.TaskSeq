@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\build.cmd = ..\build.cmd
 		..\Directory.Build.props = ..\Directory.Build.props
 		..\README.md = ..\README.md
+		..\release-notes.txt = ..\release-notes.txt
 		..\Version.props = ..\Version.props
 	EndProjectSection
 EndProject
@@ -31,7 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{B198D5
 	ProjectSection(SolutionItems) = preProject
 		..\assets\nuget-package-readme.md = ..\assets\nuget-package-readme.md
 		..\assets\taskseq-icon.png = ..\assets\taskseq-icon.png
-		..\assets\TaskSeq.ico = ..\assets\TaskSeq.ico
 	EndProjectSection
 EndProject
 Global

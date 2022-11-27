@@ -5,11 +5,9 @@
 
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <ApplicationIcon>..\..\assets\TaskSeq.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\assets\TaskSeq.ico" Link="TaskSeq.ico" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Nunit.Extensions.fs" />
     <Compile Include="TestUtils.fs" />
