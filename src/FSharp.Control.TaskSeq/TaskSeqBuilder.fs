@@ -635,7 +635,7 @@ module HighPriority =
         //
         member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
             TaskSeqCode<'T>(fun sm ->
-                let mutable awaiter: TaskAwaiter<'TResult1> = task.GetAwaiter()
+                let mutable awaiter = task.GetAwaiter()
                 let mutable __stack_fin = true
 
                 Debug.logInfo "at Bind"
