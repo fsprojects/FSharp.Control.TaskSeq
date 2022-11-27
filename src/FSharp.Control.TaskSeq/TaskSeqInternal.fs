@@ -5,41 +5,36 @@ open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
-[<AutoOpen>]
-module ExtraTaskSeqOperators =
-    /// A TaskSeq workflow for IAsyncEnumerable<'T> types.
-    let taskSeq = TaskSeqBuilder()
-
 [<Struct>]
-type AsyncEnumStatus =
+type internal AsyncEnumStatus =
     | BeforeAll
     | WithCurrent
     | AfterAll
 
 [<Struct>]
-type Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
+type internal Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
     | CountableAction of countable_action: (int -> 'T -> 'U)
     | SimpleAction of simple_action: ('T -> 'U)
     | AsyncCountableAction of async_countable_action: (int -> 'T -> 'TaskU)
     | AsyncSimpleAction of async_simple_action: ('T -> 'TaskU)
 
 [<Struct>]
-type FolderAction<'T, 'State, 'TaskState when 'TaskState :> Task<'State>> =
+type internal FolderAction<'T, 'State, 'TaskState when 'TaskState :> Task<'State>> =
     | FolderAction of state_action: ('State -> 'T -> 'State)
     | AsyncFolderAction of async_state_action: ('State -> 'T -> 'TaskState)
 
 [<Struct>]
-type ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
+type internal ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
     | TryPick of try_pick: ('T -> 'U option)
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
 
 [<Struct>]
-type PredicateAction<'T, 'TaskBool when 'TaskBool :> Task<bool>> =
+type internal PredicateAction<'T, 'TaskBool when 'TaskBool :> Task<bool>> =
     | Predicate of try_filter: ('T -> bool)
     | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
 
 [<Struct>]
-type InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
+type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitAction of init_item: (int -> 'T)
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
