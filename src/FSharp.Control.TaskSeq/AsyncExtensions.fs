@@ -1,7 +1,5 @@
 namespace FSharp.Control
 
-open FSharp.Control.TaskSeqBuilders
-
 [<AutoOpen>]
 module AsyncExtensions =
 

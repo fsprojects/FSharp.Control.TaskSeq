@@ -1,4 +1,4 @@
-namespace FSharp.Control.TaskSeqBuilders
+namespace FSharp.Control
 
 open System.Diagnostics
 
@@ -47,13 +47,6 @@ module Internal = // cannot be marked with 'internal' scope
 
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
-type IPriority1 =
-    interface
-    end
-
-type IPriority2 =
-    interface
-    end
 
 [<NoComparison; NoEquality>]
 type TaskSeqStateMachineData<'T>() =
@@ -489,15 +482,7 @@ type TaskSeqBuilder() =
                 true)
         )
 
-    member inline this.Using
-        (
-            disp: #IDisposable,
-            body: #IDisposable -> TaskSeqCode<'T>,
-            ?priority: IPriority2
-        ) : TaskSeqCode<'T> =
-
-        // FIXME: what about priority?
-        ignore priority
+    member inline this.Using(disp: #IDisposable, body: #IDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
 
         // A using statement is just a try/finally with the finally block disposing if non-null.
         this.TryFinally(
@@ -508,26 +493,6 @@ type TaskSeqBuilder() =
                     disp.Dispose())
         )
 
-    member inline this.Using
-        (
-            disp: #IAsyncDisposable,
-            body: #IAsyncDisposable -> TaskSeqCode<'T>,
-            ?priority: IPriority1
-        ) : TaskSeqCode<'T> =
-
-        // FIXME: what about priorities?
-        ignore priority
-
-        // A using statement is just a try/finally with the finally block disposing if non-null.
-        this.TryFinallyAsync(
-            (fun sm -> (body disp).Invoke(&sm)),
-            (fun () ->
-                if not (isNull (box disp)) then
-                    disp.DisposeAsync().AsTask()
-                else
-                    Task.CompletedTask)
-        )
-
     member inline this.For(sequence: seq<'TElement>, body: 'TElement -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
         // A for loop is just a using statement on the sequence's enumerator...
         this.Using(
@@ -536,14 +501,6 @@ type TaskSeqBuilder() =
             (fun e -> this.While((fun () -> e.MoveNext()), (fun sm -> (body e.Current).Invoke(&sm))))
         )
 
-    member inline this.For(source: #IAsyncEnumerable<'TElement>, body: 'TElement -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
-        TaskSeqCode<'T>(fun sm ->
-            this
-                .Using(
-                    source.GetAsyncEnumerator(sm.Data.cancellationToken),
-                    (fun e -> this.WhileAsync((fun () -> e.MoveNextAsync()), (fun sm -> (body e.Current).Invoke(&sm))))
-                )
-                .Invoke(&sm))
 
     member inline _.Yield(v: 'T) : TaskSeqCode<'T> =
         TaskSeqCode<'T>(fun sm ->
@@ -555,9 +512,6 @@ type TaskSeqBuilder() =
             sm.Data.current <- ValueSome v
             sm.Data.awaiter <- null
             __stack_fin)
-
-    member inline this.YieldFrom(source: IAsyncEnumerable<'T>) : TaskSeqCode<'T> =
-        this.For(source, (fun v -> this.Yield(v)))
 
     member inline this.YieldFrom(source: seq<'T>) : TaskSeqCode<'T> = this.For(source, (fun v -> this.Yield(v)))
 
@@ -610,3 +564,52 @@ type TaskSeqBuilder() =
                 sm.Data.awaiter <- awaiter
                 sm.Data.current <- ValueNone
                 false)
+
+//
+// These "modules of priority" allow for an indecisive F# to resolve
+// the proper overload if a single type implements more than one
+// interface. For instance, a type implementing 'IDisposable' and
+// 'IAsyncDisposable'.
+//
+// See for more info tasks.fs in F# Core.
+//
+// This section also includes the dependencies of such overloads
+// (like For depending on Using etc).
+//
+
+[<AutoOpen>]
+module MediumPriority =
+    type TaskSeqBuilder with
+
+        member inline this.Using
+            (
+                disp: #IAsyncDisposable,
+                body: #IAsyncDisposable -> TaskSeqCode<'T>
+            ) : TaskSeqCode<'T> =
+
+            // A using statement is just a try/finally with the finally block disposing if non-null.
+            this.TryFinallyAsync(
+                (fun sm -> (body disp).Invoke(&sm)),
+                (fun () ->
+                    if not (isNull (box disp)) then
+                        disp.DisposeAsync().AsTask()
+                    else
+                        Task.CompletedTask)
+            )
+
+        member inline this.For
+            (
+                source: #IAsyncEnumerable<'TElement>,
+                body: 'TElement -> TaskSeqCode<'T>
+            ) : TaskSeqCode<'T> =
+            TaskSeqCode<'T>(fun sm ->
+                this
+                    .Using(
+                        source.GetAsyncEnumerator(sm.Data.cancellationToken),
+                        (fun e ->
+                            this.WhileAsync((fun () -> e.MoveNextAsync()), (fun sm -> (body e.Current).Invoke(&sm))))
+                    )
+                    .Invoke(&sm))
+
+        member inline this.YieldFrom(source: IAsyncEnumerable<'T>) : TaskSeqCode<'T> =
+            this.For(source, (fun v -> this.Yield(v)))

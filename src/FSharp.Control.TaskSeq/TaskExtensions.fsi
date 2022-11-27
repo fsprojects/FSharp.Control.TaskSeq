@@ -4,7 +4,6 @@ namespace FSharp.Control
 
 [<AutoOpen>]
 module TaskExtensions =
-    open FSharp.Control.TaskSeqBuilders
 
     type TaskBuilder with
 

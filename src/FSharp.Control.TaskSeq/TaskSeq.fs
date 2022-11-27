@@ -7,8 +7,6 @@ open System.Threading.Tasks
 #nowarn "57"
 
 module TaskSeq =
-    // F# BUG: the following module is 'AutoOpen' and this isn't needed in the Tests project. Why do we need to open it?
-    open FSharp.Control.TaskSeqBuilders
 
     // Just for convenience
     module Internal = TaskSeqInternal

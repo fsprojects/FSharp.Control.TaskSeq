@@ -5,7 +5,6 @@ namespace FSharp.Control
 module TaskSeq =
     open System.Collections.Generic
     open System.Threading.Tasks
-    open FSharp.Control.TaskSeqBuilders
 
     /// Initialize an empty taskSeq.
     val empty<'T> : taskSeq<'T>
