@@ -33,7 +33,11 @@ module ValueTask =
 
     /// Ignore a ValueTask<'T>, returns a non-generic ValueTask.
     let inline ignore (vtask: ValueTask<'T>) =
-        if vtask.IsCompleted then
+        // this implementation follows Stephen Toub's advice, see:
+        // https://github.com/dotnet/runtime/issues/31503#issuecomment-554415966
+        if vtask.IsCompletedSuccessfully then
+            // ensure any side effect executes
+            vtask.Result |> ignore
             ValueTask()
         else
             ValueTask(vtask.AsTask())
@@ -63,6 +67,7 @@ module Task =
     /// Convert a Task<'T> into a non-generic Task, ignoring the result
     let inline ignore (task: Task<'T>) =
         TaskBuilder.task {
+            // ensure the task is awaited
             let! _ = task
             return ()
         }
