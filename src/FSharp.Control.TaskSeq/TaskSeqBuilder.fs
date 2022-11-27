@@ -40,7 +40,7 @@ module Internal = // cannot be marked with 'internal' scope
     /// Call MoveNext on an IAsyncStateMachine by reference
     let inline moveNextRef (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
 
-    // F# requires that we implement interfaces even on an abstract class
+    /// F# requires that we implement interfaces even on an abstract class
     let inline raiseNotImpl () =
         NotImplementedException "Abstract Class: method or property not implemented"
         |> raise
@@ -660,3 +660,8 @@ module HighPriority =
                     sm.Data.awaiter <- awaiter
                     sm.Data.current <- ValueNone
                     false)
+
+[<AutoOpen>]
+module TaskSeqBuilder =
+    /// Builds an asynchronous task sequence based on IAsyncEnumerable<'T> using computation expression syntax.
+    let taskSeq = TaskSeqBuilder()

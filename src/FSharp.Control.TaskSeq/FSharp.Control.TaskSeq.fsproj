@@ -26,6 +26,15 @@ Generates optimized IL code through the new resumable state machines, and comes 
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OtherFlags></OtherFlags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OtherFlags></OtherFlags>
+    <Tailcalls>True</Tailcalls>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="..\..\release-notes.txt" Link="release-notes.txt" />
     <None Include="..\..\assets\taskseq-icon.png">
@@ -33,7 +42,11 @@ Generates optimized IL code through the new resumable state machines, and comes 
       <PackagePath>\</PackagePath>
     </None>
     <None Include="..\..\assets\nuget-package-readme.md" Pack="true" PackagePath="" />
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="DebugUtils.fs" />
+    <Compile Include="Utils.fsi" />
     <Compile Include="Utils.fs" />
+    <Compile Include="TaskSeqBuilder.fsi" />
     <Compile Include="TaskSeqBuilder.fs" />
     <Compile Include="TaskSeqInternal.fs" />
     <Compile Include="TaskSeq.fsi" />
