@@ -10,88 +10,97 @@ open Xunit
 type private OneGetter() =
     member _.Get1() = 1
 
-type private Disposable() =
+type private Disposable(disposed: bool ref) =
     inherit OneGetter()
 
     interface IDisposable with
-        member _.Dispose() = ()
+        member _.Dispose() = disposed.Value <- true
 
-type private AsyncDisposable() =
+type private AsyncDisposable(disposed: bool ref) =
     inherit OneGetter()
 
     interface IAsyncDisposable with
-        member _.DisposeAsync() = ValueTask()
+        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- true })
 
-type private MultiDispose() =
+type private MultiDispose(disposed: int ref) =
     inherit OneGetter()
 
     interface IDisposable with
-        member _.Dispose() =
-            ()
+        member _.Dispose() = disposed.Value <- !disposed + 1
 
     interface IAsyncDisposable with
-        member _.DisposeAsync() =
-            ValueTask()
+        member _.DisposeAsync() = ValueTask(task { do disposed.Value <- !disposed + 1 })
 
-let private check ts = task {
-    let! length = ts |> TaskSeq.length
-    length |> should equal 1
-}
+let private check = TaskSeq.length >> Task.map (should equal 1)
 
 [<Fact>]
-let ``CE task: Using when type implements IDisposable``() =
-    let ts = taskSeq {
-        use x = new Disposable()
+let ``CE task: Using when type implements IDisposable`` () =
+    let disposed = ref false
 
+    let ts = taskSeq {
+        use x = new Disposable(disposed)
         yield x.Get1()
     }
 
     check ts
+    |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using when type implements IAsyncDisposable``() =
+let ``CE task: Using when type implements IAsyncDisposable`` () =
+    let disposed = ref false
+
     let ts = taskSeq {
-        use x = AsyncDisposable()
+        use x = AsyncDisposable(disposed)
         yield x.Get1()
     }
 
     check ts
-
+    |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using when type implements IDisposable and IAsyncDisposable``() =
+let ``CE task: Using when type implements IDisposable and IAsyncDisposable`` () =
+    let disposed = ref 0
+
     let ts = taskSeq {
-        use x = new MultiDispose() // Fails to compile
+        use x = new MultiDispose(disposed) // Used to fail to compile (see #97)
         yield x.Get1()
     }
 
     check ts
+    |> Task.map (fun _ -> disposed.Value |> should equal 1) // only one of the two dispose method should fire
 
 [<Fact>]
-let ``CE task: Using! when type implements IDisposable``() =
+let ``CE task: Using! when type implements IDisposable`` () =
+    let disposed = ref false
+
     let ts = taskSeq {
-        use! x = task { return new Disposable() }
+        use! x = task { return new Disposable(disposed) }
         yield x.Get1()
     }
 
     check ts
-
+    |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using! when type implements IAsyncDisposable``() =
+let ``CE task: Using! when type implements IAsyncDisposable`` () =
+    let disposed = ref false
+
     let ts = taskSeq {
-        use! x = task { return AsyncDisposable() }
+        use! x = task { return AsyncDisposable(disposed) }
         yield x.Get1()
     }
 
     check ts
-
+    |> Task.map (fun _ -> disposed.Value |> should be True)
 
 [<Fact>]
-let ``CE task: Using! when type implements IDisposable and IAsyncDisposable``() =
+let ``CE task: Using! when type implements IDisposable and IAsyncDisposable`` () =
+    let disposed = ref 0
+
     let ts = taskSeq {
-        use! x = task { return new MultiDispose() } // Fails to compile
+        use! x = task { return new MultiDispose(disposed) } // Used to fail to compile (see #97)
         yield x.Get1()
     }
 
     check ts
+    |> Task.map (fun _ -> disposed.Value |> should equal 1) // only one of the two dispose method should fire
