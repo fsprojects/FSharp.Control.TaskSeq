@@ -44,3 +44,15 @@ let ``CE taskSeq: use 'do!' with a non-generic task`` () =
     taskSeq { do! (task { do value <- value + 1 }) |> Task.ignore }
     |> verifyEmpty
     |> Task.map (fun _ -> value |> should equal 1)
+
+[<Fact>]
+let ``CE taskSeq: use 'do!' with a task-delay`` () =
+    let mutable value = 0
+
+    taskSeq {
+        do value <- value + 1
+        do! Task.Delay 50
+        do value <- value + 1
+    }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 2)
