@@ -97,8 +97,6 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
 and TaskSeqCode<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
-and TaskSeqResumptionFunc<'T> = ResumptionFunc<TaskSeqStateMachineData<'T>>
-and TaskSeqResumptionDynamicInfo<'T> = ResumptionDynamicInfo<TaskSeqStateMachineData<'T>>
 
 [<Class>]
 type TaskSeqBuilder =
