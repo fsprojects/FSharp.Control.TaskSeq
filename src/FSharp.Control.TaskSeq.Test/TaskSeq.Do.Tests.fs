@@ -11,38 +11,36 @@ open FSharp.Control
 let ``CE taskSeq: use 'do'`` () =
     let mutable value = 0
 
-    taskSeq { do value <- value + 1 }
-
-    |> verifyEmpty
+    taskSeq { do value <- value + 1 } |> verifyEmpty
 
 [<Fact>]
 let ``CE taskSeq: use 'do!' with a task<unit>`` () =
     let mutable value = 0
 
     taskSeq { do! task { do value <- value + 1 } }
-
     |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 1)
 
-//[<Fact>]
-//let ``CE taskSeq: use 'do!' with a valuetask<unit>`` () =
-//    let mutable value = 0
+[<Fact>]
+let ``CE taskSeq: use 'do!' with a valuetask<unit>`` () =
+    let mutable value = 0
 
-//    taskSeq { do! ValueTask.ofIValueTaskSource (task { do value <- value + 1 }) }
+    taskSeq { do! ValueTask.ofTask (task { do value <- value + 1 }) }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 1)
 
-//    |> verifyEmpty
+[<Fact>]
+let ``CE taskSeq: use 'do!' with a non-generic valuetask`` () =
+    let mutable value = 0
 
-//[<Fact>]
-//let ``CE taskSeq: use 'do!' with a non-generic valuetask`` () =
-//    let mutable value = 0
+    taskSeq { do! ValueTask(task { do value <- value + 1 }) }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 1)
 
-//    taskSeq { do! ValueTask(task { do value <- value + 1 }) }
+[<Fact>]
+let ``CE taskSeq: use 'do!' with a non-generic task`` () =
+    let mutable value = 0
 
-//    |> verifyEmpty
-
-//[<Fact>]
-//let ``CE taskSeq: use 'do!' with a non-generic task`` () =
-//    let mutable value = 0
-
-//    taskSeq { do! (task { do value <- value + 1 }) |> Task.ignore }
-
-//    |> verifyEmpty
+    taskSeq { do! (task { do value <- value + 1 }) |> Task.ignore }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 1)
