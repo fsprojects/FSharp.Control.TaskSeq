@@ -7,8 +7,6 @@ open System.Threading.Tasks
 open Microsoft.FSharp.Core.CompilerServices
 open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 
-open FSharp.Control.TaskSeqBuilders
-
 #nowarn "57"
 #nowarn "1204"
 #nowarn "3513"
