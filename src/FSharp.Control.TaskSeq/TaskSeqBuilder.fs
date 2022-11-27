@@ -505,56 +505,6 @@ type TaskSeqBuilder() =
             sm.Data.awaiter <- null
             __stack_fin)
 
-    member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
-        TaskSeqCode<'T>(fun sm ->
-            let mutable awaiter = task.GetAwaiter()
-            let mutable __stack_fin = true
-
-            Debug.logInfo "at Bind"
-
-            if not awaiter.IsCompleted then
-                // This will yield with __stack_fin2 = false
-                // This will resume with __stack_fin2 = true
-                let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
-                __stack_fin <- __stack_fin2
-
-            Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
-            Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
-
-            if __stack_fin then
-                let result = awaiter.GetResult()
-                (continuation result).Invoke(&sm)
-
-            else
-                Debug.logInfo "at Bind: calling AwaitUnsafeOnCompleted"
-
-                sm.Data.awaiter <- awaiter
-                sm.Data.current <- ValueNone
-                false)
-
-    member inline _.Bind(task: ValueTask<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
-        TaskSeqCode<'T>(fun sm ->
-            let mutable awaiter = task.GetAwaiter()
-            let mutable __stack_fin = true
-
-            Debug.logInfo "at BindV"
-
-            if not awaiter.IsCompleted then
-                // This will yield with __stack_fin2 = false
-                // This will resume with __stack_fin2 = true
-                let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
-                __stack_fin <- __stack_fin2
-
-            if __stack_fin then
-                let result = awaiter.GetResult()
-                (continuation result).Invoke(&sm)
-            else
-                Debug.logInfo "at BindV: calling AwaitUnsafeOnCompleted"
-
-                sm.Data.awaiter <- awaiter
-                sm.Data.current <- ValueNone
-                false)
-
 //
 // These "modules of priority" allow for an indecisive F# to resolve
 // the proper overload if a single type implements more than one
@@ -566,6 +516,58 @@ type TaskSeqBuilder() =
 // This section also includes the dependencies of such overloads
 // (like For depending on Using etc).
 //
+
+[<AutoOpen>]
+module LowPriority =
+    type TaskSeqBuilder with
+
+        //
+        // Note: we cannot place _.Bind directly on the type, as the NoEagerXXX attribute
+        // has no effect, and each use of `do!` will give an overload error (because the
+        // `TaskLike` type and the `Task<_>` type are interchangeable).
+        //
+        // However, we cannot unify these two methods, because Task<_> inherits from Task (non-generic)
+        // and we need a way to distinguish these two methods.
+        //
+
+        [<NoEagerConstraintApplication>]
+        member inline _.Bind< ^TaskLike, 'TResult1, 'TResult2, ^Awaiter, 'TOverall
+            when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
+            and ^Awaiter :> ICriticalNotifyCompletion
+            and ^Awaiter: (member get_IsCompleted: unit -> bool)
+            and ^Awaiter: (member GetResult: unit -> 'TResult1)>
+            (
+                task: ^TaskLike,
+                continuation: ('TResult1 -> TaskSeqCode<'TResult2>)
+            ) : TaskSeqCode<'TResult2> =
+
+            TaskSeqCode<'TResult2>(fun sm ->
+                let mutable awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
+                let mutable __stack_fin = true
+
+                Debug.logInfo "at TaskLike bind!"
+
+                if not (^Awaiter: (member get_IsCompleted: unit -> bool) (awaiter)) then
+                    // This will yield with __stack_fin2 = false
+                    // This will resume with __stack_fin2 = true
+                    let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
+                    __stack_fin <- __stack_fin2
+
+                Debug.logInfo ("at TaskLike bind!: with __stack_fin = ", __stack_fin)
+                Debug.logInfo ("at TaskLike bind!: this.completed = ", sm.Data.completed)
+
+                if __stack_fin then
+                    Debug.logInfo "at TaskLike bind!: finished awaiting, calling continuation"
+                    let result = (^Awaiter: (member GetResult: unit -> 'TResult1) (awaiter))
+                    (continuation result).Invoke(&sm)
+
+                else
+                    Debug.logInfo "at TaskLike bind!: await further"
+
+                    sm.Data.awaiter <- awaiter
+                    sm.Data.current <- ValueNone
+                    false)
+
 
 [<AutoOpen>]
 module MediumPriority =
@@ -608,3 +610,62 @@ module MediumPriority =
 
         member inline this.YieldFrom(source: IAsyncEnumerable<'T>) : TaskSeqCode<'T> =
             this.For(source, (fun v -> this.Yield(v)))
+
+[<AutoOpen>]
+module HighPriority =
+    type TaskSeqBuilder with
+
+        member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
+            TaskSeqCode<'T>(fun sm ->
+                let mutable awaiter = task.GetAwaiter()
+                let mutable __stack_fin = true
+
+                Debug.logInfo "at Bind"
+
+                if not awaiter.IsCompleted then
+                    // This will yield with __stack_fin2 = false
+                    // This will resume with __stack_fin2 = true
+                    let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
+                    __stack_fin <- __stack_fin2
+
+                Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
+                Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
+
+                if __stack_fin then
+                    Debug.logInfo "at Bind: finished awaiting, calling continuation"
+                    let result = awaiter.GetResult()
+                    (continuation result).Invoke(&sm)
+
+                else
+                    Debug.logInfo "at Bind: await further"
+
+                    sm.Data.awaiter <- awaiter
+                    sm.Data.current <- ValueNone
+                    false)
+
+        member inline _.Bind
+            (
+                task: ValueTask<'TResult1>,
+                continuation: ('TResult1 -> TaskSeqCode<'T>)
+            ) : TaskSeqCode<'T> =
+            TaskSeqCode<'T>(fun sm ->
+                let mutable awaiter = task.GetAwaiter()
+                let mutable __stack_fin = true
+
+                Debug.logInfo "at BindV"
+
+                if not awaiter.IsCompleted then
+                    // This will yield with __stack_fin2 = false
+                    // This will resume with __stack_fin2 = true
+                    let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
+                    __stack_fin <- __stack_fin2
+
+                if __stack_fin then
+                    let result = awaiter.GetResult()
+                    (continuation result).Invoke(&sm)
+                else
+                    Debug.logInfo "at BindV: calling AwaitUnsafeOnCompleted"
+
+                    sm.Data.awaiter <- awaiter
+                    sm.Data.current <- ValueNone
+                    false)
