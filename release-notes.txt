@@ -2,6 +2,7 @@
 Release notes:
 
 0.3.0 (unreleased)
+    - internal renames, improved doc comments, signature files for complex types, hide internal-only types, #111.
     - adds support for static TaskLike, allowing the same let! and do! overloads that F# task supports, fixes #110.
     - implements 'do!' for non-generic Task like with Task.Delay, fixes #43.
     - adds support for 'for .. in ..' with task sequences in F# tasks and async, #75, #93 and #99 (with help from @theangrybyrd).
