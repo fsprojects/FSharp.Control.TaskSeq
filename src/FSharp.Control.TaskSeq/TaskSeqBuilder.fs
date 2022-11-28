@@ -19,8 +19,6 @@ open FSharp.Control
 [<AutoOpen>]
 module Internal = // cannot be marked with 'internal' scope
 
-    /// Setting from environment variable TASKSEQ_LOG_VERBOSE, which,
-    /// when set, enables (very) verbose printing of flow and state
     let initVerbose () =
         try
             match Environment.GetEnvironmentVariable "TASKSEQ_LOG_VERBOSE" with
@@ -37,10 +35,8 @@ module Internal = // cannot be marked with 'internal' scope
             false
 
 
-    /// Call MoveNext on an IAsyncStateMachine by reference
     let inline moveNextRef (x: byref<'T> when 'T :> IAsyncStateMachine) = x.MoveNext()
 
-    /// F# requires that we implement interfaces even on an abstract class
     let inline raiseNotImpl () =
         NotImplementedException "Abstract Class: method or property not implemented"
         |> raise
@@ -79,7 +75,7 @@ type TaskSeqStateMachineData<'T>() =
 
     /// A reference to 'self', because otherwise we can't use byref in the resumable code.
     [<DefaultValue(false)>]
-    val mutable boxedSelf: TaskSeq<'T>
+    val mutable boxedSelf: TaskSeqBase<'T>
 
     member data.PushDispose(disposer: unit -> Task) =
         if isNull data.disposalStack then
@@ -91,7 +87,7 @@ type TaskSeqStateMachineData<'T>() =
         if not (isNull data.disposalStack) then
             data.disposalStack.RemoveAt(data.disposalStack.Count - 1)
 
-and [<AbstractClass; NoEquality; NoComparison>] TaskSeq<'T>() =
+and [<AbstractClass; NoEquality; NoComparison>] TaskSeqBase<'T>() =
 
     abstract MoveNextAsyncResult: unit -> ValueTask<bool>
 
@@ -119,7 +115,7 @@ and [<AbstractClass; NoEquality; NoComparison>] TaskSeq<'T>() =
 
 and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     when 'Machine :> IAsyncStateMachine and 'Machine :> IResumableStateMachine<TaskSeqStateMachineData<'T>>>() =
-    inherit TaskSeq<'T>()
+    inherit TaskSeqBase<'T>()
     let initialThreadId = Environment.CurrentManagedThreadId
 
     /// Shadows the initial machine, just after it is initialized by the F# compiler-generated state.
@@ -304,16 +300,16 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
             // assume it's a possibly new, not yet supported case, treat as default
             ValueTask.ofIValueTaskSource this version
 
-and TaskSeqCode<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
+and ResumableTSC<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
 and TaskSeqResumptionFunc<'T> = ResumptionFunc<TaskSeqStateMachineData<'T>>
 and TaskSeqResumptionDynamicInfo<'T> = ResumptionDynamicInfo<TaskSeqStateMachineData<'T>>
 
 type TaskSeqBuilder() =
 
-    member inline _.Delay(f: unit -> TaskSeqCode<'T>) : TaskSeqCode<'T> = TaskSeqCode<'T>(fun sm -> f().Invoke(&sm))
+    member inline _.Delay(f: unit -> ResumableTSC<'T>) : ResumableTSC<'T> = ResumableTSC<'T>(fun sm -> f().Invoke(&sm))
 
-    member inline _.Run(code: TaskSeqCode<'T>) : IAsyncEnumerable<'T> =
+    member inline _.Run(code: ResumableTSC<'T>) : IAsyncEnumerable<'T> =
         if __useResumableCode then
             // This is the static implementation.  A new struct type is created.
             __stateMachine<TaskSeqStateMachineData<'T>, IAsyncEnumerable<'T>>
@@ -386,11 +382,11 @@ type TaskSeqBuilder() =
             |> raise
 
 
-    member inline _.Zero() : TaskSeqCode<'T> =
+    member inline _.Zero() : ResumableTSC<'T> =
         Debug.logInfo "at Zero()"
         ResumableCode.Zero()
 
-    member inline _.Combine(task1: TaskSeqCode<'T>, task2: TaskSeqCode<'T>) : TaskSeqCode<'T> =
+    member inline _.Combine(task1: ResumableTSC<'T>, task2: ResumableTSC<'T>) : ResumableTSC<'T> =
         Debug.logInfo "at Combine(.., ..)"
 
         ResumableCode.Combine(task1, task2)
@@ -399,8 +395,8 @@ type TaskSeqBuilder() =
     member inline _.WhileAsync
         (
             [<InlineIfLambda>] condition: unit -> ValueTask<bool>,
-            body: TaskSeqCode<'T>
-        ) : TaskSeqCode<'T> =
+            body: ResumableTSC<'T>
+        ) : ResumableTSC<'T> =
         let mutable condition_res = true
 
         ResumableCode.While(
@@ -436,17 +432,17 @@ type TaskSeqBuilder() =
                     false)
         )
 
-    member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: TaskSeqCode<'T>) : TaskSeqCode<'T> =
+    member inline b.While([<InlineIfLambda>] condition: unit -> bool, body: ResumableTSC<'T>) : ResumableTSC<'T> =
         Debug.logInfo "at While(...)"
         ResumableCode.While(condition, body)
 
-    member inline _.TryWith(body: TaskSeqCode<'T>, catch: exn -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+    member inline _.TryWith(body: ResumableTSC<'T>, catch: exn -> ResumableTSC<'T>) : ResumableTSC<'T> =
         ResumableCode.TryWith(body, catch)
 
-    member inline _.TryFinallyAsync(body: TaskSeqCode<'T>, compensation: unit -> Task) : TaskSeqCode<'T> =
+    member inline _.TryFinallyAsync(body: ResumableTSC<'T>, compensation: unit -> Task) : ResumableTSC<'T> =
         ResumableCode.TryFinallyAsync(
 
-            TaskSeqCode<'T>(fun sm ->
+            ResumableTSC<'T>(fun sm ->
                 sm.Data.PushDispose(fun () -> compensation ())
                 body.Invoke(&sm)),
 
@@ -467,9 +463,9 @@ type TaskSeqBuilder() =
                 __stack_condition_fin)
         )
 
-    member inline _.TryFinally(body: TaskSeqCode<'T>, compensation: unit -> unit) : TaskSeqCode<'T> =
+    member inline _.TryFinally(body: ResumableTSC<'T>, compensation: unit -> unit) : ResumableTSC<'T> =
         ResumableCode.TryFinally(
-            TaskSeqCode<'T>(fun sm ->
+            ResumableTSC<'T>(fun sm ->
                 sm.Data.PushDispose(fun () ->
                     compensation ()
                     Task.CompletedTask)
@@ -482,7 +478,7 @@ type TaskSeqBuilder() =
                 true)
         )
 
-    member inline this.Using(disp: #IAsyncDisposable, body: #IAsyncDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+    member inline this.Using(disp: #IAsyncDisposable, body: #IAsyncDisposable -> ResumableTSC<'T>) : ResumableTSC<'T> =
 
         // A using statement is just a try/finally with the finally block disposing if non-null.
         this.TryFinallyAsync(
@@ -494,8 +490,8 @@ type TaskSeqBuilder() =
                     Task.CompletedTask)
         )
 
-    member inline _.Yield(v: 'T) : TaskSeqCode<'T> =
-        TaskSeqCode<'T>(fun sm ->
+    member inline _.Yield(v: 'T) : ResumableTSC<'T> =
+        ResumableTSC<'T>(fun sm ->
             // This will yield with __stack_fin = false
             // This will resume with __stack_fin = true
             Debug.logInfo "at Yield"
@@ -546,10 +542,10 @@ module LowPriority =
             and ^Awaiter: (member GetResult: unit -> 'TResult1)>
             (
                 task: ^TaskLike,
-                continuation: ('TResult1 -> TaskSeqCode<'TResult2>)
-            ) : TaskSeqCode<'TResult2> =
+                continuation: ('TResult1 -> ResumableTSC<'TResult2>)
+            ) : ResumableTSC<'TResult2> =
 
-            TaskSeqCode<'TResult2>(fun sm ->
+            ResumableTSC<'TResult2>(fun sm ->
                 let mutable awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
                 let mutable __stack_fin = true
 
@@ -581,7 +577,7 @@ module LowPriority =
 module MediumPriority =
     type TaskSeqBuilder with
 
-        member inline this.Using(disp: #IDisposable, body: #IDisposable -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+        member inline this.Using(disp: #IDisposable, body: #IDisposable -> ResumableTSC<'T>) : ResumableTSC<'T> =
 
             // A using statement is just a try/finally with the finally block disposing if non-null.
             this.TryFinally(
@@ -592,7 +588,7 @@ module MediumPriority =
                         disp.Dispose())
             )
 
-        member inline this.For(sequence: seq<'TElement>, body: 'TElement -> TaskSeqCode<'T>) : TaskSeqCode<'T> =
+        member inline this.For(sequence: seq<'TElement>, body: 'TElement -> ResumableTSC<'T>) : ResumableTSC<'T> =
             // A for loop is just a using statement on the sequence's enumerator...
             this.Using(
                 sequence.GetEnumerator(),
@@ -600,14 +596,14 @@ module MediumPriority =
                 (fun e -> this.While((fun () -> e.MoveNext()), (fun sm -> (body e.Current).Invoke(&sm))))
             )
 
-        member inline this.YieldFrom(source: seq<'T>) : TaskSeqCode<'T> = this.For(source, (fun v -> this.Yield(v)))
+        member inline this.YieldFrom(source: seq<'T>) : ResumableTSC<'T> = this.For(source, (fun v -> this.Yield(v)))
 
         member inline this.For
             (
                 source: #IAsyncEnumerable<'TElement>,
-                body: 'TElement -> TaskSeqCode<'T>
-            ) : TaskSeqCode<'T> =
-            TaskSeqCode<'T>(fun sm ->
+                body: 'TElement -> ResumableTSC<'T>
+            ) : ResumableTSC<'T> =
+            ResumableTSC<'T>(fun sm ->
                 this
                     .Using(
                         source.GetAsyncEnumerator(sm.Data.cancellationToken),
@@ -616,7 +612,7 @@ module MediumPriority =
                     )
                     .Invoke(&sm))
 
-        member inline this.YieldFrom(source: IAsyncEnumerable<'T>) : TaskSeqCode<'T> =
+        member inline this.YieldFrom(source: IAsyncEnumerable<'T>) : ResumableTSC<'T> =
             this.For(source, (fun v -> this.Yield(v)))
 
 [<AutoOpen>]
@@ -633,8 +629,8 @@ module HighPriority =
         //  - In contrast, ValueTask<_> *does have* GetResult() -> 'TResult
         //  - Conclusion: we do not need an extra overload anymore for ValueTask
         //
-        member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> TaskSeqCode<'T>)) : TaskSeqCode<'T> =
-            TaskSeqCode<'T>(fun sm ->
+        member inline _.Bind(task: Task<'TResult1>, continuation: ('TResult1 -> ResumableTSC<'T>)) : ResumableTSC<'T> =
+            ResumableTSC<'T>(fun sm ->
                 let mutable awaiter = task.GetAwaiter()
                 let mutable __stack_fin = true
 
