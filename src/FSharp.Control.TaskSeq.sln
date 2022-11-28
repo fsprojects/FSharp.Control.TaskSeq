@@ -34,6 +34,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{B198D5
 		..\assets\taskseq-icon.png = ..\assets\taskseq-icon.png
 	EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharp.Control.TaskSeq.SmokeTests", "FSharp.Control.TaskSeq.SmokeTests\FSharp.Control.TaskSeq.SmokeTests.fsproj", "{784DAB92-C61A-4A00-890B-E6E3B1805473}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{06CA2C7E-04DA-4A85-BB8E-4D94BD67AEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06CA2C7E-04DA-4A85-BB8E-4D94BD67AEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06CA2C7E-04DA-4A85-BB8E-4D94BD67AEB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{784DAB92-C61A-4A00-890B-E6E3B1805473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{784DAB92-C61A-4A00-890B-E6E3B1805473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{784DAB92-C61A-4A00-890B-E6E3B1805473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{784DAB92-C61A-4A00-890B-E6E3B1805473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
