@@ -657,6 +657,42 @@ module HighPriority =
                     sm.Data.current <- ValueNone
                     false)
 
+        member inline _.Bind
+            (
+                asyncSource: Async<'TResult1>,
+                continuation: ('TResult1 -> ResumableTSC<'T>)
+            ) : ResumableTSC<'T> =
+            ResumableTSC<'T>(fun sm ->
+                let mutable awaiter =
+                    Async
+                        .StartAsTask(asyncSource, cancellationToken = sm.Data.cancellationToken)
+                        .GetAwaiter()
+
+                let mutable __stack_fin = true
+
+                Debug.logInfo "at Bind"
+
+                if not awaiter.IsCompleted then
+                    // This will yield with __stack_fin2 = false
+                    // This will resume with __stack_fin2 = true
+                    let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
+                    __stack_fin <- __stack_fin2
+
+                Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
+                Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
+
+                if __stack_fin then
+                    Debug.logInfo "at Bind: finished awaiting, calling continuation"
+                    let result = awaiter.GetResult()
+                    (continuation result).Invoke(&sm)
+
+                else
+                    Debug.logInfo "at Bind: await further"
+
+                    sm.Data.awaiter <- awaiter
+                    sm.Data.current <- ValueNone
+                    false)
+
 [<AutoOpen>]
 module TaskSeqBuilder =
     /// Builds an asynchronous task sequence based on IAsyncEnumerable<'T> using computation expression syntax.
