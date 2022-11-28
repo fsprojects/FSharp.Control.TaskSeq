@@ -191,3 +191,5 @@ module HighPriority =
     type TaskSeqBuilder with
 
         member inline Bind: task: Task<'TResult1> * continuation: ('TResult1 -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        member inline Bind:
+            asyncSource: Async<'TResult1> * continuation: ('TResult1 -> ResumableTSC<'T>) -> ResumableTSC<'T>
