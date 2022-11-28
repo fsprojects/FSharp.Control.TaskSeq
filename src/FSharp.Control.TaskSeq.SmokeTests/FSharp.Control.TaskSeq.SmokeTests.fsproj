@@ -8,14 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\Abel\.nuget\packages\fsharp.control.taskseq\0.3.0\contentFiles\any\netstandard2.1\release-notes.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="SmokeTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.2.2" />
+    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.3.0" />
+    <PackageReference Include="FsUnit.xUnit" Version="5.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
