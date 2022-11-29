@@ -51,7 +51,7 @@ let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsyn
 // FIXED!
 // Previously: shaky test. Appears that this occasionally raises a NullReferenceException,
 // esp when there's stress (i.e. run all at the same time).
-// See https://github.com/abelbraaksma/TaskSeq/pull/54
+// See https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/54
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
@@ -68,7 +68,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync multiple times`` vari
 // This is the simpler version of the above test.
 [<Fact>]
 let ``BUG #54 CE with empty taskSeq and Delay, crash after GetAsyncEnumerator + MoveNextAsync 2x`` () = task {
-    // See: https://github.com/abelbraaksma/TaskSeq/pull/54
+    // See: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/54
     let tskSeq = taskSeq { do! Task.Delay(50) |> Task.ofTask }
 
     use enumerator1 = tskSeq.GetAsyncEnumerator()

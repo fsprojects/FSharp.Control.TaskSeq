@@ -406,7 +406,7 @@ Command modifiers, like `release` and `debug`, can be specified with `-` or `/` 
 build help
 ```
 
-For more info, see this PR: <https://github.com/abelbraaksma/TaskSeq/pull/29>.
+For more info, see this PR: <https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/29>.
 
 ## Work in progress
 
@@ -505,12 +505,12 @@ module TaskSeq =
     val zip: source1: taskSeq<'T> -> source2: taskSeq<'U> -> taskSeq<'T * 'U>
 ```
 
-[buildstatus]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml
-[buildstatus_img]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/main.yaml/badge.svg
-[teststatus]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml
-[teststatus_img]: https://github.com/abelbraaksma/TaskSeq/actions/workflows/test.yaml/badge.svg
+[buildstatus]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/main.yaml
+[buildstatus_img]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/main.yaml/badge.svg
+[teststatus]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/test.yaml
+[teststatus_img]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/test.yaml/badge.svg
 
-[1]: https://github.com/abelbraaksma/TaskSeq/issues/25
+[1]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/25
 [2]: https://github.com/xunit/xunit/issues/2587
 [3]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0
 [4]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-7.0
