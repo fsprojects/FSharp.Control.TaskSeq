@@ -185,8 +185,8 @@ type ``Real world tests``(output: ITestOutputHelper) =
         }
 
         // the following is extremely slow, which is why we just use F#'s comparison instead
-        // Using this takes 67s, compared to 0.25s using normal F# comparison.
-        do! ts |> TaskSeq.iter (should equal expected)
+        // Using the following line takes 6s, compared to 0.25s using normal F# comparison.
+        //do! ts |> TaskSeq.iter (should equal expected)
         do! ts |> TaskSeq.iter ((=) expected >> (should be True))
         do! task { do count |> should equal 4096 }
     }
