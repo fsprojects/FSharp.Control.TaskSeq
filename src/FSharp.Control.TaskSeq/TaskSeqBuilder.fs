@@ -159,7 +159,7 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
 
             // This ensures that, esp. in cases where there's no actual iteration (i.e. empty seq)
             // we can still detect completeness and prevent an incorrect jump in the resumable code.
-            // See https://github.com/abelbraaksma/TaskSeq/pull/54
+            // See https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/54
             if not canMoveNext then
                 // Signal we reached the end.
                 // DO NOT call Data.builder.Complete() here, ONLY do that in the Run method.
@@ -329,7 +329,7 @@ type TaskSeqBuilder() =
                             // Signal we're at the end
                             // NOTE: if we don't do it here, as well as in IValueTaskSource<bool>.GetResult
                             // we either end up in an endless loop, or we'll get NRE on empty sequences.
-                            // see: https://github.com/abelbraaksma/TaskSeq/pull/54
+                            // see: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/54
                             sm.Data.promiseOfValueOrEnd.SetResult(false)
                             sm.Data.builder.Complete()
                             sm.Data.completed <- true
