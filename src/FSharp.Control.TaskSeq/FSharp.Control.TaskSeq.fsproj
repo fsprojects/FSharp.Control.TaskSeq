@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -52,6 +52,6 @@ This library brings C#'s concept of 'await foreach' to F#.</Description>
 
   <ItemGroup>
     <!-- maximal compatibility with minimal required FSharp.Core version for TaskSeq -->
-    <PackageReference Update="FSharp.Core" Version="6.0.2" />
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
 </Project>
