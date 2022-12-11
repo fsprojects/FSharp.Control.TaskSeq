@@ -51,16 +51,19 @@ module TaskSeq =
             e.DisposeAsync().AsTask().Wait()
     |]
 
-    let toSeq (source: taskSeq<'T>) = seq {
+    let toSeq (source: taskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
-        let e = source.GetAsyncEnumerator(CancellationToken())
 
-        try
-            while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
-                yield e.Current
-        finally
-            e.DisposeAsync().AsTask().Wait()
-    }
+        seq {
+
+            let e = source.GetAsyncEnumerator(CancellationToken())
+
+            try
+                while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
+                    yield e.Current
+            finally
+                e.DisposeAsync().AsTask().Wait()
+        }
 
     let toArrayAsync source =
         Internal.toResizeArrayAsync source
@@ -76,39 +79,43 @@ module TaskSeq =
     // Convert 'OfXXX' functions
     //
 
-    let ofArray (source: 'T[]) = taskSeq {
+    let ofArray (source: 'T[]) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                yield c
+        }
 
     let ofList (source: 'T list) = taskSeq {
         for c in source do
             yield c
     }
 
-    let ofSeq (source: 'T seq) = taskSeq {
+    let ofSeq (source: 'T seq) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                yield c
+        }
 
-    let ofResizeArray (source: 'T ResizeArray) = taskSeq {
+    let ofResizeArray (source: 'T ResizeArray) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                yield c
+        }
 
-    let ofTaskSeq (source: #Task<'T> seq) = taskSeq {
+    let ofTaskSeq (source: #Task<'T> seq) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            let! c = c
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                let! c = c
+                yield c
+        }
 
     let ofTaskList (source: #Task<'T> list) = taskSeq {
         for c in source do
@@ -116,21 +123,23 @@ module TaskSeq =
             yield c
     }
 
-    let ofTaskArray (source: #Task<'T> array) = taskSeq {
+    let ofTaskArray (source: #Task<'T> array) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            let! c = c
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                let! c = c
+                yield c
+        }
 
-    let ofAsyncSeq (source: Async<'T> seq) = taskSeq {
+    let ofAsyncSeq (source: Async<'T> seq) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            let! c = task { return! c }
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                let! c = task { return! c }
+                yield c
+        }
 
     let ofAsyncList (source: Async<'T> list) = taskSeq {
         for c in source do
@@ -138,13 +147,14 @@ module TaskSeq =
             yield c
     }
 
-    let ofAsyncArray (source: Async<'T> array) = taskSeq {
+    let ofAsyncArray (source: Async<'T> array) =
         Internal.checkNonNull (nameof source) source
 
-        for c in source do
-            let! c = Async.toTask c
-            yield c
-    }
+        taskSeq {
+            for c in source do
+                let! c = Async.toTask c
+                yield c
+        }
 
     //
     // Utility functions
@@ -164,34 +174,41 @@ module TaskSeq =
             member _.GetAsyncEnumerator(ct) = generator().GetAsyncEnumerator(ct)
         }
 
-    let concat (sources: taskSeq<#taskSeq<'T>>) = taskSeq {
+    let concat (sources: taskSeq<#taskSeq<'T>>) =
         Internal.checkNonNull (nameof sources) sources
 
-        for ts in sources do
-            // no null-check of inner taskseqs, similar to seq
-            yield! (ts :> taskSeq<'T>)
-    }
+        taskSeq {
+            for ts in sources do
+                // no null-check of inner taskseqs, similar to seq
+                yield! (ts :> taskSeq<'T>)
+        }
 
-    let append (source1: taskSeq<'T>) (source2: taskSeq<'T>) = taskSeq {
+    let append (source1: taskSeq<'T>) (source2: taskSeq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! source1
-        yield! source2
-    }
 
-    let appendSeq (source1: taskSeq<'T>) (source2: seq<'T>) = taskSeq {
+        taskSeq {
+            yield! source1
+            yield! source2
+        }
+
+    let appendSeq (source1: taskSeq<'T>) (source2: seq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! source1
-        yield! source2
-    }
 
-    let prependSeq (source1: seq<'T>) (source2: taskSeq<'T>) = taskSeq {
+        taskSeq {
+            yield! source1
+            yield! source2
+        }
+
+    let prependSeq (source1: seq<'T>) (source2: taskSeq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! source1
-        yield! source2
-    }
+
+        taskSeq {
+            yield! source1
+            yield! source2
+        }
 
     //
     // iter/map/collect functions
@@ -261,14 +278,16 @@ module TaskSeq =
         | None -> return invalidArg (nameof source) "The input sequence contains more than one element."
     }
 
-    let indexed (source: taskSeq<'T>) = taskSeq {
+    let indexed (source: taskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
-        let mutable i = 0
 
-        for x in source do
-            yield i, x
-            i <- i + 1
-    }
+        taskSeq {
+            let mutable i = 0
+
+            for x in source do
+                yield i, x
+                i <- i + 1
+        }
 
     let choose chooser source = Internal.choose (TryPick chooser) source
     let chooseAsync chooser source = Internal.choose (TryPickAsync chooser) source
