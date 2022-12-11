@@ -49,7 +49,6 @@
     <Compile Include="TaskSeq.Do.Tests.fs" />
     <Compile Include="TaskSeq.Let.Tests.fs" />
     <Compile Include="TaskSeq.Using.Tests.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
