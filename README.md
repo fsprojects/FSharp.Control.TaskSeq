@@ -462,8 +462,8 @@ The following are the current surface area of the `TaskSeq` utility functions, o
 
 ```f#
 module TaskSeq =
-    val append: source1: #taskSeq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
-    val appendSeq: source1: #taskSeq<'T> -> source2: #seq<'T> -> taskSeq<'T>
+    val append: source1: taskSeq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
+    val appendSeq: source1: taskSeq<'T> -> source2: seq<'T> -> taskSeq<'T>
     val box: source: taskSeq<'T> -> taskSeq<obj>
     val cast: source: taskSeq<obj> -> taskSeq<'T>
     val choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>
@@ -522,7 +522,7 @@ module TaskSeq =
     val ofTaskSeq: source: seq<#Task<'T>> -> taskSeq<'T>
     val pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
     val pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
-    val prependSeq: source1: #seq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+    val prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
     val singleton: source: 'T -> taskSeq<'T>
     val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
     val takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
