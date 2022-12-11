@@ -104,7 +104,7 @@ module ExtraCustomMatchers =
     /// Asserts any exception that matches, or is derived from the given exception <see cref="Type" />.
     /// Async exceptions are almost always nested in an <see cref="AggregateException" />, however, in an
     /// async try/catch in F#, the exception is typically unwrapped. But this is not foolproof, and
-    /// in cases where we just call <see cref="Task.Wait" />, and <see cref="AggregateException" /> will be raised regardless.
+    /// in cases where we just call <see cref="Task.Wait" />, an <see cref="AggregateException" /> will be raised regardless.
     /// This assertion will go over all nested exceptions and 'self', to find a matching exception.
     /// Function to evaluate MUST return a <see cref="System.Threading.Tasks.Task" />, not a generic
     /// <see cref="Task&lt;'T>" />.
