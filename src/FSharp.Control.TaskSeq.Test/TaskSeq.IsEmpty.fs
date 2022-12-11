@@ -60,6 +60,21 @@ module SideEffects =
         |> Task.map (should be True)
         |> Task.map (fun () -> i |> should equal 2)
 
+    [<Fact>]
+    let ``TaskSeq-isEmpty executes side effects each time`` () =
+        let mutable i = 0
+
+        taskSeq {
+            i <- i + 1
+            i <- i + 1
+        }
+        |>> TaskSeq.isEmpty
+        |>> TaskSeq.isEmpty
+        |>> TaskSeq.isEmpty
+        |> TaskSeq.isEmpty // 4th time: 8
+        |> Task.map (should be True)
+        |> Task.map (fun () -> i |> should equal 8)
+
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-isEmpty returns false for non-empty`` variant =
         Gen.getSeqWithSideEffect variant
