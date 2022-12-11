@@ -44,6 +44,11 @@ type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
 module internal TaskSeqInternal =
+    /// Raise an NRE for arguments that are null. Only used for 'source' parameters, never for function parameters.
+    let inline checkNonNull argName arg =
+        if isNull arg then
+            nullArg argName
+
     let inline raiseEmptySeq () =
         ArgumentException("The asynchronous input sequence was empty.", "source")
         |> raise
@@ -61,6 +66,7 @@ module internal TaskSeqInternal =
         |> raise
 
     let isEmpty (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         return not step
@@ -93,6 +99,7 @@ module internal TaskSeqInternal =
 
     /// Returns length unconditionally, or based on a predicate
     let lengthBy predicate (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable i = 0
@@ -128,6 +135,7 @@ module internal TaskSeqInternal =
 
     /// Returns length unconditionally, or based on a predicate
     let lengthBeforeMax max (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable i = 0
@@ -143,6 +151,7 @@ module internal TaskSeqInternal =
     }
 
     let tryExactlyOne (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         match! e.MoveNextAsync() with
@@ -199,6 +208,7 @@ module internal TaskSeqInternal =
     }
 
     let iter action (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
@@ -240,6 +250,7 @@ module internal TaskSeqInternal =
     }
 
     let fold folder initial (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable result = initial
@@ -264,6 +275,7 @@ module internal TaskSeqInternal =
     }
 
     let toResizeArrayAsync source = task {
+        checkNonNull (nameof source) source
         let res = ResizeArray()
         do! source |> iter (SimpleAction(fun item -> res.Add item))
         return res
@@ -271,37 +283,41 @@ module internal TaskSeqInternal =
 
     let toResizeArrayAndMapAsync mapper source = (toResizeArrayAsync >> Task.map mapper) source
 
-    let map mapper (taskSequence: taskSeq<_>) =
+    let map mapper (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
+
         match mapper with
         | CountableAction mapper -> taskSeq {
             let mutable i = 0
 
-            for c in taskSequence do
+            for c in source do
                 yield mapper i c
                 i <- i + 1
           }
 
         | SimpleAction mapper -> taskSeq {
-            for c in taskSequence do
+            for c in source do
                 yield mapper c
           }
 
         | AsyncCountableAction mapper -> taskSeq {
             let mutable i = 0
 
-            for c in taskSequence do
+            for c in source do
                 let! result = mapper i c
                 yield result
                 i <- i + 1
           }
 
         | AsyncSimpleAction mapper -> taskSeq {
-            for c in taskSequence do
+            for c in source do
                 let! result = mapper c
                 yield result
           }
 
     let zip (source1: taskSeq<_>) (source2: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
         use e1 = source1.GetAsyncEnumerator(CancellationToken())
         use e2 = source2.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
@@ -317,28 +333,37 @@ module internal TaskSeqInternal =
     }
 
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         for c in source do
             yield! binder c :> IAsyncEnumerable<_>
     }
 
     let collectSeq (binder: _ -> #seq<_>) (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         for c in source do
             yield! binder c :> seq<_>
     }
 
     let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         for c in source do
             let! result = binder c
             yield! result :> IAsyncEnumerable<_>
     }
 
     let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         for c in source do
             let! result = binder c
             yield! result :> seq<_>
     }
 
     let tryLast (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let mutable last = ValueNone
@@ -356,6 +381,7 @@ module internal TaskSeqInternal =
     }
 
     let tryHead (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         match! e.MoveNextAsync() with
@@ -364,6 +390,7 @@ module internal TaskSeqInternal =
     }
 
     let tryTail (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         match! e.MoveNextAsync() with
@@ -384,6 +411,8 @@ module internal TaskSeqInternal =
     }
 
     let tryItem index (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
+
         if index < 0 then
             // while the loop below wouldn't run anyway, we don't want to call MoveNext in this case
             // to prevent side effects hitting unnecessarily
@@ -409,6 +438,7 @@ module internal TaskSeqInternal =
     }
 
     let tryPick chooser (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
@@ -441,6 +471,7 @@ module internal TaskSeqInternal =
     }
 
     let tryFind predicate (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
@@ -477,6 +508,7 @@ module internal TaskSeqInternal =
     }
 
     let tryFindIndex predicate (source: taskSeq<_>) = task {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
 
         let mutable go = true
@@ -509,6 +541,8 @@ module internal TaskSeqInternal =
     }
 
     let choose chooser (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         match chooser with
         | TryPick picker ->
             for item in source do
@@ -524,6 +558,8 @@ module internal TaskSeqInternal =
     }
 
     let filter predicate (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
+
         match predicate with
         | Predicate predicate ->
             for item in source do
@@ -642,6 +678,7 @@ module internal TaskSeqInternal =
                 ValueTask.CompletedTask
 
     let except itemsToExclude (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
@@ -666,6 +703,7 @@ module internal TaskSeqInternal =
     }
 
     let exceptOfSeq itemsToExclude (source: taskSeq<_>) = taskSeq {
+        checkNonNull (nameof source) source
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
