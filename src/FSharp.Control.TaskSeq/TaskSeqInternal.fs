@@ -531,6 +531,57 @@ module internal TaskSeqInternal =
                 | true -> yield item
                 | false -> ()
     }
+
+    let takeWhile predicate (source: taskSeq<_>) = taskSeq {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let! step = e.MoveNextAsync()
+        let mutable go = step
+
+        match predicate with
+        | Predicate predicate ->
+            while go do
+                let value = e.Current
+                if predicate value then
+                    yield value
+                    let! more = e.MoveNextAsync()
+                    go <- more
+                else go <- false
+        | PredicateAsync predicate ->
+            while go do
+                let value = e.Current
+                match! predicate value with
+                | true ->
+                    yield value
+                    let! more = e.MoveNextAsync()
+                    go <- more
+                | false -> go <- false
+    }
+
+    let takeWhileInclusive predicate (source: taskSeq<_>) = taskSeq {
+        use e = source.GetAsyncEnumerator(CancellationToken())
+        let! step = e.MoveNextAsync()
+        let mutable go = step
+
+        match predicate with
+        | Predicate predicate ->
+            while go do
+                let value = e.Current
+                yield value
+                if predicate value then
+                    let! more = e.MoveNextAsync()
+                    go <- more
+                else go <- false
+        | PredicateAsync predicate ->
+            while go do
+                let value = e.Current
+                yield value
+                match! predicate value with
+                | true ->
+                    let! more = e.MoveNextAsync()
+                    go <- more
+                | false -> go <- false
+    }
+
     // Consider turning using an F# version of this instead?
     // https://github.com/i3arnon/ConcurrentHashSet
     type ConcurrentHashSet<'T when 'T: equality>(ct) =
