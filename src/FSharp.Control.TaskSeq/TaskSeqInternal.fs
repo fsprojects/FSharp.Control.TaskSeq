@@ -65,12 +65,14 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
-    let isEmpty (source: taskSeq<_>) = task {
+    let isEmpty (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let! step = e.MoveNextAsync()
-        return not step
-    }
+
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let! step = e.MoveNextAsync()
+            return not step
+        }
 
     let singleton (source: 'T) =
         { new IAsyncEnumerable<'T> with
@@ -98,75 +100,83 @@ module internal TaskSeqInternal =
         }
 
     /// Returns length unconditionally, or based on a predicate
-    let lengthBy predicate (source: taskSeq<_>) = task {
+    let lengthBy predicate (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let mutable i = 0
-        let! step = e.MoveNextAsync()
-        go <- step
 
-        match predicate with
-        | None ->
-            while go do
-                let! step = e.MoveNextAsync()
-                i <- i + 1 // update before moving: we are counting, not indexing
-                go <- step
+        task {
 
-        | Some (Predicate predicate) ->
-            while go do
-                if predicate e.Current then
-                    i <- i + 1
-
-                let! step = e.MoveNextAsync()
-                go <- step
-
-        | Some (PredicateAsync predicate) ->
-            while go do
-                match! predicate e.Current with
-                | true -> i <- i + 1
-                | false -> ()
-
-                let! step = e.MoveNextAsync()
-                go <- step
-
-        return i
-    }
-
-    /// Returns length unconditionally, or based on a predicate
-    let lengthBeforeMax max (source: taskSeq<_>) = task {
-        checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let mutable i = 0
-        let! step = e.MoveNextAsync()
-        go <- step
-
-        while go && i < max do
-            i <- i + 1 // update before moving: we are counting, not indexing
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let mutable i = 0
             let! step = e.MoveNextAsync()
             go <- step
 
-        return i
-    }
+            match predicate with
+            | None ->
+                while go do
+                    let! step = e.MoveNextAsync()
+                    i <- i + 1 // update before moving: we are counting, not indexing
+                    go <- step
 
-    let tryExactlyOne (source: taskSeq<_>) = task {
+            | Some (Predicate predicate) ->
+                while go do
+                    if predicate e.Current then
+                        i <- i + 1
+
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | Some (PredicateAsync predicate) ->
+                while go do
+                    match! predicate e.Current with
+                    | true -> i <- i + 1
+                    | false -> ()
+
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return i
+        }
+
+    /// Returns length unconditionally, or based on a predicate
+    let lengthBeforeMax max (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
 
-        match! e.MoveNextAsync() with
-        | true ->
-            // grab first item and test if there's a second item
-            let current = e.Current
+        task {
+
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let mutable i = 0
+            let! step = e.MoveNextAsync()
+            go <- step
+
+            while go && i < max do
+                i <- i + 1 // update before moving: we are counting, not indexing
+                let! step = e.MoveNextAsync()
+                go <- step
+
+            return i
+        }
+
+    let tryExactlyOne (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
 
             match! e.MoveNextAsync() with
-            | true -> return None // 2 or more items
-            | false -> return Some current // exactly one
+            | true ->
+                // grab first item and test if there's a second item
+                let current = e.Current
 
-        | false ->
-            // zero items
-            return None
-    }
+                match! e.MoveNextAsync() with
+                | true -> return None // 2 or more items
+                | false -> return Some current // exactly one
+
+            | false ->
+                // zero items
+                return None
+        }
 
 
     let init count initializer = taskSeq {
@@ -207,79 +217,85 @@ module internal TaskSeqInternal =
 
     }
 
-    let iter action (source: taskSeq<_>) = task {
+    let iter action (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step = e.MoveNextAsync()
-        go <- step
 
-        // this ensures that the inner loop is optimized for the closure
-        // though perhaps we need to split into individual functions after all to use
-        // InlineIfLambda?
-        match action with
-        | CountableAction action ->
-            let mutable i = 0
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let! step = e.MoveNextAsync()
+            go <- step
 
-            while go do
-                do action i e.Current
-                let! step = e.MoveNextAsync()
-                i <- i + 1
-                go <- step
+            // this ensures that the inner loop is optimized for the closure
+            // though perhaps we need to split into individual functions after all to use
+            // InlineIfLambda?
+            match action with
+            | CountableAction action ->
+                let mutable i = 0
 
-        | SimpleAction action ->
-            while go do
-                do action e.Current
-                let! step = e.MoveNextAsync()
-                go <- step
+                while go do
+                    do action i e.Current
+                    let! step = e.MoveNextAsync()
+                    i <- i + 1
+                    go <- step
 
-        | AsyncCountableAction action ->
-            let mutable i = 0
+            | SimpleAction action ->
+                while go do
+                    do action e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
 
-            while go do
-                do! action i e.Current
-                let! step = e.MoveNextAsync()
-                i <- i + 1
-                go <- step
+            | AsyncCountableAction action ->
+                let mutable i = 0
 
-        | AsyncSimpleAction action ->
-            while go do
-                do! action e.Current
-                let! step = e.MoveNextAsync()
-                go <- step
-    }
+                while go do
+                    do! action i e.Current
+                    let! step = e.MoveNextAsync()
+                    i <- i + 1
+                    go <- step
 
-    let fold folder initial (source: taskSeq<_>) = task {
+            | AsyncSimpleAction action ->
+                while go do
+                    do! action e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
+        }
+
+    let fold folder initial (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let mutable result = initial
-        let! step = e.MoveNextAsync()
-        go <- step
 
-        match folder with
-        | FolderAction folder ->
-            while go do
-                result <- folder result e.Current
-                let! step = e.MoveNextAsync()
-                go <- step
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let mutable result = initial
+            let! step = e.MoveNextAsync()
+            go <- step
 
-        | AsyncFolderAction folder ->
-            while go do
-                let! tempResult = folder result e.Current
-                result <- tempResult
-                let! step = e.MoveNextAsync()
-                go <- step
+            match folder with
+            | FolderAction folder ->
+                while go do
+                    result <- folder result e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
 
-        return result
-    }
+            | AsyncFolderAction folder ->
+                while go do
+                    let! tempResult = folder result e.Current
+                    result <- tempResult
+                    let! step = e.MoveNextAsync()
+                    go <- step
 
-    let toResizeArrayAsync source = task {
+            return result
+        }
+
+    let toResizeArrayAsync source =
         checkNonNull (nameof source) source
-        let res = ResizeArray()
-        do! source |> iter (SimpleAction(fun item -> res.Add item))
-        return res
-    }
+
+        task {
+            let res = ResizeArray()
+            do! source |> iter (SimpleAction(fun item -> res.Add item))
+            return res
+        }
 
     let toResizeArrayAndMapAsync mapper source = (toResizeArrayAsync >> Task.map mapper) source
 
@@ -315,315 +331,285 @@ module internal TaskSeqInternal =
                 yield result
           }
 
-    let zip (source1: taskSeq<_>) (source2: taskSeq<_>) = taskSeq {
+    let zip (source1: taskSeq<_>) (source2: taskSeq<_>) =
         checkNonNull (nameof source1) source1
         checkNonNull (nameof source2) source2
-        use e1 = source1.GetAsyncEnumerator(CancellationToken())
-        use e2 = source2.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step1 = e1.MoveNextAsync()
-        let! step2 = e2.MoveNextAsync()
-        go <- step1 && step2
 
-        while go do
-            yield e1.Current, e2.Current
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator(CancellationToken())
+            use e2 = source2.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
             let! step1 = e1.MoveNextAsync()
             let! step2 = e2.MoveNextAsync()
             go <- step1 && step2
-    }
 
-    let collect (binder: _ -> #IAsyncEnumerable<_>) (source: taskSeq<_>) = taskSeq {
+            while go do
+                yield e1.Current, e2.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                go <- step1 && step2
+        }
+
+    let collect (binder: _ -> #IAsyncEnumerable<_>) (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        for c in source do
-            yield! binder c :> IAsyncEnumerable<_>
-    }
+        taskSeq {
+            for c in source do
+                yield! binder c :> IAsyncEnumerable<_>
+        }
 
-    let collectSeq (binder: _ -> #seq<_>) (source: taskSeq<_>) = taskSeq {
+    let collectSeq (binder: _ -> #seq<_>) (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        for c in source do
-            yield! binder c :> seq<_>
-    }
+        taskSeq {
+            for c in source do
+                yield! binder c :> seq<_>
+        }
 
-    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: taskSeq<_>) = taskSeq {
+    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        for c in source do
-            let! result = binder c
-            yield! result :> IAsyncEnumerable<_>
-    }
+        taskSeq {
+            for c in source do
+                let! result = binder c
+                yield! result :> IAsyncEnumerable<_>
+        }
 
-    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: taskSeq<_>) = taskSeq {
+    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        for c in source do
-            let! result = binder c
-            yield! result :> seq<_>
-    }
+        taskSeq {
+            for c in source do
+                let! result = binder c
+                yield! result :> seq<_>
+        }
 
-    let tryLast (source: taskSeq<_>) = task {
+    let tryLast (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let mutable last = ValueNone
-        let! step = e.MoveNextAsync()
-        go <- step
 
-        while go do
-            last <- ValueSome e.Current
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let mutable last = ValueNone
             let! step = e.MoveNextAsync()
             go <- step
 
-        match last with
-        | ValueSome value -> return Some value
-        | ValueNone -> return None
-    }
+            while go do
+                last <- ValueSome e.Current
+                let! step = e.MoveNextAsync()
+                go <- step
 
-    let tryHead (source: taskSeq<_>) = task {
+            match last with
+            | ValueSome value -> return Some value
+            | ValueNone -> return None
+        }
+
+    let tryHead (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
 
-        match! e.MoveNextAsync() with
-        | true -> return Some e.Current
-        | false -> return None
-    }
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
 
-    let tryTail (source: taskSeq<_>) = task {
+            match! e.MoveNextAsync() with
+            | true -> return Some e.Current
+            | false -> return None
+        }
+
+    let tryTail (source: taskSeq<_>) =
         checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
 
-        match! e.MoveNextAsync() with
-        | false -> return None
-        | true ->
-            return
-                taskSeq {
-                    let mutable go = true
-                    let! step = e.MoveNextAsync()
-                    go <- step
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
 
-                    while go do
-                        yield e.Current
+            match! e.MoveNextAsync() with
+            | false -> return None
+            | true ->
+                return
+                    taskSeq {
+                        let mutable go = true
                         let! step = e.MoveNextAsync()
                         go <- step
-                }
-                |> Some
-    }
 
-    let tryItem index (source: taskSeq<_>) = task {
+                        while go do
+                            yield e.Current
+                            let! step = e.MoveNextAsync()
+                            go <- step
+                    }
+                    |> Some
+        }
+
+    let tryItem index (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        if index < 0 then
-            // while the loop below wouldn't run anyway, we don't want to call MoveNext in this case
-            // to prevent side effects hitting unnecessarily
-            return None
-        else
+        task {
+            if index < 0 then
+                // while the loop below wouldn't run anyway, we don't want to call MoveNext in this case
+                // to prevent side effects hitting unnecessarily
+                return None
+            else
+                use e = source.GetAsyncEnumerator(CancellationToken())
+                let mutable go = true
+                let mutable idx = 0
+                let mutable foundItem = None
+                let! step = e.MoveNextAsync()
+                go <- step
+
+                while go && idx <= index do
+                    if idx = index then
+                        foundItem <- Some e.Current
+                        go <- false
+                    else
+                        let! step = e.MoveNextAsync()
+                        go <- step
+                        idx <- idx + 1
+
+                return foundItem
+        }
+
+    let tryPick chooser (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
             use e = source.GetAsyncEnumerator(CancellationToken())
+
             let mutable go = true
-            let mutable idx = 0
             let mutable foundItem = None
             let! step = e.MoveNextAsync()
             go <- step
 
-            while go && idx <= index do
-                if idx = index then
-                    foundItem <- Some e.Current
-                    go <- false
-                else
-                    let! step = e.MoveNextAsync()
-                    go <- step
-                    idx <- idx + 1
+            match chooser with
+            | TryPick picker ->
+                while go do
+                    match picker e.Current with
+                    | Some value ->
+                        foundItem <- Some value
+                        go <- false
+                    | None ->
+                        let! step = e.MoveNextAsync()
+                        go <- step
+
+            | TryPickAsync picker ->
+                while go do
+                    match! picker e.Current with
+                    | Some value ->
+                        foundItem <- Some value
+                        go <- false
+                    | None ->
+                        let! step = e.MoveNextAsync()
+                        go <- step
 
             return foundItem
-    }
+        }
 
-    let tryPick chooser (source: taskSeq<_>) = task {
-        checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-
-        let mutable go = true
-        let mutable foundItem = None
-        let! step = e.MoveNextAsync()
-        go <- step
-
-        match chooser with
-        | TryPick picker ->
-            while go do
-                match picker e.Current with
-                | Some value ->
-                    foundItem <- Some value
-                    go <- false
-                | None ->
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        | TryPickAsync picker ->
-            while go do
-                match! picker e.Current with
-                | Some value ->
-                    foundItem <- Some value
-                    go <- false
-                | None ->
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        return foundItem
-    }
-
-    let tryFind predicate (source: taskSeq<_>) = task {
-        checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-
-        let mutable go = true
-        let mutable foundItem = None
-        let! step = e.MoveNextAsync()
-        go <- step
-
-        match predicate with
-        | Predicate predicate ->
-            while go do
-                let current = e.Current
-
-                match predicate current with
-                | true ->
-                    foundItem <- Some current
-                    go <- false
-                | false ->
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        | PredicateAsync predicate ->
-            while go do
-                let current = e.Current
-
-                match! predicate current with
-                | true ->
-                    foundItem <- Some current
-                    go <- false
-                | false ->
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        return foundItem
-    }
-
-    let tryFindIndex predicate (source: taskSeq<_>) = task {
-        checkNonNull (nameof source) source
-        use e = source.GetAsyncEnumerator(CancellationToken())
-
-        let mutable go = true
-        let mutable isFound = false
-        let mutable index = -1
-        let! step = e.MoveNextAsync()
-        go <- step
-
-        match predicate with
-        | Predicate predicate ->
-            while go && not isFound do
-                index <- index + 1
-                isFound <- predicate e.Current
-
-                if not isFound then
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        | PredicateAsync predicate ->
-            while go && not isFound do
-                index <- index + 1
-                let! predicateResult = predicate e.Current
-                isFound <- predicateResult
-
-                if not isFound then
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
-        if isFound then return Some index else return None
-    }
-
-    let choose chooser (source: taskSeq<_>) = taskSeq {
+    let tryFind predicate (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        match chooser with
-        | TryPick picker ->
-            for item in source do
-                match picker item with
-                | Some value -> yield value
-                | None -> ()
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
 
-        | TryPickAsync picker ->
-            for item in source do
-                match! picker item with
-                | Some value -> yield value
-                | None -> ()
-    }
+            let mutable go = true
+            let mutable foundItem = None
+            let! step = e.MoveNextAsync()
+            go <- step
 
-    let filter predicate (source: taskSeq<_>) = taskSeq {
+            match predicate with
+            | Predicate predicate ->
+                while go do
+                    let current = e.Current
+
+                    match predicate current with
+                    | true ->
+                        foundItem <- Some current
+                        go <- false
+                    | false ->
+                        let! step = e.MoveNextAsync()
+                        go <- step
+
+            | PredicateAsync predicate ->
+                while go do
+                    let current = e.Current
+
+                    match! predicate current with
+                    | true ->
+                        foundItem <- Some current
+                        go <- false
+                    | false ->
+                        let! step = e.MoveNextAsync()
+                        go <- step
+
+            return foundItem
+        }
+
+    let tryFindIndex predicate (source: taskSeq<_>) =
         checkNonNull (nameof source) source
 
-        match predicate with
-        | Predicate predicate ->
-            for item in source do
-                if predicate item then
-                    yield item
+        task {
+            use e = source.GetAsyncEnumerator(CancellationToken())
 
-        | PredicateAsync predicate ->
-            for item in source do
-                match! predicate item with
-                | true -> yield item
-                | false -> ()
-    }
+            let mutable go = true
+            let mutable isFound = false
+            let mutable index = -1
+            let! step = e.MoveNextAsync()
+            go <- step
 
-    let takeWhile whileKind predicate (source: taskSeq<_>) = taskSeq {
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let! step = e.MoveNextAsync()
-        let mutable more = step
+            match predicate with
+            | Predicate predicate ->
+                while go && not isFound do
+                    index <- index + 1
+                    isFound <- predicate e.Current
 
-        match whileKind, predicate with
-        | Exclusive, Predicate predicate ->
-            while more do
-                let value = e.Current
-                more <- predicate value
+                    if not isFound then
+                        let! step = e.MoveNextAsync()
+                        go <- step
 
-                if more then
-                    yield value
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
+            | PredicateAsync predicate ->
+                while go && not isFound do
+                    index <- index + 1
+                    let! predicateResult = predicate e.Current
+                    isFound <- predicateResult
 
-        | Inclusive, Predicate predicate ->
-            while more do
-                let value = e.Current
-                more <- predicate value
+                    if not isFound then
+                        let! step = e.MoveNextAsync()
+                        go <- step
 
-                yield value
+            if isFound then return Some index else return None
+        }
 
-                if more then
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
+    let choose chooser (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
 
-        | Exclusive, PredicateAsync predicate ->
-            while more do
-                let value = e.Current
-                let! passed = predicate value
-                more <- passed
+        taskSeq {
 
-                if more then
-                    yield value
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
+            match chooser with
+            | TryPick picker ->
+                for item in source do
+                    match picker item with
+                    | Some value -> yield value
+                    | None -> ()
 
-        | Inclusive, PredicateAsync predicate ->
-            while more do
-                let value = e.Current
-                let! passed = predicate value
-                more <- passed
+            | TryPickAsync picker ->
+                for item in source do
+                    match! picker item with
+                    | Some value -> yield value
+                    | None -> ()
+        }
 
-                yield value
+    let filter predicate (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
 
-                if more then
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
-    }
+        taskSeq {
+            match predicate with
+            | Predicate predicate ->
+                for item in source do
+                    if predicate item then
+                        yield item
 
+            | PredicateAsync predicate ->
+                for item in source do
+                    match! predicate item with
+                    | true -> yield item
+                    | false -> ()
+        }
     // Consider turning using an F# version of this instead?
     // https://github.com/i3arnon/ConcurrentHashSet
     type ConcurrentHashSet<'T when 'T: equality>(ct) =
@@ -677,56 +663,58 @@ module internal TaskSeqInternal =
 
                 ValueTask.CompletedTask
 
-    let except itemsToExclude (source: taskSeq<_>) = taskSeq {
+    let except itemsToExclude (source: taskSeq<_>) =
         checkNonNull (nameof source) source
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step = e.MoveNextAsync()
-        go <- step
+        taskSeq {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let! step = e.MoveNextAsync()
+            go <- step
 
-        if step then
-            // only create hashset by the time we actually start iterating
-            use hashSet = new ConcurrentHashSet<_>(CancellationToken())
-            do! hashSet.AddManyAsync itemsToExclude
+            if step then
+                // only create hashset by the time we actually start iterating
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+                do! hashSet.AddManyAsync itemsToExclude
 
-            while go do
-                let current = e.Current
+                while go do
+                    let current = e.Current
 
-                // if true, it was added, and therefore unique, so we return it
-                // if false, it existed, and therefore a duplicate, and we skip
-                if hashSet.Add current then
-                    yield current
+                    // if true, it was added, and therefore unique, so we return it
+                    // if false, it existed, and therefore a duplicate, and we skip
+                    if hashSet.Add current then
+                        yield current
 
-                let! step = e.MoveNextAsync()
-                go <- step
+                    let! step = e.MoveNextAsync()
+                    go <- step
 
-    }
+        }
 
-    let exceptOfSeq itemsToExclude (source: taskSeq<_>) = taskSeq {
+    let exceptOfSeq itemsToExclude (source: taskSeq<_>) =
         checkNonNull (nameof source) source
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let mutable go = true
-        let! step = e.MoveNextAsync()
-        go <- step
+        taskSeq {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let mutable go = true
+            let! step = e.MoveNextAsync()
+            go <- step
 
-        if step then
-            // only create hashset by the time we actually start iterating
-            use hashSet = new ConcurrentHashSet<_>(CancellationToken())
-            do hashSet.AddMany itemsToExclude
+            if step then
+                // only create hashset by the time we actually start iterating
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+                do hashSet.AddMany itemsToExclude
 
-            while go do
-                let current = e.Current
+                while go do
+                    let current = e.Current
 
-                // if true, it was added, and therefore unique, so we return it
-                // if false, it existed, and therefore a duplicate, and we skip
-                if hashSet.Add current then
-                    yield current
+                    // if true, it was added, and therefore unique, so we return it
+                    // if false, it existed, and therefore a duplicate, and we skip
+                    if hashSet.Add current then
+                        yield current
 
-                let! step = e.MoveNextAsync()
-                go <- step
+                    let! step = e.MoveNextAsync()
+                    go <- step
 
-    }
+        }
