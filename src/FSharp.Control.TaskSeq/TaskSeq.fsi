@@ -323,7 +323,7 @@ module TaskSeq =
     val tryItem: index: int -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the nth element of the <see cref="taskSeq" />, or <see cref="None" /> if the sequence
+    /// Returns the nth element of the <see cref="taskSeq" />, or raises an exception if the sequence
     /// does not contain enough elements, or if <paramref name="index" /> is negative.
     /// </summary>
     /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or

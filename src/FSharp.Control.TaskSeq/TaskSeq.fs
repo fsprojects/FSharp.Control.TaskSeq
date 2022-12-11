@@ -236,47 +236,39 @@ module TaskSeq =
 
     let tryHead source = Internal.tryHead source
 
-    let head source = task {
-        match! Internal.tryHead source with
-        | Some head -> return head
-        | None -> return Internal.raiseEmptySeq ()
-    }
+    let head source =
+        Internal.tryHead source
+        |> Task.map (Option.defaultWith Internal.raiseEmptySeq)
 
     let tryLast source = Internal.tryLast source
 
-    let last source = task {
-        match! Internal.tryLast source with
-        | Some last -> return last
-        | None -> return Internal.raiseEmptySeq ()
-    }
+    let last source =
+        Internal.tryLast source
+        |> Task.map (Option.defaultWith Internal.raiseEmptySeq)
 
     let tryTail source = Internal.tryTail source
 
-    let tail source = task {
-        match! Internal.tryTail source with
-        | Some result -> return result
-        | None -> return Internal.raiseEmptySeq ()
-    }
+    let tail source =
+        Internal.tryTail source
+        |> Task.map (Option.defaultWith Internal.raiseEmptySeq)
 
     let tryItem index source = Internal.tryItem index source
 
-    let item index source = task {
-        match! Internal.tryItem index source with
-        | Some item -> return item
-        | None ->
-            if index < 0 then
-                return invalidArg (nameof index) "The input must be non-negative."
-            else
-                return Internal.raiseInsufficient ()
-    }
+    let item index source =
+        if index < 0 then
+            invalidArg (nameof index) "The input must be non-negative."
+
+        Internal.tryItem index source
+        |> Task.map (Option.defaultWith Internal.raiseInsufficient)
 
     let tryExactlyOne source = Internal.tryExactlyOne source
 
-    let exactlyOne source = task {
-        match! Internal.tryExactlyOne source with
-        | Some item -> return item
-        | None -> return invalidArg (nameof source) "The input sequence contains more than one element."
-    }
+    let exactlyOne source =
+        Internal.tryExactlyOne source
+        |> Task.map (
+            Option.defaultWith (fun () ->
+                invalidArg (nameof source) "The input sequence contains more than one element.")
+        )
 
     let indexed (source: taskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
@@ -318,47 +310,34 @@ module TaskSeq =
         Internal.tryFind (Predicate((=) value)) source
         |> Task.map (Option.isSome)
 
-    let pick chooser source = task {
-        match! Internal.tryPick (TryPick chooser) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
+    let pick chooser source =
+        Internal.tryPick (TryPick chooser) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
-    let pickAsync chooser source = task {
-        match! Internal.tryPick (TryPickAsync chooser) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
+    let pickAsync chooser source =
+        Internal.tryPick (TryPickAsync chooser) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
-    let find predicate source = task {
-        match! Internal.tryFind (Predicate predicate) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
+    let find predicate source =
+        Internal.tryFind (Predicate predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
+    let findAsync predicate source =
+        Internal.tryFind (PredicateAsync predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
-    let findAsync predicate source = task {
-        match! Internal.tryFind (PredicateAsync predicate) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
+    let findIndex predicate source =
+        Internal.tryFindIndex (Predicate predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
-    let findIndex predicate source = task {
-        match! Internal.tryFindIndex (Predicate predicate) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
-
-    let findIndexAsync predicate source = task {
-        match! Internal.tryFindIndex (PredicateAsync predicate) source with
-        | Some item -> return item
-        | None -> return Internal.raiseNotFound ()
-    }
+    let findIndexAsync predicate source =
+        Internal.tryFindIndex (PredicateAsync predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
 
 
     //
-    // zip/unzip etc functions
+    // zip/unzip/fold etc functions
     //
 
     let zip source1 source2 = Internal.zip source1 source2
