@@ -168,6 +168,7 @@ module TaskSeq =
         Internal.checkNonNull (nameof sources) sources
 
         for ts in sources do
+            // no null-check of inner taskseqs, similar to seq
             yield! (ts :> taskSeq<'T>)
     }
 

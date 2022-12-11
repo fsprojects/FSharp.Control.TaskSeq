@@ -62,3 +62,29 @@ let ``TaskSeq-empty multiple times in a taskSeq context`` () = task {
 
     Array.isEmpty sq |> should be True
 }
+
+[<Fact>]
+let ``TaskSeq-empty multiple times with side effects`` () = task {
+    let mutable x = 0
+
+    let sq = taskSeq {
+        yield! TaskSeq.empty<string>
+        yield! TaskSeq.empty<string>
+        x <- x + 1
+        yield! TaskSeq.empty<string>
+        x <- x + 1
+        yield! TaskSeq.empty<string>
+        x <- x + 1
+        yield! TaskSeq.empty<string>
+        x <- x + 1
+        x <- x + 1
+    }
+
+    // executing side effects once
+    (TaskSeq.toArray >> Array.isEmpty) sq |> should be True
+    x |> should equal 5
+
+    // twice
+    (TaskSeq.toArray >> Array.isEmpty) sq |> should be True
+    x |> should equal 10
+}
