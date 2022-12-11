@@ -23,6 +23,14 @@ let validateSequence ts =
     |> Task.map (should equal "1234567891012345678910")
 
 module EmptySeq =
+    let ``Null source is invalid`` () =
+        let test1 () = TaskSeq.empty |> TaskSeq.append null |> TaskSeq.toList
+        let test2 () = null |> TaskSeq.append TaskSeq.empty |> TaskSeq.toList
+        let test3 () = null |> TaskSeq.append null |> TaskSeq.toList
+        test1 |> should throw typeof<ArgumentNullException>
+        test2 |> should throw typeof<ArgumentNullException>
+        test3 |> should throw typeof<ArgumentNullException>
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-append both args empty`` variant =
         Gen.getEmptyVariant variant
