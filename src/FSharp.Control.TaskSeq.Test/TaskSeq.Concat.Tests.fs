@@ -21,6 +21,9 @@ let validateSequence ts =
     |> Task.map (should equal "123456789101234567891012345678910")
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () = assertNullArg <| fun () -> TaskSeq.concat null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-concat with empty sequences`` variant =
         taskSeq {

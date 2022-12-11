@@ -11,6 +11,9 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () = assertNullArg <| fun () -> TaskSeq.contains 42 null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-contains returns false`` variant =
         Gen.getEmptyVariant variant

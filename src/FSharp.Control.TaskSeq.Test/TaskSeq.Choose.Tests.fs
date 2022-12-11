@@ -10,13 +10,19 @@ open FsToolkit.ErrorHandling
 open FSharp.Control
 
 //
-// TaskSeq.map
-// TaskSeq.mapi
-// TaskSeq.mapAsync
-// TaskSeq.mapiAsync
+// TaskSeq.choose
+// TaskSeq.chooseAsync
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.choose (fun _ -> None) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.chooseAsync (fun _ -> Task.fromResult None) null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-choose`` variant = task {
         let! empty =

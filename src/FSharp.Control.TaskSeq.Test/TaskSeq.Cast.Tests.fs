@@ -23,6 +23,9 @@ let validateSequence ts =
     |> Task.map (should equal "12345678910")
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () = assertNullArg <| fun () -> TaskSeq.box null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-box empty`` variant = Gen.getEmptyVariant variant |> TaskSeq.box |> verifyEmpty
 
