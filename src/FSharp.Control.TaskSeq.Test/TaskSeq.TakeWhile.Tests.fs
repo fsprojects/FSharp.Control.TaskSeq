@@ -31,7 +31,7 @@ module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-takeWhile filters correctly`` variant =
         Gen.getSeqImmutable variant
-        |> TaskSeq.takeWhile (fun x -> x <= 5)
+        |> TaskSeq.takeWhile (fun x -> x <> 6)
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
@@ -40,7 +40,7 @@ module Immutable =
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-takeWhileAsync filters correctly`` variant =
         Gen.getSeqImmutable variant
-        |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 5 })
+        |> TaskSeq.takeWhileAsync (fun x -> task { return x <> 6 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
@@ -50,7 +50,7 @@ module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-takeWhile filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhile (fun x -> x <= 5)
+        |> TaskSeq.takeWhile (fun x -> x <> 6)
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
@@ -59,7 +59,7 @@ module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-takeWhileAsync filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 5 })
+        |> TaskSeq.takeWhileAsync (fun x -> task { return x <> 6 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
