@@ -130,7 +130,7 @@ module TaskSeq =
     /// <param name="source2">The second input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
-    val append: source1: #taskSeq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+    val append: source1: taskSeq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Concatenates a task sequence <paramref name="source1" /> with a non-async F# <see cref="seq" /> in <paramref name="source2" />
@@ -141,7 +141,7 @@ module TaskSeq =
     /// <param name="source2">The input F# <see cref="seq" /> sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
-    val appendSeq: source1: #taskSeq<'T> -> source2: #seq<'T> -> taskSeq<'T>
+    val appendSeq: source1: taskSeq<'T> -> source2: seq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Concatenates a non-async F# <see cref="seq" /> in <paramref name="source1" /> with a task sequence in <paramref name="source2" />
@@ -152,7 +152,7 @@ module TaskSeq =
     /// <param name="source2">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
-    val prependSeq: source1: #seq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
+    val prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
 
     /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
     val toList: source: taskSeq<'T> -> 'T list

@@ -171,25 +171,25 @@ module TaskSeq =
             yield! (ts :> taskSeq<'T>)
     }
 
-    let append (source1: #taskSeq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+    let append (source1: taskSeq<'T>) (source2: taskSeq<'T>) = taskSeq {
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! (source1 :> IAsyncEnumerable<'T>)
-        yield! (source2 :> IAsyncEnumerable<'T>)
+        yield! source1
+        yield! source2
     }
 
-    let appendSeq (source1: #taskSeq<'T>) (source2: #seq<'T>) = taskSeq {
+    let appendSeq (source1: taskSeq<'T>) (source2: seq<'T>) = taskSeq {
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! (source1 :> IAsyncEnumerable<'T>)
-        yield! (source2 :> seq<'T>)
+        yield! source1
+        yield! source2
     }
 
-    let prependSeq (source1: #seq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+    let prependSeq (source1: seq<'T>) (source2: taskSeq<'T>) = taskSeq {
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
-        yield! (source1 :> seq<'T>)
-        yield! (source2 :> IAsyncEnumerable<'T>)
+        yield! source1
+        yield! source2
     }
 
     //
