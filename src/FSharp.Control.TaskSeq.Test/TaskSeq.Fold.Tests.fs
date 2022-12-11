@@ -13,6 +13,14 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.fold (fun _ _ -> 42) 0 null
+
+        assertNullArg
+        <| fun () -> TaskSeq.foldAsync (fun _ _ -> Task.fromResult 42) 0 null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-fold takes state when empty`` variant = task {
         let! empty =

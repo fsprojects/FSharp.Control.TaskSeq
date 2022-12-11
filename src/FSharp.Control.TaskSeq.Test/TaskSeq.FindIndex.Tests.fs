@@ -15,6 +15,20 @@ open System.Collections.Generic
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.findIndex (fun _ -> false) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.findIndexAsync (fun _ -> Task.fromResult false) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.tryFindIndex (fun _ -> false) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.tryFindIndexAsync (fun _ -> Task.fromResult false) null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-findIndex raises KeyNotFoundException`` variant =
         fun () ->

@@ -21,11 +21,22 @@ let pickerAsync equalTo x = task { return if x = equalTo then Some x else None }
 
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.pick (picker 0) null
+        assertNullArg <| fun () -> TaskSeq.tryPick (picker 0) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.pickAsync (pickerAsync 0) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.tryPickAsync (pickerAsync 0) null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-pick on an empty sequence raises KeyNotFoundException`` variant = task {
         fun () ->
             Gen.getEmptyVariant variant
-            |> TaskSeq.pick (fun x -> if x = 12 then Some x else None)
+            |> TaskSeq.pick (picker 12)
             |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
     }
@@ -34,16 +45,14 @@ module EmptySeq =
     let ``TaskSeq-pickAsync on an empty sequence raises KeyNotFoundException`` variant = task {
         fun () ->
             Gen.getEmptyVariant variant
-            |> TaskSeq.pickAsync (fun x -> task { return if x = 12 then Some x else None })
+            |> TaskSeq.pickAsync (pickerAsync 12)
             |> Task.ignore
         |> should throwAsyncExact typeof<KeyNotFoundException>
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-tryPick on an empty sequence returns None`` variant = task {
-        let! nothing =
-            Gen.getEmptyVariant variant
-            |> TaskSeq.tryPick (fun x -> if x = 12 then Some x else None)
+        let! nothing = Gen.getEmptyVariant variant |> TaskSeq.tryPick (picker 12)
 
         nothing |> should be None'
     }
@@ -52,7 +61,7 @@ module EmptySeq =
     let ``TaskSeq-tryPickAsync on an empty sequence returns None`` variant = task {
         let! nothing =
             Gen.getEmptyVariant variant
-            |> TaskSeq.tryPickAsync (fun x -> task { return if x = 12 then Some x else None })
+            |> TaskSeq.tryPickAsync (pickerAsync 12)
 
         nothing |> should be None'
     }
@@ -63,7 +72,7 @@ module Immutable =
     let ``TaskSeq-pick sad path raises KeyNotFoundException`` variant = task {
         fun () ->
             Gen.getSeqImmutable variant
-            |> TaskSeq.pick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
+            |> TaskSeq.pick (picker 0) // dummy tasks sequence starts at 1
             |> Task.ignore
 
         |> should throwAsyncExact typeof<KeyNotFoundException>
@@ -83,7 +92,7 @@ module Immutable =
     let ``TaskSeq-pick sad path raises KeyNotFoundException variant`` variant = task {
         fun () ->
             Gen.getSeqImmutable variant
-            |> TaskSeq.pick (fun x -> if x = 11 then Some x else None) // dummy tasks sequence ends at 50
+            |> TaskSeq.pick (picker 11) // dummy tasks sequence ends at 50
             |> Task.ignore
 
         |> should throwAsyncExact typeof<KeyNotFoundException>
@@ -93,7 +102,7 @@ module Immutable =
     let ``TaskSeq-pickAsync sad path raises KeyNotFoundException variant`` variant = task {
         fun () ->
             Gen.getSeqImmutable variant
-            |> TaskSeq.pickAsync (fun x -> task { return if x = 11 then Some x else None }) // dummy tasks sequence ends at 50
+            |> TaskSeq.pickAsync (pickerAsync 11) // dummy tasks sequence ends at 50
             |> Task.ignore
 
         |> should throwAsyncExact typeof<KeyNotFoundException>
@@ -164,9 +173,7 @@ module Immutable =
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-tryPick sad path returns None`` variant = task {
-        let! nothing =
-            Gen.getSeqImmutable variant
-            |> TaskSeq.tryPick (fun x -> if x = 0 then Some x else None) // dummy tasks sequence starts at 1
+        let! nothing = Gen.getSeqImmutable variant |> TaskSeq.tryPick (picker 0) // dummy tasks sequence starts at 1
 
         nothing |> should be None'
     }
@@ -175,7 +182,7 @@ module Immutable =
     let ``TaskSeq-tryPickAsync sad path return None`` variant = task {
         let! nothing =
             Gen.getSeqImmutable variant
-            |> TaskSeq.tryPickAsync (fun x -> task { return if x = 0 then Some x else None }) // dummy tasks sequence starts at 1
+            |> TaskSeq.tryPickAsync (pickerAsync 0) // dummy tasks sequence starts at 1
 
         nothing |> should be None'
     }

@@ -12,6 +12,17 @@ let validateSequence sq =
 
 module EmptySeq =
     [<Fact>]
+    let ``Null source is invalid`` () =
+        // note: ofList and its variants do not have null as proper value
+        assertNullArg <| fun () -> TaskSeq.ofAsyncArray null
+        assertNullArg <| fun () -> TaskSeq.ofAsyncSeq null
+        assertNullArg <| fun () -> TaskSeq.ofTaskArray null
+        assertNullArg <| fun () -> TaskSeq.ofTaskSeq null
+        assertNullArg <| fun () -> TaskSeq.ofResizeArray null
+        assertNullArg <| fun () -> TaskSeq.ofArray null
+        assertNullArg <| fun () -> TaskSeq.ofSeq null
+
+    [<Fact>]
     let ``TaskSeq-ofAsyncArray with empty set`` () =
         Array.init 0 (fun x -> async { return x })
         |> TaskSeq.ofAsyncArray

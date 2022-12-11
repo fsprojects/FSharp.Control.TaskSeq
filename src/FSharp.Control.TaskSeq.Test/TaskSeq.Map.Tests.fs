@@ -35,6 +35,17 @@ let validateSequenceWithOffset offset ts =
     |> Task.map (should equal expected)
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.map (fun _ -> ()) null
+        assertNullArg <| fun () -> TaskSeq.mapi (fun _ _ -> ()) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.mapAsync (fun _ -> Task.fromResult ()) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.mapiAsync (fun _ _ -> Task.fromResult ()) null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-map empty`` variant =
         Gen.getEmptyVariant variant

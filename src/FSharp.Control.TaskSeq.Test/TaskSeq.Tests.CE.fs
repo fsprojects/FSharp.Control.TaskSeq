@@ -1,10 +1,23 @@
 module TaskSeq.Tests.``taskSeq Computation Expression``
 
+open System
+
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
 open FSharp.Control
+
+[<Fact>]
+let ``CE taskSeq using yield! with null`` () = task {
+    let ts = taskSeq {
+        yield! Gen.sideEffectTaskSeq 10
+        yield! (null: taskSeq<int>)
+    }
+
+    fun () -> TaskSeq.toList ts
+    |> assertThrows typeof<NullReferenceException>
+}
 
 [<Fact>]
 let ``CE taskSeq with several yield!`` () = task {

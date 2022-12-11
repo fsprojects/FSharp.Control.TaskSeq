@@ -679,6 +679,8 @@ module internal TaskSeqInternal =
 
     let except itemsToExclude (source: taskSeq<_>) = taskSeq {
         checkNonNull (nameof source) source
+        checkNonNull (nameof itemsToExclude) itemsToExclude
+
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
@@ -704,6 +706,8 @@ module internal TaskSeqInternal =
 
     let exceptOfSeq itemsToExclude (source: taskSeq<_>) = taskSeq {
         checkNonNull (nameof source) source
+        checkNonNull (nameof itemsToExclude) itemsToExclude
+
         use e = source.GetAsyncEnumerator(CancellationToken())
         let mutable go = true
         let! step = e.MoveNextAsync()
