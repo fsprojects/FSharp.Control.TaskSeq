@@ -27,9 +27,31 @@ module EmptySeq =
         |> TaskSeq.toListAsync
         |> Task.map (List.isEmpty >> should be True)
 
-module Terminates =
+// The primary requirement is that items after the item failing the predicate must be excluded
+module TakeWhileExcludesEverythingAfterFail =
     [<Fact>]
-    let ``TaskSeq-takeWhile stops after predicate fails`` () =
+    let ``TaskSeq-takeWhile excludes all items after predicate fails`` () =
+        seq { 1; 2; 2; 3; 2; 1 }
+        |> TaskSeq.ofSeq
+        |> TaskSeq.takeWhile (fun x -> x <= 2)
+        |> TaskSeq.map char
+        |> TaskSeq.map ((+) '@')
+        |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "AB")
+
+    [<Fact>]
+    let ``TaskSeq-takeWhileAsync excludes all items after after predicate fails`` () =
+        taskSeq { 1; 2; 2; 3; 2; 1 }
+        |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 2 })
+        |> TaskSeq.map char
+        |> TaskSeq.map ((+) '@')
+        |> TaskSeq.toArrayAsync
+        |> Task.map (String >> should equal "AB")
+
+// Covers the fact that it's not sufficient to merely exclude successor items - it's also critical that the enumeration terminates
+module TakeWhileTerminatesOnFail =
+    [<Fact>]
+    let ``TaskSeq-takeWhile stops consuming after predicate fails`` () =
         seq { 1; 2; 3; failwith "Too far" }
         |> TaskSeq.ofSeq
         |> TaskSeq.takeWhile (fun x -> x <= 2)
@@ -39,7 +61,7 @@ module Terminates =
         |> Task.map (String >> should equal "AB")
 
     [<Fact>]
-    let ``TaskSeq-takeWhileAsync stops after predicate fails`` () =
+    let ``TaskSeq-takeWhileAsync stops consuming after predicate fails`` () =
         taskSeq { 1; 2; 3; failwith "Too far" }
         |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 2 })
         |> TaskSeq.map char
