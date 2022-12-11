@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
-    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +20,7 @@
     <Compile Include="TaskSeq.Except.Tests.fs" />
     <Compile Include="TaskSeq.Exists.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
+    <Compile Include="TaskSeq.TakeWhile.Tests.fs" />
     <Compile Include="TaskSeq.FindIndex.Tests.fs" />
     <Compile Include="TaskSeq.Find.Tests.fs" />
     <Compile Include="TaskSeq.Fold.Tests.fs" />
