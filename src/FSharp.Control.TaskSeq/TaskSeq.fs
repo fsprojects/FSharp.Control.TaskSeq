@@ -30,6 +30,7 @@ module TaskSeq =
     //
 
     let toList (source: taskSeq<'T>) = [
+        Internal.checkNonNull (nameof source) source
         let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
@@ -40,6 +41,7 @@ module TaskSeq =
     ]
 
     let toArray (source: taskSeq<'T>) = [|
+        Internal.checkNonNull (nameof source) source
         let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
@@ -50,6 +52,7 @@ module TaskSeq =
     |]
 
     let toSeq (source: taskSeq<'T>) = seq {
+        Internal.checkNonNull (nameof source) source
         let e = source.GetAsyncEnumerator(CancellationToken())
 
         try
@@ -74,6 +77,8 @@ module TaskSeq =
     //
 
     let ofArray (source: 'T[]) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             yield c
     }
@@ -84,16 +89,22 @@ module TaskSeq =
     }
 
     let ofSeq (source: 'T seq) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             yield c
     }
 
     let ofResizeArray (source: 'T ResizeArray) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             yield c
     }
 
     let ofTaskSeq (source: #Task<'T> seq) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             let! c = c
             yield c
@@ -106,12 +117,16 @@ module TaskSeq =
     }
 
     let ofTaskArray (source: #Task<'T> array) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             let! c = c
             yield c
     }
 
     let ofAsyncSeq (source: Async<'T> seq) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             let! c = task { return! c }
             yield c
@@ -124,6 +139,8 @@ module TaskSeq =
     }
 
     let ofAsyncArray (source: Async<'T> array) = taskSeq {
+        Internal.checkNonNull (nameof source) source
+
         for c in source do
             let! c = Async.toTask c
             yield c
@@ -148,21 +165,29 @@ module TaskSeq =
         }
 
     let concat (sources: taskSeq<#taskSeq<'T>>) = taskSeq {
+        Internal.checkNonNull (nameof sources) sources
+
         for ts in sources do
             yield! (ts :> taskSeq<'T>)
     }
 
     let append (source1: #taskSeq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+        Internal.checkNonNull (nameof source1) source1
+        Internal.checkNonNull (nameof source2) source2
         yield! (source1 :> IAsyncEnumerable<'T>)
         yield! (source2 :> IAsyncEnumerable<'T>)
     }
 
     let appendSeq (source1: #taskSeq<'T>) (source2: #seq<'T>) = taskSeq {
+        Internal.checkNonNull (nameof source1) source1
+        Internal.checkNonNull (nameof source2) source2
         yield! (source1 :> IAsyncEnumerable<'T>)
         yield! (source2 :> seq<'T>)
     }
 
     let prependSeq (source1: #seq<'T>) (source2: #taskSeq<'T>) = taskSeq {
+        Internal.checkNonNull (nameof source1) source1
+        Internal.checkNonNull (nameof source2) source2
         yield! (source1 :> seq<'T>)
         yield! (source2 :> IAsyncEnumerable<'T>)
     }
@@ -242,6 +267,7 @@ module TaskSeq =
     }
 
     let indexed (source: taskSeq<'T>) = taskSeq {
+        Internal.checkNonNull (nameof source) source
         let mutable i = 0
 
         for x in source do
