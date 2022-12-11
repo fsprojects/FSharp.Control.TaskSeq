@@ -7,7 +7,13 @@ open FsToolkit.ErrorHandling
 
 open FSharp.Control
 
+//
+// TaskSeq.isEmpty
+//
+
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () = assertNullArg <| fun () -> TaskSeq.head null
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-isEmpty returns true for empty`` variant =

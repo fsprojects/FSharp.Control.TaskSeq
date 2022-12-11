@@ -14,6 +14,16 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.length null
+
+        assertNullArg
+        <| fun () -> TaskSeq.lengthBy (fun _ -> false) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.lengthByAsync (fun _ -> Task.fromResult false) null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-length returns zero on empty sequences`` variant = task {
         let! len = Gen.getEmptyVariant variant |> TaskSeq.length

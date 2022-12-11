@@ -13,6 +13,11 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.exactlyOne null
+        assertNullArg <| fun () -> TaskSeq.tryExactlyOne null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-exactlyOne throws`` variant = task {
         fun () ->

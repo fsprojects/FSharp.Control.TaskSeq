@@ -12,6 +12,12 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.zip null TaskSeq.empty
+        assertNullArg <| fun () -> TaskSeq.zip TaskSeq.empty null
+        assertNullArg <| fun () -> TaskSeq.zip null null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-zip can zip empty sequences v1`` variant =
         TaskSeq.zip (Gen.getEmptyVariant variant) (Gen.getEmptyVariant variant)

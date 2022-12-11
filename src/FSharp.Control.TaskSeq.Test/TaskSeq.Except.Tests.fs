@@ -14,6 +14,20 @@ open FSharp.Control
 
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.except null TaskSeq.empty
+        assertNullArg <| fun () -> TaskSeq.except TaskSeq.empty null
+        assertNullArg <| fun () -> TaskSeq.except null null
+
+        assertNullArg
+        <| fun () -> TaskSeq.exceptOfSeq null TaskSeq.empty
+
+        assertNullArg
+        <| fun () -> TaskSeq.exceptOfSeq Seq.empty null
+
+        assertNullArg <| fun () -> TaskSeq.exceptOfSeq null null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-except`` variant =
         Gen.getEmptyVariant variant
