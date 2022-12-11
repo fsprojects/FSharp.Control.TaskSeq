@@ -366,6 +366,36 @@ module TaskSeq =
     val filter: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
+    /// Yields items from the source while the <paramref name="predicate" /> function returns <see cref="true" />.
+    /// The first <see cref="false" /> result concludes consumption of the source.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeWhileAsync" />.
+    /// </summary>
+    val takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Yields items from the source while the <paramref name="predicate" /> asynchronous function returns <see cref="true" />.
+    /// The first <see cref="false" /> result concludes consumption of the source.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.takeWhile" />.
+    /// </summary>
+    val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Yields items from the source while the <paramref name="predicate" /> function returns <see cref="true" />.
+    /// The first <see cref="false" /> result concludes consumption of the source, but is included in the result.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeWhileInclusiveAsync" />.
+    /// If the final item is not desired, consider using <see cref="TaskSeq.takeWhile" />.
+    /// </summary>
+    val takeWhileInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Yields items from the source while the <paramref name="predicate" /> asynchronous function returns <see cref="true" />.
+    /// The first <see cref="false" /> result concludes consumption of the source, but is included in the result.
+    /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.takeWhileInclusive" />.
+    /// If the final item is not desired, consider using <see cref="TaskSeq.takeWhileAsync" />.
+    /// </summary>
+    val takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
     /// Returns a new collection containing only the elements of the collection
     /// for which the given asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
     /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.filter" />.
