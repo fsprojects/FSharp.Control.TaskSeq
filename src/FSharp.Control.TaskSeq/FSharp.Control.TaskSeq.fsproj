@@ -9,9 +9,9 @@
     <Authors>Abel Braaksma; Don Syme</Authors>
     <Description>This library brings C#'s concept of 'await foreach' to F#, with a seamless implementation of IAsyncEnumerable&lt;'T&gt;.
 
-The 'taskSeq' computation expression adds support for awaitable asyncronous sequences with a similar ease of use and performance as F#'s 'task' CE, with minimal overhead through ValueTask under the hood. TaskSeq brings 'seq' and 'task' together in a safe way.
+The 'taskSeq' computation expression adds support for awaitable asynchronous sequences with similar ease of use and performance to F#'s 'task' CE, with minimal overhead through ValueTask under the hood. TaskSeq brings 'seq' and 'task' together in a safe way.
 
-Generates optimized IL code through the new resumable state machines, and comes with a comprehensive set of helpful functions in module 'TaskSeq'. See README for documentation and more info.</Description>
+Generates optimized IL code through resumable state machines, and comes with a comprehensive set of helper functions in module 'TaskSeq'. See README for documentation and more info.</Description>
     <Copyright>Copyright 2022</Copyright>
     <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</RepositoryUrl>
