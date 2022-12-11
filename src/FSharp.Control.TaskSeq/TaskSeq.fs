@@ -197,11 +197,8 @@ module TaskSeq =
     //
 
     let cast source : taskSeq<'T> = Internal.map (SimpleAction(fun (x: obj) -> x :?> 'T)) source
-    let box source = Internal.map (SimpleAction(fun x -> box x)) source
-
-    let unbox<'U when 'U: struct> (source: taskSeq<obj>) : taskSeq<'U> =
-        Internal.map (SimpleAction(fun x -> unbox x)) source
-
+    let box source = Internal.map (SimpleAction box) source
+    let unbox<'U when 'U: struct> (source: taskSeq<obj>) : taskSeq<'U> = Internal.map (SimpleAction unbox) source
     let iter action source = Internal.iter (SimpleAction action) source
     let iteri action source = Internal.iter (CountableAction action) source
     let iterAsync action source = Internal.iter (AsyncSimpleAction action) source
@@ -210,12 +207,9 @@ module TaskSeq =
     let mapi (mapper: int -> 'T -> 'U) source = Internal.map (CountableAction mapper) source
     let mapAsync mapper source = Internal.map (AsyncSimpleAction mapper) source
     let mapiAsync mapper source = Internal.map (AsyncCountableAction mapper) source
-    let collect (binder: 'T -> #IAsyncEnumerable<'U>) source = Internal.collect binder source
+    let collect (binder: 'T -> #taskSeq<'U>) source = Internal.collect binder source
     let collectSeq (binder: 'T -> #seq<'U>) source = Internal.collectSeq binder source
-
-    let collectAsync (binder: 'T -> #Task<#IAsyncEnumerable<'U>>) source : taskSeq<'U> =
-        Internal.collectAsync binder source
-
+    let collectAsync (binder: 'T -> #Task<#taskSeq<'U>>) source : taskSeq<'U> = Internal.collectAsync binder source
     let collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) source : taskSeq<'U> = Internal.collectSeqAsync binder source
 
     //
