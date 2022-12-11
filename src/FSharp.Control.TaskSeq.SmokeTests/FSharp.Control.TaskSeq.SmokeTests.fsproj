@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-
-    <IsPackable>false</IsPackable>
-    <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +10,6 @@
 
   <ItemGroup>
     <Compile Include="SmokeTests.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
