@@ -12,6 +12,13 @@ open FSharp.Control
 //
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.collect (fun _ -> TaskSeq.empty) null
+
+        assertNullArg
+        <| fun () -> TaskSeq.collectAsync (fun _ -> Task.fromResult TaskSeq.empty) null
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-collect collecting emptiness`` variant =

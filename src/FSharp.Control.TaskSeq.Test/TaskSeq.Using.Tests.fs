@@ -1,4 +1,4 @@
-module TaskSeq.Test.Using
+module TaskSeq.Tests.Using
 
 open System
 open System.Threading.Tasks
