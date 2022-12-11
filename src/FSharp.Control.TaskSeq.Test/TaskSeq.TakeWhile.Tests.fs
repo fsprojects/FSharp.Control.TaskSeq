@@ -10,6 +10,8 @@ open FSharp.Control
 //
 // TaskSeq.takeWhile
 // TaskSeq.takeWhileAsync
+// TaskSeq.takeWhileInclusive
+// TaskSeq.takeWhileInclusiveAsync
 //
 
 module EmptySeq =
@@ -28,46 +30,61 @@ module EmptySeq =
         |> Task.map (List.isEmpty >> should be True)
 
 // The primary requirement is that items after the item failing the predicate must be excluded
-module TakeWhileExcludesEverythingAfterFail =
-    [<Fact>]
-    let ``TaskSeq-takeWhile excludes all items after predicate fails`` () =
-        seq { 1; 2; 2; 3; 2; 1 }
+module FiltersAfterFail =
+    [<Theory; InlineData false; InlineData true>]
+    let ``TaskSeq-takeWhile(Inclusive)? excludes all items after predicate fails`` inclusive =
+        // The only real difference in semantics between the base and the *Inclusive variant lies in whether the final item is returned
+        // NOTE the semantics are very clear on only propagating a single failing item in the inclusive case
+        let f, expected =
+            if inclusive then TaskSeq.takeWhileInclusive, "ABBC"
+            else TaskSeq.takeWhile, "ABB"
+        seq { 1; 2; 2; 3; 3; 2; 1 }
         |> TaskSeq.ofSeq
-        |> TaskSeq.takeWhile (fun x -> x <= 2)
+        |> f (fun x -> x <= 2)
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
-        |> Task.map (String >> should equal "AB")
+        |> Task.map (String >> should equal expected)
 
-    [<Fact>]
-    let ``TaskSeq-takeWhileAsync excludes all items after after predicate fails`` () =
-        taskSeq { 1; 2; 2; 3; 2; 1 }
-        |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 2 })
+    // Same as preceding test, just with Async functions
+    [<Theory; InlineData false; InlineData true>]
+    let ``TaskSeq-takeWhile(Inclusive)?Async excludes all items after after predicate fails`` inclusive =
+        let f, expected =
+            if inclusive then TaskSeq.takeWhileInclusiveAsync, "ABBC"
+            else TaskSeq.takeWhileAsync, "ABB"
+        taskSeq { 1; 2; 2; 3; 3; 2; 1 }
+        |> f (fun x -> task { return x <= 2 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
-        |> Task.map (String >> should equal "AB")
+        |> Task.map (String >> should equal expected)
 
 // Covers the fact that it's not sufficient to merely exclude successor items - it's also critical that the enumeration terminates
-module TakeWhileTerminatesOnFail =
-    [<Fact>]
-    let ``TaskSeq-takeWhile stops consuming after predicate fails`` () =
-        seq { 1; 2; 3; failwith "Too far" }
+module StopsEnumeratingAfterFail =
+    [<Theory; InlineData false; InlineData true>]
+    let ``TaskSeq-takeWhile(Inclusive)? stops consuming after predicate fails`` inclusive =
+        let f, expected =
+            if inclusive then TaskSeq.takeWhileInclusive, "ABBC"
+            else TaskSeq.takeWhile, "ABB"
+        seq { 1; 2; 2; 3; 3; failwith "Too far" }
         |> TaskSeq.ofSeq
-        |> TaskSeq.takeWhile (fun x -> x <= 2)
+        |> f (fun x -> x <= 2)
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
-        |> Task.map (String >> should equal "AB")
+        |> Task.map (String >> should equal expected)
 
-    [<Fact>]
-    let ``TaskSeq-takeWhileAsync stops consuming after predicate fails`` () =
-        taskSeq { 1; 2; 3; failwith "Too far" }
-        |> TaskSeq.takeWhileAsync (fun x -> task { return x <= 2 })
+    [<Theory; InlineData false; InlineData true>]
+    let ``TaskSeq-takeWhile(Inclusive)?Async stops consuming after predicate fails`` inclusive =
+        let f, expected =
+            if inclusive then TaskSeq.takeWhileInclusiveAsync, "ABBC"
+            else TaskSeq.takeWhileAsync, "ABB"
+        taskSeq { 1; 2; 2; 3; 3; failwith "Too far" }
+        |> f (fun x -> task { return x <= 2 })
         |> TaskSeq.map char
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
-        |> Task.map (String >> should equal "AB")
+        |> Task.map (String >> should equal expected)
 
 // This is the base condition as one would expect in actual code
 let inline cond x = x <> 6
