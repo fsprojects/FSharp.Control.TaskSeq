@@ -532,54 +532,31 @@ module internal TaskSeqInternal =
                 | false -> ()
     }
 
-    let takeWhile predicate (source: taskSeq<_>) = taskSeq {
+    let takeWhile inclusive predicate (source: taskSeq<_>) = taskSeq {
         use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
-        let mutable go = step
+        let mutable more = step
 
         match predicate with
         | Predicate predicate ->
-            while go do
+            while more do
                 let value = e.Current
-                if predicate value then
+                more <- predicate value
+                if more || inclusive then
                     yield value
-                    let! more = e.MoveNextAsync()
-                    go <- more
-                else go <- false
+                if more then
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
         | PredicateAsync predicate ->
-            while go do
+            while more do
                 let value = e.Current
-                match! predicate value with
-                | true ->
+                let! passed = predicate value
+                more <- passed
+                if more || inclusive then
                     yield value
-                    let! more = e.MoveNextAsync()
-                    go <- more
-                | false -> go <- false
-    }
-
-    let takeWhileInclusive predicate (source: taskSeq<_>) = taskSeq {
-        use e = source.GetAsyncEnumerator(CancellationToken())
-        let! step = e.MoveNextAsync()
-        let mutable go = step
-
-        match predicate with
-        | Predicate predicate ->
-            while go do
-                let value = e.Current
-                yield value
-                if predicate value then
-                    let! more = e.MoveNextAsync()
-                    go <- more
-                else go <- false
-        | PredicateAsync predicate ->
-            while go do
-                let value = e.Current
-                yield value
-                match! predicate value with
-                | true ->
-                    let! more = e.MoveNextAsync()
-                    go <- more
-                | false -> go <- false
+                if more then
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
     }
 
     // Consider turning using an F# version of this instead?

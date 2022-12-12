@@ -86,11 +86,11 @@ module StopsEnumeratingAfterFail =
         |> TaskSeq.toArrayAsync
         |> Task.map (String >> should equal expected)
 
-// This is the base condition as one would expect in actual code
+/// This is the base condition as one would expect in actual code
 let inline cond x = x <> 6
 
-// For each of the tests below, we add a guard that will trigger if the predicate is passed items known to be beyond the
-// first failing item in the known sequence (which is 1..10)
+/// For each of the tests below, we add a guard that will trigger if the predicate is passed items known to be beyond the
+/// first failing item in the known sequence (which is 1..10)
 let inline condWithGuard x =
     let res = cond x
     if x > 6 then failwith "Test sequence should not be enumerated beyond the first item failing the predicate"
