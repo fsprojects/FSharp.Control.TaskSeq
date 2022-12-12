@@ -1,11 +1,14 @@
 module TaskSeq.Tests.Singleton
 
-open System.Threading.Tasks
 open Xunit
 open FsUnit.Xunit
 open FsToolkit.ErrorHandling
 
 open FSharp.Control
+
+//
+// TaskSeq.singleton
+//
 
 module EmptySeq =
 
@@ -18,12 +21,38 @@ module EmptySeq =
         |> TaskSeq.exactlyOne
         |> Task.map (should equal 10)
 
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-singleton with a mutable value`` () =
+        let mutable x = 0
+        let ts = TaskSeq.singleton x
+        x <- x + 1
+
+        // mutable value is dereferenced when passed to a function
+        ts |> TaskSeq.exactlyOne |> Task.map (should equal 0)
+
+    [<Fact>]
+    let ``TaskSeq-singleton with a ref cell`` () =
+        let x = ref 0
+        let ts = TaskSeq.singleton x
+        x.Value <- x.Value + 1
+
+        ts
+        |> TaskSeq.exactlyOne
+        |> Task.map (fun x -> x.Value |> should equal 1)
+
 module Other =
     [<Fact>]
     let ``TaskSeq-singleton creates a sequence of one`` () =
         TaskSeq.singleton 42
         |> TaskSeq.exactlyOne
         |> Task.map (should equal 42)
+
+    [<Fact>]
+    let ``TaskSeq-singleton with null as value`` () =
+        TaskSeq.singleton null
+        |> TaskSeq.exactlyOne
+        |> Task.map (should be Null)
 
     [<Fact>]
     let ``TaskSeq-singleton can be yielded multiple times`` () =

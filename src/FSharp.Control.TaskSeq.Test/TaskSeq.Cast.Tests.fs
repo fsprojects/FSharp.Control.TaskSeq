@@ -24,7 +24,10 @@ let validateSequence ts =
 
 module EmptySeq =
     [<Fact>]
-    let ``Null source is invalid`` () = assertNullArg <| fun () -> TaskSeq.box null
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.box null
+        assertNullArg <| fun () -> TaskSeq.unbox null
+        assertNullArg <| fun () -> TaskSeq.cast null
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-box empty`` variant = Gen.getEmptyVariant variant |> TaskSeq.box |> verifyEmpty
