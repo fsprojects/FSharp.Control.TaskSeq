@@ -12,17 +12,26 @@ module TaskSeq =
     /// <summary>
     /// Creates a <see cref="taskSeq" /> sequence from <paramref name="source" /> that generates a single element and then ends.
     /// </summary>
-    val singleton: source: 'T -> taskSeq<'T>
+    ///
+    /// <param name="value">The input item to use as the single value for the task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    val singleton: value: 'T -> taskSeq<'T>
 
     /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val isEmpty: source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Returns the length of the sequence. This operation requires the whole sequence to be evaluated and
     /// should not be used on potentially infinite sequences, see <see cref="lengthOrMax" /> for an alternative.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val length: source: taskSeq<'T> -> Task<int>
 
     /// <summary>
@@ -30,12 +39,20 @@ module TaskSeq =
     /// to be evaluated in full, or until <paramref name="max" /> items have been processed. Use this method instead of
     /// <see cref="TaskSeq.length" /> if you want to prevent too many items to be evaluated, or if the sequence is potentially infinite.
     /// </summary>
+    ///
+    /// <param name="max">The maximum value to return and the maximum items to count.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
     /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
     /// </summary>
+    ///
+    /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val lengthBy: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
@@ -43,6 +60,10 @@ module TaskSeq =
     /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
     /// If <paramref name="predicate" /> does not need to be asynchronous, consider using <see cref="TaskSeq.lengthBy" />.
     /// </summary>
+    ///
+    /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
@@ -116,7 +137,7 @@ module TaskSeq =
     /// new flattened, single task sequence. Each task sequence is awaited item by item, before the next is iterated.
     /// </summary>
     ///
-    /// <param name="sources">The input enumeration-of-enumerations.</param>
+    /// <param name="sources">The input task-sequence-of-task-sequences.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
@@ -154,198 +175,502 @@ module TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
     val prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
 
-    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
+    /// <summary>
+    /// Builds an F# <see cref="list" /> from the input task sequence in <paramref name="source" />.
+    /// This function is blocking until the sequence is exhausted and will then properly dispose of the resources.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting list.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toList: source: taskSeq<'T> -> 'T list
 
-    /// Returns taskSeq as an array. This function is blocking until the sequence is exhausted and will properly dispose of the resources.
+    /// <summary>
+    /// Builds an <see cref="array" /> from the input task sequence in <paramref name="source" />.
+    /// This function is blocking until the sequence is exhausted and will then properly dispose of the resources.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting array.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toArray: source: taskSeq<'T> -> 'T[]
 
     /// <summary>
-    /// Returns the task sequence <paramref name="source" /> as an F# <see cref="seq" />, that is, an
-    /// <see cref="IEnumerable&lt;'T>" />. This function is blocking at each <see cref="yield" />, but otherwise
-    /// acts as a normal delay-executed sequence.
-    /// It will then dispose of the resources.
+    /// Views the task sequence in <paramref name="source" /> as an F# <see cref="seq" />, that is, an
+    /// <see cref="IEnumerable&lt;'T>" />. This function is blocking at each <see cref="yield" /> or call
+    /// to <see cref="IEnumerable&lt;'T>/MoveNext()" /> in the resulting sequence.
+    /// Resources are disposed when the sequence is disposed, or the sequence is exhausted.
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toSeq: source: taskSeq<'T> -> seq<'T>
 
-    /// Unwraps the taskSeq as a Task<array<_>>. This function is non-blocking.
+    /// <summary>
+    /// Builds an <see cref="array" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// This function is non-blocking while it builds the array.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting array.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
 
-    /// Unwraps the taskSeq as a Task<list<_>>. This function is non-blocking.
+    /// <summary>
+    /// Builds an F# <see cref="list" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// This function is non-blocking while it builds the list.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting list.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toListAsync: source: taskSeq<'T> -> Task<'T list>
 
-    /// Unwraps the taskSeq as a Task<ResizeArray<_>>. This function is non-blocking.
+    /// <summary>
+    /// Builds a resizable array asynchronously from the input task sequence in <paramref name="source" />.
+    /// This function is non-blocking while it builds the resizable array.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting resizable array.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toResizeArrayAsync: source: taskSeq<'T> -> Task<ResizeArray<'T>>
 
-    /// Unwraps the taskSeq as a Task<IList<_>>. This function is non-blocking.
+    /// <summary>
+    /// Builds an <see cref="IList&lt;'T>" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// This function is non-blocking while it builds the IList.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting IList interface.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
 
-    /// Create a taskSeq of an array.
+    /// <summary>
+    /// Views the given <see cref="array" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input array.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input array is null.</exception>
     val ofArray: source: 'T[] -> taskSeq<'T>
 
-    /// Create a taskSeq of a list.
+    /// <summary>
+    /// Views the given <see cref="list" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input list.</param>
+    /// <returns>The resulting task sequence.</returns>
     val ofList: source: 'T list -> taskSeq<'T>
 
-    /// Create a taskSeq of a seq.
+    /// <summary>
+    /// Views the given <see cref="seq" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val ofSeq: source: seq<'T> -> taskSeq<'T>
 
-    /// Create a taskSeq of a ResizeArray, aka List.
+    /// <summary>
+    /// Views the given resizable array as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input resize array.</param>
+    /// <returns>The resulting task sequence.</returns>
     val ofResizeArray: source: ResizeArray<'T> -> taskSeq<'T>
 
-    /// Create a taskSeq of a sequence of tasks, that may already have hot-started.
+    /// <summary>
+    /// Views the given <see cref="seq" /> of <see cref="Task" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. A sequence of tasks is not the same as a task sequence.
+    /// Each task in a sequence of tasks can be run individually and potentially out of order, or with
+    /// overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen.
+    /// </summary>
+    ///
+    /// <param name="source">The input sequence-of-tasks.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val ofTaskSeq: source: seq<#Task<'T>> -> taskSeq<'T>
 
-    /// Create a taskSeq of a list of tasks, that may already have hot-started.
+    /// <summary>
+    /// Views the given <see cref="list" /> of <see cref="Task" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. A list of tasks will typically already be hot-started,
+    /// as a result, each task can already run and potentially out of order, or with
+    /// overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen. Converting a list of tasks into a task sequence is no guarantee
+    /// that overlapping side effects are prevented. Safe for side-effect free tasks.
+    /// </summary>
+    ///
+    /// <param name="source">The input list-of-tasks.</param>
+    /// <returns>The resulting task sequence.</returns>
     val ofTaskList: source: #Task<'T> list -> taskSeq<'T>
 
-    /// Create a taskSeq of an array of tasks, that may already have hot-started.
+    /// <summary>
+    /// Views the given <see cref="array" /> of <see cref="Task" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. An array of tasks will typically already be hot-started,
+    /// as a result, each task can already run and potentially out of order, or with
+    /// overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen. Converting an array of tasks into a task sequence is no guarantee
+    /// that overlapping side effects are prevented. Safe for side-effect free tasks.
+    /// </summary>
+    ///
+    /// <param name="source">The input array-of-tasks.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input array is null.</exception>
     val ofTaskArray: source: #Task<'T> array -> taskSeq<'T>
 
-    /// Create a taskSeq of a seq of async.
+    /// <summary>
+    /// Views the given <see cref="seq" /> of <see cref="Async" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. A sequence of asyncs is not the same as a task sequence.
+    /// Each async computation in a sequence of asyncs can be run individually or in parallel, potentially
+    /// with overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen.
+    /// </summary>
+    ///
+    /// <param name="source">The input sequence-of-asyncs.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val ofAsyncSeq: source: seq<Async<'T>> -> taskSeq<'T>
 
-    /// Create a taskSeq of a list of async.
+    /// <summary>
+    /// Views the given <see cref="list" /> of <see cref="Async" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. A list of asyncs is not the same as a task sequence.
+    /// Each async computation in a list of asyncs can be run individually or in parallel, potentially
+    /// with overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen.
+    /// </summary>
+    ///
+    /// <param name="source">The input list-of-asyncs.</param>
+    /// <returns>The resulting task sequence.</returns>
     val ofAsyncList: source: Async<'T> list -> taskSeq<'T>
 
-    /// Create a taskSeq of an array of async.
+    /// <summary>
+    /// Views the given <see cref="array" /> of <see cref="Async" />s as a task sequence, that is, as an
+    /// <see cref="IAsyncEnumerable&lt;'T>" />. An array of asyncs is not the same as a task sequence.
+    /// Each async computation in an array of asyncs can be run individually or in parallel, potentially
+    /// with overlapping side effects, while a task sequence forces awaiting between the items in the sequence,
+    /// preventing such overlap to happen.
+    /// </summary>
+    ///
+    /// <param name="source">The input array-of-asyncs.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
 
     /// <summary>
-    /// Boxes as type <see cref="obj" /> each item in the <paramref name="source" /> sequence asynchyronously.
+    /// Views each item in the input task sequence as <see cref="obj" />, boxing value types.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val box: source: taskSeq<'T> -> taskSeq<obj>
 
     /// <summary>
-    /// Unboxes to the target type <see cref="'U" /> each item in the <paramref name="source" /> sequence asynchyronously.
+    /// Unboxes to the target type <see cref="'U" /> each item in the input task sequence.
     /// The target type must be a <see cref="struct" /> or a built-in value type.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
     val unbox<'U when 'U: struct> : source: taskSeq<obj> -> taskSeq<'U>
 
     /// <summary>
-    /// Casts each item in the untyped <paramref name="source" /> sequence asynchyronously. If your types are boxed struct types
+    /// Casts each item in the untyped input task sequence. If the input sequence contains value types
     /// it is recommended to use <see cref="TaskSeq.unbox" /> instead.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
-    val cast: source: taskSeq<obj> -> taskSeq<'T>
+    val cast: source: taskSeq<obj> -> taskSeq<'U>
 
-    /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking
-    /// exhausts the sequence as soon as the task is evaluated.
+    /// <summary>
+    /// Iterates over the input task sequence, applying the <paramref name="action" /> function to each item.
+    /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">A function to apply to each element of the task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val iter: action: ('T -> unit) -> source: taskSeq<'T> -> Task<unit>
 
-    /// Iterates over the taskSeq applying the action function to each item. This function is non-blocking,
-    /// exhausts the sequence as soon as the task is evaluated.
+    /// <summary>
+    /// Iterates over the input task sequence, applying the <paramref name="action" /> function to each item,
+    /// carrying the index as extra parameter for the <paramref name="action" /> function.
+    /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">A function to apply to each element of the task sequence that can also access the current index.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val iteri: action: (int -> 'T -> unit) -> source: taskSeq<'T> -> Task<unit>
 
-    /// Iterates over the taskSeq applying the async action to each item. This function is non-blocking
-    /// exhausts the sequence as soon as the task is evaluated.
+    /// <summary>
+    /// Iterates over the input task sequence, applying the asynchronous <paramref name="action" /> function to each item.
+    /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">An asynchronous function to apply to each element of the task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val iterAsync: action: ('T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
 
-    /// Iterates over the taskSeq, applying the async action to each item. This function is non-blocking,
-    /// exhausts the sequence as soon as the task is evaluated.
+    /// <summary>
+    /// Iterates over the input task sequence, applying the asynchronous <paramref name="action" /> function to each item,
+    /// carrying the index as extra parameter for the <paramref name="action" /> function.
+    /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">An asynchronous function to apply to each element of the task sequence that can also access the current index.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     val iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
-
-    /// Maps over the taskSeq, applying the mapper function to each item. This function is non-blocking.
-    val map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the corresponding elements of the input task
     /// sequence <paramref name="source" /> paired with the integer index (from 0) of each element.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
+    ///
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence of tuples.</returns>
-    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val indexed: source: taskSeq<'T> -> taskSeq<int * 'T>
 
-    /// Maps over the taskSeq with an index, applying the mapper function to each item. This function is non-blocking.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function to transform items from the input task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    val map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
+
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
+    /// an extra index argument to the <paramref name="action" /> function.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function to transform items from the input task sequence that also access the current index.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val mapi: mapper: (int -> 'T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 
-    /// Maps over the taskSeq, applying the async mapper function to each item. This function is non-blocking.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function to transform items from the input task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val mapAsync: mapper: ('T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
-    /// Maps over the taskSeq with an index, applying the async mapper function to each item. This function is non-blocking.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
+    /// an extra index argument to the <paramref name="action" /> function.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function to transform items from the input task sequence that also access the current index.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
-    /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
+    /// returned task sequences.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="binder">A function to transform items from the input task sequence into a task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting concatenation of all returned task sequences.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val collect: binder: ('T -> #taskSeq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
-    /// Applies the given function to the items in the taskSeq and concatenates all the results in order.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
+    /// returned regular F# sequences.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="binder">A function to transform items from the input task sequence into a regular sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting concatenation of all returned task sequences.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val collectSeq: binder: ('T -> #seq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
-    /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
+    /// returned task sequences.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="binder">An asynchronous function to transform items from the input task sequence into a task sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting concatenation of all returned task sequences.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val collectAsync: binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
 
-    /// Applies the given async function to the items in the taskSeq and concatenates all the results in order.
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
+    /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
+    /// returned regular F# sequences.
+    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
+    /// </summary>
+    ///
+    /// <param name="binder">An asynchronous function to transform items from the input task sequence into a regular sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting concatenation of all returned task sequences.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
 
     /// <summary>
-    /// Returns the first element of the task sequence from <paramref name="source" />, or <see cref="None" /> if the sequence is empty.
+    /// Returns the first element of the input task sequence given by <paramref name="source" />,
+    /// or <see cref="None" /> if the sequence is empty.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The first element of the task sequence, or None.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val tryHead: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the first elementof the task sequence from <paramref name="source" />
+    /// Returns the first elementof the input task sequence given by <paramref name="source" />.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The first element of the task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the sequence is empty.</exception>
     val head: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
-    /// Returns the whole task sequence from <paramref name="source" />, minus its first element, or <see cref="None" /> if the sequence is empty.
+    /// Returns the whole input task sequence given by <paramref name="source" />, minus its first element,
+    /// or <see cref="None" /> if the sequence is empty.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The input task sequence minus the first element, or None.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val tryTail: source: taskSeq<'T> -> Task<taskSeq<'T> option>
 
     /// <summary>
     /// Returns the whole task sequence from <paramref name="source" />, minus its first element.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The input task sequence minus the first element.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the sequence is empty.</exception>
     val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
 
     /// <summary>
-    /// Returns the last element of the task sequence from <paramref name="source" />, or <see cref="None" /> if the sequence is empty.
+    /// Returns the last element of the input task sequence given by <paramref name="source" />,
+    /// or <see cref="None" /> if the sequence is empty.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element of the task sequence, or None.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val tryLast: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the last element of the <see cref="taskSeq" />.
+    /// Returns the last element of the input task sequence given by <paramref name="source" />.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the sequence is empty.</exception>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element of the task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the sequence is empty.</exception>
     val last: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
-    /// Returns the nth element of the <see cref="taskSeq" />, or <see cref="None" /> if the sequence
-    /// does not contain enough elements, or if <paramref name="index" /> is negative.
-    /// Parameter <paramref name="index" /> is zero-based, that is, the value 0 returns the first element.
+    /// Returns the nth element of the input task sequence given by <paramref name="source" />,
+    /// or <see cref="None" /> if the sequence does not contain enough elements, or <paramref name="index" />
+    /// is negative.
+    /// The index is zero-based, that is, using index 0 returns the first element.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The nth element of the task sequence, or None if it doesn't exist.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val tryItem: index: int -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the nth element of the <see cref="taskSeq" />, or raises an exception if the sequence
-    /// does not contain enough elements, or if <paramref name="index" /> is negative.
+    /// Returns the nth element of the input task sequence given by <paramref name="source" />,
+    /// or raises an exception if the sequence does not contain enough elements, or <paramref name="index" />
+    /// is negative.
+    /// The index is zero-based, that is, using index 0 returns the first element.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the sequence has insufficient length or
-    /// <paramref name="index" /> is negative.</exception>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The nth element of the task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">
+    ///    Thrown when the sequence has insufficient length or
+    ///    <paramref name="index" /> is negative.
+    /// </exception>
     val item: index: int -> source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the only element of the task sequence, or <see cref="None" /> if the sequence is empty of
     /// contains more than one element.
     /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The only element of the singleton task sequence, or None.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the only element of the task sequence.
     /// </summary>
-    /// <exception cref="ArgumentException">Thrown when the input sequence does not contain precisely one element.</exception>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The only element of the singleton task sequence, or None.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input sequence does not contain precisely one element.</exception>
     val exactlyOne: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
     /// a sequence comprised of the results "x" for each element where
-    /// the function returns <c>Some(x)</c>.
+    /// the function returns <see cref="Some(x)" />.
     /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseAsync" />.
     /// </summary>
     val choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>

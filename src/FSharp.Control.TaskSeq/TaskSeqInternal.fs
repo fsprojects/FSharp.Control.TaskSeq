@@ -76,7 +76,7 @@ module internal TaskSeqInternal =
             return not step
         }
 
-    let singleton (source: 'T) =
+    let singleton (value: 'T) =
         { new IAsyncEnumerable<'T> with
             member _.GetAsyncEnumerator(_) =
                 let mutable status = BeforeAll
@@ -94,7 +94,7 @@ module internal TaskSeqInternal =
 
                     member _.Current: 'T =
                         match status with
-                        | WithCurrent -> source
+                        | WithCurrent -> value
                         | _ -> Unchecked.defaultof<'T>
 
                     member _.DisposeAsync() = ValueTask.CompletedTask
