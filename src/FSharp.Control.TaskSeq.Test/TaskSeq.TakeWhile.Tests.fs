@@ -133,3 +133,87 @@ module SideEffects =
         |> TaskSeq.map ((+) '@')
         |> TaskSeq.toArrayAsync
         |> Task.map (String >> should equal "ABCDE")
+
+    [<Theory; InlineData(false, false); InlineData(true, false); InlineData(false, true); InlineData(true, true)>]
+    let ``TaskSeq-takeWhile(Inclusive)?(Async)? __special-case__ prove it does not read beyond the failing yield`` (inclusive, async) = task {
+        let mutable x = 42 // for this test, the potential mutation should not actually occur
+
+        let items = taskSeq {
+            yield x // Always passes the test; always returned
+            yield x * 2 // the failing item (which will also be yielded in the result when using *Inclusive)
+            x <- x + 1 // we are proving we never get here
+        }
+
+        let f =
+            match inclusive, async with
+            | false, false -> TaskSeq.takeWhile (fun x -> x = 42)
+            | true, false -> TaskSeq.takeWhileInclusive (fun x -> x = 42)
+            | false, true -> TaskSeq.takeWhileAsync (fun x -> task { return x = 42 })
+            | true, true -> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x = 42 })
+
+        let expected = if inclusive then [| 42; 84 |] else [| 42 |]
+
+        let! first = items |> f |> TaskSeq.toArrayAsync
+        let! repeat = items |> f |> TaskSeq.toArrayAsync
+
+        first |> should equal expected
+        repeat |> should equal expected
+        x |> should equal 42
+    }
+
+    [<Theory; InlineData(false, false); InlineData(true, false); InlineData(false, true); InlineData(true, true)>]
+    let ``TaskSeq-takeWhile(Inclusive)?(Async)? __special-case__ prove side effects are executed`` (inclusive, async) = task {
+        let mutable x = 41
+
+        let items = taskSeq {
+            x <- x + 1
+            yield x
+            x <- x + 2
+            yield x * 2
+            x <- x + 200 // as previously proven, we should not trigger this
+        }
+
+        let f =
+            match inclusive, async with
+            | false, false -> TaskSeq.takeWhile (fun x -> x < 50)
+            | true, false -> TaskSeq.takeWhileInclusive (fun x -> x < 50)
+            | false, true -> TaskSeq.takeWhileAsync (fun x -> task { return x < 50 })
+            | true, true -> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 50 })
+
+        let expectedFirst = if inclusive then [| 42; 44*2 |] else [| 42 |]
+        let expectedRepeat = if inclusive then [| 45; 47*2 |] else [| 45 |]
+
+        let! first = items |> f |> TaskSeq.toArrayAsync
+        x |> should equal 44
+        let! repeat = items |> f |> TaskSeq.toArrayAsync
+        x |> should equal 47
+
+        first |> should equal expectedFirst
+        repeat |> should equal expectedRepeat
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-takeWhile consumes the prefix of a longer sequence, with mutation`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+
+        let! first = TaskSeq.takeWhile (fun x -> x < 5) ts |> TaskSeq.toArrayAsync
+        let expected = [| 1..4 |]
+        first |> should equal expected
+
+        // side effect, reiterating causes it to resume from where we left it (minus the failing item)
+        let! repeat = TaskSeq.takeWhile (fun x -> x < 5) ts |> TaskSeq.toArrayAsync
+        repeat |> should not' (equal expected)
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-takeWhileInclusiveAsync consumes the prefix for a longer sequence, with mutation`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+
+        let! first = TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts |> TaskSeq.toArrayAsync
+        let expected = [| 1..5 |]
+        first |> should equal expected
+
+        // side effect, reiterating causes it to resume from where we left it (minus the failing item)
+        let! repeat = TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts |> TaskSeq.toArrayAsync
+        repeat |> should not' (equal expected)
+    }
