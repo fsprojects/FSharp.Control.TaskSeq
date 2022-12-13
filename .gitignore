@@ -146,9 +146,8 @@ _NCrunch_*
 .*crunch*.local.xml
 nCrunchTemp_*
 
-# MightyMoose
-*.mm.*
-AutoTest.Net/
+# Rider / JetBrains IDEs
+.idea/
 
 # Web workbench (sass)
 .sass-cache/
