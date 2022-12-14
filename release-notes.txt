@@ -1,5 +1,7 @@
 
 Release notes:
+0.4.x (unreleased)
+    - adds TaskSeq.takeWhile, takeWhileAsync, takeWhileInclusive, takeWhileInclusiveAsync, #126 (by @bartelink)
 
 0.3.0
     - internal renames, improved doc comments, signature files for complex types, hide internal-only types, fixes #112.
