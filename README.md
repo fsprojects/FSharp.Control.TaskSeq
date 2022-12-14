@@ -279,6 +279,8 @@ The following is the progress report:
 | &#x2705; [#90][] | `singleton`        | `singleton`     |                      | |
 |                  | `skip`             | `skip`          |                      | |
 |                  | `skipWhile`        | `skipWhile`     | `skipWhileAsync`     | |
+|                  |                    |                 | `skipWhileInclusive` | |
+|                  |                    |                 | `skipWhileInclusiveAsync` | |
 | &#x2753;         | `sort`             |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortBy`           |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortByAscending`  |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
@@ -289,7 +291,9 @@ The following is the progress report:
 |                  | `sumBy`            | `sumBy`         | `sumByAsync`         | |
 | &#x2705; [#76][] | `tail`             | `tail`          |                      | |
 |                  | `take`             | `take`          |                      | |
-| &#x2705; [#126][] | `takeWhile`       | `takeWhile`     | `takeWhileAsync`, `takeWhileInclusive`, `takeWhileInclusiveAsync` | |
+| &#x2705; [#126][]| `takeWhile`        | `takeWhile`     | `takeWhileAsync`     | |
+| &#x2705; [#126][]|                    |                 | `takeWhileInclusive` | |
+| &#x2705; [#126][]|                    |                 | `takeWhileInclusiveAsync`| |
 | &#x2705; [#2][]  | `toArray`          | `toArray`       | `toArrayAsync`       | |
 | &#x2705; [#2][]  |                    | `toIList`       | `toIListAsync`       | |
 | &#x2705; [#2][]  | `toList`           | `toList`        | `toListAsync`        | |
