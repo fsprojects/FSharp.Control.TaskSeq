@@ -549,6 +549,7 @@ module TaskSeq =
 [#82]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/82
 [#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
 [#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
+[#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
