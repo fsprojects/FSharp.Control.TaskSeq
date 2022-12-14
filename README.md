@@ -495,6 +495,10 @@ module TaskSeq =
     val prependSeq: source1: #seq<'T> -> source2: #taskSeq<'T> -> taskSeq<'T>
     val singleton: source: 'T -> taskSeq<'T>
     val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
+    val takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
+    val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
+    val takeWhileInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
+    val takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
     val toArray: source: taskSeq<'T> -> 'T[]
     val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
     val toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
