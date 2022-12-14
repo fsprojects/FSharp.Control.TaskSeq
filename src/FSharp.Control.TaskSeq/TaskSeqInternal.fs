@@ -12,6 +12,11 @@ type internal AsyncEnumStatus =
     | AfterAll
 
 [<Struct>]
+type internal WhileKind =
+    | Inclusive
+    | Exclusive
+
+[<Struct>]
 type internal Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
     | CountableAction of countable_action: (int -> 'T -> 'U)
     | SimpleAction of simple_action: ('T -> 'U)
@@ -532,28 +537,52 @@ module internal TaskSeqInternal =
                 | false -> ()
     }
 
-    let takeWhile inclusive predicate (source: taskSeq<_>) = taskSeq {
+    let takeWhile whileKind predicate (source: taskSeq<_>) = taskSeq {
         use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()
         let mutable more = step
 
-        match predicate with
-        | Predicate predicate ->
+        match whileKind, predicate with
+        | Exclusive, Predicate predicate ->
             while more do
                 let value = e.Current
                 more <- predicate value
-                if more || inclusive then
+
+                if more then
                     yield value
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
+
+        | Inclusive, Predicate predicate ->
+            while more do
+                let value = e.Current
+                more <- predicate value
+
+                yield value
+
                 if more then
                     let! ok = e.MoveNextAsync()
                     more <- ok
-        | PredicateAsync predicate ->
+
+        | Exclusive, PredicateAsync predicate ->
             while more do
                 let value = e.Current
                 let! passed = predicate value
                 more <- passed
-                if more || inclusive then
+
+                if more then
                     yield value
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
+
+        | Inclusive, PredicateAsync predicate ->
+            while more do
+                let value = e.Current
+                let! passed = predicate value
+                more <- passed
+
+                yield value
+
                 if more then
                     let! ok = e.MoveNextAsync()
                     more <- ok
