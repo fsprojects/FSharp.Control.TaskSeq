@@ -48,7 +48,7 @@ Latest version [can be installed from Nuget][nuget].
 
 The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6].
 
-Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iterating over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and implements the same _resumable state machine_ approach with `taskSeq`.
+Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iteration over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and applies the same _resumable state machine_ approach with `taskSeq`.
 
 ### Module functions
 
@@ -58,9 +58,12 @@ As with `seq` and `Seq`, this library comes with a bunch of well-known collectio
 
 ### `taskSeq` computation expressions
 
-The `taskSeq` computation expression can be used just like using `seq`. On top of that, it adds support for working with tasks through `let!` and 
-looping over a normal or asynchronous sequence (one that implements `IAsyncEnumerable<'T>'`). You can use `yield!` and `yield` and there's support
-for `use` and `use!`, `try-with` and `try-finally` and `while` loops within the task sequence expression:
+The `taskSeq` computation expression can be used just like using `seq`.
+Additionally, it adds support for working with `Task`s through `let!` and 
+looping over both normal and asynchronous sequences (ones that implement
+`IAsyncEnumerable<'T>'`). You can use `yield!` and `yield` and there's support
+for `use` and `use!`, `try-with` and `try-finally` and `while` loops within
+the task sequence expression:
 
 ### Installation
 
@@ -183,7 +186,7 @@ The _resumable state machine_ backing the `taskSeq` CE is now finished and _rest
 
 ### Progress and implemented `TaskSeq` module functions
 
-We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided from `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
+We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided by `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
 
 The following is the progress report:
 
@@ -327,12 +330,17 @@ The following is the progress report:
 
 ## More information
 
-### Further reading `IAsyncEnumerable`
+### The AsyncSeq library
+
+If you're looking to use `IAsyncEnumerable` with `async` and not `task`, the existing [`AsyncSeq`][11] library already provides excellent coverage of that use case. While `TaskSeq` is intended to interoperate with `async` as `task` does, it's not intended to provide an `AsyncSeq` type (at least not yet).
+
+In short, if your application is using `Async` (and the parallelism features stemming from that), consider using the `AsyncSeq` library instead.
+
+### Further reading on `IAsyncEnumerable`
 
 - A good C#-based introduction [can be found in this blog][8].
 - [An MSDN article][9] written shortly after it was introduced.
 - Converting a `seq` to an `IAsyncEnumerable` [demo gist][10] as an example, though `TaskSeq` contains many more utility functions and uses a slightly different approach.
-- If you're looking for using `IAsyncEnumerable` with `async` and not `task`, the excellent [`AsyncSeq`][11] library should be used. While `TaskSeq` is intended to consume `async` just like `task` does, it won't create an `AsyncSeq` type (at least not yet). If you want classic Async and parallelism, you should get this library instead.
 
 ### Further reading on resumable state machines
 
