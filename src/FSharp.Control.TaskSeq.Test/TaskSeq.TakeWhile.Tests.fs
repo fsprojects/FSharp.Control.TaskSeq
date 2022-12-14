@@ -48,22 +48,26 @@ module With =
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-takeWhile+A has no effect`` variant = task {
-        do! Gen.getEmptyVariant variant
+        do!
+            Gen.getEmptyVariant variant
             |> TaskSeq.takeWhile ((=) 12)
             |> verifyEmpty
 
-        do! Gen.getEmptyVariant variant
+        do!
+            Gen.getEmptyVariant variant
             |> TaskSeq.takeWhileAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-takeWhileInclusive+A has no effect`` variant = task {
-        do! Gen.getEmptyVariant variant
+        do!
+            Gen.getEmptyVariant variant
             |> TaskSeq.takeWhileInclusive ((=) 12)
             |> verifyEmpty
 
-        do! Gen.getEmptyVariant variant
+        do!
+            Gen.getEmptyVariant variant
             |> TaskSeq.takeWhileInclusiveAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
