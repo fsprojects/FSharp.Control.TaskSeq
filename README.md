@@ -24,15 +24,16 @@ Latest version [can be installed from Nuget][nuget].
   - [`taskSeq` computation expressions](#taskseq-computation-expressions)
   - [Installation](#installation)
   - [Examples](#examples)
-- [Status & planning](#status--planning)
+- [Choosing between `AsyncSeq` and `TaskSeq`](#choosing-between-asyncseq-and-taskseq)
+- [Status \& planning](#status--planning)
   - [Implementation progress](#implementation-progress)
   - [Progress `taskSeq` CE](#progress-taskseq-ce)
   - [Progress and implemented `TaskSeq` module functions](#progress-and-implemented-taskseq-module-functions)
 - [More information](#more-information)
-  - [Further reading `IAsyncEnumerable`](#further-reading-iasyncenumerable)
+  - [Further reading on `IAsyncEnumerable`](#further-reading-on-iasyncenumerable)
   - [Further reading on resumable state machines](#further-reading-on-resumable-state-machines)
   - [Further reading on computation expressions](#further-reading-on-computation-expressions)
-- [Building & testing](#building--testing)
+- [Building \& testing](#building--testing)
   - [Prerequisites](#prerequisites)
   - [Build the solution](#build-the-solution)
   - [Run the tests](#run-the-tests)
@@ -162,6 +163,33 @@ let feedFromTwitter user pwd = taskSeq {
        yield message
 }
 ```
+
+## Choosing between `AsyncSeq` and `TaskSeq`
+
+The [`AsyncSeq`][11] and `TaskSeq` library both operate on asynchronous sequences, but there are a few fundamental differences, most notably that the former _does not_ implement `IAsyncEnumerable<'T>`, but has its own same-named, but differently behaving type. Another core difference is that `TaskSeq` uses `ValueTasks` for the asynchronous computations, and `AsyncSeq` uses F#'s `Async<'T>`.
+
+There are more differences:
+
+|                            | `TaskSeq`                                                                             | `AsyncSeq`                                                           |
+|----------------------------|---------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| **Frameworks**             | .NET 5.0+, NetStandard 2.1                                                        | .NET 5.0+, NetStandard 2.0 and 2.1, .NET Framework 4.6.1+            |
+| **Underlying type**        | `System.Collections.Generic.IAsyncEnumerable<'T>`                                 | Its own type, also called `IAsyncEnumerable<'T>`, but not compatible |
+| **Implementation**         | State machine (statically compiled)                                               | No state machine, continuation style                                 |
+| **Semantics**              | `seq`-like: on-demand                                                             | `seq`-like: on-demand                                                |
+| **Support `let!`**         | All `task`-like: `Async<'T>`, `ValueTask<'T>`, `Task<'T>` or any `GetAwaiter()`   | `Async<'T>` only                                                     |
+| **Support `do!`**          | `Async<unit>`, `Task<unit>` and `Task`, `ValueTask<unit>` and `ValueTask`         | `Async<unit>` only                                                   |
+| **Support `yield!`**       | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                  | `AsyncSeq`                                                           |
+| **Support `for`**          | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                  | `AsyncSeq` any sequence                                              |
+| **Behavior with `yield`**  | Zero allocations, no `Task` or even `ValueTask` created                           | Allocated, an F# `Async` wrapped in a singleton `AsyncSeq`           |
+| **Conversion to other**    | `TaskSeq.toAsyncSeq`                                                              | `AsyncSeq.toAsyncEnum`                                               |
+| **Conversion from other**  | Implicit (yield!) or `TaskSeq.ofAsyncSeq`                                         | `AsyncSeq.ofAsyncEnum`                                               |
+| **Recursion in `yield!`**  | No (requires F# support, upcoming)                                                | Yes                                                                  |
+| **Based on F# concept of** | `task`                                                                            | `async`                                                              |
+| **`MoveNextAsync`**        | `ValueTask<bool>`                                                                 | `Async<'T option>`                                                   |
+| **`Current` internals**    | `ValueOption<'T>`                                                                 | `Option<'T>`                                                         |
+| **Cancellation**           | Implicit token governing iteration                                                | Implicit token passed to each subtask                                |
+| **Performance**            | Very high, negligible allocations                                                 | Slower, more allocations, due to using `async`                       |
+| **Parallelism**            | Possible with ChildTask, support will follow                                      | Supported explicitly                                                 |
 
 ## Status & planning
 
@@ -329,12 +357,6 @@ The following is the progress report:
 <sup>³⁾ <a id="note3"></a>_The motivation for `readOnly` in `Seq` is that a cast from a mutable array or list to a `seq<_>` is valid and can be cast back, leading to a mutable sequence. Since `TaskSeq` doesn't implement `IEnumerable<_>`, such casts are not possible._</sup>
 
 ## More information
-
-### The AsyncSeq library
-
-If you're looking to use `IAsyncEnumerable` with `async` and not `task`, the existing [`AsyncSeq`][11] library already provides excellent coverage of that use case. While `TaskSeq` is intended to interoperate with `async` as `task` does, it's not intended to provide an `AsyncSeq` type (at least not yet).
-
-In short, if your application is using `Async` (and the parallelism features stemming from that), consider using the `AsyncSeq` library instead.
 
 ### Further reading on `IAsyncEnumerable`
 
