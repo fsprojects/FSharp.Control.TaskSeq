@@ -6,7 +6,11 @@
 
 An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module, that allows seamless use of asynchronous sequences similar to F#'s native `seq` and `task` CE's.
 
-Latest version [can be installed from Nuget][nuget].
+Latest version [can be installed from Nuget][nuget]. 
+
+## Release notes<!-- omit in toc -->
+
+See [release notes.txt](release-notes.txt) for the version history of `TaskSeq`. See [Status overview](#status--planning) for current status of the surface area of `TaskSeq`.
 
 -----------------------------------------
 
