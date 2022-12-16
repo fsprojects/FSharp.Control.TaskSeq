@@ -166,34 +166,33 @@ let feedFromTwitter user pwd = taskSeq {
 
 ## Choosing between `AsyncSeq` and `TaskSeq`
 
-The [`AsyncSeq`][11] and `TaskSeq` library both operate on asynchronous sequences, but there are a few fundamental differences, most notably that the former _does not_ implement `IAsyncEnumerable<'T>`, but has its own same-named, but differently behaving type. Another core difference is that `TaskSeq` uses `ValueTasks` for the asynchronous computations, and `AsyncSeq` uses F#'s `Async<'T>`.
+The [`AsyncSeq`][11] and `TaskSeq` libraries both operate on asynchronous sequences, but there are a few fundamental differences. The most notable being that the former _does not_ implement `IAsyncEnumerable<'T>`, though it does have a type of that name with different semantics (not surprising; it predates the definition of the modern one). Another key difference is that `TaskSeq` uses `ValueTask`s for the asynchronous computations, whereas `AsyncSeq` uses F#'s `Async<'T>`.
 
 There are more differences:
 
-|                            | `TaskSeq`                                                                             | `AsyncSeq`                                                           |
-|----------------------------|---------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| **Frameworks**             | .NET 5.0+, NetStandard 2.1                                                        | .NET 5.0+, NetStandard 2.0 and 2.1, .NET Framework 4.6.1+            |
-| **Underlying type**        | `System.Collections.Generic.IAsyncEnumerable<'T>`                                 | Its own type, also called `IAsyncEnumerable<'T>`, but not compatible |
-| **Implementation**         | State machine (statically compiled)                                               | No state machine, continuation style                                 |
-| **Semantics**              | `seq`-like: on-demand                                                             | `seq`-like: on-demand                                                |
-| **Support `let!`**         | All `task`-like: `Async<'T>`, `ValueTask<'T>`, `Task<'T>` or any `GetAwaiter()`   | `Async<'T>` only                                                     |
-| **Support `do!`**          | `Async<unit>`, `Task<unit>` and `Task`, `ValueTask<unit>` and `ValueTask`         | `Async<unit>` only                                                   |
-| **Support `yield!`**       | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                  | `AsyncSeq`                                                           |
-| **Support `for`**          | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                  | `AsyncSeq` any sequence                                              |
-| **Behavior with `yield`**  | Zero allocations, no `Task` or even `ValueTask` created                           | Allocated, an F# `Async` wrapped in a singleton `AsyncSeq`           |
-| **Conversion to other**    | `TaskSeq.toAsyncSeq`                                                              | `AsyncSeq.toAsyncEnum`                                               |
-| **Conversion from other**  | Implicit (yield!) or `TaskSeq.ofAsyncSeq`                                         | `AsyncSeq.ofAsyncEnum`                                               |
-| **Recursion in `yield!`**  | No (requires F# support, upcoming)                                                | Yes                                                                  |
-| **Based on F# concept of** | `task`                                                                            | `async`                                                              |
-| **`MoveNextAsync`**        | `ValueTask<bool>`                                                                 | `Async<'T option>`                                                   |
-| **`Current` internals**    | `ValueOption<'T>`                                                                 | `Option<'T>`                                                         |
-| **Cancellation**           | Implicit token governing iteration                                                | Implicit token passed to each subtask                                |
-| **Performance**            | Very high, negligible allocations                                                 | Slower, more allocations, due to using `async`                       |
-| **Parallelism**            | Possible with ChildTask, support will follow                                      | Supported explicitly                                                 |
+|                            | `TaskSeq`                                                                       | `AsyncSeq`                                                           |
+|----------------------------|---------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| **Frameworks**             | .NET 5.0+, NetStandard 2.1                                                      | .NET 5.0+, NetStandard 2.0 and 2.1, .NET Framework 4.6.1+            |
+| **Underlying type**        | `System.Collections.Generic.IAsyncEnumerable<'T>`                               | Its own type, also called `IAsyncEnumerable<'T>`, but not compatible |
+| **Implementation**         | State machine (statically compiled)                                             | No state machine, continuation style                                 |
+| **Semantics**              | `seq`-like: on-demand                                                           | `seq`-like: on-demand                                                |
+| **Support `let!`**         | All `task`-like: `Async<'T>`, `Task<'T>`, `ValueTask<'T>` or any `GetAwaiter()` | `Async<'T>` only                                                     |
+| **Support `do!`**          | `Async<unit>`, `Task<unit>` and `Task`, `ValueTask<unit>` and `ValueTask`       | `Async<unit>` only                                                   |
+| **Support `yield!`**       | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                | `AsyncSeq`                                                           |
+| **Support `for`**          | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                | `AsyncSeq`, any sequence                                             |
+| **Behavior with `yield`**  | Zero allocations; no `Task` or even `ValueTask` created                         | Allocates an F# `Async` wrapped in a singleton `AsyncSeq`            |
+| **Conversion to other**    | `TaskSeq.toAsyncSeq`                                                            | `AsyncSeq.toAsyncEnum`                                               |
+| **Conversion from other**  | Implicit (`yield!`) or `TaskSeq.ofAsyncSeq`                                     | `AsyncSeq.ofAsyncEnum`                                               |
+| **Recursion in `yield!`**  | **No** (requires F# support, upcoming)                                          | Yes                                                                  |
+| **Based on F# concept of** | `task`                                                                          | `async`                                                              |
+| **`MoveNextAsync`** impl   | `ValueTask<bool>`                                                               | `Async<'T option>`                                                   |
+| **Cancellation**           | Implicit token governs iteration                                                | Implicit token flows to all subtasks per `async` semantics           |
+| **Performance**            | Very high, negligible allocations                                               | Slower, more allocations, due to using `async`                       |
+| **Parallelism**            | Possible with ChildTask; support will follow                                    | Supported explicitly                                                 |
 
 ## Status & planning
 
-This project has stable features currently, but before we go full "version one", we'd like to complete the surface area. This section covers the status of that, with a full list of implmented functions below. Here's the short list:
+This project has stable features currently, but before we go full "version one", we'd like to complete the surface area. This section covers the status of that, with a full list of implemented functions below. Here's the shortlist:
 
 - [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
 - [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
