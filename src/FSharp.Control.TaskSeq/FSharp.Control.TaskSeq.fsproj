@@ -11,7 +11,7 @@
 
 The 'taskSeq' computation expression adds support for awaitable asynchronous sequences with similar ease of use and performance to F#'s 'task' CE, with minimal overhead through ValueTask under the hood. TaskSeq brings 'seq' and 'task' together in a safe way.
 
-Generates optimized IL code through resumable state machines, and comes with a comprehensive set of helper functions in module 'TaskSeq'. See README for documentation and more info.</Description>
+Generates optimized IL code through resumable state machines, and comes with a comprehensive set of functions in module 'TaskSeq'. See README for documentation and more info.</Description>
     <Copyright>Copyright 2022</Copyright>
     <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</RepositoryUrl>
