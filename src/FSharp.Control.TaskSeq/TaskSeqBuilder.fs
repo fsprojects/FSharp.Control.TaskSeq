@@ -649,6 +649,12 @@ module HighPriority =
                     sm.Data.current <- ValueNone
                     false)
 
+        // Binding to a cancellation token. This allows `do! someCancellationToken`
+        member inline _.Bind(myToken: CancellationToken, continuation: (unit -> ResumableTSC<'T>)) : ResumableTSC<'T> =
+            ResumableTSC<'T>(fun sm ->
+                sm.Data.cancellationToken <- myToken
+                (continuation ()).Invoke(&sm))
+
         member inline _.Bind(computation: Async<'T>, continuation: ('T -> ResumableTSC<'U>)) =
             ResumableTSC<'U>(fun sm ->
                 let mutable awaiter =

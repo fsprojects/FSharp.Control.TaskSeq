@@ -76,6 +76,11 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the task sequence.")
         |> raise
 
+    let inline withCancellationToken (cancellationToken: CancellationToken) (source: taskSeq<'T>) = taskSeq {
+        do! cancellationToken
+        yield! source
+    }
+
     let isEmpty (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
