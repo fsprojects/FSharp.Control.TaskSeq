@@ -672,6 +672,12 @@ module HighPriority =
                     sm.Data.current <- ValueNone
                     false)
 
+        // Binding to a cancellation token. This allows `do! someCancellationToken`
+        member inline _.Bind(myToken: CancellationToken, continuation: (unit -> ResumableTSC<'T>)) : ResumableTSC<'T> =
+            ResumableTSC<'T>(fun sm ->
+                sm.Data.cancellationToken <- myToken
+                (continuation ()).Invoke(&sm))
+
 [<AutoOpen>]
 module TaskSeqBuilder =
     /// Builds an asynchronous task sequence based on IAsyncEnumerable<'T> using computation expression syntax.
