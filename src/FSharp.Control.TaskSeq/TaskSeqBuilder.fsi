@@ -198,3 +198,8 @@ module HighPriority =
 
         member inline Bind: task: Task<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
         member inline Bind: computation: Async<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
+        //member inline Bind:
+        //    cancellationToken: CancellationToken * continuation: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        [<CustomOperation "cancellationToken">]
+        member inline SetCancellationToken:
+            cancellationToken: CancellationToken * continuation: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>

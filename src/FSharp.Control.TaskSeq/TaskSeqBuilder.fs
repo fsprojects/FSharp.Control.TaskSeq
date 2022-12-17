@@ -556,7 +556,7 @@ module LowPriority =
 
                 else
                     Debug.logInfo "at TaskLike bind: await further"
-
+                    sm.Data.cancellationToken.ThrowIfCancellationRequested()
                     sm.Data.awaiter <- awaiter
                     sm.Data.current <- ValueNone
                     false)
@@ -614,6 +614,10 @@ module HighPriority =
         //
         member inline _.Bind(task: Task<'T>, continuation: ('T -> ResumableTSC<'U>)) =
             ResumableTSC<'U>(fun sm ->
+                // WTF???
+                //let x = Func<Task<_>>(fun _ -> task)
+                //Task<'TResult>.Run(x, sm.Data.cancellationToken)
+
                 let mutable awaiter = task.GetAwaiter()
                 let mutable __stack_fin = true
 
@@ -635,7 +639,7 @@ module HighPriority =
 
                 else
                     Debug.logInfo "at Bind: await further"
-
+                    sm.Data.cancellationToken.ThrowIfCancellationRequested()
                     sm.Data.awaiter <- awaiter
                     sm.Data.current <- ValueNone
                     false)
@@ -672,10 +676,16 @@ module HighPriority =
                     sm.Data.current <- ValueNone
                     false)
 
-        // Binding to a cancellation token. This allows `do! someCancellationToken`
-        member inline _.Bind(myToken: CancellationToken, continuation: (unit -> ResumableTSC<'T>)) : ResumableTSC<'T> =
+        //// Binding to a cancellation token. This allows `do! someCancellationToken`
+        //member inline _.Bind(cancellationToken, continuation: (unit -> ResumableTSC<'T>)) : ResumableTSC<'T> =
+        //    ResumableTSC<'T>(fun sm ->
+        //        sm.Data.cancellationToken <- cancellationToken
+        //        (continuation ()).Invoke(&sm))
+
+        [<CustomOperation "cancellationToken">]
+        member inline _.SetCancellationToken(cancellationToken, continuation: (unit -> ResumableTSC<'T>)) : ResumableTSC<'T> =
             ResumableTSC<'T>(fun sm ->
-                sm.Data.cancellationToken <- myToken
+                sm.Data.cancellationToken <- cancellationToken
                 (continuation ()).Invoke(&sm))
 
 [<AutoOpen>]
