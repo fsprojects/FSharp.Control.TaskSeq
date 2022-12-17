@@ -60,6 +60,12 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
+    //let inline withCancellationToken (cancellationToken2: CancellationToken) (source: taskSeq<'T>) = taskSeq {
+    //    // COMPILE ERROR HERE
+    //    cancellationToken cancellationToken2
+    //    yield! source
+    //}
+
     let isEmpty (source: taskSeq<_>) = task {
         use e = source.GetAsyncEnumerator(CancellationToken())
         let! step = e.MoveNextAsync()

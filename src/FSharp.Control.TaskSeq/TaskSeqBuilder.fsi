@@ -191,3 +191,8 @@ module HighPriority =
     type TaskSeqBuilder with
 
         member inline Bind: task: Task<'TResult1> * continuation: ('TResult1 -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        //member inline Bind:
+        //    cancellationToken: CancellationToken * continuation: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        [<CustomOperation "cancellationToken">]
+        member inline SetCancellationToken:
+            cancellationToken: CancellationToken * continuation: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>
