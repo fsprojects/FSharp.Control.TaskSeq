@@ -51,7 +51,7 @@ See [release notes.txt](release-notes.txt) for the version history of `TaskSeq`.
 
 ## Overview
 
-The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][5] given by a call to [`GetAsyncEnumerator()`][6].
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][3] given by a call to [`GetAsyncEnumerator()`][6].
 
 Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iteration over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and applies the same _resumable state machine_ approach with `taskSeq`.
 
@@ -177,22 +177,27 @@ There are more differences:
 |                            | `TaskSeq`                                                                       | `AsyncSeq`                                                           |
 |----------------------------|---------------------------------------------------------------------------------|----------------------------------------------------------------------|
 | **Frameworks**             | .NET 5.0+, NetStandard 2.1                                                      | .NET 5.0+, NetStandard 2.0 and 2.1, .NET Framework 4.6.1+            |
-| **Underlying type**        | `System.Collections.Generic.IAsyncEnumerable<'T>`                               | Its own type, also called `IAsyncEnumerable<'T>`, but not compatible |
+| **F# concept of**          | `task`                                                                          | `async`                                                              |
+| **Underlying type**        | [`Generic.IAsyncEnumerable<'T>`][3] <sup>[note #1](#tsnote1 "Full name System.Collections.Generic.IAsyncEnumerable&lt;'T>.")</sup>| Its own type, also called `IAsyncEnumerable<'T>`<sup>[note #1](#tsnote1 "Full name FSharp.Control.IAsyncEnumerable&lt;'T>.")</sup> |
 | **Implementation**         | State machine (statically compiled)                                             | No state machine, continuation style                                 |
 | **Semantics**              | `seq`-like: on-demand                                                           | `seq`-like: on-demand                                                |
+| **Disposability**          | Asynchronous, through [`IAsyncDisposable`][7]                                   | Synchronous, through `IDisposable`                                   |
 | **Support `let!`**         | All `task`-like: `Async<'T>`, `Task<'T>`, `ValueTask<'T>` or any `GetAwaiter()` | `Async<'T>` only                                                     |
 | **Support `do!`**          | `Async<unit>`, `Task<unit>` and `Task`, `ValueTask<unit>` and `ValueTask`       | `Async<unit>` only                                                   |
-| **Support `yield!`**       | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                | `AsyncSeq`                                                           |
-| **Support `for`**          | `IAsyncEnumerable<'T>`, `AsyncSeq`, any sequence                                | `AsyncSeq`, any sequence                                             |
+| **Support `yield!`**       | [`IAsyncEnumerable<'T>`][3] (= `TaskSeq`), `AsyncSeq`, any sequence             | `AsyncSeq`                                                           |
+| **Support `for`**          | [`IAsyncEnumerable<'T>`][3] (= `TaskSeq`), `AsyncSeq`, any sequence             | `AsyncSeq`, any sequence                                             |
 | **Behavior with `yield`**  | Zero allocations; no `Task` or even `ValueTask` created                         | Allocates an F# `Async` wrapped in a singleton `AsyncSeq`            |
-| **Conversion to other**    | `TaskSeq.toAsyncSeq`                                                            | `AsyncSeq.toAsyncEnum`                                               |
-| **Conversion from other**  | Implicit (`yield!`) or `TaskSeq.ofAsyncSeq`                                     | `AsyncSeq.ofAsyncEnum`                                               |
+| **Conversion to other**    | `TaskSeq.toAsyncSeq`                                                            | [`AsyncSeq.toAsyncEnum`][22]                                         |
+| **Conversion from other**  | Implicit (`yield!`) or `TaskSeq.ofAsyncSeq`                                     | [`AsyncSeq.ofAsyncEnum`][23]                                         |
 | **Recursion in `yield!`**  | **No** (requires F# support, upcoming)                                          | Yes                                                                  |
-| **Based on F# concept of** | `task`                                                                          | `async`                                                              |
-| **`MoveNextAsync`** impl   | `ValueTask<bool>`                                                               | `Async<'T option>`                                                   |
-| **Cancellation**           | Implicit token governs iteration                                                | Implicit token flows to all subtasks per `async` semantics           |
-| **Performance**            | Very high, negligible allocations                                               | Slower, more allocations, due to using `async`                       |
+| **Iteration semantics**    | [Two operations][6], 'Next' is a value task, 'Current' must be called separately| One operation, 'Next' is `Async`, returns `option` with 'Current'    |
+| **`MoveNextAsync`**        | [Returns `ValueTask<bool>`][4]                                                  | Returns `Async<'T option>`                                           |
+| **[`Current`][5]**         | [Returns `'T`][5]                                                               | n/a                                                                  |
+| **Cancellation**           | See [#133][], until 0.3.0: use `GetAsyncEnumerator(cancelToken)`                | Implicit token flows to all subtasks per `async` semantics           |
+| **Performance**            | Very high, negligible allocations                                               | Slower, more allocations, due to using `async` and cont style        |
 | **Parallelism**            | Possible with ChildTask; support will follow                                    | Supported explicitly                                                 |
+
+<sup>¹⁾ <a id="tsnote1"></a>_Both `AsyncSeq` and `TaskSeq` use a type called `IAsyncEnumerable<'T>`, but only `TaskSeq` uses the type from the BCL Generic Collections. `AsyncSeq` supports .NET Framework 4.6.x and NetStandard 2.0 as well, which do not have this type in the BCL._</sup>
 
 ## Status & planning
 
@@ -207,7 +212,7 @@ This project has stable features currently, but before we go full "version one",
 
 ### Implementation progress
 
-As of 9 November 2022: [Nuget package available][21]. In this phase, we will frequently update the package. Current:
+As of 9 November 2022: [Nuget package available][21]. In this phase, we will frequently update the package, see [release notes.txt](release-notes.txt). Current version:
 
 [![Nuget](https://img.shields.io/nuget/vpre/FSharp.Control.TaskSeq)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
 
@@ -553,11 +558,11 @@ module TaskSeq =
 
 [1]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/25
 [2]: https://github.com/xunit/xunit/issues/2587
-[3]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0
-[4]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-7.0
-[5]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1?view=net-7.0
-[6]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1.getasyncenumerator?view=net-7.0
-[7]: https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-7.0
+[3]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-6.0
+[4]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.movenextasync?view=net-6.0
+[5]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerator-1.current?view=net-6.0
+[6]: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1.getasyncenumerator?view=net-6.0
+[7]: https://learn.microsoft.com/en-us/dotnet/api/system.iasyncdisposable?view=net-6.0
 [8]: https://stu.dev/iasyncenumerable-introduction/
 [9]: https://learn.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8
 [10]: https://gist.github.com/akhansari/d88812b742aa6be1c35b4f46bd9f8532
@@ -572,6 +577,8 @@ module TaskSeq =
 [19]: https://fsharpforfunandprofit.com/series/computation-expressions/
 [20]: https://github.com/dotnet/fsharp/blob/d5312aae8aad650f0043f055bb14c3aa8117e12e/tests/benchmarks/CompiledCodeBenchmarks/TaskPerf/TaskPerf/taskSeq.fs
 [21]: https://www.nuget.org/packages/FSharp.Control.TaskSeq#versions-body-tab
+[22]: https://fsprojects.github.io/FSharp.Control.AsyncSeq/reference/fsharp-control-asyncseq.html#toAsyncEnum
+[23]: https://fsprojects.github.io/FSharp.Control.AsyncSeq/reference/fsharp-control-asyncseq.html#fromAsyncEnum
 
 [#2]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/2
 [#11]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/11
@@ -587,6 +594,7 @@ module TaskSeq =
 [#83]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/83
 [#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
+[#133]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/133
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
