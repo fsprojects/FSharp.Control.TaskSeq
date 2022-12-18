@@ -99,14 +99,19 @@ let ``CE taskSeq: use 'let!' with Async - mutables`` () =
 
     taskSeq {
         do! async { value <- value + 1 }
+        do value |> should equal 1
         let! x = async { return value + 1 }
+        do x |> should equal 2
         do! Async.Sleep 50
         do! async { value <- value + 1 }
+        do value |> should equal 2
         let! ret = async { return value + 1 }
-        yield x + ret // eq 6
+        do value |> should equal 2
+        do ret |> should equal 3
+        yield x + ret // eq 5
     }
     |> TaskSeq.exactlyOne
-    |> Task.map (fun _ -> value |> should equal 6)
+    |> Task.map (should equal 5)
 
 [<Fact>]
 let ``CE taskSeq: use 'let!' with all kinds of overloads at once`` () =
@@ -132,16 +137,16 @@ let ``CE taskSeq: use 'let!' with all kinds of overloads at once`` () =
 
         let! c = ValueTask<_>(4) // valuetask that completes immediately
         let! _ = Task.Factory.StartNew(fun () -> value <- value + 1) // non-generic Task with side effect
-        let! d = Task.fromResult (4) // normal Task that completes immediately
+        let! d = Task.fromResult 99 // normal Task that completes immediately
         let! _ = Async.Sleep 0 // unit Async
 
         let! e = async {
             do! Async.Sleep 40
-            do value <- value + 1
+            do value <- value + 1 // eq 4 now
             return value
         }
 
         yield! [ a; b; c; d; e ]
     }
     |> TaskSeq.toListAsync
-    |> Task.map (fun x -> should equal [ 1; 2; 4; 4; 3 ])
+    |> Task.map (should equal [ 1; 2; 4; 99; 4 ])
