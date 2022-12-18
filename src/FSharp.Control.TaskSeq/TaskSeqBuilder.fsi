@@ -131,14 +131,15 @@ type TaskSeqBuilder =
     member inline Combine: task1: ResumableTSC<'T> * task2: ResumableTSC<'T> -> ResumableTSC<'T>
     member inline Delay: f: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>
     member inline Run: code: ResumableTSC<'T> -> taskSeq<'T>
-    member inline TryFinally: body: ResumableTSC<'T> * compensation: (unit -> unit) -> ResumableTSC<'T>
-    member inline TryFinallyAsync: body: ResumableTSC<'T> * compensation: (unit -> Task) -> ResumableTSC<'T>
+    member inline TryFinally: body: ResumableTSC<'T> * compensationAction: (unit -> unit) -> ResumableTSC<'T>
+    member inline TryFinallyAsync: body: ResumableTSC<'T> * compensationAction: (unit -> Task) -> ResumableTSC<'T>
     member inline TryWith: body: ResumableTSC<'T> * catch: (exn -> ResumableTSC<'T>) -> ResumableTSC<'T>
-    member inline Using: disp: 'a * body: ('a -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'a :> IAsyncDisposable
+    member inline Using:
+        disp: 'Disp * body: ('Disp -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'Disp :> IAsyncDisposable
     member inline While: condition: (unit -> bool) * body: ResumableTSC<'T> -> ResumableTSC<'T>
     /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the CE
     member inline WhileAsync: condition: (unit -> ValueTask<bool>) * body: ResumableTSC<'T> -> ResumableTSC<'T>
-    member inline Yield: v: 'T -> ResumableTSC<'T>
+    member inline Yield: value: 'T -> ResumableTSC<'T>
     member inline Zero: unit -> ResumableTSC<'T>
 
 [<AutoOpen>]
@@ -159,12 +160,12 @@ module LowPriority =
     type TaskSeqBuilder with
 
         [<NoEagerConstraintApplication>]
-        member inline Bind< ^TaskLike, 'TResult1, 'TResult2, ^Awaiter, 'TOverall> :
-            task: ^TaskLike * continuation: ('TResult1 -> ResumableTSC<'TResult2>) -> ResumableTSC<'TResult2>
+        member inline Bind< ^TaskLike, 'T, 'U, ^Awaiter, 'TOverall> :
+            task: ^TaskLike * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
                 when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
                 and ^Awaiter :> ICriticalNotifyCompletion
                 and ^Awaiter: (member get_IsCompleted: unit -> bool)
-                and ^Awaiter: (member GetResult: unit -> 'TResult1)
+                and ^Awaiter: (member GetResult: unit -> 'T)
 
 /// <summary>
 /// Contains low priority extension methods for the main builder class for the <see cref="taskSeq" /> computation expression.
@@ -175,7 +176,9 @@ module LowPriority =
 module MediumPriority =
     type TaskSeqBuilder with
 
-        member inline Using: disp: 'a * body: ('a -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'a :> IDisposable
+        // NOTE: syntax with '#Disposable' won't work properly in FSI
+        member inline Using:
+            dispensation: 'Disp * body: ('Disp -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'Disp :> IDisposable
         member inline For: sequence: seq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
         member inline YieldFrom: source: seq<'T> -> ResumableTSC<'T>
         member inline For: source: #taskSeq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
@@ -190,6 +193,5 @@ module MediumPriority =
 module HighPriority =
     type TaskSeqBuilder with
 
-        member inline Bind: task: Task<'TResult1> * continuation: ('TResult1 -> ResumableTSC<'T>) -> ResumableTSC<'T>
-        member inline Bind:
-            asyncSource: Async<'TResult1> * continuation: ('TResult1 -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        member inline Bind: task: Task<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
+        member inline Bind: computation: Async<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
