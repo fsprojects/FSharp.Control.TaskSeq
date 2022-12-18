@@ -41,7 +41,7 @@ let ``CE taskSeq: use 'do!' with a non-generic valuetask`` () =
 let ``CE taskSeq: use 'do!' with a non-generic task`` () =
     let mutable value = 0
 
-    taskSeq { do! (task { do value <- value + 1 }) |> Task.ignore }
+    taskSeq { do! task { do value <- value + 1 } |> Task.ignore }
     |> verifyEmpty
     |> Task.map (fun _ -> value |> should equal 1)
 
@@ -56,3 +56,47 @@ let ``CE taskSeq: use 'do!' with a task-delay`` () =
     }
     |> verifyEmpty
     |> Task.map (fun _ -> value |> should equal 2)
+
+[<Fact>]
+let ``CE taskSeq: use 'do!' with Async`` () =
+    let mutable value = 0
+
+    taskSeq {
+        do value <- value + 1
+        do! Async.Sleep 50
+        do value <- value + 1
+    }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 2)
+
+[<Fact>]
+let ``CE taskSeq: use 'do!' with Async - mutables`` () =
+    let mutable value = 0
+
+    taskSeq {
+        do! async { value <- value + 1 }
+        do! Async.Sleep 50
+        do! async { value <- value + 1 }
+    }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 2)
+
+[<Fact>]
+let ``CE taskSeq: use 'do!' with all kinds of overloads at once`` () =
+    let mutable value = 0
+
+    // this test should be expanded in case any new overload is added
+    // that is supported by `do!`, to ensure the high/low priority
+    // overloads still work properly
+    taskSeq {
+        do! task { do value <- value + 1 } |> Task.ignore
+        do! ValueTask <| task { do value <- value + 1 }
+        do! ValueTask.ofTask (task { do value <- value + 1 })
+        do! ValueTask<_>(()) // unit valuetask that completes immediately
+        do! Task.fromResult (()) // unit Task that completes immediately
+        do! Task.Delay 0
+        do! Async.Sleep 0
+        do! async { value <- value + 1 } // eq 4
+    }
+    |> verifyEmpty
+    |> Task.map (fun _ -> value |> should equal 4)
