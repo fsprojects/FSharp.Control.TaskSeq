@@ -13,7 +13,9 @@ type internal AsyncEnumStatus =
 
 [<Struct>]
 type internal WhileKind =
+    /// The item under test is included even if false
     | Inclusive
+    /// The item under test is always excluded
     | Exclusive
 
 [<Struct>]
@@ -610,6 +612,61 @@ module internal TaskSeqInternal =
                     | true -> yield item
                     | false -> ()
         }
+
+    let takeWhile whileKind predicate (source: taskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            use e = source.GetAsyncEnumerator(CancellationToken())
+            let! step = e.MoveNextAsync()
+            let mutable more = step
+
+            match whileKind, predicate with
+            | Exclusive, Predicate predicate ->
+                while more do
+                    let value = e.Current
+                    more <- predicate value
+
+                    if more then
+                        yield value
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+
+            | Inclusive, Predicate predicate ->
+                while more do
+                    let value = e.Current
+                    more <- predicate value
+
+                    yield value
+
+                    if more then
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+
+            | Exclusive, PredicateAsync predicate ->
+                while more do
+                    let value = e.Current
+                    let! passed = predicate value
+                    more <- passed
+
+                    if more then
+                        yield value
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+
+            | Inclusive, PredicateAsync predicate ->
+                while more do
+                    let value = e.Current
+                    let! passed = predicate value
+                    more <- passed
+
+                    yield value
+
+                    if more then
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+        }
+
     // Consider turning using an F# version of this instead?
     // https://github.com/i3arnon/ConcurrentHashSet
     type ConcurrentHashSet<'T when 'T: equality>(ct) =
