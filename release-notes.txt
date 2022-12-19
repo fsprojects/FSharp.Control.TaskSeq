@@ -1,6 +1,7 @@
 
 Release notes:
 0.4.x (unreleased)
+    - BREAKING CHANGE: most null arguments now raise ArgumentNullException instead of NullReferenceException, #127
     - adds `let!` and `do!` support for F#'s Async<'T>
     - adds TaskSeq.takeWhile, takeWhileAsync, takeWhileInclusive, takeWhileInclusiveAsync, #126 (by @bartelink)
     - adds AsyncSeq vs TaskSeq comparison chart, #131
