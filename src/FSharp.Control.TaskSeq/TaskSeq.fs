@@ -21,7 +21,7 @@ module TaskSeq =
                 }
         }
 
-    let singleton (source: 'T) = Internal.singleton source
+    let singleton (value: 'T) = Internal.singleton value
 
     let isEmpty source = Internal.isEmpty source
 
