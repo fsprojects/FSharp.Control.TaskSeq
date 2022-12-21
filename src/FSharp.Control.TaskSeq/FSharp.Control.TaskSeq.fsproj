@@ -36,7 +36,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\release-notes.txt" Link="release-notes.txt" />
+    <None Include="..\..\release-notes.txt" Link="release-notes.txt" />
     <None Include="..\..\assets\taskseq-icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
