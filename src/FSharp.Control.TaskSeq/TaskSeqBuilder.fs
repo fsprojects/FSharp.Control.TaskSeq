@@ -79,9 +79,8 @@ type TaskSeqStateMachineData<'T>() =
 
     member data.PushDispose(disposer: unit -> Task) =
         if isNull data.disposalStack then
-            data.disposalStack <- null
-
-    //data.disposalStack.Add disposer
+            data.disposalStack <- ResizeArray()
+        data.disposalStack.Add disposer
 
     member data.PopDispose() =
         if not (isNull data.disposalStack) then
