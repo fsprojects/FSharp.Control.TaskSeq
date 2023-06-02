@@ -8,7 +8,7 @@ Release notes:
     - removes release-notes.txt from file dependencies, but keep in the package, #138
 
 0.3.1 (unreleased)
-    - fixes not calling Dispose for 'use!' and 'use', #157 (fixed by @bartelink)
+    - fixes not calling Dispose for 'use!', 'use', or `finally` blocks in `try`...`finally` #157
     
 0.3.0
     - internal renames, improved doc comments, signature files for complex types, hide internal-only types, fixes #112.
