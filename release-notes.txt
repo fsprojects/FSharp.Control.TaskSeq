@@ -7,6 +7,9 @@ Release notes:
     - adds AsyncSeq vs TaskSeq comparison chart, #131
     - removes release-notes.txt from file dependencies, but keep in the package, #138
 
+0.3.1 (unreleased)
+    - fixes not calling Dispose for 'use!' and 'use', #157 (fixed by @bartelink)
+    
 0.3.0
     - internal renames, improved doc comments, signature files for complex types, hide internal-only types, fixes #112.
     - adds support for static TaskLike, allowing the same let! and do! overloads that F# task supports, fixes #110.
