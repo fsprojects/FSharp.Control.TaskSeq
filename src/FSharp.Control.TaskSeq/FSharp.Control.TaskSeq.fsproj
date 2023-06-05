@@ -21,7 +21,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>
-    <PackageTags>taskseq'fsharp;f#;computation expression;IAsyncEnumerable;task;async;asyncseq;</PackageTags>
+    <PackageTags>taskseq;fsharp;f#;computation expression;IAsyncEnumerable;task;async;asyncseq;</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
