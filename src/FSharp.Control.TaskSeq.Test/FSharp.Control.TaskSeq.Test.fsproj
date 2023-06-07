@@ -56,7 +56,7 @@
     <!-- we use 6.0.3 here and not 6.0.2 because TaskResult lib requires it-->
     <PackageReference Update="FSharp.Core" Version="6.0.3" />
     <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="3.2.0" />
-    <PackageReference Include="FsUnit.xUnit" Version="5.1.0" />
+    <PackageReference Include="FsUnit.xUnit" Version="5.3.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.1" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
