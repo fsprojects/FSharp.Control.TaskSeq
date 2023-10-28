@@ -42,7 +42,6 @@
     <Compile Include="TaskSeq.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug-delayed.Tests.CE.fs" />
-    <Compile Include="TaskSeq.PocTests.fs" />
     <Compile Include="TaskSeq.Realworld.fs" />
     <Compile Include="TaskSeq.AsyncExtensions.Tests.fs" />
     <Compile Include="TaskSeq.TaskExtensions.Tests.fs" />
