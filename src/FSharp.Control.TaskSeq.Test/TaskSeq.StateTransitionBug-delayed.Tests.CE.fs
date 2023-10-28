@@ -1,13 +1,9 @@
 module TaskSeq.Tests.``Bug #42 -- asynchronous`` // see PR #42
 
 open System
-open System.Threading.Tasks
-open System.Diagnostics
-open System.Collections.Generic
 
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 

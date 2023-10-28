@@ -2,6 +2,7 @@ module TaskSeq.Tests.Let
 
 open System
 open System.Threading.Tasks
+
 open FsUnit
 open Xunit
 

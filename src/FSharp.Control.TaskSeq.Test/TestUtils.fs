@@ -4,17 +4,13 @@ open System
 open System.Threading
 open System.Threading.Tasks
 open System.Diagnostics
-
-open FsToolkit.ErrorHandling
-
-open FSharp.Control
 open System.Collections.Generic
-open FsUnit.Xunit
+
 open Xunit
 open Xunit.Abstractions
-open System.Runtime.Serialization
-open System.Reflection
-open Microsoft.FSharp.Reflection
+open FsUnit.Xunit
+
+open FSharp.Control
 
 /// Milliseconds
 [<Measure>]
@@ -84,8 +80,6 @@ module DelayHelper =
 /// </summary>
 type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     let mutable x = 0
-    let rnd = Random()
-    let rnd () = rnd.NextInt64(int64 µsecMin, int64 µsecMax) * 1L<µs>
 
     let runTaskDelayed () = backgroundTask { return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> Interlocked.Increment &x) }
 

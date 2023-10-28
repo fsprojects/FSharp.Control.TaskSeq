@@ -2,11 +2,11 @@ namespace TaskSeq.Tests
 
 open System
 open System.Threading.Tasks
+
 open FsUnit
 open NHamcrest.Core
 open Microsoft.FSharp.Reflection
 
-open FsToolkit.ErrorHandling
 open Xunit
 open Xunit.Sdk
 

@@ -1,11 +1,11 @@
 module TaskSeq.Tests.FindIndex
 
+open System.Collections.Generic
+
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
-open System.Collections.Generic
 
 //
 // TaskSeq.findIndex

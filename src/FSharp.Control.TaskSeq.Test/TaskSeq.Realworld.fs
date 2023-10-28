@@ -2,14 +2,13 @@ namespace TaskSeq.Tests
 
 open System
 open System.IO
+open System.Threading.Tasks
+open System.Collections.Generic
+
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
-open System.Threading.Tasks
-open System.Diagnostics
-open System.Collections.Generic
 open Xunit.Abstractions
 
 /// Just a naive, simple in-memory reader that acts as an IAsyncEnumerable to use with tests

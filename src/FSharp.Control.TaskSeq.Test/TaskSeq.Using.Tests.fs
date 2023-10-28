@@ -2,6 +2,7 @@ module TaskSeq.Tests.Using
 
 open System
 open System.Threading.Tasks
+
 open FSharp.Control
 open FsUnit
 open Xunit
