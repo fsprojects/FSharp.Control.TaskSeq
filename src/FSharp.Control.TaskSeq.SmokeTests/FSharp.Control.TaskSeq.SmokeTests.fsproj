@@ -9,13 +9,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="TestUtils.fs" />
     <Compile Include="SmokeTests.fs" />
+    <Compile Include="TaskSeq.PocTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary to the base test project, which uses the lowest possible denominator -->
     <PackageReference Update="FSharp.Core" Version="7.0.401" />
     <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0-alpha.1" />
+    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="3.2.0" />
     <PackageReference Include="FsUnit.xUnit" Version="5.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageReference Include="xunit" Version="2.5.3" />
