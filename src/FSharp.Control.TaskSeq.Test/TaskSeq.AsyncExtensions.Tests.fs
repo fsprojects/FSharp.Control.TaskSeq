@@ -1,6 +1,5 @@
 module TaskSeq.Tests.AsyncExtensions
 
-open System
 open Xunit
 open FsUnit.Xunit
 

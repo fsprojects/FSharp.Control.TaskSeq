@@ -1,7 +1,7 @@
 module TaskSeq.Tests.Do
 
-open System
 open System.Threading.Tasks
+
 open FsUnit
 open Xunit
 

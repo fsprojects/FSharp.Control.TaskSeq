@@ -1,11 +1,9 @@
 module TaskSeq.Tests.Choose
 
 open System
-open System.Threading.Tasks
 
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 

@@ -1,9 +1,7 @@
 module TaskSeq.Tests.Zip
 
-open System
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 

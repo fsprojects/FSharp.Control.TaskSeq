@@ -1,9 +1,9 @@
 module TaskSeq.Tests.Fold
 
 open System.Text
+
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 

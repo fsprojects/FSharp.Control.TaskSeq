@@ -2,7 +2,6 @@ module TaskSeq.Tests.Singleton
 
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 

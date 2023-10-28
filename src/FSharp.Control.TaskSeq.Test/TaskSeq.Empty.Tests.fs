@@ -3,7 +3,6 @@ module TaskSeq.Tests.Empty
 open System.Threading.Tasks
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 
@@ -42,7 +41,7 @@ let ``TaskSeq-empty of unit in a taskSeq context`` () = task {
 [<Fact>]
 let ``TaskSeq-empty of more complex type in a taskSeq context`` () = task {
     let! sq =
-        taskSeq { yield! TaskSeq.empty<Result<Task<string>, int>> }
+        taskSeq { yield! TaskSeq.empty<Result<Task<string>, int>> } // not a TaskResult, but a ResultTask lol
         |> TaskSeq.toArrayAsync
 
     Array.isEmpty sq |> should be True

@@ -1,10 +1,9 @@
 module TaskSeq.Tests.Pick
 
-open System
 open System.Collections.Generic
+
 open Xunit
 open FsUnit.Xunit
-open FsToolkit.ErrorHandling
 
 open FSharp.Control
 
