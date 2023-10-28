@@ -22,7 +22,11 @@ module ExtraCustomMatchers =
     let private baseResultTypeTest value =
         match value with
         | null ->
-            MatchException("Result type", "<null>", "Value <null> or None is never Result.Ok or Result.Error")
+            EqualException.ForMismatchedValues(
+                "Result type",
+                "<null>",
+                "Value <null> or None is never Result.Ok or Result.Error"
+            )
             |> raise
 
         | _ ->
@@ -31,7 +35,7 @@ module ExtraCustomMatchers =
             if ty.FullName.StartsWith "Microsoft.FSharp.Core.FSharpResult" then
                 FSharpValue.GetUnionFields(value, ty) |> fst
             else
-                MatchException("Result type", ty.Name, "Type must be Result<_, _>")
+                EqualException.ForMismatchedValues("Result type", ty.Name, "Type must be Result<_, _>")
                 |> raise
 
     let private baseOptionTypeTest value =
@@ -49,9 +53,13 @@ module ExtraCustomMatchers =
                 | "None" -> None
                 | _ ->
                     raise
-                    <| MatchException("Option type", ty.Name, "Unexpected field name for F# option type")
+                    <| EqualException.ForMismatchedValues(
+                        "Option type",
+                        ty.Name,
+                        "Unexpected field name for F# option type"
+                    )
             else
-                MatchException("Option type", ty.Name, "Type must be Option<_>")
+                EqualException.ForMismatchedValues("Option type", ty.Name, "Type must be Option<_>")
                 |> raise
 
 
