@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary to the base test project, which uses the lowest possible denominator -->
+    <PackageReference Update="FSharp.Core" Version="7.0.401" />
     <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0-alpha.1" />
     <PackageReference Include="FsUnit.xUnit" Version="5.5.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
