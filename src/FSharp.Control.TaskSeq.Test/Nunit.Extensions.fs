@@ -22,11 +22,7 @@ module ExtraCustomMatchers =
     let private baseResultTypeTest value =
         match value with
         | null ->
-            EqualException.ForMismatchedValues(
-                "Result type",
-                "<null>",
-                "Value <null> or None is never Result.Ok or Result.Error"
-            )
+            EqualException.ForMismatchedValues("Result type", "<null>", "Value <null> or None is never Result.Ok or Result.Error")
             |> raise
 
         | _ ->
@@ -53,11 +49,7 @@ module ExtraCustomMatchers =
                 | "None" -> None
                 | _ ->
                     raise
-                    <| EqualException.ForMismatchedValues(
-                        "Option type",
-                        ty.Name,
-                        "Unexpected field name for F# option type"
-                    )
+                    <| EqualException.ForMismatchedValues("Option type", ty.Name, "Unexpected field name for F# option type")
             else
                 EqualException.ForMismatchedValues("Option type", ty.Name, "Type must be Option<_>")
                 |> raise

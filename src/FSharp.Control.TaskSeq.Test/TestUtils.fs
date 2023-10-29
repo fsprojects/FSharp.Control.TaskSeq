@@ -87,9 +87,7 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     let rnd = Random()
     let rnd () = rnd.NextInt64(int64 µsecMin, int64 µsecMax) * 1L<µs>
 
-    let runTaskDelayed () = backgroundTask {
-        return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> Interlocked.Increment &x)
-    }
+    let runTaskDelayed () = backgroundTask { return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> Interlocked.Increment &x) }
 
     let runTaskDelayedImmutable i = backgroundTask { return! DelayHelper.delayTask µsecMin µsecMax (fun _ -> i + 1) }
 
@@ -513,9 +511,7 @@ module TestUtils =
                         yield! taskSeq {
                             yield! taskSeq {
                                 yield! taskSeq {
-                                    yield! taskSeq {
-                                        yield! taskSeq { yield! taskSeq { yield! taskSeq { yield! nestedTaskSeq } } }
-                                    }
+                                    yield! taskSeq { yield! taskSeq { yield! taskSeq { yield! taskSeq { yield! nestedTaskSeq } } } }
                                 }
                             }
                         }

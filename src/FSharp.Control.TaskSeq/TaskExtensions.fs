@@ -19,11 +19,7 @@ module TaskExtensions =
 
         /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the task CE
         /// This code is mostly a copy of TaskSeq.WhileAsync.
-        member inline _.WhileAsync
-            (
-                [<InlineIfLambda>] condition: unit -> ValueTask<bool>,
-                body: TaskCode<_, unit>
-            ) : TaskCode<_, _> =
+        member inline _.WhileAsync([<InlineIfLambda>] condition: unit -> ValueTask<bool>, body: TaskCode<_, unit>) : TaskCode<_, _> =
             let mutable condition_res = true
 
             // note that this While itself has both a dynamic and static implementation
