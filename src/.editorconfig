@@ -68,7 +68,7 @@ indent_size=4
 
 # line length before it gets broken down into multiple lines
 # default 120
-max_line_length=120
+max_line_length=140
 
 # Either crlf | lf, default is system-dependent (when not specified at all)
 # end_of_line=crlf
@@ -180,7 +180,7 @@ fsharp_array_or_list_multiline_formatter=character_width
 
 # maximum with of a value binding, does not include keyword "let"
 # default 80
-fsharp_max_value_binding_width=100
+fsharp_max_value_binding_width=140
 
 # maximum width for function and member binding (rh-side)
 # default 40
