@@ -74,18 +74,16 @@ module Task =
         :> Task
 
     /// Map a Task<'T>
-    let inline map mapper (task: Task<'T>) : Task<'U> =
-        TaskBuilder.task {
-            let! result = task
-            return mapper result
-        }
+    let inline map mapper (task: Task<'T>) : Task<'U> = TaskBuilder.task {
+        let! result = task
+        return mapper result
+    }
 
     /// Bind a Task<'T>
-    let inline bind binder (task: Task<'T>) : Task<'U> =
-        TaskBuilder.task {
-            let! t = task
-            return! binder t
-        }
+    let inline bind binder (task: Task<'T>) : Task<'U> = TaskBuilder.task {
+        let! t = task
+        return! binder t
+    }
 
     /// Create a task from a value
     let inline fromResult (value: 'U) : Task<'U> = TaskBuilder.task { return value }
@@ -107,11 +105,10 @@ module Async =
     }
 
     /// Map an Async<'T>
-    let inline map mapper (async: Async<'T>) : Async<'U> =
-        ExtraTopLevelOperators.async {
-            let! result = async
-            return mapper result
-        }
+    let inline map mapper (async: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async {
+        let! result = async
+        return mapper result
+    }
 
     /// Bind an Async<'T>
     let inline bind binder (task: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder task }

@@ -80,6 +80,7 @@ type TaskSeqStateMachineData<'T>() =
     member data.PushDispose(disposer: unit -> Task) =
         if isNull data.disposalStack then
             data.disposalStack <- ResizeArray()
+
         data.disposalStack.Add disposer
 
     member data.PopDispose() =
