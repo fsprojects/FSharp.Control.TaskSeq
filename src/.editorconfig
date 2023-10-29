@@ -68,7 +68,7 @@ indent_size=4
 
 # line length before it gets broken down into multiple lines
 # default 120
-max_line_length=140
+max_line_length=100
 
 # Either crlf | lf, default is system-dependent (when not specified at all)
 # end_of_line=crlf
