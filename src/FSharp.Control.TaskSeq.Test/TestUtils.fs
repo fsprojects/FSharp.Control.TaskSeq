@@ -24,6 +24,8 @@ type µs
 /// Inspired by IoT code: https://github.com/dotnet/iot/pull/235/files
 module DelayHelper =
 
+    let private rnd = Random()
+
     /// <summary>
     /// Delay for at least the specified <paramref name="microseconds"/>.
     /// </summary>
@@ -50,7 +52,6 @@ module DelayHelper =
                 Thread.SpinWait(1)
 
     let delayTask (µsecMin: int64<µs>) (µsecMax: int64<µs>) f = task {
-        let rnd = Random()
         let rnd () = rnd.NextInt64(int64 µsecMin, int64 µsecMax) * 1L<µs>
 
         // ensure unequal running lengths and points-in-time for assigning the variable
