@@ -265,10 +265,7 @@ module TaskSeq =
 
     let exactlyOne source =
         Internal.tryExactlyOne source
-        |> Task.map (
-            Option.defaultWith (fun () ->
-                invalidArg (nameof source) "The input sequence contains more than one element.")
-        )
+        |> Task.map (Option.defaultWith (fun () -> invalidArg (nameof source) "The input sequence contains more than one element."))
 
     let indexed (source: taskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
