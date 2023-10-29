@@ -127,7 +127,7 @@ let ``CE taskSeq: use 'let!' with all kinds of overloads at once`` () =
             return value
         }
 
-        let! b =  // eq 2
+        let! b = // eq 2
             task {
                 do! Task.Delay 50
                 do value <- value + 1

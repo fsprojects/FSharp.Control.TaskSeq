@@ -134,8 +134,10 @@ type TaskSeqBuilder =
     member inline TryFinally: body: ResumableTSC<'T> * compensationAction: (unit -> unit) -> ResumableTSC<'T>
     member inline TryFinallyAsync: body: ResumableTSC<'T> * compensationAction: (unit -> Task) -> ResumableTSC<'T>
     member inline TryWith: body: ResumableTSC<'T> * catch: (exn -> ResumableTSC<'T>) -> ResumableTSC<'T>
+
     member inline Using:
         disp: 'Disp * body: ('Disp -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'Disp :> IAsyncDisposable
+
     member inline While: condition: (unit -> bool) * body: ResumableTSC<'T> -> ResumableTSC<'T>
     /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the CE
     member inline WhileAsync: condition: (unit -> ValueTask<bool>) * body: ResumableTSC<'T> -> ResumableTSC<'T>
@@ -179,6 +181,7 @@ module MediumPriority =
         // NOTE: syntax with '#Disposable' won't work properly in FSI
         member inline Using:
             dispensation: 'Disp * body: ('Disp -> ResumableTSC<'T>) -> ResumableTSC<'T> when 'Disp :> IDisposable
+
         member inline For: sequence: seq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
         member inline YieldFrom: source: seq<'T> -> ResumableTSC<'T>
         member inline For: source: #taskSeq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
