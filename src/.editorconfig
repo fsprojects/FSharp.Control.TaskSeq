@@ -260,6 +260,10 @@ fsharp_bar_before_discriminated_union_declaration=false
 # To work reliably, fsharp_multiline_block_brackets_on_same_column must be "true"
 fsharp_experimental_stroustrup_style=true
 
+# above setting is for Fantomas 5.x. The new version uses these two
+fsharp_multiline_bracket_style = stroustrup
+fsharp_newline_before_multiline_computation_expression = false
+
 # from docs: Please do not use this setting for formatting hand written code!
 # default false
 fsharp_strict_mode=false
