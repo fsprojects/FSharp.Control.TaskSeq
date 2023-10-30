@@ -23,7 +23,13 @@ type TaskSeq private () =
 
     static member singleton(value: 'T) = Internal.singleton value
 
-    static member isEmpty source = Internal.isEmpty source
+    //static member isEmpty(source, ?token) = Internal.isEmpty (Option.defaultValue CancellationToken.None token) source
+    static member isEmpty source = Internal.isEmpty CancellationToken.None source
+    static member isEmpty token = Internal.isEmpty token
+
+    static member Foo =
+        TaskSeq.empty<string>
+        |> TaskSeq.isEmpty CancellationToken.None
 
     //
     // Convert 'ToXXX' functions

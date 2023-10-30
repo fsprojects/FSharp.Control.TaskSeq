@@ -76,11 +76,11 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the task sequence.")
         |> raise
 
-    let isEmpty (source: TaskSeq<_>) =
+    let isEmpty token (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator CancellationToken.None
+            use e = source.GetAsyncEnumerator(token)
             let! step = e.MoveNextAsync()
             return not step
         }

@@ -1,6 +1,7 @@
 namespace FSharp.Control
 
 open System.Collections.Generic
+open System.Threading
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -26,6 +27,16 @@ type TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member isEmpty: source: TaskSeq<'T> -> Task<bool>
+
+
+    /// <summary>
+    /// Returns the <see cref="isEmpty" /> function with the given <see cref="CancellationToken" /> in its closure, which
+    /// returns <see cref="true" /> is the cancelaable task sequence contains no elements, <see cref="false" /> otherwise.
+    /// </summary>
+    ///
+    /// <param name="token">The cancellation token.</param>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence for the returned function is null.</exception>
+    static member isEmpty: token: CancellationToken -> (TaskSeq<'T> -> Task<bool>)
 
     /// <summary>
     /// Returns the length of the sequence. This operation requires the whole sequence to be evaluated and
