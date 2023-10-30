@@ -2,6 +2,8 @@
 Release notes:
 0.4.x (unreleased)
     - fix documentation, improve tooltips experience, add exception info to every method
+    - 'TaskSeq<'T>' now replaces 'taskSeq<'T>'
+    - DEPRECATED: type alias 'taskSeq<'T>' now raises warning FS0044 in favor of 'TaskSeq<'T>'
     - BINARY INCOMPATIBLE: TaskSeq module members are now static members, source code compatible, #186
 	
 0.4.0-alpha.1
