@@ -1,7 +1,8 @@
 
 Release notes:
 0.4.x (unreleased)
-    - fix documentation
+    - fix documentation, improve tooltips experience, add exception info to every method
+    - BINARY INCOMPATIBLE: TaskSeq module members are now static members, source code compatible, #186
 	
 0.4.0-alpha.1
     - fixes not calling Dispose for 'use!', 'use', or `finally` blocks #157 (by @bartelink)
