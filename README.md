@@ -331,6 +331,9 @@ The following is the progress report:
 |                  | `sumBy`            | `sumBy`         | `sumByAsync`         | |
 | &#x2705; [#76][] | `tail`             | `tail`          |                      | |
 |                  | `take`             | `take`          |                      | |
+| &#x2705; [#126][]| `takeUntil`        | `takeUntil`     | `takeUntilAsync`     | |
+| &#x2705; [#126][]|                    |                 | `takeUntilInclusive` | |
+| &#x2705; [#126][]|                    |                 | `takeUntilInclusiveAsync`| |
 | &#x2705; [#126][]| `takeWhile`        | `takeWhile`     | `takeWhileAsync`     | |
 | &#x2705; [#126][]|                    |                 | `takeWhileInclusive` | |
 | &#x2705; [#126][]|                    |                 | `takeWhileInclusiveAsync`| |
@@ -526,6 +529,10 @@ module TaskSeq =
     val prependSeq: source1: seq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
     val singleton: source: 'T -> TaskSeq<'T>
     val tail: source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeUntil: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeUntilAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeUntilInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeUntilInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
     val takeWhile: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
     val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
     val takeWhileInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
