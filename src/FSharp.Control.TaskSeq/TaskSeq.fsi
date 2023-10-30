@@ -1,20 +1,25 @@
 namespace FSharp.Control
 
+open System.Collections.Generic
+open System.Threading.Tasks
+
 #nowarn "1204"
 
-module TaskSeq =
-    open System.Collections.Generic
-    open System.Threading.Tasks
+[<AutoOpen>]
+module TaskSeqExtensions =
+    module TaskSeq =
+        /// Initialize an empty task sequence.
+        val empty<'T> : taskSeq<'T>
 
-    /// Initialize an empty taskSeq.
-    val empty<'T> : taskSeq<'T>
+[<Sealed>]
+type TaskSeq =
 
     /// <summary>
     /// Creates a <see cref="taskSeq" /> sequence from <paramref name="source" /> that generates a single element and then ends.
     /// </summary>
     ///
     /// <param name="value">The input item to use as the single item of the task sequence.</param>
-    val singleton: value: 'T -> taskSeq<'T>
+    static member singleton: value: 'T -> taskSeq<'T>
 
     /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
@@ -22,7 +27,7 @@ module TaskSeq =
     ///
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val isEmpty: source: taskSeq<'T> -> Task<bool>
+    static member isEmpty: source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Returns the length of the sequence. This operation requires the whole sequence to be evaluated and
@@ -31,7 +36,7 @@ module TaskSeq =
     ///
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val length: source: taskSeq<'T> -> Task<int>
+    static member length: source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the length of the sequence, or <paramref name="max" />, whichever comes first. This operation requires the task sequence
@@ -42,7 +47,7 @@ module TaskSeq =
     /// <param name="max">Limit at which to stop evaluating source items for finding the length.</param>
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
+    static member lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
@@ -53,7 +58,7 @@ module TaskSeq =
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val lengthBy: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
+    static member lengthBy: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
@@ -64,7 +69,7 @@ module TaskSeq =
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
+    static member lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns a task sequence that is given by the delayed specification of a task sequence.
@@ -72,7 +77,7 @@ module TaskSeq =
     ///
     /// <param name="generator">The generating function for the task sequence.</param>
     /// <returns>The generated task sequence.</returns>
-    val delay: generator: (unit -> taskSeq<'T>) -> taskSeq<'T>
+    static member delay: generator: (unit -> taskSeq<'T>) -> taskSeq<'T>
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
@@ -87,7 +92,7 @@ module TaskSeq =
     /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:System.ArgumentException">Thrown when count is negative.</exception>
-    val init: count: int -> initializer: (int -> 'T) -> taskSeq<'T>
+    static member init: count: int -> initializer: (int -> 'T) -> taskSeq<'T>
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
@@ -102,7 +107,7 @@ module TaskSeq =
     /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:System.ArgumentException">Thrown when count is negative.</exception>
-    val initAsync: count: int -> initializer: (int -> #Task<'T>) -> taskSeq<'T>
+    static member initAsync: count: int -> initializer: (int -> #Task<'T>) -> taskSeq<'T>
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
@@ -116,7 +121,7 @@ module TaskSeq =
     ///
     /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
     /// <returns>The resulting task sequence.</returns>
-    val initInfinite: initializer: (int -> 'T) -> taskSeq<'T>
+    static member initInfinite: initializer: (int -> 'T) -> taskSeq<'T>
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
@@ -130,7 +135,7 @@ module TaskSeq =
     ///
     /// <param name="initializer">A function that generates an item in the sequence from a given index.</param>
     /// <returns>The resulting task sequence.</returns>
-    val initInfiniteAsync: initializer: (int -> #Task<'T>) -> taskSeq<'T>
+    static member initInfiniteAsync: initializer: (int -> #Task<'T>) -> taskSeq<'T>
 
     /// <summary>
     /// Combines the given task sequence of task sequences and concatenates them end-to-end, to form a
@@ -140,7 +145,7 @@ module TaskSeq =
     /// <param name="sources">The input task-sequence-of-task-sequences.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
-    val concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
+    static member concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
 
     /// <summary>
     /// Concatenates task sequences <paramref name="source1" /> and <paramref name="source2" /> in order as a single
@@ -151,7 +156,7 @@ module TaskSeq =
     /// <param name="source2">The second input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input task sequences is null.</exception>
-    val append: source1: taskSeq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
+    static member append: source1: taskSeq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Concatenates a task sequence <paramref name="source1" /> with a non-async F# <see cref="seq" /> in <paramref name="source2" />
@@ -162,7 +167,7 @@ module TaskSeq =
     /// <param name="source2">The input F# <see cref="seq" /> sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
-    val appendSeq: source1: taskSeq<'T> -> source2: seq<'T> -> taskSeq<'T>
+    static member appendSeq: source1: taskSeq<'T> -> source2: seq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Concatenates a non-async F# <see cref="seq" /> in <paramref name="source1" /> with a task sequence in <paramref name="source2" />
@@ -173,7 +178,7 @@ module TaskSeq =
     /// <param name="source2">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the input sequences is null.</exception>
-    val prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
+    static member prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Builds an F# <see cref="list" /> from the input task sequence in <paramref name="source" />.
@@ -183,7 +188,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting list.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toList: source: taskSeq<'T> -> 'T list
+    static member toList: source: taskSeq<'T> -> 'T list
 
     /// <summary>
     /// Builds an <see cref="array" /> from the input task sequence in <paramref name="source" />.
@@ -193,7 +198,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting array.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toArray: source: taskSeq<'T> -> 'T[]
+    static member toArray: source: taskSeq<'T> -> 'T[]
 
     /// <summary>
     /// Views the task sequence in <paramref name="source" /> as an F# <see cref="seq" />, that is, an
@@ -205,7 +210,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toSeq: source: taskSeq<'T> -> seq<'T>
+    static member toSeq: source: taskSeq<'T> -> seq<'T>
 
     /// <summary>
     /// Builds an <see cref="array" /> asynchronously from the input task sequence.
@@ -215,7 +220,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting array.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
+    static member toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
 
     /// <summary>
     /// Builds an F# <see cref="list" /> asynchronously from the input task sequence.
@@ -225,7 +230,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting list.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toListAsync: source: taskSeq<'T> -> Task<'T list>
+    static member toListAsync: source: taskSeq<'T> -> Task<'T list>
 
     /// <summary>
     /// Gathers items into a ResizeArray (see <see cref="T:System.Collections.Generic.List&lt;_>" />) asynchronously from the input task sequence.
@@ -235,7 +240,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting resizable array.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toResizeArrayAsync: source: taskSeq<'T> -> Task<ResizeArray<'T>>
+    static member toResizeArrayAsync: source: taskSeq<'T> -> Task<ResizeArray<'T>>
 
     /// <summary>
     /// Builds an <see cref="IList&lt;'T>" /> asynchronously from the input task sequence.
@@ -245,7 +250,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting IList interface.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
+    static member toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
 
     /// <summary>
     /// Views the given <see cref="array" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
@@ -254,7 +259,7 @@ module TaskSeq =
     /// <param name="source">The input array.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input array is null.</exception>
-    val ofArray: source: 'T[] -> taskSeq<'T>
+    static member ofArray: source: 'T[] -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="list" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
@@ -262,7 +267,7 @@ module TaskSeq =
     ///
     /// <param name="source">The input list.</param>
     /// <returns>The resulting task sequence.</returns>
-    val ofList: source: 'T list -> taskSeq<'T>
+    static member ofList: source: 'T list -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="seq" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
@@ -271,7 +276,7 @@ module TaskSeq =
     /// <param name="source">The input sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val ofSeq: source: seq<'T> -> taskSeq<'T>
+    static member ofSeq: source: seq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Views the given resizable array as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
@@ -280,7 +285,7 @@ module TaskSeq =
     /// <param name="source">The input resize array.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input resize array is null.</exception>
-    val ofResizeArray: source: ResizeArray<'T> -> taskSeq<'T>
+    static member ofResizeArray: source: ResizeArray<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="seq" /> of <see cref="Task" />s as a task sequence, that is, as an
@@ -293,7 +298,7 @@ module TaskSeq =
     /// <param name="source">The input sequence-of-tasks.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val ofTaskSeq: source: seq<#Task<'T>> -> taskSeq<'T>
+    static member ofTaskSeq: source: seq<#Task<'T>> -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="list" /> of <see cref="Task" />s as a task sequence, that is, as an
@@ -306,7 +311,7 @@ module TaskSeq =
     ///
     /// <param name="source">The input list-of-tasks.</param>
     /// <returns>The resulting task sequence.</returns>
-    val ofTaskList: source: #Task<'T> list -> taskSeq<'T>
+    static member ofTaskList: source: #Task<'T> list -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="array" /> of <see cref="Task" />s as a task sequence, that is, as an
@@ -320,7 +325,7 @@ module TaskSeq =
     /// <param name="source">The input array-of-tasks.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input array is null.</exception>
-    val ofTaskArray: source: #Task<'T> array -> taskSeq<'T>
+    static member ofTaskArray: source: #Task<'T> array -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="seq" /> of <see cref="Async" />s as a task sequence, that is, as an
@@ -333,7 +338,7 @@ module TaskSeq =
     /// <param name="source">The input sequence-of-asyncs.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val ofAsyncSeq: source: seq<Async<'T>> -> taskSeq<'T>
+    static member ofAsyncSeq: source: seq<Async<'T>> -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="list" /> of <see cref="Async" />s as a task sequence, that is, as an
@@ -345,7 +350,7 @@ module TaskSeq =
     ///
     /// <param name="source">The input list-of-asyncs.</param>
     /// <returns>The resulting task sequence.</returns>
-    val ofAsyncList: source: Async<'T> list -> taskSeq<'T>
+    static member ofAsyncList: source: Async<'T> list -> taskSeq<'T>
 
     /// <summary>
     /// Views the given <see cref="array" /> of <see cref="Async" />s as a task sequence, that is, as an
@@ -358,7 +363,7 @@ module TaskSeq =
     /// <param name="source">The input array-of-asyncs.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
+    static member ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
 
     /// <summary>
     /// Views each item in the input task sequence as <see cref="obj" />, boxing value types.
@@ -367,7 +372,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val box: source: taskSeq<'T> -> taskSeq<obj>
+    static member box: source: taskSeq<'T> -> taskSeq<obj>
 
     /// <summary>
     /// Unboxes to the target type <see cref="'U" /> each item in the input task sequence.
@@ -378,7 +383,7 @@ module TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
-    val unbox<'U when 'U: struct> : source: taskSeq<obj> -> taskSeq<'U>
+    static member unbox<'U when 'U: struct> : source: taskSeq<obj> -> taskSeq<'U>
 
     /// <summary>
     /// Casts each item in the untyped input task sequence. If the input sequence contains value types
@@ -389,7 +394,7 @@ module TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="InvalidCastException">Thrown when the function is unable to cast an item to the target type.</exception>
-    val cast: source: taskSeq<obj> -> taskSeq<'U>
+    static member cast: source: taskSeq<obj> -> taskSeq<'U>
 
     /// <summary>
     /// Iterates over the input task sequence, applying the <paramref name="action" /> function to each item.
@@ -400,7 +405,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val iter: action: ('T -> unit) -> source: taskSeq<'T> -> Task<unit>
+    static member iter: action: ('T -> unit) -> source: taskSeq<'T> -> Task<unit>
 
     /// <summary>
     /// Iterates over the input task sequence, applying the <paramref name="action" /> function to each item,
@@ -412,7 +417,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val iteri: action: (int -> 'T -> unit) -> source: taskSeq<'T> -> Task<unit>
+    static member iteri: action: (int -> 'T -> unit) -> source: taskSeq<'T> -> Task<unit>
 
     /// <summary>
     /// Iterates over the input task sequence, applying the asynchronous <paramref name="action" /> function to each item.
@@ -423,7 +428,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val iterAsync: action: ('T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
+    static member iterAsync: action: ('T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
 
     /// <summary>
     /// Iterates over the input task sequence, applying the asynchronous <paramref name="action" /> function to each item,
@@ -435,7 +440,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
-    val iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
+    static member iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the corresponding elements of the input task
@@ -446,7 +451,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence of tuples.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val indexed: source: taskSeq<'T> -> taskSeq<int * 'T>
+    static member indexed: source: taskSeq<'T> -> taskSeq<int * 'T>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
@@ -460,7 +465,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
@@ -475,7 +480,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val mapi: mapper: (int -> 'T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member mapi: mapper: (int -> 'T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
@@ -489,7 +494,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val mapAsync: mapper: ('T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member mapAsync: mapper: ('T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
@@ -504,7 +509,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
@@ -519,7 +524,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting concatenation of all returned task sequences.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val collect: binder: ('T -> #taskSeq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member collect: binder: ('T -> #taskSeq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
@@ -534,7 +539,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting concatenation of all returned task sequences.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val collectSeq: binder: ('T -> #seq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member collectSeq: binder: ('T -> #seq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
@@ -549,7 +554,8 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting concatenation of all returned task sequences.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val collectAsync: binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
+    static member collectAsync:
+        binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
@@ -564,7 +570,8 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting concatenation of all returned task sequences.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
+    static member collectSeqAsync:
+        binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
 
     /// <summary>
     /// Returns the first element of the input task sequence given by <paramref name="source" />,
@@ -574,7 +581,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The first element of the task sequence, or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryHead: source: taskSeq<'T> -> Task<'T option>
+    static member tryHead: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the first element of the input task sequence given by <paramref name="source" />.
@@ -584,7 +591,7 @@ module TaskSeq =
     /// <returns>The first element of the task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the task sequence is empty.</exception>
-    val head: source: taskSeq<'T> -> Task<'T>
+    static member head: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the whole input task sequence given by <paramref name="source" />, minus its first element,
@@ -594,7 +601,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The input task sequence minus the first element, or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryTail: source: taskSeq<'T> -> Task<taskSeq<'T> option>
+    static member tryTail: source: taskSeq<'T> -> Task<taskSeq<'T> option>
 
     /// <summary>
     /// Returns the whole task sequence from <paramref name="source" />, minus its first element.
@@ -604,7 +611,7 @@ module TaskSeq =
     /// <returns>The input task sequence minus the first element.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the task sequence is empty.</exception>
-    val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
+    static member tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
 
     /// <summary>
     /// Returns the last element of the input task sequence given by <paramref name="source" />,
@@ -614,7 +621,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The last element of the task sequence, or None.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryLast: source: taskSeq<'T> -> Task<'T option>
+    static member tryLast: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the last element of the input task sequence given by <paramref name="source" />.
@@ -624,7 +631,7 @@ module TaskSeq =
     /// <returns>The last element of the task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the task sequence is empty.</exception>
-    val last: source: taskSeq<'T> -> Task<'T>
+    static member last: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the nth element of the input task sequence given by <paramref name="source" />,
@@ -635,7 +642,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The nth element of the task sequence, or None if it doesn't exist.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryItem: index: int -> source: taskSeq<'T> -> Task<'T option>
+    static member tryItem: index: int -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the nth element of the input task sequence given by <paramref name="source" />,
@@ -647,7 +654,7 @@ module TaskSeq =
     /// <returns>The nth element of the task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the sequence has insufficient length or <paramref name="index" /> is negative.</exception>
-    val item: index: int -> source: taskSeq<'T> -> Task<'T>
+    static member item: index: int -> source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the only element of the task sequence, or <see cref="None" /> if the sequence is empty of
@@ -657,7 +664,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The only element of the singleton task sequence, or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
+    static member tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the only element of the task sequence.
@@ -667,7 +674,7 @@ module TaskSeq =
     /// <returns>The only element of the singleton task sequence, or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the input task sequence does not contain precisely one element.</exception>
-    val exactlyOne: source: taskSeq<'T> -> Task<'T>
+    static member exactlyOne: source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
@@ -679,7 +686,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to each element of the task sequence.
@@ -692,7 +699,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val chooseAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> taskSeq<'U>
+    static member chooseAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> taskSeq<'U>
 
     /// <summary>
     /// Returns a new task sequence containing only the elements of the collection
@@ -704,7 +711,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val filter: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member filter: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a new task sequence containing only the elements of the input sequence
@@ -716,7 +723,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val filterAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member filterAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
@@ -730,7 +737,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a sequence that, when iterated, yields elements of the underlying sequence while the
@@ -744,7 +751,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a sequence that, when iterated, yields elements of the underlying sequence until the given
@@ -758,7 +765,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val takeWhileInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member takeWhileInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a sequence that, when iterated, yields elements of the underlying sequence until the given
@@ -772,7 +779,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+    static member takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
@@ -783,7 +790,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The chosen element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryPick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U option>
+    static member tryPick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U option>
 
     /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements, returning the first result where
@@ -794,7 +801,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The chosen element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U option>
+    static member tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U option>
 
     /// <summary>
     /// Returns the first element for which the given function <paramref name="predicate" /> returns
@@ -806,7 +813,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The found element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryFind: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T option>
+    static member tryFind: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the first element for which the given asynchronous function <paramref name="predicate" /> returns
@@ -818,7 +825,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The found element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
+    static member tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
     /// Returns the index, starting from zero, for which the given function <paramref name="predicate" /> returns
@@ -830,7 +837,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The found element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryFindIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int option>
+    static member tryFindIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int option>
 
     /// <summary>
     /// Returns the index, starting from zero, for which the given asynchronous function <paramref name="predicate" /> returns
@@ -842,8 +849,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The found element or <see cref="None" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int option>
-
+    static member tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int option>
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
@@ -856,7 +862,7 @@ module TaskSeq =
     /// <returns>The selected element.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown when every item of the sequence evaluates to <see cref="None" /> when the given function is applied.</exception>
-    val pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
+    static member pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
 
     /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements, returning the first result where
@@ -869,7 +875,7 @@ module TaskSeq =
     /// <returns>The selected element.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown when every item of the sequence evaluates to <see cref="None" /> when the given function is applied.</exception>
-    val pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
+    static member pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
 
     /// <summary>
     /// Returns the first element for which the given function <paramref name="predicate" /> returns <see cref="true" />.
@@ -882,7 +888,7 @@ module TaskSeq =
     /// <returns>The first element for which the predicate returns <see cref="true" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
-    val find: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T>
+    static member find: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the first element for which the given asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
@@ -895,7 +901,7 @@ module TaskSeq =
     /// <returns>The first element for which the predicate returns <see cref="true" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
-    val findAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T>
+    static member findAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Returns the index, starting from zero, of the first element for which the given function <paramref name="predicate" />
@@ -908,7 +914,7 @@ module TaskSeq =
     /// <returns>The index for which the predicate returns <see cref="true" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
-    val findIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
+    static member findIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Returns the index, starting from zero, of the first element for which the given function <paramref name="predicate" />
@@ -921,7 +927,7 @@ module TaskSeq =
     /// <returns>The index for which the predicate returns <see cref="true" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
-    val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
+    static member findIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Tests if the sequence contains the specified element. Returns <see cref="true" />
@@ -933,7 +939,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns><see cref="True" /> if the input sequence contains the specified element; <see cref="false" /> otherwise.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val contains<'T when 'T: equality> : value: 'T -> source: taskSeq<'T> -> Task<bool>
+    static member contains<'T when 'T: equality> : value: 'T -> source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Tests if any element of the task sequence in <paramref name="source" /> satisfies the given <paramref name="predicate" />. The function
@@ -946,7 +952,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns><see cref="True" /> if any result from the predicate is true; <see cref="false" /> otherwise.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val exists: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<bool>
+    static member exists: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Tests if any element of the task sequence in <paramref name="source" /> satisfies the given asynchronous <paramref name="predicate" />.
@@ -959,7 +965,7 @@ module TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns><see cref="True" /> if any result from the predicate is true; <see cref="false" /> otherwise.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val existsAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<bool>
+    static member existsAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<bool>
 
     /// <summary>
     /// Returns a new task sequence with the distinct elements of the second task sequence which do not appear in the
@@ -978,7 +984,7 @@ module TaskSeq =
     /// <returns>A sequence that contains the set difference of the elements of two sequences.</returns>
     ///
     /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
-    val except<'T when 'T: equality> : itemsToExclude: taskSeq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
+    static member except<'T when 'T: equality> : itemsToExclude: taskSeq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Returns a new task sequence with the distinct elements of the second task sequence which do not appear in the
@@ -997,7 +1003,7 @@ module TaskSeq =
     /// <returns>A sequence that contains the set difference of the elements of two sequences.</returns>
     ///
     /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
-    val exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
+    static member exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
 
     /// <summary>
     /// Combines the two task sequences into a new task sequence of pairs. The two sequences need not have equal lengths:
@@ -1007,7 +1013,7 @@ module TaskSeq =
     /// <param name="source1">The first input task sequence.</param>
     /// <param name="source2">The second input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
-    val zip: source1: taskSeq<'T> -> source2: taskSeq<'U> -> taskSeq<'T * 'U>
+    static member zip: source1: taskSeq<'T> -> source2: taskSeq<'U> -> taskSeq<'T * 'U>
 
     /// <summary>
     /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
@@ -1021,7 +1027,7 @@ module TaskSeq =
     /// <param name="source">The input sequence.</param>
     /// <returns>The state object after the folding function is applied to each element of the sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
+    static member fold: folder: ('State -> 'T -> 'State) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
 
     /// <summary>
     /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
@@ -1035,4 +1041,5 @@ module TaskSeq =
     /// <param name="source">The input sequence.</param>
     /// <returns>The state object after the folding function is applied to each element of the sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
+    static member foldAsync:
+        folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
