@@ -782,6 +782,63 @@ type TaskSeq =
     static member takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
+    /// given function <paramref name="predicate" /> returns <see cref="false" />, and then returns no further elements.
+    /// The first element where the predicate returns <see cref="true" /> is not included in the resulting sequence
+    /// (see also <see cref="TaskSeq.takeUntilInclusive" />).
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeUntilAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to true when no more items should be returned.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member takeUntil: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
+    /// given asynchronous function <paramref name="predicate" /> returns <see cref="false" />, and then returns no further elements.
+    /// The first element where the predicate returns <see cref="true" /> is not included in the resulting sequence
+    /// (see also <see cref="TaskSeq.takeUntilInclusiveAsync" />).
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeUntil" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to true when no more items should be returned.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member takeUntilAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence until the given
+    /// function <paramref name="predicate" /> returns <see cref="true" />, returns that element
+    /// and then returns no further elements (see also <see cref="TaskSeq.takeUntil" />). This function returns
+    /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeUntilInclusiveAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to true when no more items should be returned.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member takeUntilInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence until the given
+    /// asynchronous function <paramref name="predicate" /> returns <see cref="true" />, returns that element
+    /// and then returns no further elements (see also <see cref="TaskSeq.takeUntilAsync" />). This function returns
+    /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeUntilInclusive" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to true when no more items should be returned.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member takeUntilInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
+
+
+    /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />.
     /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.tryPickAsync" />.

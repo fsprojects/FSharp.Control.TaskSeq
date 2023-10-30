@@ -1,4 +1,4 @@
-module TaskSeq.Tests.TakeWhile
+module TaskSeq.Tests.TakeUntil
 
 open System
 
@@ -8,10 +8,10 @@ open FsUnit.Xunit
 open FSharp.Control
 
 //
-// TaskSeq.takeWhile
-// TaskSeq.takeWhileAsync
-// TaskSeq.takeWhileInclusive
-// TaskSeq.takeWhileInclusiveAsync
+// TaskSeq.takeUntil
+// TaskSeq.takeUntilAsync
+// TaskSeq.takeUntilInclusive
+// TaskSeq.takeUntilInclusiveAsync
 //
 
 [<AutoOpen>]
@@ -20,10 +20,10 @@ module With =
     /// NOTE the semantics are very clear on only propagating a single failing item in the inclusive case.
     let getFunction inclusive isAsync =
         match inclusive, isAsync with
-        | false, false -> TaskSeq.takeWhile
-        | false, true -> fun pred -> TaskSeq.takeWhileAsync (pred >> Task.fromResult)
-        | true, false -> TaskSeq.takeWhileInclusive
-        | true, true -> fun pred -> TaskSeq.takeWhileInclusiveAsync (pred >> Task.fromResult)
+        | false, false -> TaskSeq.takeUntil
+        | false, true -> fun pred -> TaskSeq.takeUntilAsync (pred >> Task.fromResult)
+        | true, false -> TaskSeq.takeUntilInclusive
+        | true, true -> fun pred -> TaskSeq.takeUntilInclusiveAsync (pred >> Task.fromResult)
 
     /// adds '@' to each number and concatenates the chars before calling 'should equal'
     let verifyAsString expected =
@@ -33,7 +33,7 @@ module With =
         >> Task.map (String >> should equal expected)
 
     /// This is the base condition as one would expect in actual code
-    let inline cond x = x <> 6
+    let inline cond x = x = 6
 
     /// For each of the tests below, we add a guard that will trigger if the predicate is passed items known to be beyond the
     /// first failing item in the known sequence (which is 1..6)
@@ -47,96 +47,96 @@ module With =
 
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-takeWhile has no effect`` variant = task {
+    let ``TaskSeq-takeUntil has no effect`` variant = task {
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhile ((=) 12)
+            |> TaskSeq.takeUntil ((=) 12)
             |> verifyEmpty
 
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileAsync ((=) 12 >> Task.fromResult)
+            |> TaskSeq.takeUntilAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-takeWhileInclusive has no effect`` variant = task {
+    let ``TaskSeq-takeUntilInclusive has no effect`` variant = task {
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileInclusive ((=) 12)
+            |> TaskSeq.takeUntilInclusive ((=) 12)
             |> verifyEmpty
 
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileInclusiveAsync ((=) 12 >> Task.fromResult)
+            |> TaskSeq.takeUntilInclusiveAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
 
 module Immutable =
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhile filters correctly`` variant = task {
+    let ``TaskSeq-takeUntil filters correctly`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhile condWithGuard
+            |> TaskSeq.takeUntil condWithGuard
             |> verifyAsString "ABCDE"
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
+            |> TaskSeq.takeUntilAsync (fun x -> task { return condWithGuard x })
             |> verifyAsString "ABCDE"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhile does not pick first item when false`` variant = task {
+    let ``TaskSeq-takeUntil does not pick first item when true`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhile ((=) 0)
+            |> TaskSeq.takeUntil ((<>) 0)
             |> verifyAsString ""
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileAsync ((=) 0 >> Task.fromResult)
+            |> TaskSeq.takeUntilAsync ((<>) 0 >> Task.fromResult)
             |> verifyAsString ""
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusive filters correctly`` variant = task {
+    let ``TaskSeq-takeUntilInclusive filters correctly`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusive condWithGuard
+            |> TaskSeq.takeUntilInclusive condWithGuard
             |> verifyAsString "ABCDEF"
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return condWithGuard x })
+            |> TaskSeq.takeUntilInclusiveAsync (fun x -> task { return condWithGuard x })
             |> verifyAsString "ABCDEF"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusive always picks at least the first item`` variant = task {
+    let ``TaskSeq-takeUntilInclusive always picks at least the first item`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusive ((=) 0)
+            |> TaskSeq.takeUntilInclusive ((<>) 0)
             |> verifyAsString "A"
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusiveAsync ((=) 0 >> Task.fromResult)
+            |> TaskSeq.takeUntilInclusiveAsync ((<>) 0 >> Task.fromResult)
             |> verifyAsString "A"
     }
 
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhile filters correctly`` variant =
+    let ``TaskSeq-takeUntil filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhile condWithGuard
+        |> TaskSeq.takeUntil condWithGuard
         |> verifyAsString "ABCDE"
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhileAsync filters correctly`` variant =
+    let ``TaskSeq-takeUntilAsync filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
+        |> TaskSeq.takeUntilAsync (fun x -> task { return condWithGuard x })
         |> verifyAsString "ABCDE"
 
     [<Theory>]
@@ -144,9 +144,9 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
+    let ``TaskSeq-takeUntilXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
         let mutable x = 42 // for this test, the potential mutation should not actually occur
-        let functionToTest = getFunction inclusive isAsync ((=) 42)
+        let functionToTest = getFunction inclusive isAsync ((<>) 42)
 
         let items = taskSeq {
             yield x // Always passes the test; always returned
@@ -169,9 +169,9 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove side effects are executed`` (inclusive, isAsync) = task {
+    let ``TaskSeq-takeUntilXXX prove side effects are executed`` (inclusive, isAsync) = task {
         let mutable x = 41
-        let functionToTest = getFunction inclusive isAsync ((>) 50)
+        let functionToTest = getFunction inclusive isAsync ((<=) 50)
 
         let items = taskSeq {
             x <- x + 1
@@ -194,11 +194,11 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhile consumes the prefix of a longer sequence, with mutation`` variant = task {
+    let ``TaskSeq-takeUntil consumes the prefix of a longer sequence, with mutation`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! first =
-            TaskSeq.takeWhile (fun x -> x < 5) ts
+            TaskSeq.takeUntil (fun x -> x >= 5) ts
             |> TaskSeq.toArrayAsync
 
         let expected = [| 1..4 |]
@@ -206,26 +206,26 @@ module SideEffects =
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
         let! repeat =
-            TaskSeq.takeWhile (fun x -> x < 5) ts
+            TaskSeq.takeUntil (fun x -> x < 5) ts
             |> TaskSeq.toArrayAsync
 
         repeat |> should not' (equal expected)
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusiveAsync consumes the prefix for a longer sequence, with mutation`` variant = task {
+    let ``TaskSeq-takeUntilInclusiveAsync consumes the prefix for a longer sequence, with mutation`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! first =
-            TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
+            TaskSeq.takeUntilInclusiveAsync (fun x -> task { return x = 6 }) ts
             |> TaskSeq.toArrayAsync
 
-        let expected = [| 1..5 |]
+        let expected = [| 1..6 |] // the '6' is included, we are testing "Inclusive"
         first |> should equal expected
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
         let! repeat =
-            TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
+            TaskSeq.takeUntilInclusiveAsync (fun x -> task { return x < 5 }) ts
             |> TaskSeq.toArrayAsync
 
         repeat |> should not' (equal expected)
@@ -237,12 +237,12 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX exclude all items after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-takeUntilXXX exclude all items after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         [ 1; 2; 2; 3; 3; 2; 1 ]
         |> TaskSeq.ofSeq
-        |> functionToTest (fun x -> x <= 2)
+        |> functionToTest (fun x -> x > 2)
         |> verifyAsString (if inclusive then "ABBC" else "ABB")
 
     [<Theory>]
@@ -250,7 +250,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-takeUntilXXX stops consuming after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         seq {
@@ -258,5 +258,5 @@ module Other =
             yield failwith "Too far"
         }
         |> TaskSeq.ofSeq
-        |> functionToTest (fun x -> x <= 2)
+        |> functionToTest (fun x -> x > 2)
         |> verifyAsString (if inclusive then "ABBC" else "ABB")
