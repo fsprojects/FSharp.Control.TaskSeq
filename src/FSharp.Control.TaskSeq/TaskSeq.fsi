@@ -13,7 +13,7 @@ module TaskSeq =
     /// Creates a <see cref="taskSeq" /> sequence from <paramref name="source" /> that generates a single element and then ends.
     /// </summary>
     ///
-    /// <param name="value">The input item to use as the single value for the task sequence.</param>
+    /// <param name="value">The input item to use as the single item of the task sequence.</param>
     val singleton: value: 'T -> taskSeq<'T>
 
     /// <summary>
@@ -35,11 +35,11 @@ module TaskSeq =
 
     /// <summary>
     /// Returns the length of the sequence, or <paramref name="max" />, whichever comes first. This operation requires the task sequence
-    /// to be evaluated in full, or until <paramref name="max" /> items have been processed. Use this method instead of
-    /// <see cref="TaskSeq.length" /> if you want to prevent too many items to be evaluated, or if the sequence is potentially infinite.
+    /// to be evaluated ether in full, or until <paramref name="max" /> items have been processed. Use this method instead of
+    /// <see cref="TaskSeq.length" /> if you need to limit the number of items evaluated, or if the sequence is potentially infinite.
     /// </summary>
     ///
-    /// <param name="max">The maximum value to return and the maximum items to count.</param>
+    /// <param name="max">Limit at which to stop evaluating source items for finding the length.</param>
     /// <param name="source">The input task sequence.</param>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     val lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
@@ -76,7 +76,7 @@ module TaskSeq =
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
-    /// with the current index, up to the given count. Each element is saved after its initialization for successive access to
+    /// with the curren zero-basedt index, up to the given count. Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
     /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
     /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
@@ -91,7 +91,7 @@ module TaskSeq =
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
-    /// with the current index, up to the given count. Each element is saved after its initialization for successive access to
+    /// with the current zero-based index, up to the given count. Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
     /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
     /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
@@ -106,7 +106,7 @@ module TaskSeq =
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
-    /// with the current index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
+    /// with the current zero-based index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
     /// Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
     /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
@@ -120,7 +120,7 @@ module TaskSeq =
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
-    /// with the current index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
+    /// with the current zero-based index, ad infinitum, or until <see cref="Int32.MaxValue" /> is reached.
     /// Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
     /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
@@ -208,7 +208,7 @@ module TaskSeq =
     val toSeq: source: taskSeq<'T> -> seq<'T>
 
     /// <summary>
-    /// Builds an <see cref="array" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// Builds an <see cref="array" /> asynchronously from the input task sequence.
     /// This function is non-blocking while it builds the array.
     /// </summary>
     ///
@@ -218,7 +218,7 @@ module TaskSeq =
     val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
 
     /// <summary>
-    /// Builds an F# <see cref="list" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// Builds an F# <see cref="list" /> asynchronously from the input task sequence.
     /// This function is non-blocking while it builds the list.
     /// </summary>
     ///
@@ -228,7 +228,7 @@ module TaskSeq =
     val toListAsync: source: taskSeq<'T> -> Task<'T list>
 
     /// <summary>
-    /// Builds a resizable array asynchronously from the input task sequence in <paramref name="source" />.
+    /// Gathers items into a ResizeArray (see <see cref="T:System.Collections.Generic.List&lt;_>" />) asynchronously from the input task sequence.
     /// This function is non-blocking while it builds the resizable array.
     /// </summary>
     ///
@@ -238,7 +238,7 @@ module TaskSeq =
     val toResizeArrayAsync: source: taskSeq<'T> -> Task<ResizeArray<'T>>
 
     /// <summary>
-    /// Builds an <see cref="IList&lt;'T>" /> asynchronously from the input task sequence in <paramref name="source" />.
+    /// Builds an <see cref="IList&lt;'T>" /> asynchronously from the input task sequence.
     /// This function is non-blocking while it builds the IList.
     /// </summary>
     ///
@@ -404,7 +404,7 @@ module TaskSeq =
 
     /// <summary>
     /// Iterates over the input task sequence, applying the <paramref name="action" /> function to each item,
-    /// carrying the index as extra parameter for the <paramref name="action" /> function.
+    /// supplying the zero-based index as extra parameter for the <paramref name="action" /> function.
     /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
     /// </summary>
     ///
@@ -427,7 +427,7 @@ module TaskSeq =
 
     /// <summary>
     /// Iterates over the input task sequence, applying the asynchronous <paramref name="action" /> function to each item,
-    /// carrying the index as extra parameter for the <paramref name="action" /> function.
+    /// supplying the zero-based index as extra parameter for the <paramref name="action" /> function.
     /// This function is non-blocking, but will exhaust the full input sequence as soon as the task is evaluated.
     /// </summary>
     ///
@@ -451,7 +451,7 @@ module TaskSeq =
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -465,8 +465,8 @@ module TaskSeq =
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
-    /// an extra index argument to the <paramref name="action" /> function.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// an extra zero-based index argument to the <paramref name="action" /> function.
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -480,7 +480,7 @@ module TaskSeq =
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -494,8 +494,8 @@ module TaskSeq =
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
-    /// an extra index argument to the <paramref name="action" /> function.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// an extra zero-based index argument to the <paramref name="action" /> function.
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -510,7 +510,7 @@ module TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
     /// returned task sequences.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -525,7 +525,7 @@ module TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
     /// returned regular F# sequences.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -540,7 +540,7 @@ module TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
     /// returned task sequences.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -555,7 +555,7 @@ module TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="binder" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
     /// returned regular F# sequences.
-    /// The given function will be applied as elements are demanded using the <see cref="MoveNextAsync" />
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
@@ -577,7 +577,7 @@ module TaskSeq =
     val tryHead: source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the first elementof the input task sequence given by <paramref name="source" />.
+    /// Returns the first element of the input task sequence given by <paramref name="source" />.
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
@@ -628,8 +628,7 @@ module TaskSeq =
 
     /// <summary>
     /// Returns the nth element of the input task sequence given by <paramref name="source" />,
-    /// or <see cref="None" /> if the sequence does not contain enough elements, or <paramref name="index" />
-    /// is negative.
+    /// or <see cref="None" /> if the sequence does not contain enough elements.
     /// The index is zero-based, that is, using index 0 returns the first element.
     /// </summary>
     ///
@@ -640,8 +639,7 @@ module TaskSeq =
 
     /// <summary>
     /// Returns the nth element of the input task sequence given by <paramref name="source" />,
-    /// or raises an exception if the sequence does not contain enough elements, or <paramref name="index" />
-    /// is negative.
+    /// or raises an exception if the sequence does not contain enough elements.
     /// The index is zero-based, that is, using index 0 returns the first element.
     /// </summary>
     ///
@@ -823,7 +821,7 @@ module TaskSeq =
     val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
 
     /// <summary>
-    /// Returns the index, starting from zero for which the given function <paramref name="predicate" /> returns
+    /// Returns the index, starting from zero, for which the given function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
     /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.tryFindIndexAsync" />.
     /// </summary>
@@ -835,7 +833,7 @@ module TaskSeq =
     val tryFindIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int option>
 
     /// <summary>
-    /// Returns the index, starting from zero for which the given asynchronous function <paramref name="predicate" /> returns
+    /// Returns the index, starting from zero, for which the given asynchronous function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.tryFindIndex" />.
     /// </summary>
