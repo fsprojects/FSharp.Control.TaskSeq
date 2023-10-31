@@ -15,7 +15,7 @@ module TaskSeqExtensions =
 type TaskSeq =
 
     /// <summary>
-    /// Creates a <see cref="taskSeq" /> sequence from <paramref name="source" /> that generates a single element and then ends.
+    /// Creates a task sequence from <paramref name="value" /> that generates a single element and then ends.
     /// </summary>
     ///
     /// <param name="value">The input item to use as the single item of the task sequence.</param>
