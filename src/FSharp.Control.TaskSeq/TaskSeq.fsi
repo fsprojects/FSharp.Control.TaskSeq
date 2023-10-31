@@ -11,7 +11,7 @@ module TaskSeqExtensions =
         /// Initialize an empty task sequence.
         val empty<'T> : taskSeq<'T>
 
-[<Sealed>]
+[<Sealed; AbstractClass>]
 type TaskSeq =
 
     /// <summary>
