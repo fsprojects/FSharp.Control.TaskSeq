@@ -56,7 +56,7 @@ module TaskExtensions =
                         false)
             )
 
-        member inline this.For(source: taskSeq<'T>, body: 'T -> TaskCode<_, unit>) : TaskCode<_, unit> =
+        member inline this.For(source: TaskSeq<'T>, body: 'T -> TaskCode<_, unit>) : TaskCode<_, unit> =
             TaskCode<'TOverall, unit>(fun sm ->
                 this
                     .Using(

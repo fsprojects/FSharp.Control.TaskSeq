@@ -28,7 +28,7 @@ module Internal =
 /// The type <paramref name="taskSeq&lt;_>" /> is deprecated since version 0.4.0,
 /// please use <paramref name="TaskSeq&lt;_>" /> in its stead. See <see cref="T:FSharp.Control.TaskSeq&lt;_>" />.
 /// </summary>
-[<Obsolete "From version 0.4.0 onward, 'taskSeq<_>' is deprecated in favor of 'TaskSeq<_>'. It will be removed in an upcoming release.">]
+[<Obsolete "From version 0.4.0 onward, 'TaskSeq<_>' is deprecated in favor of 'TaskSeq<_>'. It will be removed in an upcoming release.">]
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
 /// <summary>
@@ -138,7 +138,7 @@ type TaskSeqBuilder =
 
     member inline Combine: task1: ResumableTSC<'T> * task2: ResumableTSC<'T> -> ResumableTSC<'T>
     member inline Delay: f: (unit -> ResumableTSC<'T>) -> ResumableTSC<'T>
-    member inline Run: code: ResumableTSC<'T> -> taskSeq<'T>
+    member inline Run: code: ResumableTSC<'T> -> TaskSeq<'T>
     member inline TryFinally: body: ResumableTSC<'T> * compensationAction: (unit -> unit) -> ResumableTSC<'T>
     member inline TryFinallyAsync: body: ResumableTSC<'T> * compensationAction: (unit -> Task) -> ResumableTSC<'T>
     member inline TryWith: body: ResumableTSC<'T> * catch: (exn -> ResumableTSC<'T>) -> ResumableTSC<'T>
@@ -192,8 +192,8 @@ module MediumPriority =
 
         member inline For: sequence: seq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
         member inline YieldFrom: source: seq<'T> -> ResumableTSC<'T>
-        member inline For: source: #taskSeq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
-        member inline YieldFrom: source: taskSeq<'T> -> ResumableTSC<'T>
+        member inline For: source: #TaskSeq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
+        member inline YieldFrom: source: TaskSeq<'T> -> ResumableTSC<'T>
 
 /// <summary>
 /// Contains low priority extension methods for the main builder class for the <see cref="taskSeq" /> computation expression.

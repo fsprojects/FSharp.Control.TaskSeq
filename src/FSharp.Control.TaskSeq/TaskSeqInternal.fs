@@ -67,7 +67,7 @@ module internal TaskSeqInternal =
         KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
         |> raise
 
-    let isEmpty (source: taskSeq<_>) =
+    let isEmpty (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -102,7 +102,7 @@ module internal TaskSeqInternal =
         }
 
     /// Returns length unconditionally, or based on a predicate
-    let lengthBy predicate (source: taskSeq<_>) =
+    let lengthBy predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -141,7 +141,7 @@ module internal TaskSeqInternal =
         }
 
     /// Returns length unconditionally, or based on a predicate
-    let lengthBeforeMax max (source: taskSeq<_>) =
+    let lengthBeforeMax max (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -160,7 +160,7 @@ module internal TaskSeqInternal =
             return i
         }
 
-    let tryExactlyOne (source: taskSeq<_>) =
+    let tryExactlyOne (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -219,7 +219,7 @@ module internal TaskSeqInternal =
 
     }
 
-    let iter action (source: taskSeq<_>) =
+    let iter action (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -263,7 +263,7 @@ module internal TaskSeqInternal =
                     go <- step
         }
 
-    let fold folder initial (source: taskSeq<_>) =
+    let fold folder initial (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -301,7 +301,7 @@ module internal TaskSeqInternal =
 
     let toResizeArrayAndMapAsync mapper source = (toResizeArrayAsync >> Task.map mapper) source
 
-    let map mapper (source: taskSeq<_>) =
+    let map mapper (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         match mapper with
@@ -333,7 +333,7 @@ module internal TaskSeqInternal =
                 yield result
           }
 
-    let zip (source1: taskSeq<_>) (source2: taskSeq<_>) =
+    let zip (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
         checkNonNull (nameof source1) source1
         checkNonNull (nameof source2) source2
 
@@ -352,7 +352,7 @@ module internal TaskSeqInternal =
                 go <- step1 && step2
         }
 
-    let collect (binder: _ -> #IAsyncEnumerable<_>) (source: taskSeq<_>) =
+    let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -360,7 +360,7 @@ module internal TaskSeqInternal =
                 yield! binder c :> IAsyncEnumerable<_>
         }
 
-    let collectSeq (binder: _ -> #seq<_>) (source: taskSeq<_>) =
+    let collectSeq (binder: _ -> #seq<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -368,7 +368,7 @@ module internal TaskSeqInternal =
                 yield! binder c :> seq<_>
         }
 
-    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: taskSeq<_>) =
+    let collectAsync (binder: _ -> #Task<#IAsyncEnumerable<_>>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -377,7 +377,7 @@ module internal TaskSeqInternal =
                 yield! result :> IAsyncEnumerable<_>
         }
 
-    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: taskSeq<_>) =
+    let collectSeqAsync (binder: _ -> #Task<#seq<_>>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -386,7 +386,7 @@ module internal TaskSeqInternal =
                 yield! result :> seq<_>
         }
 
-    let tryLast (source: taskSeq<_>) =
+    let tryLast (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -406,7 +406,7 @@ module internal TaskSeqInternal =
             | ValueNone -> return None
         }
 
-    let tryHead (source: taskSeq<_>) =
+    let tryHead (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -417,7 +417,7 @@ module internal TaskSeqInternal =
             | false -> return None
         }
 
-    let tryTail (source: taskSeq<_>) =
+    let tryTail (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -440,7 +440,7 @@ module internal TaskSeqInternal =
                     |> Some
         }
 
-    let tryItem index (source: taskSeq<_>) =
+    let tryItem index (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -468,7 +468,7 @@ module internal TaskSeqInternal =
                 return foundItem
         }
 
-    let tryPick chooser (source: taskSeq<_>) =
+    let tryPick chooser (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -503,7 +503,7 @@ module internal TaskSeqInternal =
             return foundItem
         }
 
-    let tryFind predicate (source: taskSeq<_>) =
+    let tryFind predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -542,7 +542,7 @@ module internal TaskSeqInternal =
             return foundItem
         }
 
-    let tryFindIndex predicate (source: taskSeq<_>) =
+    let tryFindIndex predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
@@ -577,7 +577,7 @@ module internal TaskSeqInternal =
             if isFound then return Some index else return None
         }
 
-    let choose chooser (source: taskSeq<_>) =
+    let choose chooser (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -596,7 +596,7 @@ module internal TaskSeqInternal =
                     | None -> ()
         }
 
-    let filter predicate (source: taskSeq<_>) =
+    let filter predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -613,7 +613,7 @@ module internal TaskSeqInternal =
                     | false -> ()
         }
 
-    let takeWhile whileKind predicate (source: taskSeq<_>) =
+    let takeWhile whileKind predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -691,7 +691,7 @@ module internal TaskSeqInternal =
             finally
                 _rwLock.ExitWriteLock()
 
-        member _.AddManyAsync(source: taskSeq<'T>) = task {
+        member _.AddManyAsync(source: TaskSeq<'T>) = task {
             use e = source.GetAsyncEnumerator(ct)
             let mutable go = true
             let! step = e.MoveNextAsync()
@@ -720,7 +720,7 @@ module internal TaskSeqInternal =
 
                 ValueTask.CompletedTask
 
-    let except itemsToExclude (source: taskSeq<_>) =
+    let except itemsToExclude (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
@@ -748,7 +748,7 @@ module internal TaskSeqInternal =
 
         }
 
-    let exceptOfSeq itemsToExclude (source: taskSeq<_>) =
+    let exceptOfSeq itemsToExclude (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
         checkNonNull (nameof itemsToExclude) itemsToExclude
 

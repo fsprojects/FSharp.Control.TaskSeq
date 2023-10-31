@@ -6,7 +6,7 @@ module AsyncExtensions =
     // Add asynchronous for loop to the 'async' computation builder
     type Microsoft.FSharp.Control.AsyncBuilder with
 
-        member _.For(source: taskSeq<'T>, action: 'T -> Async<unit>) =
+        member _.For(source: TaskSeq<'T>, action: 'T -> Async<unit>) =
             source
             |> TaskSeq.iterAsync (action >> Async.StartAsTask)
             |> Async.AwaitTask
