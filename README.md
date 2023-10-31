@@ -463,93 +463,93 @@ The following are the current surface area of the `TaskSeq` utility functions, o
 
 ```f#
 module TaskSeq =
-    val append: source1: taskSeq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
-    val appendSeq: source1: taskSeq<'T> -> source2: seq<'T> -> taskSeq<'T>
-    val box: source: taskSeq<'T> -> taskSeq<obj>
-    val cast: source: taskSeq<obj> -> taskSeq<'T>
-    val choose: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> taskSeq<'U>
-    val chooseAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> taskSeq<'U>
-    val collect: binder: ('T -> #taskSeq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
-    val collectAsync: binder: ('T -> #Task<'TSeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'TSeqU :> taskSeq<'U>
-    val collectSeq: binder: ('T -> #seq<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
-    val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: taskSeq<'T> -> taskSeq<'U> when 'SeqU :> seq<'U>
-    val concat: sources: taskSeq<#taskSeq<'T>> -> taskSeq<'T>
-    val contains<'T when 'T: equality> : value: 'T -> source: taskSeq<'T> -> Task<bool>
-    val delay: generator: (unit -> taskSeq<'T>) -> taskSeq<'T>
-    val empty<'T> : taskSeq<'T>
-    val exactlyOne: source: taskSeq<'T> -> Task<'T>
-    val except<'T when 'T: equality> : itemsToExclude: taskSeq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
-    val exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: taskSeq<'T> -> taskSeq<'T>
-    val exists: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<bool>
-    val existsAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<bool>
-    val filter: predicate: ('T -> bool) -> source: taskSeq<'T> -> taskSeq<'T>
-    val filterAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> taskSeq<'T>
-    val find: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T>
-    val findAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T>
-    val findIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
-    val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
-    val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
-    val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: taskSeq<'T> -> Task<'State>
-    val head: source: taskSeq<'T> -> Task<'T>
-    val indexed: source: taskSeq<'T> -> taskSeq<int * 'T>
-    val init: count: int -> initializer: (int -> 'T) -> taskSeq<'T>
-    val initAsync: count: int -> initializer: (int -> #Task<'T>) -> taskSeq<'T>
-    val initInfinite: initializer: (int -> 'T) -> taskSeq<'T>
-    val initInfiniteAsync: initializer: (int -> #Task<'T>) -> taskSeq<'T>
-    val isEmpty: source: taskSeq<'T> -> Task<bool>
-    val item: index: int -> source: taskSeq<'T> -> Task<'T>
-    val iter: action: ('T -> unit) -> source: taskSeq<'T> -> Task<unit>
-    val iterAsync: action: ('T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
-    val iteri: action: (int -> 'T -> unit) -> source: taskSeq<'T> -> Task<unit>
-    val iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: taskSeq<'T> -> Task<unit>
-    val last: source: taskSeq<'T> -> Task<'T>
-    val length: source: taskSeq<'T> -> Task<int>
-    val lengthBy: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int>
-    val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int>
-    val lengthOrMax: max: int -> source: taskSeq<'T> -> Task<int>
-    val map: mapper: ('T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
-    val mapAsync: mapper: ('T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
-    val mapi: mapper: (int -> 'T -> 'U) -> source: taskSeq<'T> -> taskSeq<'U>
-    val mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: taskSeq<'T> -> taskSeq<'U>
-    val ofArray: source: 'T[] -> taskSeq<'T>
-    val ofAsyncArray: source: Async<'T> array -> taskSeq<'T>
-    val ofAsyncList: source: Async<'T> list -> taskSeq<'T>
-    val ofAsyncSeq: source: seq<Async<'T>> -> taskSeq<'T>
-    val ofList: source: 'T list -> taskSeq<'T>
-    val ofResizeArray: source: ResizeArray<'T> -> taskSeq<'T>
-    val ofSeq: source: seq<'T> -> taskSeq<'T>
-    val ofTaskArray: source: #Task<'T> array -> taskSeq<'T>
-    val ofTaskList: source: #Task<'T> list -> taskSeq<'T>
-    val ofTaskSeq: source: seq<#Task<'T>> -> taskSeq<'T>
-    val pick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U>
-    val pickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U>
-    val prependSeq: source1: seq<'T> -> source2: taskSeq<'T> -> taskSeq<'T>
-    val singleton: source: 'T -> taskSeq<'T>
-    val tail: source: taskSeq<'T> -> Task<taskSeq<'T>>
-    val takeWhile: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
-    val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
-    val takeWhileInclusive: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
-    val takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<taskSeq<'T>>
-    val toArray: source: taskSeq<'T> -> 'T[]
-    val toArrayAsync: source: taskSeq<'T> -> Task<'T[]>
-    val toIListAsync: source: taskSeq<'T> -> Task<IList<'T>>
-    val toList: source: taskSeq<'T> -> 'T list
-    val toListAsync: source: taskSeq<'T> -> Task<'T list>
-    val toResizeArrayAsync: source: taskSeq<'T> -> Task<ResizeArray<'T>>
-    val toSeq: source: taskSeq<'T> -> seq<'T>
-    val tryExactlyOne: source: taskSeq<'T> -> Task<'T option>
-    val tryFind: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<'T option>
-    val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<'T option>
-    val tryFindIndex: predicate: ('T -> bool) -> source: taskSeq<'T> -> Task<int option>
-    val tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: taskSeq<'T> -> Task<int option>
-    val tryHead: source: taskSeq<'T> -> Task<'T option>
-    val tryItem: index: int -> source: taskSeq<'T> -> Task<'T option>
-    val tryLast: source: taskSeq<'T> -> Task<'T option>
-    val tryPick: chooser: ('T -> 'U option) -> source: taskSeq<'T> -> Task<'U option>
-    val tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: taskSeq<'T> -> Task<'U option>
-    val tryTail: source: taskSeq<'T> -> Task<taskSeq<'T> option>
-    val unbox<'U when 'U: struct> : source: taskSeq<obj> -> taskSeq<'U>
-    val zip: source1: taskSeq<'T> -> source2: taskSeq<'U> -> taskSeq<'T * 'U>
+    val append: source1: TaskSeq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
+    val appendSeq: source1: TaskSeq<'T> -> source2: seq<'T> -> TaskSeq<'T>
+    val box: source: TaskSeq<'T> -> TaskSeq<obj>
+    val cast: source: TaskSeq<obj> -> TaskSeq<'T>
+    val choose: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val chooseAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val collect: binder: ('T -> #TaskSeq<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val collectAsync: binder: ('T -> #Task<'TSeqU>) -> source: TaskSeq<'T> -> TaskSeq<'U> when 'TSeqU :> TaskSeq<'U>
+    val collectSeq: binder: ('T -> #seq<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: TaskSeq<'T> -> TaskSeq<'U> when 'SeqU :> seq<'U>
+    val concat: sources: TaskSeq<#TaskSeq<'T>> -> TaskSeq<'T>
+    val contains<'T when 'T: equality> : value: 'T -> source: TaskSeq<'T> -> Task<bool>
+    val delay: generator: (unit -> TaskSeq<'T>) -> TaskSeq<'T>
+    val empty<'T> : TaskSeq<'T>
+    val exactlyOne: source: TaskSeq<'T> -> Task<'T>
+    val except<'T when 'T: equality> : itemsToExclude: TaskSeq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val exists: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<bool>
+    val existsAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<bool>
+    val filter: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val filterAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val find: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T>
+    val findAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T>
+    val findIndex: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int>
+    val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
+    val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+    val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+    val head: source: TaskSeq<'T> -> Task<'T>
+    val indexed: source: TaskSeq<'T> -> TaskSeq<int * 'T>
+    val init: count: int -> initializer: (int -> 'T) -> TaskSeq<'T>
+    val initAsync: count: int -> initializer: (int -> #Task<'T>) -> TaskSeq<'T>
+    val initInfinite: initializer: (int -> 'T) -> TaskSeq<'T>
+    val initInfiniteAsync: initializer: (int -> #Task<'T>) -> TaskSeq<'T>
+    val isEmpty: source: TaskSeq<'T> -> Task<bool>
+    val item: index: int -> source: TaskSeq<'T> -> Task<'T>
+    val iter: action: ('T -> unit) -> source: TaskSeq<'T> -> Task<unit>
+    val iterAsync: action: ('T -> #Task<unit>) -> source: TaskSeq<'T> -> Task<unit>
+    val iteri: action: (int -> 'T -> unit) -> source: TaskSeq<'T> -> Task<unit>
+    val iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: TaskSeq<'T> -> Task<unit>
+    val last: source: TaskSeq<'T> -> Task<'T>
+    val length: source: TaskSeq<'T> -> Task<int>
+    val lengthBy: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int>
+    val lengthByAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
+    val lengthOrMax: max: int -> source: TaskSeq<'T> -> Task<int>
+    val map: mapper: ('T -> 'U) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val mapAsync: mapper: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val mapi: mapper: (int -> 'T -> 'U) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+    val ofArray: source: 'T[] -> TaskSeq<'T>
+    val ofAsyncArray: source: Async<'T> array -> TaskSeq<'T>
+    val ofAsyncList: source: Async<'T> list -> TaskSeq<'T>
+    val ofAsyncSeq: source: seq<Async<'T>> -> TaskSeq<'T>
+    val ofList: source: 'T list -> TaskSeq<'T>
+    val ofResizeArray: source: ResizeArray<'T> -> TaskSeq<'T>
+    val ofSeq: source: seq<'T> -> TaskSeq<'T>
+    val ofTaskArray: source: #Task<'T> array -> TaskSeq<'T>
+    val ofTaskList: source: #Task<'T> list -> TaskSeq<'T>
+    val ofTaskSeq: source: seq<#Task<'T>> -> TaskSeq<'T>
+    val pick: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> Task<'U>
+    val pickAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> Task<'U>
+    val prependSeq: source1: seq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
+    val singleton: source: 'T -> TaskSeq<'T>
+    val tail: source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeWhile: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeWhileInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val toArray: source: TaskSeq<'T> -> 'T[]
+    val toArrayAsync: source: TaskSeq<'T> -> Task<'T[]>
+    val toIListAsync: source: TaskSeq<'T> -> Task<IList<'T>>
+    val toList: source: TaskSeq<'T> -> 'T list
+    val toListAsync: source: TaskSeq<'T> -> Task<'T list>
+    val toResizeArrayAsync: source: TaskSeq<'T> -> Task<ResizeArray<'T>>
+    val toSeq: source: TaskSeq<'T> -> seq<'T>
+    val tryExactlyOne: source: TaskSeq<'T> -> Task<'T option>
+    val tryFind: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T option>
+    val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T option>
+    val tryFindIndex: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int option>
+    val tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int option>
+    val tryHead: source: TaskSeq<'T> -> Task<'T option>
+    val tryItem: index: int -> source: TaskSeq<'T> -> Task<'T option>
+    val tryLast: source: TaskSeq<'T> -> Task<'T option>
+    val tryPick: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> Task<'U option>
+    val tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> Task<'U option>
+    val tryTail: source: TaskSeq<'T> -> Task<TaskSeq<'T> option>
+    val unbox<'U when 'U: struct> : source: TaskSeq<obj> -> TaskSeq<'U>
+    val zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 ```
 
 [buildstatus]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/main.yaml
