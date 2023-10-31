@@ -23,8 +23,12 @@ module TaskSeqExtensions =
 // Just for convenience
 module Internal = TaskSeqInternal
 
-[<Sealed>]
-type TaskSeq =
+[<Sealed; AbstractClass>]
+type TaskSeq private () =
+    // Rules for static classes, see bug report: https://github.com/dotnet/fsharp/issues/8093
+    // F# does not need this internally, but C# does
+    // 'Abstract & Sealed': makes it a static class in C#
+    // the 'private ()' ensure that a constructor is emitted, which is required by IL
 
     static member singleton(value: 'T) = Internal.singleton value
 
