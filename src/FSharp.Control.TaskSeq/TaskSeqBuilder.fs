@@ -41,9 +41,10 @@ module Internal = // cannot be marked with 'internal' scope
         NotImplementedException "Abstract Class: method or property not implemented"
         |> raise
 
-[<Obsolete "From version 0.4.0 onward, 'taskSeq<'T>' is deprecated in favor of 'TaskSeq<'T>'. It will be removed in an upcoming release.">]
+// deprecated from 0.4.0, see FSI file
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
+// the proper type from 0.4.0 onwards, see FSI file
 type TaskSeq<'T> = IAsyncEnumerable<'T>
 
 

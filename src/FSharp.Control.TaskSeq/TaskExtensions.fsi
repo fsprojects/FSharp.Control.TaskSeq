@@ -10,4 +10,4 @@ module TaskExtensions =
         /// <summary>
         /// Inside <see cref="task" />, iterate over all values of a <see cref="taskSeq" />.
         /// </summary>
-        member inline For: source: taskSeq<'T> * body: ('T -> TaskCode<'TOverall, unit>) -> TaskCode<'TOverall, unit>
+        member inline For: source: TaskSeq<'T> * body: ('T -> TaskCode<'TOverall, unit>) -> TaskCode<'TOverall, unit>

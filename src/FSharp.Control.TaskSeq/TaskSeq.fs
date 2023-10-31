@@ -38,7 +38,7 @@ type TaskSeq private () =
     // Convert 'ToXXX' functions
     //
 
-    static member toList(source: taskSeq<'T>) = [
+    static member toList(source: TaskSeq<'T>) = [
         Internal.checkNonNull (nameof source) source
         let e = source.GetAsyncEnumerator(CancellationToken())
 
@@ -49,7 +49,7 @@ type TaskSeq private () =
             e.DisposeAsync().AsTask().Wait()
     ]
 
-    static member toArray(source: taskSeq<'T>) = [|
+    static member toArray(source: TaskSeq<'T>) = [|
         Internal.checkNonNull (nameof source) source
         let e = source.GetAsyncEnumerator(CancellationToken())
 
@@ -60,7 +60,7 @@ type TaskSeq private () =
             e.DisposeAsync().AsTask().Wait()
     |]
 
-    static member toSeq(source: taskSeq<'T>) =
+    static member toSeq(source: TaskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
 
         seq {
@@ -178,21 +178,21 @@ type TaskSeq private () =
     static member initAsync count initializer = Internal.init (Some count) (InitActionAsync initializer)
     static member initInfiniteAsync initializer = Internal.init None (InitActionAsync initializer)
 
-    static member delay(generator: unit -> taskSeq<'T>) =
+    static member delay(generator: unit -> TaskSeq<'T>) =
         { new IAsyncEnumerable<'T> with
             member _.GetAsyncEnumerator(ct) = generator().GetAsyncEnumerator(ct)
         }
 
-    static member concat(sources: taskSeq<#taskSeq<'T>>) =
+    static member concat(sources: TaskSeq<#TaskSeq<'T>>) =
         Internal.checkNonNull (nameof sources) sources
 
         taskSeq {
             for ts in sources do
                 // no null-check of inner taskseqs, similar to seq
-                yield! (ts :> taskSeq<'T>)
+                yield! (ts :> TaskSeq<'T>)
         }
 
-    static member append (source1: taskSeq<'T>) (source2: taskSeq<'T>) =
+    static member append (source1: TaskSeq<'T>) (source2: TaskSeq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
 
@@ -201,7 +201,7 @@ type TaskSeq private () =
             yield! source2
         }
 
-    static member appendSeq (source1: taskSeq<'T>) (source2: seq<'T>) =
+    static member appendSeq (source1: TaskSeq<'T>) (source2: seq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
 
@@ -210,7 +210,7 @@ type TaskSeq private () =
             yield! source2
         }
 
-    static member prependSeq (source1: seq<'T>) (source2: taskSeq<'T>) =
+    static member prependSeq (source1: seq<'T>) (source2: TaskSeq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2
 
@@ -223,9 +223,9 @@ type TaskSeq private () =
     // iter/map/collect functions
     //
 
-    static member cast source : taskSeq<'T> = Internal.map (SimpleAction(fun (x: obj) -> x :?> 'T)) source
+    static member cast source : TaskSeq<'T> = Internal.map (SimpleAction(fun (x: obj) -> x :?> 'T)) source
     static member box source = Internal.map (SimpleAction box) source
-    static member unbox<'U when 'U: struct>(source: taskSeq<obj>) : taskSeq<'U> = Internal.map (SimpleAction unbox) source
+    static member unbox<'U when 'U: struct>(source: TaskSeq<obj>) : TaskSeq<'U> = Internal.map (SimpleAction unbox) source
     static member iter action source = Internal.iter (SimpleAction action) source
     static member iteri action source = Internal.iter (CountableAction action) source
     static member iterAsync action source = Internal.iter (AsyncSimpleAction action) source
@@ -234,10 +234,10 @@ type TaskSeq private () =
     static member mapi (mapper: int -> 'T -> 'U) source = Internal.map (CountableAction mapper) source
     static member mapAsync mapper source = Internal.map (AsyncSimpleAction mapper) source
     static member mapiAsync mapper source = Internal.map (AsyncCountableAction mapper) source
-    static member collect (binder: 'T -> #taskSeq<'U>) source = Internal.collect binder source
+    static member collect (binder: 'T -> #TaskSeq<'U>) source = Internal.collect binder source
     static member collectSeq (binder: 'T -> #seq<'U>) source = Internal.collectSeq binder source
-    static member collectAsync (binder: 'T -> #Task<#taskSeq<'U>>) source : taskSeq<'U> = Internal.collectAsync binder source
-    static member collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) source : taskSeq<'U> = Internal.collectSeqAsync binder source
+    static member collectAsync (binder: 'T -> #Task<#TaskSeq<'U>>) source : TaskSeq<'U> = Internal.collectAsync binder source
+    static member collectSeqAsync (binder: 'T -> #Task<#seq<'U>>) source : TaskSeq<'U> = Internal.collectSeqAsync binder source
 
     //
     // choosers, pickers and the like
@@ -276,7 +276,7 @@ type TaskSeq private () =
         Internal.tryExactlyOne source
         |> Task.map (Option.defaultWith (fun () -> invalidArg (nameof source) "The input sequence contains more than one element."))
 
-    static member indexed(source: taskSeq<'T>) =
+    static member indexed(source: TaskSeq<'T>) =
         Internal.checkNonNull (nameof source) source
 
         taskSeq {

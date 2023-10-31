@@ -11,7 +11,7 @@ open FSharp.Control
 let ``CE taskSeq using yield! with null`` () = task {
     let ts = taskSeq {
         yield! Gen.sideEffectTaskSeq 10
-        yield! (null: taskSeq<int>)
+        yield! (null: TaskSeq<int>)
     }
 
     fun () -> TaskSeq.toList ts

@@ -8,4 +8,4 @@ module AsyncExtensions =
         /// <summary>
         /// Inside <see cref="async" />, iterate over all values of a <see cref="taskSeq" />.
         /// </summary>
-        member For: source: taskSeq<'T> * action: ('T -> Async<unit>) -> Async<unit>
+        member For: source: TaskSeq<'T> * action: ('T -> Async<unit>) -> Async<unit>
