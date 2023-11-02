@@ -8,5 +8,5 @@ module AsyncExtensions =
 
         member _.For(source: TaskSeq<'T>, action: 'T -> Async<unit>) =
             source
-            |> TaskSeq.iterAsync (action >> Async.StartAsTask)
+            |> TaskSeq.iterAsync (action >> Async.StartImmediateAsTask)
             |> Async.AwaitTask
