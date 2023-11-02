@@ -1,9 +1,10 @@
 
 Release notes:
 0.4.x (unreleased)
-    - overhaul all doc comments, add exceptions info, improve tooltips experience, #136
-    - DEPRECATED: type 'TaskSeq<'T>' now replaces 'taskSeq<'T>', the latter deprecated FS0044, #187
-    - BINARY INCOMPATIBLE: TaskSeq module members are now static members, source code compatible, #186
+    - overhaul all doc comments, add exceptions, improve editor experience, #136
+    - DEPRECATED: 'taskSeq<_>' renamed to 'TaskSeq<_>', 'taskSeq' warns with FS0044, #187
+    - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184
+    - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
 	
 0.4.0-alpha.1
     - fixes not calling Dispose for 'use!', 'use', or `finally` blocks #157 (by @bartelink)
