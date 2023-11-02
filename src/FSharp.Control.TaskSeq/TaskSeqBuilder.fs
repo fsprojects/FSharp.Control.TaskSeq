@@ -648,7 +648,7 @@ module HighPriority =
             ResumableTSC<'U>(fun sm ->
                 let mutable awaiter =
                     Async
-                        .StartAsTask(computation, cancellationToken = sm.Data.cancellationToken)
+                        .StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken)
                         .GetAwaiter()
 
                 let mutable __stack_fin = true
