@@ -40,7 +40,7 @@ type TaskSeq private () =
 
     static member toList(source: TaskSeq<'T>) = [
         Internal.checkNonNull (nameof source) source
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        let e = source.GetAsyncEnumerator CancellationToken.None
 
         try
             while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
@@ -51,7 +51,7 @@ type TaskSeq private () =
 
     static member toArray(source: TaskSeq<'T>) = [|
         Internal.checkNonNull (nameof source) source
-        let e = source.GetAsyncEnumerator(CancellationToken())
+        let e = source.GetAsyncEnumerator CancellationToken.None
 
         try
             while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
@@ -65,7 +65,7 @@ type TaskSeq private () =
 
         seq {
 
-            let e = source.GetAsyncEnumerator(CancellationToken())
+            let e = source.GetAsyncEnumerator CancellationToken.None
 
             try
                 while (let vt = e.MoveNextAsync() in if vt.IsCompleted then vt.Result else vt.AsTask().Result) do
