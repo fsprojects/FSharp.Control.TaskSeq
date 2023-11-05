@@ -291,18 +291,18 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 // the Current value
                 data.current <- ValueNone
 
-            ValueTask.FromResult result
+            ValueTask.fromResult result
 
         | ValueTaskSourceStatus.Faulted
         | ValueTaskSourceStatus.Canceled
         | ValueTaskSourceStatus.Pending as state ->
             Debug.logInfo ("at MoveNextAsyncResult: case ", state)
 
-            ValueTask.ofIValueTaskSource this version
+            ValueTask.ofSource this version
         | _ ->
             Debug.logInfo "at MoveNextAsyncResult: Unexpected state"
             // assume it's a possibly new, not yet supported case, treat as default
-            ValueTask.ofIValueTaskSource this version
+            ValueTask.ofSource this version
 
 and ResumableTSC<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
