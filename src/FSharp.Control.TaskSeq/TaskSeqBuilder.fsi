@@ -25,6 +25,8 @@ module Internal =
     val inline raiseNotImpl: unit -> 'a
 
 /// <summary>
+/// Represents a <see cref="task sequence" /> and is the output of using the <paramref name="taskSeq{...}" />
+/// computation expression from this library. It is an alias for <see cref="T:System.IAsyncEnumerable&lt;_>" />.
 /// The type <paramref name="taskSeq&lt;_>" /> is deprecated since version 0.4.0,
 /// please use <paramref name="TaskSeq&lt;_>" /> in its stead. See <see cref="T:FSharp.Control.TaskSeq&lt;_>" />.
 /// </summary>
