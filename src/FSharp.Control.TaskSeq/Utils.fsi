@@ -20,6 +20,13 @@ module ValueTask =
     val True: ValueTask<bool>
 
     /// Creates a ValueTask with the supplied result of the successful operation.
+    val inline fromResult: x: 'T -> ValueTask<'T>
+
+    /// <summary>
+    /// The function <paramref name="FromResult" /> is deprecated since version 0.4.0,
+    /// please use <paramref name="fromSource" /> in its stead. See <see cref="T:FSharp.Control.ValueTask.fromResult" />.
+    /// </summary>
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.FromResult' is deprecated in favor of 'ValueTask.fromResult'. It will be removed in an upcoming release.">]
     val inline FromResult: x: 'T -> ValueTask<'T>
 
     /// <summary>
