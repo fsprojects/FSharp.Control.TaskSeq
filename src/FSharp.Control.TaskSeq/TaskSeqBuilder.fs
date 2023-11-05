@@ -42,6 +42,7 @@ module Internal = // cannot be marked with 'internal' scope
         |> raise
 
 // deprecated from 0.4.0, see FSI file
+[<Obsolete "From version 0.4.0 onward, 'TaskSeq<_>' is deprecated in favor of 'TaskSeq<_>'. It will be removed in an upcoming release.">]
 type taskSeq<'T> = IAsyncEnumerable<'T>
 
 // the proper type from 0.4.0 onwards, see FSI file
