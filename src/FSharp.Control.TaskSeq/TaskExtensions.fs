@@ -60,7 +60,7 @@ module TaskExtensions =
             TaskCode<'TOverall, unit>(fun sm ->
                 this
                     .Using(
-                        source.GetAsyncEnumerator(CancellationToken()),
+                        source.GetAsyncEnumerator CancellationToken.None,
                         (fun e ->
                             this.WhileAsync(
                                 // __debugPoint is only available from FSharp.Core 6.0.4

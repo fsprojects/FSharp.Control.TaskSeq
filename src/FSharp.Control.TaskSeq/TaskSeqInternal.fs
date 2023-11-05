@@ -71,7 +71,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let! step = e.MoveNextAsync()
             return not step
         }
@@ -107,7 +107,7 @@ module internal TaskSeqInternal =
 
         task {
 
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable i = 0
             let! step = e.MoveNextAsync()
@@ -146,7 +146,7 @@ module internal TaskSeqInternal =
 
         task {
 
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable i = 0
             let! step = e.MoveNextAsync()
@@ -164,7 +164,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             match! e.MoveNextAsync() with
             | true ->
@@ -223,7 +223,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let! step = e.MoveNextAsync()
             go <- step
@@ -267,7 +267,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable result = initial
             let! step = e.MoveNextAsync()
@@ -338,8 +338,8 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source2) source2
 
         taskSeq {
-            use e1 = source1.GetAsyncEnumerator(CancellationToken())
-            use e2 = source2.GetAsyncEnumerator(CancellationToken())
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let! step1 = e1.MoveNextAsync()
             let! step2 = e2.MoveNextAsync()
@@ -390,7 +390,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable last = ValueNone
             let! step = e.MoveNextAsync()
@@ -410,7 +410,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             match! e.MoveNextAsync() with
             | true -> return Some e.Current
@@ -421,7 +421,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             match! e.MoveNextAsync() with
             | false -> return None
@@ -449,7 +449,7 @@ module internal TaskSeqInternal =
                 // to prevent side effects hitting unnecessarily
                 return None
             else
-                use e = source.GetAsyncEnumerator(CancellationToken())
+                use e = source.GetAsyncEnumerator CancellationToken.None
                 let mutable go = true
                 let mutable idx = 0
                 let mutable foundItem = None
@@ -472,7 +472,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             let mutable go = true
             let mutable foundItem = None
@@ -507,7 +507,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             let mutable go = true
             let mutable foundItem = None
@@ -546,7 +546,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
 
             let mutable go = true
             let mutable isFound = false
@@ -617,7 +617,7 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         taskSeq {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let! step = e.MoveNextAsync()
             let mutable more = step
 
@@ -725,14 +725,14 @@ module internal TaskSeqInternal =
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
         taskSeq {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let! step = e.MoveNextAsync()
             go <- step
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
                 do! hashSet.AddManyAsync itemsToExclude
 
                 while go do
@@ -753,14 +753,14 @@ module internal TaskSeqInternal =
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
         taskSeq {
-            use e = source.GetAsyncEnumerator(CancellationToken())
+            use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let! step = e.MoveNextAsync()
             go <- step
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken())
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
                 do hashSet.AddMany itemsToExclude
 
                 while go do
