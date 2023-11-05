@@ -19,19 +19,9 @@ module ValueTaskExtensions =
 
 module ValueTask =
     let False = ValueTask<bool>()
-
     let True = ValueTask<bool> true
-
     let inline fromResult (value: 'T) = ValueTask<'T> value
-
-    [<Obsolete "From version 0.4.0 onward, 'ValueTask.FromResult' is deprecated in favor of 'ValueTask.fromResult'. It will be removed in an upcoming release.">]
-    let inline FromResult (value: 'T) = ValueTask<'T> value
-
     let inline ofSource taskSource version = ValueTask<bool>(taskSource, version)
-
-    [<Obsolete "From version 0.4.0 onward, 'ValueTask.ofIValueTaskSource' is deprecated in favor of 'ValueTask.ofSource'. It will be removed in an upcoming release.">]
-    let inline ofIValueTaskSource taskSource version = ofSource taskSource version
-
     let inline ofTask (task: Task<'T>) = ValueTask<'T> task
 
     let inline ignore (vtask: ValueTask<'T>) =
@@ -44,7 +34,15 @@ module ValueTask =
         else
             ValueTask(vtask.AsTask())
 
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.FromResult' is deprecated in favor of 'ValueTask.fromResult'. It will be removed in an upcoming release.">]
+    let inline FromResult (value: 'T) = ValueTask<'T> value
+
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.ofIValueTaskSource' is deprecated in favor of 'ValueTask.ofSource'. It will be removed in an upcoming release.">]
+    let inline ofIValueTaskSource taskSource version = ofSource taskSource version
+
+
 module Task =
+    let inline fromResult (value: 'U) : Task<'U> = Task.FromResult value
     let inline ofAsync (async: Async<'T>) = task { return! async }
     let inline ofTask (task': Task) = task { do! task' }
     let inline apply (func: _ -> _) = func >> Task.FromResult
@@ -70,12 +68,11 @@ module Task =
         return! binder t
     }
 
-    let inline fromResult (value: 'U) : Task<'U> = Task.FromResult value
-
 module Async =
     let inline ofTask (task: Task<'T>) = Async.AwaitTask task
     let inline ofUnitTask (task: Task) = Async.AwaitTask task
     let inline toTask (async: Async<'T>) = task { return! async }
+    let inline bind binder (task: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder task }
 
     let inline ignore (async': Async<'T>) = async {
         let! _ = async'
@@ -86,5 +83,3 @@ module Async =
         let! result = async
         return mapper result
     }
-
-    let inline bind binder (task: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder task }
