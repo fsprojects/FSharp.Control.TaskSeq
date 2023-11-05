@@ -1,6 +1,6 @@
 namespace FSharp.Control
 
-open System.Diagnostics
+open System
 open System.Threading.Tasks
 open System.Threading.Tasks.Sources
 
@@ -22,7 +22,17 @@ module ValueTask =
     /// Creates a ValueTask with the supplied result of the successful operation.
     val inline FromResult: x: 'T -> ValueTask<'T>
 
-    /// Creates a ValueTask with an IValueTaskSource representing the operation
+    /// <summary>
+    /// Initialized a new instance of <see cref="ValueTask" /> with an <see cref="IValueTaskSource" /> representing
+    /// representing its operation.
+    /// </summary>
+    val inline ofSource: taskSource: IValueTaskSource<bool> -> version: int16 -> ValueTask<bool>
+
+    /// <summary>
+    /// The function <paramref name="ofIValueTaskSource" /> is deprecated since version 0.4.0,
+    /// please use <paramref name="ofSource" /> in its stead. See <see cref="T:FSharp.Control.ValueTask.ofSource" />.
+    /// </summary>
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.ofIValueTaskSource' is deprecated in favor of 'ValueTask.ofSource'. It will be removed in an upcoming release.">]
     val inline ofIValueTaskSource: taskSource: IValueTaskSource<bool> -> version: int16 -> ValueTask<bool>
 
     /// Creates a ValueTask form a Task<'T>

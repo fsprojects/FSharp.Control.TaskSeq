@@ -12,7 +12,9 @@ module ValueTaskExtensions =
     type ValueTask with
 
         /// (Extension member) Gets a task that has already completed successfully.
-        static member inline CompletedTask = Unchecked.defaultof<ValueTask>
+        static member inline CompletedTask =
+            // This mimics how it is done in .NET itself
+            Unchecked.defaultof<ValueTask>
 
 
 module ValueTask =
@@ -26,10 +28,13 @@ module ValueTask =
     let inline FromResult (x: 'T) = ValueTask<'T> x
 
     /// Creates a ValueTask with an IValueTaskSource representing the operation
-    let inline ofIValueTaskSource taskSource version = ValueTask<bool>(taskSource, version)
+    let inline ofSource taskSource version = ValueTask<bool>(taskSource, version)
+
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.ofIValueTaskSource' is deprecated in favor of 'ValueTask.ofSource'. It will be removed in an upcoming release.">]
+    let inline ofIValueTaskSource taskSource version = ofSource taskSource version
 
     /// Creates a ValueTask form a Task<'T>
-    let inline ofTask (task: Task<'T>) = ValueTask<'T>(task)
+    let inline ofTask (task: Task<'T>) = ValueTask<'T> task
 
     /// Ignore a ValueTask<'T>, returns a non-generic ValueTask.
     let inline ignore (vtask: ValueTask<'T>) =
@@ -86,7 +91,7 @@ module Task =
     }
 
     /// Create a task from a value
-    let inline fromResult (value: 'U) : Task<'U> = TaskBuilder.task { return value }
+    let inline fromResult (value: 'U) : Task<'U> = Task.FromResult value
 
 module Async =
     /// Convert an Task<'T> into an Async<'T>
