@@ -25,6 +25,9 @@ module ValueTask =
     let True = ValueTask<bool> true
 
     /// Creates a ValueTask with the supplied result of the successful operation.
+    let inline fromResult (x: 'T) = ValueTask<'T> x
+
+    [<Obsolete "From version 0.4.0 onward, 'ValueTask.FromResult' is deprecated in favor of 'ValueTask.fromResult'. It will be removed in an upcoming release.">]
     let inline FromResult (x: 'T) = ValueTask<'T> x
 
     /// Creates a ValueTask with an IValueTaskSource representing the operation
