@@ -59,6 +59,6 @@ Generates optimized IL code through resumable state machines, and comes with a c
 
   <ItemGroup>
     <!-- maximal compatibility with minimal required FSharp.Core version for TaskSeq -->
-    <PackageReference Update="FSharp.Core" Version="6.0.1" />
+    <PackageReference Update="FSharp.Core" Version="8.0.100" />
   </ItemGroup>
 </Project>
