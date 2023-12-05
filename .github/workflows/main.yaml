@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       # setup dotnet based on global.json
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
       # build it, test it, pack it
       - name: Run dotnet build (release)
         # see issue #105
@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
       # setup dotnet based on global.json
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
       # build it, test it, pack it
       - name: Run dotnet test - release
         # see issue #105
