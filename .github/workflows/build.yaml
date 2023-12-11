@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
   
       - name: tool restore
         run: dotnet tool restore
@@ -34,7 +34,7 @@ jobs:
 
       # setup dotnet based on global.json
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
 
       # build it, test it, pack it
       - name: Run dotnet build (release)

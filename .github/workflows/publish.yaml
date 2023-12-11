@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       # setup dotnet based on global.json
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
       # build it, test it, pack it, publish it
       - name: Run dotnet build (release, for nuget)
         # see issue #105
