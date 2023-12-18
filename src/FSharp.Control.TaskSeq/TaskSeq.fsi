@@ -726,6 +726,65 @@ type TaskSeq =
     static member filterAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the
+    /// underlying sequence, and then returns the remainder of the elements. Raises an exception if there are not enough
+    /// elements in the sequence. See <see cref="drop" /> for a version that does not raise an exception.
+    /// See also <see cref="take" /> for the inverse of this operation.
+    /// </summary>
+    ///
+    /// <param name="count">The number of items to skip.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
+    /// <exception cref="T:InvalidOperationException">Thrown when count exceeds the number of elements in the sequence.</exception>
+    static member skip: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, drops at most <paramref name="count" /> elements of the
+    /// underlying sequence, and then returns the remainder of the elements, if any.
+    /// See <see cref="skip" /> for a version that raises an exception if there
+    /// are not enough elements. See also <see cref="truncate" /> for the inverse of this operation.
+    /// </summary>
+    ///
+    /// <param name="count">The number of items to drop.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
+    static member drop: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, yields <paramref name="count" /> elements of the
+    /// underlying sequence, and then returns no further elements. Raises an exception if there are not enough
+    /// elements in the sequence. See <see cref="truncate" /> for a version that does not raise an exception.
+    /// See also <see cref="skip" /> for the inverse of this operation.
+    /// </summary>
+    ///
+    /// <param name="count">The number of items to take.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
+    /// <exception cref="T:InvalidOperationException">Thrown when count exceeds the number of elements in the sequence.</exception>
+    static member take: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, yields at most <paramref name="count" /> elements of the underlying
+    /// sequence, truncating the remainder, if any.
+    /// See <see cref="take" /> for a version that raises an exception if there are not enough elements in the
+    /// sequence. See also <see cref="drop" /> for the inverse of this operation.
+    /// </summary>
+    ///
+    /// <param name="count">The maximum number of items to enumerate.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
+    static member truncate: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
     /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
     /// given function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
     /// The first element where the predicate returns <see cref="false" /> is not included in the resulting sequence
