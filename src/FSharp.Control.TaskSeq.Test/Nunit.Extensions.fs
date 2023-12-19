@@ -138,11 +138,14 @@ module ExtraCustomMatchers =
         )
 
     /// <summary>
+    /// This makes a test BLOCKING!!! (TODO: get a better test framework?)
+    ///
     /// Asserts any exception that exactly matches the given exception <see cref="Type" />.
     /// Async exceptions are almost always nested in an <see cref="AggregateException" />, however, in an
     /// async try/catch in F#, the exception is typically unwrapped. But this is not foolproof, and
     /// in cases where we just call <see cref="Task.Wait" />, and <see cref="AggregateException" /> will be raised regardless.
     /// This assertion will go over all nested exceptions and 'self', to find a matching exception.
+    ///
     /// Function to evaluate MUST return a <see cref="System.Threading.Tasks.Task" />, not a generic
     /// <see cref="Task&lt;'T>" />.
     /// Calls <see cref="Assert.ThrowsAnyAsync&lt;Exception>" /> of xUnit to ensure proper evaluation of async.

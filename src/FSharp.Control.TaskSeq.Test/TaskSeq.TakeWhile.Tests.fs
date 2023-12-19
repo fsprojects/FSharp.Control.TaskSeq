@@ -25,7 +25,7 @@ module With =
         | true, false -> TaskSeq.takeWhileInclusive
         | true, true -> fun pred -> TaskSeq.takeWhileInclusiveAsync (pred >> Task.fromResult)
 
-    /// adds '@' to each number and concatenates the chars before calling 'should equal'
+    /// Turns a sequence of numbers into a string, starting with A for '1'
     let verifyAsString expected =
         TaskSeq.map char
         >> TaskSeq.map ((+) '@')
@@ -73,6 +73,9 @@ module EmptySeq =
     }
 
 module Immutable =
+
+    // TaskSeq-takeWhile+A stands for:
+    // takeWhile + takeWhileAsync etc.
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-takeWhile+A filters correctly`` variant = task {

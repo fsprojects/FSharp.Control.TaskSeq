@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -35,8 +35,9 @@
     <Compile Include="TaskSeq.OfXXX.Tests.fs" />
     <Compile Include="TaskSeq.Pick.Tests.fs" />
     <Compile Include="TaskSeq.Singleton.Tests.fs" />
-    <Compile Include="TaskSeq.TakeWhile.Tests.fs" />
     <Compile Include="TaskSeq.Tail.Tests.fs" />
+    <Compile Include="TaskSeq.Take.fs" />
+    <Compile Include="TaskSeq.TakeWhile.Tests.fs" />
     <Compile Include="TaskSeq.ToXXX.Tests.fs" />
     <Compile Include="TaskSeq.Zip.Tests.fs" />
     <Compile Include="TaskSeq.Tests.CE.fs" />

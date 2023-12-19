@@ -147,6 +147,9 @@ module TestUtils =
     /// Spin-waits, occasionally normal delay, between 50µs - 18,000µs
     let microDelay () = task { do! DelayHelper.delayTask 50L<µs> 18_000L<µs> (fun _ -> ()) }
 
+    /// Consumes and returns a Task (not a Task<unit>!!!)
+    let consumeTaskSeq ts = TaskSeq.iter ignore ts |> Task.ignore
+
     module Assert =
         /// Call MoveNextAsync() and check if return value is the expected value
         let moveNextAndCheck expected (enumerator: IAsyncEnumerator<_>) = task {
