@@ -648,9 +648,9 @@ module internal TaskSeqInternal =
                     use e = source.GetAsyncEnumerator CancellationToken.None
 
                     for _ in 1..count do
-                        let! step = e.MoveNextAsync()
+                        let! ok = e.MoveNextAsync()
 
-                        if not step then
+                        if not ok then
                             raiseInsufficient ()
 
                     while! e.MoveNextAsync() do
@@ -714,8 +714,6 @@ module internal TaskSeqInternal =
                     let mutable pos = 0
 
                     // return items until we've exhausted the seq
-                    // report this line, weird error:
-                    //while! e.MoveNextAsync() && pos < 1 do
                     while cont do
                         yield e.Current
                         pos <- pos + 1

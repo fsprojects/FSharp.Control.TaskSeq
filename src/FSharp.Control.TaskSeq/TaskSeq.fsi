@@ -726,9 +726,9 @@ type TaskSeq =
     static member filterAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the
-    /// underlying sequence, and then returns the remainder of the elements. Raises an exception if there are not enough
-    /// elements in the sequence. See <see cref="drop" /> for a version that does not raise an exception.
+    /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the underlying
+    /// sequence, and then yields the remainder. Raises an exception if there are not <paramref name="count" />
+    /// items. See <see cref="drop" /> for a version that does not raise an exception.
     /// See also <see cref="take" /> for the inverse of this operation.
     /// </summary>
     ///
@@ -736,8 +736,10 @@ type TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
-    /// <exception cref="T:InvalidOperationException">Thrown when count exceeds the number of elements in the sequence.</exception>
+    /// <exception cref="T:ArgumentException">
+    ///     Thrown when <paramref name="count" /> is less than zero or when
+    ///     it exceeds the number of elements in the sequence.
+    /// </exception>
     static member skip: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
 
 
@@ -748,7 +750,7 @@ type TaskSeq =
     /// are not enough elements. See also <see cref="truncate" /> for the inverse of this operation.
     /// </summary>
     ///
-    /// <param name="count">The number of items to drop.</param>
+    /// <param name="count">The maximum number of items to drop.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
@@ -766,8 +768,10 @@ type TaskSeq =
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
-    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
-    /// <exception cref="T:InvalidOperationException">Thrown when count exceeds the number of elements in the sequence.</exception>
+    /// <exception cref="T:ArgumentException">
+    ///     Thrown when <paramref name="count" /> is less than zero or when
+    ///     it exceeds the number of elements in the sequence.
+    /// </exception>
     static member take: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
