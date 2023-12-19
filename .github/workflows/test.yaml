@@ -25,7 +25,7 @@ jobs:
         run: ./build.cmd ci -release
 
       # upload test results
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
           name: test-results-release
@@ -55,7 +55,7 @@ jobs:
         run: ./build.cmd ci -debug
 
       # upload test results
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
           name: test-results-debug
