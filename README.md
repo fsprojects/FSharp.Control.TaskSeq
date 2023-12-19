@@ -1,6 +1,6 @@
 [![build][buildstatus_img]][buildstatus]
 [![test][teststatus_img]][teststatus]
-[![Nuget](https://img.shields.io/nuget/vpre/FSharp.Control.TaskSeq)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
+[![Nuget](https://buildstats.info/nuget/FSharp.Control.TaskSeq?includePreReleases=true)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
 
 # TaskSeq<!-- omit in toc -->
 
