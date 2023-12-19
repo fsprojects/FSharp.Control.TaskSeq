@@ -19,6 +19,17 @@ type internal WhileKind =
     | Exclusive
 
 [<Struct>]
+type internal TakeOrSkipKind =
+    /// use the Seq.take semantics, raises exception if not enough elements
+    | Take
+    /// use the Seq.skip semantics, raises exception if not enough elements
+    | Skip
+    /// use the Seq.truncate semantics, safe operation, returns all if count exceeds the seq
+    | Truncate
+    /// no Seq equiv, but like Stream.drop in Scala: safe operation, return empty if not enough elements
+    | Drop
+
+[<Struct>]
 type internal Action<'T, 'U, 'TaskU when 'TaskU :> Task<'U>> =
     | CountableAction of countable_action: (int -> 'T -> 'U)
     | SimpleAction of simple_action: ('T -> 'U)
@@ -51,20 +62,17 @@ module internal TaskSeqInternal =
         if isNull arg then
             nullArg argName
 
-    let inline raiseEmptySeq () =
-        ArgumentException("The asynchronous input sequence was empty.", "source")
-        |> raise
+    let inline raiseEmptySeq () = invalidArg "source" "The input task sequence was empty."
 
-    let inline raiseCannotBeNegative (name: string) =
-        ArgumentException("The value cannot be negative", name)
-        |> raise
+    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative"
 
     let inline raiseInsufficient () =
-        ArgumentException("The asynchronous input sequence was has an insufficient number of elements.", "source")
-        |> raise
+        // this is correct, it is NOT an InvalidOperationException (see Seq.fs in F# Core)
+        // but instead, it's an ArgumentException... FWIW lol
+        invalidArg "source" "The input task sequence was has an insufficient number of elements."
 
     let inline raiseNotFound () =
-        KeyNotFoundException("The predicate function or index did not satisfy any item in the async sequence.")
+        KeyNotFoundException("The predicate function or index did not satisfy any item in the task sequence.")
         |> raise
 
     let isEmpty (source: TaskSeq<_>) =
@@ -74,6 +82,16 @@ module internal TaskSeqInternal =
             use e = source.GetAsyncEnumerator CancellationToken.None
             let! step = e.MoveNextAsync()
             return not step
+        }
+
+    let empty<'T> =
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator(_) =
+                { new IAsyncEnumerator<'T> with
+                    member _.MoveNextAsync() = ValueTask.False
+                    member _.Current = Unchecked.defaultof<'T>
+                    member _.DisposeAsync() = ValueTask.CompletedTask
+                }
         }
 
     let singleton (value: 'T) =
@@ -612,6 +630,101 @@ module internal TaskSeqInternal =
                     | true -> yield item
                     | false -> ()
         }
+
+
+    let skipOrTake skipOrTake count (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        if count < 0 then
+            raiseCannotBeNegative (nameof count)
+
+        match skipOrTake with
+        | Skip ->
+            // don't create a new sequence if count = 0
+            if count = 0 then
+                source
+            else
+                taskSeq {
+                    use e = source.GetAsyncEnumerator CancellationToken.None
+
+                    for _ in 1..count do
+                        let! ok = e.MoveNextAsync()
+
+                        if not ok then
+                            raiseInsufficient ()
+
+                    while! e.MoveNextAsync() do
+                        yield e.Current
+
+                }
+        | Drop ->
+            // don't create a new sequence if count = 0
+            if count = 0 then
+                source
+            else
+                taskSeq {
+                    use e = source.GetAsyncEnumerator CancellationToken.None
+
+                    let! step = e.MoveNextAsync()
+                    let mutable cont = step
+                    let mutable pos = 0
+
+                    // skip, or stop looping if we reached the end
+                    while cont do
+                        pos <- pos + 1
+
+                        if pos < count then
+                            let! moveNext = e.MoveNextAsync()
+                            cont <- moveNext
+                        else
+                            cont <- false
+
+                    // return the rest
+                    while! e.MoveNextAsync() do
+                        yield e.Current
+
+                }
+        | Take ->
+            // don't initialize an empty task sequence
+            if count = 0 then
+                empty
+            else
+                taskSeq {
+                    use e = source.GetAsyncEnumerator CancellationToken.None
+
+                    for _ in count .. - 1 .. 1 do
+                        let! step = e.MoveNextAsync()
+
+                        if not step then
+                            raiseInsufficient ()
+
+                        yield e.Current
+                }
+
+        | Truncate ->
+            // don't create a new sequence if count = 0
+            if count = 0 then
+                empty
+            else
+                taskSeq {
+                    use e = source.GetAsyncEnumerator CancellationToken.None
+
+                    let! step = e.MoveNextAsync()
+                    let mutable cont = step
+                    let mutable pos = 0
+
+                    // return items until we've exhausted the seq
+                    while cont do
+                        yield e.Current
+                        pos <- pos + 1
+
+                        if pos < count then
+                            let! moveNext = e.MoveNextAsync()
+                            cont <- moveNext
+                        else
+                            cont <- false
+
+                }
 
     let takeWhile whileKind predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source

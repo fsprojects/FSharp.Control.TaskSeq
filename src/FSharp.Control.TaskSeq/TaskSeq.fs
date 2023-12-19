@@ -6,22 +6,15 @@ open System.Threading.Tasks
 
 #nowarn "57"
 
-[<AutoOpen>]
-module TaskSeqExtensions =
-    module TaskSeq =
-
-        let empty<'T> =
-            { new IAsyncEnumerable<'T> with
-                member _.GetAsyncEnumerator(_) =
-                    { new IAsyncEnumerator<'T> with
-                        member _.MoveNextAsync() = ValueTask.False
-                        member _.Current = Unchecked.defaultof<'T>
-                        member _.DisposeAsync() = ValueTask.CompletedTask
-                    }
-            }
-
 // Just for convenience
 module Internal = TaskSeqInternal
+
+[<AutoOpen>]
+module TaskSeqExtensions =
+    // these need to be in a module, not a type for proper auto-initialization of generic values
+    module TaskSeq =
+        let empty<'T> = Internal.empty<'T>
+
 
 [<Sealed; AbstractClass>]
 type TaskSeq private () =
@@ -289,18 +282,27 @@ type TaskSeq private () =
 
     static member choose chooser source = Internal.choose (TryPick chooser) source
     static member chooseAsync chooser source = Internal.choose (TryPickAsync chooser) source
+
     static member filter predicate source = Internal.filter (Predicate predicate) source
     static member filterAsync predicate source = Internal.filter (PredicateAsync predicate) source
+
+    static member skip count source = Internal.skipOrTake Skip count source
+    static member drop count source = Internal.skipOrTake Drop count source
+    static member take count source = Internal.skipOrTake Take count source
+    static member truncate count source = Internal.skipOrTake Truncate count source
+
     static member takeWhile predicate source = Internal.takeWhile Exclusive (Predicate predicate) source
     static member takeWhileAsync predicate source = Internal.takeWhile Exclusive (PredicateAsync predicate) source
     static member takeWhileInclusive predicate source = Internal.takeWhile Inclusive (Predicate predicate) source
     static member takeWhileInclusiveAsync predicate source = Internal.takeWhile Inclusive (PredicateAsync predicate) source
+
     static member tryPick chooser source = Internal.tryPick (TryPick chooser) source
     static member tryPickAsync chooser source = Internal.tryPick (TryPickAsync chooser) source
     static member tryFind predicate source = Internal.tryFind (Predicate predicate) source
     static member tryFindAsync predicate source = Internal.tryFind (PredicateAsync predicate) source
     static member tryFindIndex predicate source = Internal.tryFindIndex (Predicate predicate) source
     static member tryFindIndexAsync predicate source = Internal.tryFindIndex (PredicateAsync predicate) source
+
     static member except itemsToExclude source = Internal.except itemsToExclude source
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
