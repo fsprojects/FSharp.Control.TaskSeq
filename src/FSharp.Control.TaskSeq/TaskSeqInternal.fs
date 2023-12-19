@@ -672,14 +672,16 @@ module internal TaskSeqInternal =
                     // skip, or stop looping if we reached the end
                     while cont do
                         pos <- pos + 1
-                        let! moveNext = e.MoveNextAsync()
-                        cont <- moveNext && pos <= count
+
+                        if pos < count then
+                            let! moveNext = e.MoveNextAsync()
+                            cont <- moveNext
+                        else
+                            cont <- false
 
                     // return the rest
-                    while cont do
+                    while! e.MoveNextAsync() do
                         yield e.Current
-                        let! moveNext = e.MoveNextAsync()
-                        cont <- moveNext
 
                 }
         | Take ->
