@@ -67,6 +67,8 @@ module internal TaskSeqInternal =
     let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative"
 
     let inline raiseInsufficient () =
+        // this is correct, it is NOT an InvalidOperationException (see Seq.fs in F# Core)
+        // but instead, it's an ArgumentException... FWIW lol
         invalidArg "source" "The input task sequence was has an insufficient number of elements."
 
     let inline raiseNotFound () =
@@ -136,7 +138,7 @@ module internal TaskSeqInternal =
                     i <- i + 1 // update before moving: we are counting, not indexing
                     go <- step
 
-            | Some(Predicate predicate) ->
+            | Some (Predicate predicate) ->
                 while go do
                     if predicate e.Current then
                         i <- i + 1
@@ -144,7 +146,7 @@ module internal TaskSeqInternal =
                     let! step = e.MoveNextAsync()
                     go <- step
 
-            | Some(PredicateAsync predicate) ->
+            | Some (PredicateAsync predicate) ->
                 while go do
                     match! predicate e.Current with
                     | true -> i <- i + 1
@@ -213,7 +215,7 @@ module internal TaskSeqInternal =
                 // multiple threads access the same item through the same enumerator (which is
                 // bad practice, but hey, who're we to judge).
                 if isNull value then
-                    value <- Lazy<_>.Create(fun () -> init i)
+                    value <- Lazy<_>.Create (fun () -> init i)
 
                 yield value.Force()
                 value <- Unchecked.defaultof<_>
@@ -720,7 +722,7 @@ module internal TaskSeqInternal =
                         yield e.Current
                         pos <- pos + 1
                         let! moveNext = e.MoveNextAsync()
-                        cont <- moveNext && pos <= count
+                        cont <- moveNext && pos < count
 
                 }
 
