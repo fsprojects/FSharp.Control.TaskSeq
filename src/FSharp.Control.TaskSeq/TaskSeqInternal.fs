@@ -721,8 +721,12 @@ module internal TaskSeqInternal =
                     while cont do
                         yield e.Current
                         pos <- pos + 1
-                        let! moveNext = e.MoveNextAsync()
-                        cont <- moveNext && pos < count
+
+                        if pos < count then
+                            let! moveNext = e.MoveNextAsync()
+                            cont <- moveNext
+                        else
+                            cont <- false
 
                 }
 
