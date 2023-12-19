@@ -653,12 +653,8 @@ module internal TaskSeqInternal =
                         if not step then
                             raiseInsufficient ()
 
-                    let mutable cont = true
-
-                    while cont do
+                    while! e.MoveNextAsync() do
                         yield e.Current
-                        let! moveNext = e.MoveNextAsync()
-                        cont <- moveNext
 
                 }
         | Drop ->
