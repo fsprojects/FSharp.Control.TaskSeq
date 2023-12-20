@@ -728,8 +728,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the underlying
     /// sequence, and then yields the remainder. Raises an exception if there are not <paramref name="count" />
-    /// items. See <see cref="drop" /> for a version that does not raise an exception.
-    /// See also <see cref="take" /> for the inverse of this operation.
+    /// items. See <see cref="TaskSeq.drop" /> for a version that does not raise an exception.
+    /// See also <see cref="TaskSeq.take" /> for the inverse of this operation.
     /// </summary>
     ///
     /// <param name="count">The number of items to skip.</param>
@@ -746,8 +746,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, drops at most <paramref name="count" /> elements of the
     /// underlying sequence, and then returns the remainder of the elements, if any.
-    /// See <see cref="skip" /> for a version that raises an exception if there
-    /// are not enough elements. See also <see cref="truncate" /> for the inverse of this operation.
+    /// See <see cref="TaskSeq.skip" /> for a version that raises an exception if there
+    /// are not enough elements. See also <see cref="TaskSeq.truncate" /> for the inverse of this operation.
     /// </summary>
     ///
     /// <param name="count">The maximum number of items to drop.</param>
@@ -760,8 +760,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, yields <paramref name="count" /> elements of the
     /// underlying sequence, and then returns no further elements. Raises an exception if there are not enough
-    /// elements in the sequence. See <see cref="truncate" /> for a version that does not raise an exception.
-    /// See also <see cref="skip" /> for the inverse of this operation.
+    /// elements in the sequence. See <see cref="TaskSeq.truncate" /> for a version that does not raise an exception.
+    /// See also <see cref="TaskSeq.skip" /> for the inverse of this operation.
     /// </summary>
     ///
     /// <param name="count">The number of items to take.</param>
@@ -777,8 +777,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, yields at most <paramref name="count" /> elements of the underlying
     /// sequence, truncating the remainder, if any.
-    /// See <see cref="take" /> for a version that raises an exception if there are not enough elements in the
-    /// sequence. See also <see cref="drop" /> for the inverse of this operation.
+    /// See <see cref="TaskSeq.take" /> for a version that raises an exception if there are not enough elements in the
+    /// sequence. See also <see cref="TaskSeq.drop" /> for the inverse of this operation.
     /// </summary>
     ///
     /// <param name="count">The maximum number of items to enumerate.</param>
