@@ -26,7 +26,10 @@ jobs:
       - name: Nuget publish
         # skip-duplicate ensures that the 409 error received when the package was already published,
         # will just issue a warning and won't have the GH action fail.
-        # NUGET_PUBLISH_TOKEN_TASKSEQ is valid until approx. 8 Nov 2023 and will need to be updated by then.
-        # do so under https://github.com/fsprojects/FSharp.Control.TaskSeq/settings/secrets/actions
-        # select button "Add repository secret" or update the existing one under "Repository secrets"
+        # NUGET_PUBLISH_TOKEN_TASKSEQ is valid until approx. 11 Dec 2024 and will need to be updated by then:
+        # - log in to Nuget.org using 'abelbraaksma' admin account and then refresh the token in Nuget
+        # - copy the token
+        # - go to https://github.com/fsprojects/FSharp.Control.TaskSeq/settings/secrets/actions
+        # - select button "Add repository secret" or update the existing one under "Repository secrets"
+        # - rerun the job
         run: dotnet nuget push packages\FSharp.Control.TaskSeq.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_PUBLISH_TOKEN_TASKSEQ }} --skip-duplicate
