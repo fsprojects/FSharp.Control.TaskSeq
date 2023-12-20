@@ -65,7 +65,7 @@ As with `seq` and `Seq`, this library comes with a bunch of well-known collectio
 ### `taskSeq` computation expressions
 
 The `taskSeq` computation expression can be used just like using `seq`.
-Additionally, it adds support for working with `Task`s through `let!` and 
+Additionally, it adds support for working with `Task`s through `let!` and
 looping over both normal and asynchronous sequences (ones that implement
 `IAsyncEnumerable<'T>'`). You can use `yield!` and `yield` and there's support
 for `use` and `use!`, `try-with` and `try-finally` and `while` loops within
@@ -127,7 +127,7 @@ let helloTs = taskSeq { yield "Hello, World!" }
 let f() = task {
     // using toList forces execution of whole sequence
     let! hello = TaskSeq.toList helloTs  // toList returns a Task<'T list>
-    return List.head hello 
+    return List.head hello
 }
 
 // can be mixed with normal sequences
@@ -147,15 +147,15 @@ let allFilesAsLines() = taskSeq {
         yield! contents
 }
 
-let write file = 
+let write file =
     allFilesAsLines()
-    
+
     // synchronous map function on asynchronous task sequence
     |> TaskSeq.map (fun x -> x.Replace("a", "b"))
 
     // asynchronous map
     |> TaskSeq.mapAsync (fun x -> task { return "hello: " + x })
-    
+
     // asynchronous iter
     |> TaskSeq.iterAsync (fun data -> File.WriteAllTextAsync(fileName, data))
 
@@ -227,142 +227,141 @@ We are working hard on getting a full set of module functions on `TaskSeq` that 
 
 The following is the progress report:
 
-| Done             | `Seq`              | `TaskSeq`       | Variants             | Remarks                                                                                                                                                                                                                                                                                                                |
-|------------------|--------------------|-----------------|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| &#x2753;         | `allPairs`         | `allPairs`      |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2705; [#81][] | `append`           | `append`        |                      | |
-| &#x2705; [#81][] |                    |                 | `appendSeq`          | |
-| &#x2705; [#81][] |                    |                 | `prependSeq`         | |
-|                  | `average`          | `average`       |                      | |
-|                  | `averageBy`        | `averageBy`     | `averageByAsync`     | |
-| &#x2753;         | `cache`            | `cache`         |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2705; [#67][] | `cast`             | `cast`          |                      | |
-| &#x2705; [#67][] |                    |                 | `box`                | |
-| &#x2705; [#67][] |                    |                 | `unbox`              | |
-| &#x2705; [#23][] | `choose`           | `choose`        | `chooseAsync`        | |
-|                  | `chunkBySize`      | `chunkBySize`   |                      | |
-| &#x2705; [#11][] | `collect`          | `collect`       | `collectAsync`       | |
-| &#x2705; [#11][] |                    | `collectSeq`    | `collectSeqAsync`    | |
-|                  | `compareWith`      | `compareWith`   | `compareWithAsync`   | |
-| &#x2705; [#69][] | `concat`           | `concat`        |                      | |
-| &#x2705; [#70][] | `contains`         | `contains`      |                      | |
-| &#x2705; [#82][] | `delay`            | `delay`         |                      | |
-|                  | `distinct`         | `distinct`      |                      | |
-|                  | `distinctBy`       | `dictinctBy`    | `distinctByAsync`    | |
-| &#x2705; [#2][]  | `empty`            | `empty`         |                      | |
-| &#x2705; [#23][] | `exactlyOne`       | `exactlyOne`    |                      | |
-| &#x2705; [#83][] | `except`           | `except`        |                      | |
-| &#x2705; [#83][] |                    | `exceptOfSeq`   |                      | |
-| &#x2705; [#70][] | `exists`           | `exists`        | `existsAsync`        | |
-|                  | `exists2`          | `exists2`       |                      | |
-| &#x2705; [#23][] | `filter`           | `filter`        | `filterAsync`        | |
-| &#x2705; [#23][] | `find`             | `find`          | `findAsync`          | |
-| &#x1f6ab;        | `findBack`         |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#68][] | `findIndex`        | `findIndex`     | `findIndexAsync`     | |
-| &#x1f6ab;        | `findIndexBack`    | n/a             | n/a                  | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#2][]  | `fold`             | `fold`          | `foldAsync`          | |
-|                  | `fold2`            | `fold2`         | `fold2Async`         | |
-| &#x1f6ab;        | `foldBack`         |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x1f6ab;        | `foldBack2`        |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-|                  | `forall`           | `forall`        | `forallAsync`        | |
-|                  | `forall2`          | `forall2`       | `forall2Async`       | |
-| &#x2753;         | `groupBy`          | `groupBy`       | `groupByAsync`       | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2705; [#23][] | `head`             | `head`          |                      | |
-| &#x2705; [#68][] | `indexed`          | `indexed`       |                      | |
-| &#x2705; [#69][] | `init`             | `init`          | `initAsync`          | |
-| &#x2705; [#69][] | `initInfinite`     | `initInfinite`  | `initInfiniteAsync`  | |
-|                  | `insertAt`         | `insertAt`      |                      | |
-|                  | `insertManyAt`     | `insertManyAt`  |                      | |
-| &#x2705; [#23][] | `isEmpty`          | `isEmpty`       |                      | |
-| &#x2705; [#23][] | `item`             | `item`          |                      | |
-| &#x2705; [#2][]  | `iter`             | `iter`          | `iterAsync`          | |
-|                  | `iter2`            | `iter2`         | `iter2Async`         | |
-| &#x2705; [#2][]  | `iteri`            | `iteri`         | `iteriAsync`         | |
-|                  | `iteri2`           | `iteri2`        | `iteri2Async`        | |
-| &#x2705; [#23][] | `last`             | `last`          |                      | |
-| &#x2705; [#53][] | `length`           | `length`        |                      | |
-| &#x2705; [#53][] |                    | `lengthBy`      | `lengthByAsync`      | |
-| &#x2705; [#2][]  | `map`              | `map`           | `mapAsync`           | |
-|                  | `map2`             | `map2`          | `map2Async`          | |
-|                  | `map3`             | `map3`          | `map3Async`          | |
-|                  | `mapFold`          | `mapFold`       | `mapFoldAsync`       | |
-| &#x1f6ab;        | `mapFoldBack`      |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#2][]  | `mapi`             | `mapi`          | `mapiAsync`          | |
-|                  | `mapi2`            | `mapi2`         | `mapi2Async`         | |
-|                  | `max`              | `max`           |                      | |
-|                  | `maxBy`            | `maxBy`         | `maxByAsync`         | |
-|                  | `min`              | `min`           |                      | |
-|                  | `minBy`            | `minBy`         | `minByAsync`         | |
-| &#x2705; [#2][]  | `ofArray`          | `ofArray`       |                      | |
-| &#x2705; [#2][]  |                    | `ofAsyncArray`  |                      | |
-| &#x2705; [#2][]  |                    | `ofAsyncList`   |                      | |
-| &#x2705; [#2][]  |                    | `ofAsyncSeq`    |                      | |
-| &#x2705; [#2][]  | `ofList`           | `ofList`        |                      | |
-| &#x2705; [#2][]  |                    | `ofTaskList`    |                      | |
-| &#x2705; [#2][]  |                    | `ofResizeArray` |                      | |
-| &#x2705; [#2][]  |                    | `ofSeq`         |                      | |
-| &#x2705; [#2][]  |                    | `ofTaskArray`   |                      | |
-| &#x2705; [#2][]  |                    | `ofTaskList`    |                      | |
-| &#x2705; [#2][]  |                    | `ofTaskSeq`     |                      | |
-|                  | `pairwise`         | `pairwise`      |                      | |
-|                  | `permute`          | `permute`       | `permuteAsync`       | |
-| &#x2705; [#23][] | `pick`             | `pick`          | `pickAsync`          | |
-| &#x1f6ab;        | `readOnly`         |                 |                      | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
-|                  | `reduce`           | `reduce`        | `reduceAsync`        | |
-| &#x1f6ab;        | `reduceBack`       |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-|                  | `removeAt`         | `removeAt`      |                      | |
-|                  | `removeManyAt`     | `removeManyAt`  |                      | |
-|                  | `replicate`        | `replicate`     |                      | |
-| &#x2753;         | `rev`              |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-|                  | `scan`             | `scan`          | `scanAsync`          | |
-| &#x1f6ab;        | `scanBack`         |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#90][] | `singleton`        | `singleton`     |                      | |
-|                  | `skip`             | `skip`          |                      | |
-|                  | `skipWhile`        | `skipWhile`     | `skipWhileAsync`     | |
-|                  |                    |                 | `skipWhileInclusive` | |
-|                  |                    |                 | `skipWhileInclusiveAsync` | |
-| &#x2753;         | `sort`             |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortBy`           |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortByAscending`  |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortByDescending` |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortWith`         |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-|                  | `splitInto`        | `splitInto`     |                      | |
-|                  | `sum`              | `sum`           |                      | |
-|                  | `sumBy`            | `sumBy`         | `sumByAsync`         | |
-| &#x2705; [#76][] | `tail`             | `tail`          |                      | |
-|                  | `take`             | `take`          |                      | |
-| &#x2705; [#126][]| `takeWhile`        | `takeWhile`     | `takeWhileAsync`     | |
-| &#x2705; [#126][]|                    |                 | `takeWhileInclusive` | |
-| &#x2705; [#126][]|                    |                 | `takeWhileInclusiveAsync`| |
-| &#x2705; [#2][]  | `toArray`          | `toArray`       | `toArrayAsync`       | |
-| &#x2705; [#2][]  |                    | `toIList`       | `toIListAsync`       | |
-| &#x2705; [#2][]  | `toList`           | `toList`        | `toListAsync`        | |
-| &#x2705; [#2][]  |                    | `toResizeArray` | `toResizeArrayAsync` | |
-| &#x2705; [#2][]  |                    | `toSeq`         | `toSeqAsync`         | |
-|                  |                    | […]             |                      | |
-| &#x2753;         | `transpose`        |                 |                      | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-|                  | `truncate`         | `truncate`      |                      | |
-| &#x2705; [#23][] | `tryExactlyOne`    | `tryExactlyOne` | `tryExactlyOneAsync` | |
-| &#x2705; [#23][] | `tryFind`          | `tryFind`       | `tryFindAsync`       | |
-| &#x1f6ab;        | `tryFindBack`      |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#68][] | `tryFindIndex`     | `tryFindIndex`  | `tryFindIndexAsync`  | |
-| &#x1f6ab;        | `tryFindIndexBack` |                 |                      | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x2705; [#23][] | `tryHead`          | `tryHead`       |                      | |
-| &#x2705; [#23][] | `tryItem`          | `tryItem`       |                      | |
-| &#x2705; [#23][] | `tryLast`          | `tryLast`       |                      | |
-| &#x2705; [#23][] | `tryPick`          | `tryPick`       | `tryPickAsync`       | |
-| &#x2705; [#76][] |                    | `tryTail`       |                      | |
-|                  | `unfold`           | `unfold`        | `unfoldAsync`        | |
-|                  | `updateAt`         | `updateAt`      |                      | |
-|                  | `where`            | `where`         | `whereAsync`         | |
-|                  | `windowed`         | `windowed`      |                      | |
-| &#x2705; [#2][]  | `zip`              | `zip`           |                      | |
-|                  | `zip3`             | `zip3`          |                      | |
-|                  |                    | `zip4`          |                      | |
+| Done             | `Seq`              | `TaskSeq`            | Variants                  | Remarks                                                                                                                                                                                                                                                                                                                |
+|------------------|--------------------|----------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| &#x2753;         | `allPairs`         | `allPairs`           |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705; [#81][] | `append`           | `append`             |                           | |
+| &#x2705; [#81][] |                    |                      | `appendSeq`               | |
+| &#x2705; [#81][] |                    |                      | `prependSeq`              | |
+|                  | `average`          | `average`            |                           | |
+|                  | `averageBy`        | `averageBy`          | `averageByAsync`          | |
+| &#x2753;         | `cache`            | `cache`              |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705; [#67][] | `cast`             | `cast`               |                           | |
+| &#x2705; [#67][] |                    |                      | `box`                     | |
+| &#x2705; [#67][] |                    |                      | `unbox`                   | |
+| &#x2705; [#23][] | `choose`           | `choose`             | `chooseAsync`             | |
+|                  | `chunkBySize`      | `chunkBySize`        |                           | |
+| &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
+| &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
+|                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
+| &#x2705; [#69][] | `concat`           | `concat`             |                           | |
+| &#x2705; [#70][] | `contains`         | `contains`           |                           | |
+| &#x2705; [#82][] | `delay`            | `delay`              |                           | |
+|                  | `distinct`         | `distinct`           |                           | |
+|                  | `distinctBy`       | `dictinctBy`         | `distinctByAsync`         | |
+| &#x2705; [#2][]  | `empty`            | `empty`              |                           | |
+| &#x2705; [#23][] | `exactlyOne`       | `exactlyOne`         |                           | |
+| &#x2705; [#83][] | `except`           | `except`             |                           | |
+| &#x2705; [#83][] |                    | `exceptOfSeq`        |                           | |
+| &#x2705; [#70][] | `exists`           | `exists`             | `existsAsync`             | |
+|                  | `exists2`          | `exists2`            |                           | |
+| &#x2705; [#23][] | `filter`           | `filter`             | `filterAsync`             | |
+| &#x2705; [#23][] | `find`             | `find`               | `findAsync`               | |
+| &#x1f6ab;        | `findBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#68][] | `findIndex`        | `findIndex`          | `findIndexAsync`          | |
+| &#x1f6ab;        | `findIndexBack`    | n/a                  | n/a                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#2][]  | `fold`             | `fold`               | `foldAsync`               | |
+|                  | `fold2`            | `fold2`              | `fold2Async`              | |
+| &#x1f6ab;        | `foldBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x1f6ab;        | `foldBack2`        |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+|                  | `forall`           | `forall`             | `forallAsync`             | |
+|                  | `forall2`          | `forall2`            | `forall2Async`            | |
+| &#x2753;         | `groupBy`          | `groupBy`            | `groupByAsync`            | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705; [#23][] | `head`             | `head`               |                           | |
+| &#x2705; [#68][] | `indexed`          | `indexed`            |                           | |
+| &#x2705; [#69][] | `init`             | `init`               | `initAsync`               | |
+| &#x2705; [#69][] | `initInfinite`     | `initInfinite`       | `initInfiniteAsync`       | |
+|                  | `insertAt`         | `insertAt`           |                           | |
+|                  | `insertManyAt`     | `insertManyAt`       |                           | |
+| &#x2705; [#23][] | `isEmpty`          | `isEmpty`            |                           | |
+| &#x2705; [#23][] | `item`             | `item`               |                           | |
+| &#x2705; [#2][]  | `iter`             | `iter`               | `iterAsync`               | |
+|                  | `iter2`            | `iter2`              | `iter2Async`              | |
+| &#x2705; [#2][]  | `iteri`            | `iteri`              | `iteriAsync`              | |
+|                  | `iteri2`           | `iteri2`             | `iteri2Async`             | |
+| &#x2705; [#23][] | `last`             | `last`               |                           | |
+| &#x2705; [#53][] | `length`           | `length`             |                           | |
+| &#x2705; [#53][] |                    | `lengthBy`           | `lengthByAsync`           | |
+| &#x2705; [#2][]  | `map`              | `map`                | `mapAsync`                | |
+|                  | `map2`             | `map2`               | `map2Async`               | |
+|                  | `map3`             | `map3`               | `map3Async`               | |
+|                  | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
+| &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#2][]  | `mapi`             | `mapi`               | `mapiAsync`               | |
+|                  | `mapi2`            | `mapi2`              | `mapi2Async`              | |
+|                  | `max`              | `max`                |                           | |
+|                  | `maxBy`            | `maxBy`              | `maxByAsync`              | |
+|                  | `min`              | `min`                |                           | |
+|                  | `minBy`            | `minBy`              | `minByAsync`              | |
+| &#x2705; [#2][]  | `ofArray`          | `ofArray`            |                           | |
+| &#x2705; [#2][]  |                    | `ofAsyncArray`       |                           | |
+| &#x2705; [#2][]  |                    | `ofAsyncList`        |                           | |
+| &#x2705; [#2][]  |                    | `ofAsyncSeq`         |                           | |
+| &#x2705; [#2][]  | `ofList`           | `ofList`             |                           | |
+| &#x2705; [#2][]  |                    | `ofTaskList`         |                           | |
+| &#x2705; [#2][]  |                    | `ofResizeArray`      |                           | |
+| &#x2705; [#2][]  |                    | `ofSeq`              |                           | |
+| &#x2705; [#2][]  |                    | `ofTaskArray`        |                           | |
+| &#x2705; [#2][]  |                    | `ofTaskList`         |                           | |
+| &#x2705; [#2][]  |                    | `ofTaskSeq`          |                           | |
+|                  | `pairwise`         | `pairwise`           |                           | |
+|                  | `permute`          | `permute`            | `permuteAsync`            | |
+| &#x2705; [#23][] | `pick`             | `pick`               | `pickAsync`               | |
+| &#x1f6ab;        | `readOnly`         |                      |                           | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
+|                  | `reduce`           | `reduce`             | `reduceAsync`             | |
+| &#x1f6ab;        | `reduceBack`       |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+|                  | `removeAt`         | `removeAt`           |                           | |
+|                  | `removeManyAt`     | `removeManyAt`       |                           | |
+|                  | `replicate`        | `replicate`          |                           | |
+| &#x2753;         | `rev`              |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+|                  | `scan`             | `scan`               | `scanAsync`               | |
+| &#x1f6ab;        | `scanBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#90][] | `singleton`        | `singleton`          |                           | |
+| &#x2705; [#209][]| `skip`             | `skip`               |                           | |
+| &#x2705; [#209][]|                    | `drop`               |                           | |
+|                  | `skipWhile`        | `skipWhile`          | `skipWhileAsync`          | |
+|                  |                    | `skipWhileInclusive` | `skipWhileInclusiveAsync` | |
+| &#x2753;         | `sort`             |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;         | `sortBy`           |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;         | `sortByAscending`  |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;         | `sortByDescending` |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2753;         | `sortWith`         |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+|                  | `splitInto`        | `splitInto`          |                           | |
+|                  | `sum`              | `sum`                |                           | |
+|                  | `sumBy`            | `sumBy`              | `sumByAsync`              | |
+| &#x2705; [#76][] | `tail`             | `tail`               |                           | |
+| &#x2705; [#209][]| `take`             | `take`               |                           | |
+| &#x2705; [#126][]| `takeWhile`        | `takeWhile`          | `takeWhileAsync`          | |
+| &#x2705; [#126][]|                    | `takeWhileInclusive` | `takeWhileInclusiveAsync` | |
+| &#x2705; [#2][]  | `toArray`          | `toArray`            | `toArrayAsync`            | |
+| &#x2705; [#2][]  |                    | `toIList`            | `toIListAsync`            | |
+| &#x2705; [#2][]  | `toList`           | `toList`             | `toListAsync`             | |
+| &#x2705; [#2][]  |                    | `toResizeArray`      | `toResizeArrayAsync`      | |
+| &#x2705; [#2][]  |                    | `toSeq`              | `toSeqAsync`              | |
+|                  |                    | […]                  |                           | |
+| &#x2753;         | `transpose`        |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705; [#209][]| `truncate`         | `truncate`           |                           | |
+| &#x2705; [#23][] | `tryExactlyOne`    | `tryExactlyOne`      | `tryExactlyOneAsync`      | |
+| &#x2705; [#23][] | `tryFind`          | `tryFind`            | `tryFindAsync`            | |
+| &#x1f6ab;        | `tryFindBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#68][] | `tryFindIndex`     | `tryFindIndex`       | `tryFindIndexAsync`       | |
+| &#x1f6ab;        | `tryFindIndexBack` |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
+| &#x2705; [#23][] | `tryHead`          | `tryHead`            |                           | |
+| &#x2705; [#23][] | `tryItem`          | `tryItem`            |                           | |
+| &#x2705; [#23][] | `tryLast`          | `tryLast`            |                           | |
+| &#x2705; [#23][] | `tryPick`          | `tryPick`            | `tryPickAsync`            | |
+| &#x2705; [#76][] |                    | `tryTail`            |                           | |
+|                  | `unfold`           | `unfold`             | `unfoldAsync`             | |
+|                  | `updateAt`         | `updateAt`           |                           | |
+|                  | `where`            | `where`              | `whereAsync`              | |
+|                  | `windowed`         | `windowed`           |                           | |
+| &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
+|                  | `zip3`             | `zip3`               |                           | |
+|                  |                    | `zip4`               |                           | |
 
 
-<sup>¹⁾ <a id="note1"></a>_These functions require a form of pre-materializing through `TaskSeq.cache`, similar to the approach taken in the corresponding `Seq` functions. It doesn't make much sense to have a cached async sequence. However, `AsyncSeq` does implement these, so we'll probably do so eventually as well._</sup>  
-<sup>²⁾ <a id="note2"></a>_Because of the async nature of `TaskSeq` sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the `xxxBack` iterators._</sup>  
+<sup>¹⁾ <a id="note1"></a>_These functions require a form of pre-materializing through `TaskSeq.cache`, similar to the approach taken in the corresponding `Seq` functions. It doesn't make much sense to have a cached async sequence. However, `AsyncSeq` does implement these, so we'll probably do so eventually as well._</sup>
+<sup>²⁾ <a id="note2"></a>_Because of the async nature of `TaskSeq` sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the `xxxBack` iterators._</sup>
 <sup>³⁾ <a id="note3"></a>_The motivation for `readOnly` in `Seq` is that a cast from a mutable array or list to a `seq<_>` is valid and can be cast back, leading to a mutable sequence. Since `TaskSeq` doesn't implement `IEnumerable<_>`, such casts are not possible._</sup>
 
 ## More information
@@ -476,6 +475,7 @@ module TaskSeq =
     val concat: sources: TaskSeq<#TaskSeq<'T>> -> TaskSeq<'T>
     val contains<'T when 'T: equality> : value: 'T -> source: TaskSeq<'T> -> Task<bool>
     val delay: generator: (unit -> TaskSeq<'T>) -> TaskSeq<'T>
+    val drop: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val empty<'T> : TaskSeq<'T>
     val exactlyOne: source: TaskSeq<'T> -> Task<'T>
     val except<'T when 'T: equality> : itemsToExclude: TaskSeq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
@@ -525,7 +525,9 @@ module TaskSeq =
     val pickAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> Task<'U>
     val prependSeq: source1: seq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
     val singleton: source: 'T -> TaskSeq<'T>
+    val skip: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val tail: source: TaskSeq<'T> -> Task<TaskSeq<'T>>
+    val take: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val takeWhile: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
     val takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
     val takeWhileInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<TaskSeq<'T>>
@@ -537,6 +539,7 @@ module TaskSeq =
     val toListAsync: source: TaskSeq<'T> -> Task<'T list>
     val toResizeArrayAsync: source: TaskSeq<'T> -> Task<ResizeArray<'T>>
     val toSeq: source: TaskSeq<'T> -> seq<'T>
+    val truncate: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val tryExactlyOne: source: TaskSeq<'T> -> Task<'T option>
     val tryFind: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T option>
     val tryFindAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T option>
@@ -596,6 +599,7 @@ module TaskSeq =
 [#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 [#133]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/133
+[#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
