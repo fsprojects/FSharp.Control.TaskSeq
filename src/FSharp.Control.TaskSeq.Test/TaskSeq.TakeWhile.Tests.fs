@@ -25,13 +25,6 @@ module With =
         | true, false -> TaskSeq.takeWhileInclusive
         | true, true -> fun pred -> TaskSeq.takeWhileInclusiveAsync (pred >> Task.fromResult)
 
-    /// Turns a sequence of numbers into a string, starting with A for '1'
-    let verifyAsString expected =
-        TaskSeq.map char
-        >> TaskSeq.map ((+) '@')
-        >> TaskSeq.toArrayAsync
-        >> Task.map (String >> should equal expected)
-
     /// This is the base condition as one would expect in actual code
     let inline cond x = x <> 6
 
@@ -82,12 +75,12 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhile condWithGuard
-            |> verifyAsString "ABCDE"
+            |> verifyDigitsAsString "ABCDE"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
-            |> verifyAsString "ABCDE"
+            |> verifyDigitsAsString "ABCDE"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -95,12 +88,12 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhile ((=) 0)
-            |> verifyAsString ""
+            |> verifyDigitsAsString ""
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileAsync ((=) 0 >> Task.fromResult)
-            |> verifyAsString ""
+            |> verifyDigitsAsString ""
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -108,12 +101,12 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileInclusive condWithGuard
-            |> verifyAsString "ABCDEF"
+            |> verifyDigitsAsString "ABCDEF"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return condWithGuard x })
-            |> verifyAsString "ABCDEF"
+            |> verifyDigitsAsString "ABCDEF"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -121,12 +114,12 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileInclusive ((=) 0)
-            |> verifyAsString "A"
+            |> verifyDigitsAsString "A"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.takeWhileInclusiveAsync ((=) 0 >> Task.fromResult)
-            |> verifyAsString "A"
+            |> verifyDigitsAsString "A"
     }
 
 module SideEffects =
@@ -134,13 +127,13 @@ module SideEffects =
     let ``TaskSeq-takeWhile filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.takeWhile condWithGuard
-        |> verifyAsString "ABCDE"
+        |> verifyDigitsAsString "ABCDE"
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-takeWhileAsync filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
-        |> verifyAsString "ABCDE"
+        |> verifyDigitsAsString "ABCDE"
 
     [<Theory>]
     [<InlineData(false, false)>]
@@ -246,7 +239,7 @@ module Other =
         [ 1; 2; 2; 3; 3; 2; 1 ]
         |> TaskSeq.ofSeq
         |> functionToTest (fun x -> x <= 2)
-        |> verifyAsString (if inclusive then "ABBC" else "ABB")
+        |> verifyDigitsAsString (if inclusive then "ABBC" else "ABB")
 
     [<Theory>]
     [<InlineData(false, false)>]
@@ -262,4 +255,4 @@ module Other =
         }
         |> TaskSeq.ofSeq
         |> functionToTest (fun x -> x <= 2)
-        |> verifyAsString (if inclusive then "ABBC" else "ABB")
+        |> verifyDigitsAsString (if inclusive then "ABBC" else "ABB")

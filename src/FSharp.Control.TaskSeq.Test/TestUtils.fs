@@ -141,10 +141,10 @@ module TestUtils =
         |> TaskSeq.toArrayAsync
         |> Task.map (should equal [| 1..10 |])
 
-    /// Turns a sequence of numbers into a string, starting with A for '1'
+    /// Turns a sequence of integers into a string, starting with A for '1', Z for 26 etc.
     let verifyDigitsAsString expected =
-        TaskSeq.map char
-        >> TaskSeq.map ((+) '@')
+        TaskSeq.map (char: int -> char)
+        >> TaskSeq.map ((+) '@') // turns int(1) into char('A') etc
         >> TaskSeq.toArrayAsync
         >> Task.map (String >> should equal expected)
 
