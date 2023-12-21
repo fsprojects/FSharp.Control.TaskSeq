@@ -5,14 +5,15 @@ Release notes:
     - new surface area functions, fixes #208:
       * TaskSeq.take, TaskSeq.skip, #209
       * TaskSeq.truncate, TaskSeq.drop, #209
+      * TaskSeq.where, TaskSeq.whereAsync, #217
 
     - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
     - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184
-    - DEPRECATIONS (warning FS0044): 
+    - DEPRECATIONS (warning FS0044):
       - type 'taskSeq<_>' is renamed to 'TaskSeq<_>', fixes #193
       - function 'ValueTask.ofIValueTaskSource` renamed to `ValueTask.ofSource`, fixes #193
       - function `ValueTask.FromResult` is renamed to `ValueTask.fromResult`, fixes #193
-	
+
 0.4.0-alpha.1
     - fixes not calling Dispose for 'use!', 'use', or `finally` blocks #157 (by @bartelink)
     - BREAKING CHANGE: null args now raise ArgumentNullException instead of NullReferenceException, #127
@@ -20,7 +21,7 @@ Release notes:
     - adds TaskSeq.takeWhile, takeWhileAsync, takeWhileInclusive, takeWhileInclusiveAsync, #126 (by @bartelink)
     - adds AsyncSeq vs TaskSeq comparison chart, #131
     - removes release-notes.txt from file dependencies, but keep in the package, #138
-    
+
 0.3.0
     - internal renames, improved doc comments, signature files for complex types, hide internal-only types, fixes #112.
     - adds support for static TaskLike, allowing the same let! and do! overloads that F# task supports, fixes #110.
