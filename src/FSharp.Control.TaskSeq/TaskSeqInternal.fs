@@ -13,7 +13,7 @@ type internal AsyncEnumStatus =
 
 [<Struct>]
 type internal WhileKind =
-    /// The item under test is included (or skipped) even if false
+    /// The item under test is included (or skipped) even when the predicate returns false
     | Inclusive
     /// The item under test is always excluded (or not skipped)
     | Exclusive
@@ -648,9 +648,9 @@ module internal TaskSeqInternal =
                     use e = source.GetAsyncEnumerator CancellationToken.None
 
                     for _ in 1..count do
-                        let! ok = e.MoveNextAsync()
+                        let! hasMore = e.MoveNextAsync()
 
-                        if not ok then
+                        if not hasMore then
                             raiseInsufficient ()
 
                     while! e.MoveNextAsync() do
@@ -731,8 +731,8 @@ module internal TaskSeqInternal =
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! moveFirst = e.MoveNextAsync()
-            let mutable more = moveFirst
+            let! notEmpty = e.MoveNextAsync()
+            let mutable more = notEmpty
 
             match whileKind, predicate with
             | Exclusive, Predicate predicate -> // takeWhile
@@ -743,20 +743,20 @@ module internal TaskSeqInternal =
                     if more then
                         // yield ONLY if predicate is true
                         yield value
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
 
             | Inclusive, Predicate predicate -> // takeWhileInclusive
                 while more do
                     let value = e.Current
                     more <- predicate value
 
-                    // yield, regardless of result of predicate
+                    // yield regardless of result of predicate
                     yield value
 
                     if more then
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
 
             | Exclusive, PredicateAsync predicate -> // takeWhileAsync
                 while more do
@@ -767,8 +767,8 @@ module internal TaskSeqInternal =
                     if more then
                         // yield ONLY if predicate is true
                         yield value
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
 
             | Inclusive, PredicateAsync predicate -> // takeWhileInclusiveAsync
                 while more do
@@ -780,8 +780,8 @@ module internal TaskSeqInternal =
                     yield value
 
                     if more then
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
         }
 
     let skipWhile whileKind predicate (source: TaskSeq<_>) =
@@ -795,8 +795,8 @@ module internal TaskSeqInternal =
             match whileKind, predicate with
             | Exclusive, Predicate predicate -> // skipWhile
                 while more && predicate e.Current do
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
+                    let! hasMore = e.MoveNextAsync()
+                    more <- hasMore
 
                 if more then
                     // yield the last one where the predicate was false
@@ -808,8 +808,8 @@ module internal TaskSeqInternal =
 
             | Inclusive, Predicate predicate -> // skipWhileInclusive
                 while more && predicate e.Current do
-                    let! ok = e.MoveNextAsync()
-                    more <- ok
+                    let! hasMore = e.MoveNextAsync()
+                    more <- hasMore
 
                 if more then
                     // yield the rest (this ensures we skip 1 or more)
@@ -820,15 +820,15 @@ module internal TaskSeqInternal =
                 let mutable cont = true
 
                 if more then
-                    let! ok = predicate e.Current
-                    cont <- ok
+                    let! hasMore = predicate e.Current
+                    cont <- hasMore
 
                 while more && cont do
                     let! moveNext = e.MoveNextAsync()
 
                     if moveNext then
-                        let! ok = predicate e.Current
-                        cont <- ok
+                        let! hasMore = predicate e.Current
+                        cont <- hasMore
 
                     more <- moveNext
 
@@ -844,15 +844,15 @@ module internal TaskSeqInternal =
                 let mutable cont = true
 
                 if more then
-                    let! ok = predicate e.Current
-                    cont <- ok
+                    let! hasMore = predicate e.Current
+                    cont <- hasMore
 
                 while more && cont do
                     let! moveNext = e.MoveNextAsync()
 
                     if moveNext then
-                        let! ok = predicate e.Current
-                        cont <- ok
+                        let! hasMore = predicate e.Current
+                        cont <- hasMore
 
                     more <- moveNext
 

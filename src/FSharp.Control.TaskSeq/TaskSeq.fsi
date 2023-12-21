@@ -889,7 +889,7 @@ type TaskSeq =
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then yields the
     /// remaining elements. The first element where the predicate returns <see cref="false" /> is returned, which
-    /// means that this function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
+    /// means that this function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusiveAsync" />).
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhile" />.
     /// </summary>
     ///
