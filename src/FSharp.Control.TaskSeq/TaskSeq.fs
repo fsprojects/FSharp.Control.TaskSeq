@@ -297,6 +297,10 @@ type TaskSeq private () =
     static member takeWhileAsync predicate source = Internal.takeWhile Exclusive (PredicateAsync predicate) source
     static member takeWhileInclusive predicate source = Internal.takeWhile Inclusive (Predicate predicate) source
     static member takeWhileInclusiveAsync predicate source = Internal.takeWhile Inclusive (PredicateAsync predicate) source
+    static member skipWhile predicate source = Internal.skipWhile Exclusive (Predicate predicate) source
+    static member skipWhileAsync predicate source = Internal.skipWhile Exclusive (PredicateAsync predicate) source
+    static member skipWhileInclusive predicate source = Internal.skipWhile Inclusive (Predicate predicate) source
+    static member skipWhileInclusiveAsync predicate source = Internal.skipWhile Inclusive (PredicateAsync predicate) source
 
     static member tryPick chooser source = Internal.tryPick (TryPick chooser) source
     static member tryPickAsync chooser source = Internal.tryPick (TryPickAsync chooser) source

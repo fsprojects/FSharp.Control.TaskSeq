@@ -830,10 +830,10 @@ type TaskSeq =
     static member takeWhile: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Returns a sequence that, when iterated, yields elements of the underlying sequence while the
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
     /// The first element where the predicate returns <see cref="false" /> is not included in the resulting sequence
-    /// (see also <see cref="TaskSeq.takeWhileInclusive" />).
+    /// (see also <see cref="TaskSeq.takeWhileInclusiveAsync" />).
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeWhile" />.
     /// </summary>
     ///
@@ -844,7 +844,7 @@ type TaskSeq =
     static member takeWhileAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Returns a sequence that, when iterated, yields elements of the underlying sequence until the given
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence until the given
     /// function <paramref name="predicate" /> returns <see cref="false" />, returns that element
     /// and then returns no further elements (see also <see cref="TaskSeq.takeWhile" />). This function returns
     /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
@@ -858,9 +858,9 @@ type TaskSeq =
     static member takeWhileInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Returns a sequence that, when iterated, yields elements of the underlying sequence until the given
+    /// Returns a task sequence that, when iterated, yields elements of the underlying sequence until the given
     /// asynchronous function <paramref name="predicate" /> returns <see cref="false" />, returns that element
-    /// and then returns no further elements (see also <see cref="TaskSeq.takeWhile" />). This function returns
+    /// and then returns no further elements (see also <see cref="TaskSeq.takeWhileAsync" />). This function returns
     /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeWhileInclusive" />.
     /// </summary>
@@ -870,6 +870,62 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member takeWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
+    /// given function <paramref name="predicate" /> returns <see cref="true" />, and then yields the remaining
+    /// elements. The first element where the predicate returns <see cref="false" /> is returned, which means that this
+    /// function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member skipWhile: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
+    /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then yields the
+    /// remaining elements. The first element where the predicate returns <see cref="false" /> is returned, which
+    /// means that this function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhile" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member skipWhileAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
+    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). This function skips
+    /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileInclusiveAsync" />.
+    /// </summary>`
+    ///
+    /// <param name="predicate">A function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member skipWhileInclusive: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
+    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). This function skips
+    /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhileInclusive" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member skipWhileInclusiveAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where

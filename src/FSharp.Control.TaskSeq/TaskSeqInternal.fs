@@ -13,9 +13,9 @@ type internal AsyncEnumStatus =
 
 [<Struct>]
 type internal WhileKind =
-    /// The item under test is included even if false
+    /// The item under test is included (or skipped) even if false
     | Inclusive
-    /// The item under test is always excluded
+    /// The item under test is always excluded (or not skipped)
     | Exclusive
 
 [<Struct>]
@@ -731,53 +731,122 @@ module internal TaskSeqInternal =
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! step = e.MoveNextAsync()
-            let mutable more = step
+            let! moveFirst = e.MoveNextAsync()
+            let mutable more = moveFirst
 
             match whileKind, predicate with
-            | Exclusive, Predicate predicate ->
+            | Exclusive, Predicate predicate -> // takeWhile
                 while more do
                     let value = e.Current
                     more <- predicate value
 
                     if more then
+                        // yield ONLY if predicate is true
                         yield value
                         let! ok = e.MoveNextAsync()
                         more <- ok
 
-            | Inclusive, Predicate predicate ->
+            | Inclusive, Predicate predicate -> // takeWhileInclusive
                 while more do
                     let value = e.Current
                     more <- predicate value
 
+                    // yield, regardless of result of predicate
                     yield value
 
                     if more then
                         let! ok = e.MoveNextAsync()
                         more <- ok
 
-            | Exclusive, PredicateAsync predicate ->
+            | Exclusive, PredicateAsync predicate -> // takeWhileAsync
                 while more do
                     let value = e.Current
                     let! passed = predicate value
                     more <- passed
 
                     if more then
+                        // yield ONLY if predicate is true
                         yield value
                         let! ok = e.MoveNextAsync()
                         more <- ok
 
-            | Inclusive, PredicateAsync predicate ->
+            | Inclusive, PredicateAsync predicate -> // takeWhileInclusiveAsync
                 while more do
                     let value = e.Current
                     let! passed = predicate value
                     more <- passed
 
+                    // yield regardless of predicate
                     yield value
 
                     if more then
                         let! ok = e.MoveNextAsync()
                         more <- ok
+        }
+
+    let skipWhile whileKind predicate (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! moveFirst = e.MoveNextAsync()
+            let mutable more = moveFirst
+
+            match whileKind, predicate with
+            | Exclusive, Predicate predicate -> // skipWhile
+                while more && predicate e.Current do
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
+
+                if more then
+                    // yield the last one where the predicate was false
+                    // (this ensures we skip 0 or more)
+                    yield e.Current
+
+                    while! e.MoveNextAsync() do // get the rest
+                        yield e.Current
+
+            | Inclusive, Predicate predicate -> // skipWhileInclusive
+                while more && predicate e.Current do
+                    let! ok = e.MoveNextAsync()
+                    more <- ok
+
+                if more then
+                    // yield the rest (this ensures we skip 1 or more)
+                    while! e.MoveNextAsync() do
+                        yield e.Current
+
+            | Exclusive, PredicateAsync predicate -> // skipWhileAsync
+                while more do
+                    let! passed = predicate e.Current
+                    more <- passed
+
+                    if more then
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+
+                // yield the rest
+                if more then
+                    // yield the last one where the predicate was false
+                    // (this ensures we skip 0 or more)
+                    yield e.Current
+
+                    while! e.MoveNextAsync() do
+                        yield e.Current
+
+            | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
+                while more do
+                    let! passed = predicate e.Current
+                    more <- passed
+
+                    if more then
+                        let! ok = e.MoveNextAsync()
+                        more <- ok
+
+                if more then
+                    // yield the rest (this ensures we skip 1 or more)
+                    while! e.MoveNextAsync() do
+                        yield e.Current
         }
 
     // Consider turning using an F# version of this instead?
