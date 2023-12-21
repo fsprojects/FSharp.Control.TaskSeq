@@ -158,7 +158,7 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
+    let ``TaskSeq-takeWhile and variants prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
         let mutable x = 42 // for this test, the potential mutation should not actually occur
         let functionToTest = getFunction inclusive isAsync ((=) 42)
 
@@ -183,7 +183,7 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove side effects are executed`` (inclusive, isAsync) = task {
+    let ``TaskSeq-takeWhile and variants prove side effects are executed`` (inclusive, isAsync) = task {
         let mutable x = 41
         let functionToTest = getFunction inclusive isAsync ((>) 50)
 
@@ -254,7 +254,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX should exclude all items after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-takeWhile and variants excludes all items after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         [ 1; 2; 2; 3; 3; 2; 1 ]
@@ -267,7 +267,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-takeWhile and variants stops consuming after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         seq {
