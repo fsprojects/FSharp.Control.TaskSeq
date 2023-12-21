@@ -817,34 +817,43 @@ module internal TaskSeqInternal =
                         yield e.Current
 
             | Exclusive, PredicateAsync predicate -> // skipWhileAsync
-                while more do
-                    let! passed = predicate e.Current
-                    more <- passed
+                let mutable cont = true
+                if more then
+                    let! ok = predicate e.Current
+                    cont <- ok
 
-                    if more then
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                while more && cont do
+                    let! moveNext = e.MoveNextAsync()
+                    if moveNext then
+                        let! ok = predicate e.Current
+                        cont <- ok
 
-                // yield the rest
+                    more <- moveNext
+
                 if more then
                     // yield the last one where the predicate was false
                     // (this ensures we skip 0 or more)
                     yield e.Current
 
-                    while! e.MoveNextAsync() do
+                    while! e.MoveNextAsync() do // get the rest
                         yield e.Current
 
             | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
-                while more do
-                    let! passed = predicate e.Current
-                    more <- passed
+                let mutable cont = true
+                if more then
+                    let! ok = predicate e.Current
+                    cont <- ok
 
-                    if more then
-                        let! ok = e.MoveNextAsync()
-                        more <- ok
+                while more && cont do
+                    let! moveNext = e.MoveNextAsync()
+                    if moveNext then
+                        let! ok = predicate e.Current
+                        cont <- ok
+
+                    more <- moveNext
 
                 if more then
-                    // yield the rest (this ensures we skip 1 or more)
+                     // get the rest, this gives 1 or more semantics
                     while! e.MoveNextAsync() do
                         yield e.Current
         }
