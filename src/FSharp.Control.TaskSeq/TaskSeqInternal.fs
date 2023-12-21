@@ -818,12 +818,14 @@ module internal TaskSeqInternal =
 
             | Exclusive, PredicateAsync predicate -> // skipWhileAsync
                 let mutable cont = true
+
                 if more then
                     let! ok = predicate e.Current
                     cont <- ok
 
                 while more && cont do
                     let! moveNext = e.MoveNextAsync()
+
                     if moveNext then
                         let! ok = predicate e.Current
                         cont <- ok
@@ -840,12 +842,14 @@ module internal TaskSeqInternal =
 
             | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
                 let mutable cont = true
+
                 if more then
                     let! ok = predicate e.Current
                     cont <- ok
 
                 while more && cont do
                     let! moveNext = e.MoveNextAsync()
+
                     if moveNext then
                         let! ok = predicate e.Current
                         cont <- ok
@@ -853,7 +857,7 @@ module internal TaskSeqInternal =
                     more <- moveNext
 
                 if more then
-                     // get the rest, this gives 1 or more semantics
+                    // get the rest, this gives 1 or more semantics
                     while! e.MoveNextAsync() do
                         yield e.Current
         }
