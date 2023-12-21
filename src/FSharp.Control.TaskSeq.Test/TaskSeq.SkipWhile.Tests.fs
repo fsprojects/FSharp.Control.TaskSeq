@@ -14,6 +14,8 @@ open FSharp.Control
 // TaskSeq.skipWhileInclusiveAsync
 //
 
+exception SideEffectPastEnd of string
+
 [<AutoOpen>]
 module With =
     /// The only real difference in semantics between the base and the *Inclusive variant lies in whether the final item is skipped.
@@ -182,28 +184,26 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
+    let ``TaskSeq-skipWhileXXX prove it reads the entire input stream`` (inclusive, isAsync) = task {
         let mutable x = 42 // for this test, the potential mutation should not actually occur
         let functionToTest = getFunction inclusive isAsync ((=) 42)
 
         let items = taskSeq {
             yield x // Always passes the test; always skipped
             yield x * 2 // Fails the test, skipped depending on "inclusive"
-            x <- x + 1 // we are proving we never get here
+            x <- x + 1 // we are proving we ALWAYS get here
         }
-
-        // we skip one more if "inclusive"
-        let expected = if inclusive then [||] else [| 84 |]
 
         x |> should equal 42
         let! first = items |> functionToTest |> TaskSeq.toArrayAsync
-        x |> should equal 42
-        let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
-        x |> should equal 42
+        x |> should equal 43
+        first |> should equal (if inclusive then [||] else [| 84 |])
 
-        first |> should equal expected
-        repeat |> should equal expected
-        x |> should equal 42 // if the var changed, we got too far
+        let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
+        x |> should equal 44
+
+        repeat
+        |> should equal (if inclusive then [| 86 |] else [| 43; 86 |])
     }
 
     [<Theory>]
@@ -211,7 +211,7 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX prove side effects are executed`` (inclusive, isAsync) = task {
+    let ``TaskSeq-skipWhileXXX prove side effects are properly executed`` (inclusive, isAsync) = task {
         let mutable x = 41
         let functionToTest = getFunction inclusive isAsync ((>) 50)
 
@@ -220,17 +220,18 @@ module SideEffects =
             yield x
             x <- x + 2
             yield x * 2
-            x <- x + 200 // as previously proven, we should not trigger this
+            x <- x + 200 // as previously proven, we should ALWAYS trigger this
         }
 
-        let expectedFirst = if inclusive then [||] else [| 44 * 2 |]
-        let expectedRepeat = if inclusive then [||] else [| 47 * 2 |]
+        let expectedFirst = if inclusive then [||] else [| 88 |]
+        let expectedRepeat = if inclusive then [| 494 |] else [| 245; 494 |]
 
         x |> should equal 41
         let! first = items |> functionToTest |> TaskSeq.toArrayAsync
-        x |> should equal 44
+        x |> should equal 244
+
         let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
-        x |> should equal 47
+        x |> should equal 447
 
         first |> should equal expectedFirst
         repeat |> should equal expectedRepeat
@@ -313,40 +314,19 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) = task {
-        do!
-            seq {
-                yield! [ 1; 2; 2; 3; 3 ]
-                yield failwith "Too far"
-            }
-            |> TaskSeq.ofSeq
-            |> TaskSeq.skipWhile (fun x -> x <= 2)
-            |> verifyDigitsAsString "CC"
+    let ``TaskSeq-skipWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
+        let testSkipper skipper =
+            fun () ->
+                seq {
+                    yield! [ 1; 2; 2; 3; 3 ]
+                    yield SideEffectPastEnd "Too far" |> raise
+                }
+                |> TaskSeq.ofSeq
+                |> skipper
+                |> consumeTaskSeq
+            |> should throwAsyncExact typeof<SideEffectPastEnd>
 
-        do!
-            seq {
-                yield! [ 1; 2; 2; 3; 3 ]
-                yield failwith "Too far"
-            }
-            |> TaskSeq.ofSeq
-            |> TaskSeq.skipWhileInclusive (fun x -> x <= 2)
-            |> verifyDigitsAsString "C"
-
-        do!
-            seq {
-                yield! [ 1; 2; 2; 3; 3 ]
-                yield failwith "Too far"
-            }
-            |> TaskSeq.ofSeq
-            |> TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x <= 2))
-            |> verifyDigitsAsString "CC"
-
-        do!
-            seq {
-                yield! [ 1; 2; 2; 3; 3 ]
-                yield failwith "Too far"
-            }
-            |> TaskSeq.ofSeq
-            |> TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x <= 2))
-            |> verifyDigitsAsString "C"
-    }
+        do testSkipper (TaskSeq.skipWhile (fun x -> x <= 2))
+        do testSkipper (TaskSeq.skipWhileInclusive (fun x -> x <= 2))
+        do testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x <= 2)))
+        do testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x <= 2)))
