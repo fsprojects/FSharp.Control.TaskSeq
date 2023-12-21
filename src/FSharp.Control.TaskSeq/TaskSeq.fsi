@@ -726,6 +726,34 @@ type TaskSeq =
     static member filterAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a new task sequence containing only the elements of the collection
+    /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.whereAsync" />.
+    ///
+    /// Alias for <see cref="TaskSeq.filter" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test whether an item in the input sequence should be included in the output or not.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member where: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence containing only the elements of the input sequence
+    /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.where" />.
+    ///
+    /// Alias for <see cref="TaskSeq.filterAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function to test whether an item in the input sequence should be included in the output or not.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member whereAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
     /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the underlying
     /// sequence, and then yields the remainder. Raises an exception if there are not <paramref name="count" />
     /// items. See <see cref="TaskSeq.drop" /> for a version that does not raise an exception.
@@ -741,7 +769,6 @@ type TaskSeq =
     ///     it exceeds the number of elements in the sequence.
     /// </exception>
     static member skip: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
-
 
     /// <summary>
     /// Returns a task sequence that, when iterated, drops at most <paramref name="count" /> elements of the

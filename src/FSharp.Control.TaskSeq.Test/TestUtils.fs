@@ -141,6 +141,13 @@ module TestUtils =
         |> TaskSeq.toArrayAsync
         |> Task.map (should equal [| 1..10 |])
 
+    /// Turns a sequence of numbers into a string, starting with A for '1'
+    let verifyDigitsAsString expected =
+        TaskSeq.map char
+        >> TaskSeq.map ((+) '@')
+        >> TaskSeq.toArrayAsync
+        >> Task.map (String >> should equal expected)
+
     /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
     let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
 

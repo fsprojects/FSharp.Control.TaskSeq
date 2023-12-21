@@ -225,7 +225,7 @@ The _resumable state machine_ backing the `taskSeq` CE is now finished and _rest
 
 We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided by `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
 
-The following is the progress report:
+This is what has been implemented so far, is planned or skipped:
 
 | Done             | `Seq`              | `TaskSeq`            | Variants                  | Remarks                                                                                                                                                                                                                                                                                                                |
 |------------------|--------------------|----------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -353,7 +353,7 @@ The following is the progress report:
 | &#x2705; [#76][] |                    | `tryTail`            |                           | |
 |                  | `unfold`           | `unfold`             | `unfoldAsync`             | |
 |                  | `updateAt`         | `updateAt`           |                           | |
-|                  | `where`            | `where`              | `whereAsync`              | |
+| &#x2705; [#217][]| `where`            | `where`              | `whereAsync`              | |
 |                  | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
 |                  | `zip3`             | `zip3`               |                           | |
@@ -551,6 +551,8 @@ module TaskSeq =
     val tryPick: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> Task<'U option>
     val tryPickAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> Task<'U option>
     val tryTail: source: TaskSeq<'T> -> Task<TaskSeq<'T> option>
+    val where: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val whereAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
     val unbox<'U when 'U: struct> : source: TaskSeq<obj> -> TaskSeq<'U>
     val zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 ```
@@ -600,6 +602,7 @@ module TaskSeq =
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 [#133]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/133
 [#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
+[#217]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/217
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/

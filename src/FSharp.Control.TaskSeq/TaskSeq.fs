@@ -285,6 +285,8 @@ type TaskSeq private () =
 
     static member filter predicate source = Internal.filter (Predicate predicate) source
     static member filterAsync predicate source = Internal.filter (PredicateAsync predicate) source
+    static member where predicate source = Internal.filter (Predicate predicate) source
+    static member whereAsync predicate source = Internal.filter (PredicateAsync predicate) source
 
     static member skip count source = Internal.skipOrTake Skip count source
     static member drop count source = Internal.skipOrTake Drop count source

@@ -103,11 +103,9 @@ let feedFromTwitter user pwd = taskSeq {
 
 ### `TaskSeq` module functions
 
-We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided from `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
-
 We are working hard on getting a full set of module functions on `TaskSeq` that can be used with `IAsyncEnumerable` sequences. Our guide is the set of F# `Seq` functions in F# Core and, where applicable, the functions provided by `AsyncSeq`. Each implemented function is documented through XML doc comments to provide the necessary context-sensitive help.
 
-This is what was implemented, planned or skipped:
+This is what has been implemented so far, is planned or skipped:
 
 | Done             | `Seq`              | `TaskSeq`            | Variants                  | Remarks                                                                                                                                                                                                                                                                                                                |
 |------------------|--------------------|----------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -235,7 +233,7 @@ This is what was implemented, planned or skipped:
 | &#x2705; [#76][] |                    | `tryTail`            |                           | |
 |                  | `unfold`           | `unfold`             | `unfoldAsync`             | |
 |                  | `updateAt`         | `updateAt`           |                           | |
-|                  | `where`            | `where`              | `whereAsync`              | |
+| &#x2705; [#217][]| `where`            | `where`              | `whereAsync`              | |
 |                  | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
 |                  | `zip3`             | `zip3`               |                           | |
@@ -309,3 +307,4 @@ _The motivation for `readOnly` in `Seq` is that a cast from a mutable array or l
 [#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 [#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
+[#217]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/217
