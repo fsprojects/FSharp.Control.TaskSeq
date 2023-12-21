@@ -16,15 +16,6 @@ open FSharp.Control
 
 exception SideEffectPastEnd of string
 
-[<AutoOpen>]
-module With =
-    /// The only real difference in semantics between the base and the *Inclusive variant lies in whether the final item is skipped.
-    let getFunction inclusive isAsync =
-        match inclusive, isAsync with
-        | false, false -> TaskSeq.skipWhile
-        | false, true -> fun pred -> TaskSeq.skipWhileAsync (pred >> Task.fromResult)
-        | true, false -> TaskSeq.skipWhileInclusive
-        | true, true -> fun pred -> TaskSeq.skipWhileInclusiveAsync (pred >> Task.fromResult)
 
 module EmptySeq =
 
@@ -179,41 +170,37 @@ module SideEffects =
             |> verifyDigitsAsString "GHIJ"
     }
 
-    [<Theory>]
-    [<InlineData(false, false)>]
-    [<InlineData(false, true)>]
-    [<InlineData(true, false)>]
-    [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX prove it reads the entire input stream`` (inclusive, isAsync) = task {
-        let mutable x = 42 // for this test, the potential mutation should not actually occur
-        let functionToTest = getFunction inclusive isAsync ((=) 42)
+    [<Fact>]
+    let ``TaskSeq-skipWhile and variants prove it reads the entire input stream`` () = task {
+        let mutable x = 42
 
         let items = taskSeq {
-            yield x // Always passes the test; always skipped
-            yield x * 2 // Fails the test, skipped depending on "inclusive"
+            yield x
+            yield x * 2
             x <- x + 1 // we are proving we ALWAYS get here
         }
 
-        x |> should equal 42
-        let! first = items |> functionToTest |> TaskSeq.toArrayAsync
-        x |> should equal 43
-        first |> should equal (if inclusive then [||] else [| 84 |])
+        let testSkipper skipper expected = task {
+            let! first = items |> skipper |> TaskSeq.toArrayAsync
+            return first |> should equal expected
+        }
 
-        let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
+        do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 84 |]
+        x |> should equal 43
+
+        do! testSkipper (TaskSeq.skipWhileInclusive ((=) 43)) [||]
         x |> should equal 44
 
-        repeat
-        |> should equal (if inclusive then [| 86 |] else [| 43; 86 |])
+        do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 44))) [| 88 |]
+        x |> should equal 45
+
+        do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 45))) [||]
+        x |> should equal 46
     }
 
-    [<Theory>]
-    [<InlineData(false, false)>]
-    [<InlineData(false, true)>]
-    [<InlineData(true, false)>]
-    [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX prove side effects are properly executed`` (inclusive, isAsync) = task {
+    [<Fact>]
+    let ``TaskSeq-skipWhile and variants prove side effects are properly executed`` () = task {
         let mutable x = 41
-        let functionToTest = getFunction inclusive isAsync (fun x -> x < 50)
 
         let items = taskSeq {
             x <- x + 1
@@ -223,18 +210,22 @@ module SideEffects =
             x <- x + 200 // as previously proven, we should ALWAYS trigger this
         }
 
-        let expectedFirst = if inclusive then [||] else [| 88 |]
-        let expectedRepeat = if inclusive then [| 494 |] else [| 245; 494 |]
+        let testSkipper skipper expected = task {
+            let! first = items |> skipper |> TaskSeq.toArrayAsync
+            return first |> should equal expected
+        }
 
-        x |> should equal 41
-        let! first = items |> functionToTest |> TaskSeq.toArrayAsync
+        do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 88 |]
         x |> should equal 244
 
-        let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
+        do! testSkipper (TaskSeq.skipWhileInclusive ((=) 245)) [||]
         x |> should equal 447
 
-        first |> should equal expectedFirst
-        repeat |> should equal expectedRepeat
+        do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 448))) [| 900 |]
+        x |> should equal 650
+
+        do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 651))) [||]
+        x |> should equal 853
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
@@ -278,12 +269,8 @@ module SideEffects =
     }
 
 module Other =
-    [<Theory>]
-    [<InlineData(false, false)>]
-    [<InlineData(false, true)>]
-    [<InlineData(true, false)>]
-    [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX should include all items after predicate fails`` (inclusive, isAsync) = task {
+    [<Fact>]
+    let ``TaskSeq-skipWhileXXX should include all items after predicate fails`` () = task {
         do!
             [ 1; 2; 2; 3; 3; 2; 1 ]
             |> TaskSeq.ofSeq
@@ -309,12 +296,8 @@ module Other =
             |> verifyDigitsAsString "CBA"
     }
 
-    [<Theory>]
-    [<InlineData(false, false)>]
-    [<InlineData(false, true)>]
-    [<InlineData(true, false)>]
-    [<InlineData(true, true)>]
-    let ``TaskSeq-skipWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
+    [<Fact>]
+    let ``TaskSeq-skipWhileXXX stops consuming after predicate fails`` () =
         let testSkipper skipper =
             fun () ->
                 seq {
