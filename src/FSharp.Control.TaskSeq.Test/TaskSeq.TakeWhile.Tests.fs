@@ -128,16 +128,30 @@ module Immutable =
 
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhile filters correctly`` variant =
-        Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhile condWithGuard
-        |> verifyDigitsAsString "ABCDE"
+    let ``TaskSeq-takeWhile+A filters correctly`` variant = task {
+        do!
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.takeWhile condWithGuard
+            |> verifyDigitsAsString "ABCDE"
+
+        do!
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
+            |> verifyDigitsAsString "ABCDE"
+    }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhileAsync filters correctly`` variant =
-        Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
-        |> verifyDigitsAsString "ABCDE"
+    let ``TaskSeq-takeWhileInclusive+A filters correctly`` variant = task {
+        do!
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.takeWhileInclusive condWithGuard
+            |> verifyDigitsAsString "ABCDEF"
+
+        do!
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return condWithGuard x })
+            |> verifyDigitsAsString "ABCDEF"
+    }
 
     [<Theory>]
     [<InlineData(false, false)>]
@@ -184,6 +198,7 @@ module SideEffects =
         let expectedFirst = if inclusive then [| 42; 44 * 2 |] else [| 42 |]
         let expectedRepeat = if inclusive then [| 45; 47 * 2 |] else [| 45 |]
 
+        x |> should equal 41
         let! first = items |> functionToTest |> TaskSeq.toArrayAsync
         x |> should equal 44
         let! repeat = items |> functionToTest |> TaskSeq.toArrayAsync
@@ -205,6 +220,7 @@ module SideEffects =
         first |> should equal expected
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
+        // which means the original sequence has now changed due to the side effect
         let! repeat =
             TaskSeq.takeWhile (fun x -> x < 5) ts
             |> TaskSeq.toArrayAsync
@@ -224,6 +240,7 @@ module SideEffects =
         first |> should equal expected
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
+        // which means the original sequence has now changed due to the side effect
         let! repeat =
             TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
             |> TaskSeq.toArrayAsync
@@ -237,7 +254,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX exclude all items after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-takeWhileXXX should exclude all items after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         [ 1; 2; 2; 3; 3; 2; 1 ]
