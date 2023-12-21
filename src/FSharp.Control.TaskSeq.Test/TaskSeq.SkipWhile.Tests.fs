@@ -171,7 +171,8 @@ module SideEffects =
     }
 
     [<Fact>]
-    let ``TaskSeq-skipWhile and variants prove it reads the entire input stream`` () = task {
+    let ``TaskSeq-skipWhile and variants prove it reads the entire input stream`` () =
+
         let mutable x = 42
 
         let items = taskSeq {
@@ -180,26 +181,29 @@ module SideEffects =
             x <- x + 1 // we are proving we ALWAYS get here
         }
 
+        // this needs to be lifted from the task or it raises the infamous
+        // warning FS3511 on CI: This state machine is not statically compilable
         let testSkipper skipper expected = task {
             let! first = items |> skipper |> TaskSeq.toArrayAsync
             return first |> should equal expected
         }
 
-        do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 84 |]
-        x |> should equal 43
+        task {
+            do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 84 |]
+            x |> should equal 43
 
-        do! testSkipper (TaskSeq.skipWhileInclusive ((=) 43)) [||]
-        x |> should equal 44
+            do! testSkipper (TaskSeq.skipWhileInclusive ((=) 43)) [||]
+            x |> should equal 44
 
-        do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 44))) [| 88 |]
-        x |> should equal 45
+            do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 44))) [| 88 |]
+            x |> should equal 45
 
-        do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 45))) [||]
-        x |> should equal 46
-    }
+            do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 45))) [||]
+            x |> should equal 46
+        }
 
     [<Fact>]
-    let ``TaskSeq-skipWhile and variants prove side effects are properly executed`` () = task {
+    let ``TaskSeq-skipWhile and variants prove side effects are properly executed`` () =
         let mutable x = 41
 
         let items = taskSeq {
@@ -210,23 +214,26 @@ module SideEffects =
             x <- x + 200 // as previously proven, we should ALWAYS trigger this
         }
 
+        // this needs to be lifted from the task or it raises the infamous
+        // warning FS3511 on CI: This state machine is not statically compilable
         let testSkipper skipper expected = task {
             let! first = items |> skipper |> TaskSeq.toArrayAsync
             return first |> should equal expected
         }
 
-        do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 88 |]
-        x |> should equal 244
+        task {
+            do! testSkipper (TaskSeq.skipWhile ((=) 42)) [| 88 |]
+            x |> should equal 244
 
-        do! testSkipper (TaskSeq.skipWhileInclusive ((=) 245)) [||]
-        x |> should equal 447
+            do! testSkipper (TaskSeq.skipWhileInclusive ((=) 245)) [||]
+            x |> should equal 447
 
-        do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 448))) [| 900 |]
-        x |> should equal 650
+            do! testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x = 448))) [| 900 |]
+            x |> should equal 650
 
-        do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 651))) [||]
-        x |> should equal 853
-    }
+            do! testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x = 651))) [||]
+            x |> should equal 853
+        }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-skipWhile consumes the prefix of a longer sequence, with mutation`` variant = task {
