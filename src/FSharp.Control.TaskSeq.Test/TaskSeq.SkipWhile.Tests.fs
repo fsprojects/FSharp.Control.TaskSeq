@@ -72,7 +72,7 @@ module Immutable =
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.skipWhile ((>) 5) // skip while less than 5
+            |> TaskSeq.skipWhile (fun x -> x < 5)
             |> verifyDigitsAsString "EFGHIJ"
 
         do!
@@ -104,7 +104,7 @@ module Immutable =
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.skipWhileInclusive ((>) 5)
+            |> TaskSeq.skipWhileInclusive (fun x -> x < 5)
             |> verifyDigitsAsString "FGHIJ" // last 4
 
         do!
@@ -118,12 +118,12 @@ module Immutable =
     let ``TaskSeq-skipWhileInclusive+A returns the empty sequence if always true`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.skipWhileInclusive ((<) -1)
+            |> TaskSeq.skipWhileInclusive (fun x -> x > -1) // always true
             |> verifyEmpty
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.skipWhileInclusiveAsync (fun x -> task { return true })
+            |> TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x > -1))
             |> verifyEmpty
     }
 
@@ -151,7 +151,7 @@ module SideEffects =
 
         do!
             Gen.getSeqWithSideEffect variant
-            |> TaskSeq.skipWhile ((>) 6)
+            |> TaskSeq.skipWhile (fun x -> x < 6)
             |> verifyDigitsAsString "FGHIJ"
 
         do!
@@ -170,7 +170,7 @@ module SideEffects =
 
         do!
             Gen.getSeqWithSideEffect variant
-            |> TaskSeq.skipWhileInclusive ((>) 6)
+            |> TaskSeq.skipWhileInclusive (fun x -> x < 6)
             |> verifyDigitsAsString "GHIJ"
 
         do!
@@ -213,7 +213,7 @@ module SideEffects =
     [<InlineData(true, true)>]
     let ``TaskSeq-skipWhileXXX prove side effects are properly executed`` (inclusive, isAsync) = task {
         let mutable x = 41
-        let functionToTest = getFunction inclusive isAsync ((>) 50)
+        let functionToTest = getFunction inclusive isAsync (fun x -> x < 50)
 
         let items = taskSeq {
             x <- x + 1
@@ -326,7 +326,7 @@ module Other =
                 |> consumeTaskSeq
             |> should throwAsyncExact typeof<SideEffectPastEnd>
 
-        do testSkipper (TaskSeq.skipWhile (fun x -> x <= 2))
-        do testSkipper (TaskSeq.skipWhileInclusive (fun x -> x <= 2))
-        do testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x <= 2)))
-        do testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x <= 2)))
+        testSkipper (TaskSeq.skipWhile (fun x -> x <= 2))
+        testSkipper (TaskSeq.skipWhileInclusive (fun x -> x <= 2))
+        testSkipper (TaskSeq.skipWhileAsync (fun x -> Task.fromResult (x <= 2)))
+        testSkipper (TaskSeq.skipWhileInclusiveAsync (fun x -> Task.fromResult (x <= 2)))
