@@ -1,10 +1,14 @@
 
 Release notes:
 0.4.x (unreleased)
-    - overhaul all doc comments, add exceptions, improve editor experience, #136
+    - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136
+    - new surface area functions, fixes #208:
+      * TaskSeq.take, TaskSeq.skip, #209
+      * TaskSeq.truncate, TaskSeq.drop, #209
+
     - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
     - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184
-    - DEPRECATIONS (these raise warning FS0044): 
+    - DEPRECATIONS (warning FS0044): 
       - type 'taskSeq<_>' is renamed to 'TaskSeq<_>', fixes #193
       - function 'ValueTask.ofIValueTaskSource` renamed to `ValueTask.ofSource`, fixes #193
       - function `ValueTask.FromResult` is renamed to `ValueTask.fromResult`, fixes #193
