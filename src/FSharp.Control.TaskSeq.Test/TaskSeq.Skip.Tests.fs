@@ -14,15 +14,6 @@ open FSharp.Control
 
 exception SideEffectPastEnd of string
 
-[<AutoOpen>]
-module With =
-    /// Turns a sequence of numbers into a string, starting with A for '1'
-    let verifyAsString expected =
-        TaskSeq.map char
-        >> TaskSeq.map ((+) '@')
-        >> TaskSeq.toArrayAsync
-        >> Task.map (String >> should equal expected)
-
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-skip(0) has no effect on empty input`` variant =
@@ -100,17 +91,17 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.skip 0
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.skip 1
-            |> verifyAsString "BCDEFGHIJ"
+            |> verifyDigitsAsString "BCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.skip 5
-            |> verifyAsString "FGHIJ"
+            |> verifyDigitsAsString "FGHIJ"
 
         do!
             Gen.getSeqImmutable variant
@@ -143,17 +134,17 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.drop 0
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.drop 1
-            |> verifyAsString "BCDEFGHIJ"
+            |> verifyDigitsAsString "BCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.drop 5
-            |> verifyAsString "FGHIJ"
+            |> verifyDigitsAsString "FGHIJ"
 
         do!
             Gen.getSeqImmutable variant
@@ -176,13 +167,13 @@ module SideEffects =
     let ``TaskSeq-skip skips over enough items`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.skip 5
-        |> verifyAsString "FGHIJ"
+        |> verifyDigitsAsString "FGHIJ"
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-drop skips over enough items`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.drop 5
-        |> verifyAsString "FGHIJ"
+        |> verifyDigitsAsString "FGHIJ"
 
     [<Fact>]
     let ``TaskSeq-skip prove we do not skip side effects`` () = task {

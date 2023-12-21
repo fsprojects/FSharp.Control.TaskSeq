@@ -14,15 +14,6 @@ open FSharp.Control
 
 exception SideEffectPastEnd of string
 
-[<AutoOpen>]
-module With =
-    /// Turns a sequence of numbers into a string, starting with A for '1'
-    let verifyAsString expected =
-        TaskSeq.map char
-        >> TaskSeq.map ((+) '@')
-        >> TaskSeq.toArrayAsync
-        >> Task.map (String >> should equal expected)
-
 module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-take(0) has no effect on empty input`` variant =
@@ -105,17 +96,17 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.take 1
-            |> verifyAsString "A"
+            |> verifyDigitsAsString "A"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.take 5
-            |> verifyAsString "ABCDE"
+            |> verifyDigitsAsString "ABCDE"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.take 10
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
@@ -148,27 +139,27 @@ module Immutable =
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.truncate 1
-            |> verifyAsString "A"
+            |> verifyDigitsAsString "A"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.truncate 5
-            |> verifyAsString "ABCDE"
+            |> verifyDigitsAsString "ABCDE"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.truncate 10
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.truncate 11
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
             |> TaskSeq.truncate 10_000_000
-            |> verifyAsString "ABCDEFGHIJ"
+            |> verifyDigitsAsString "ABCDEFGHIJ"
     }
 
 module SideEffects =
@@ -176,13 +167,13 @@ module SideEffects =
     let ``TaskSeq-take gets enough items`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.take 5
-        |> verifyAsString "ABCDE"
+        |> verifyDigitsAsString "ABCDE"
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-truncate gets enough items`` variant =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.truncate 5
-        |> verifyAsString "ABCDE"
+        |> verifyDigitsAsString "ABCDE"
 
     [<Fact>]
     let ``TaskSeq-take prove it does not read beyond the last yield`` () = task {
@@ -212,7 +203,7 @@ module SideEffects =
             do SideEffectPastEnd "at the end" |> raise // we SHOULD NOT get here
         }
 
-        items |> TaskSeq.take 3 |> verifyAsString "ABC"
+        items |> TaskSeq.take 3 |> verifyDigitsAsString "ABC"
 
 
     [<Fact>]
