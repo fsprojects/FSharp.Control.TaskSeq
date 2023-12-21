@@ -36,6 +36,7 @@
     <Compile Include="TaskSeq.Pick.Tests.fs" />
     <Compile Include="TaskSeq.Singleton.Tests.fs" />
     <Compile Include="TaskSeq.Skip.Tests.fs" />
+    <Compile Include="TaskSeq.SkipWhile.Tests.fs" />
     <Compile Include="TaskSeq.Tail.Tests.fs" />
     <Compile Include="TaskSeq.Take.Tests.fs" />
     <Compile Include="TaskSeq.TakeWhile.Tests.fs" />

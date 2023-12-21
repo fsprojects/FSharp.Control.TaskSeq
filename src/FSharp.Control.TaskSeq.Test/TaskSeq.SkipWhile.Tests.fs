@@ -1,4 +1,4 @@
-module TaskSeq.Tests.TakeWhile
+module TaskSeq.Tests.skipWhile
 
 open System
 
@@ -8,10 +8,10 @@ open FsUnit.Xunit
 open FSharp.Control
 
 //
-// TaskSeq.takeWhile
-// TaskSeq.takeWhileAsync
-// TaskSeq.takeWhileInclusive
-// TaskSeq.takeWhileInclusiveAsync
+// TaskSeq.skipWhile
+// TaskSeq.skipWhileAsync
+// TaskSeq.skipWhileInclusive
+// TaskSeq.skipWhileInclusiveAsync
 //
 
 [<AutoOpen>]
@@ -20,10 +20,10 @@ module With =
     /// NOTE the semantics are very clear on only propagating a single failing item in the inclusive case.
     let getFunction inclusive isAsync =
         match inclusive, isAsync with
-        | false, false -> TaskSeq.takeWhile
-        | false, true -> fun pred -> TaskSeq.takeWhileAsync (pred >> Task.fromResult)
-        | true, false -> TaskSeq.takeWhileInclusive
-        | true, true -> fun pred -> TaskSeq.takeWhileInclusiveAsync (pred >> Task.fromResult)
+        | false, false -> TaskSeq.skipWhile
+        | false, true -> fun pred -> TaskSeq.skipWhileAsync (pred >> Task.fromResult)
+        | true, false -> TaskSeq.skipWhileInclusive
+        | true, true -> fun pred -> TaskSeq.skipWhileInclusiveAsync (pred >> Task.fromResult)
 
     /// This is the base condition as one would expect in actual code
     let inline cond x = x <> 6
@@ -40,103 +40,117 @@ module With =
 
 module EmptySeq =
 
-    // TaskSeq-takeWhile+A stands for:
-    // takeWhile + takeWhileAsync etc.
+    // TaskSeq-skipWhile+A stands for:
+    // skipWhile + skipWhileAsync etc.
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-takeWhile+A has no effect`` variant = task {
+    let ``TaskSeq-skipWhile+A has no effect`` variant = task {
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhile ((=) 12)
+            |> TaskSeq.skipWhile ((=) 12)
             |> verifyEmpty
 
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileAsync ((=) 12 >> Task.fromResult)
+            |> TaskSeq.skipWhileAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-takeWhileInclusive+A has no effect`` variant = task {
+    let ``TaskSeq-skipWhileInclusive+A has no effect`` variant = task {
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileInclusive ((=) 12)
+            |> TaskSeq.skipWhileInclusive ((=) 12)
             |> verifyEmpty
 
         do!
             Gen.getEmptyVariant variant
-            |> TaskSeq.takeWhileInclusiveAsync ((=) 12 >> Task.fromResult)
+            |> TaskSeq.skipWhileInclusiveAsync ((=) 12 >> Task.fromResult)
             |> verifyEmpty
     }
 
 module Immutable =
 
-    // TaskSeq-takeWhile+A stands for:
-    // takeWhile + takeWhileAsync etc.
+    // TaskSeq-skipWhile+A stands for:
+    // skipWhile + skipWhileAsync etc.
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhile+A filters correctly`` variant = task {
+    let ``TaskSeq-skipWhile+A filters correctly`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhile condWithGuard
-            |> verifyDigitsAsString "ABCDE"
+            |> TaskSeq.skipWhile ((>) 5) // skip while less than 5
+            |> verifyDigitsAsString "EFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
-            |> verifyDigitsAsString "ABCDE"
+            |> TaskSeq.skipWhileAsync (fun x -> task { return x < 5 })
+            |> verifyDigitsAsString "EFGHIJ"
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhile+A does not pick first item when false`` variant = task {
+    let ``TaskSeq-skipWhile+A does not skip first item when false`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhile ((=) 0)
-            |> verifyDigitsAsString ""
+            |> TaskSeq.skipWhile ((=) 0)
+            |> verifyDigitsAsString "ABCDEFGHIJ" // all 10 remain!
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileAsync ((=) 0 >> Task.fromResult)
-            |> verifyDigitsAsString ""
+            |> TaskSeq.skipWhileAsync ((=) 0 >> Task.fromResult)
+            |> verifyDigitsAsString "ABCDEFGHIJ" // all 10 remain!
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusive+A filters correctly`` variant = task {
+    let ``TaskSeq-skipWhileInclusive+A filters correctly`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusive condWithGuard
-            |> verifyDigitsAsString "ABCDEF"
+            |> TaskSeq.skipWhileInclusive ((>) 5)
+            |> verifyDigitsAsString "GHIJ" // last 4
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusiveAsync (fun x -> task { return condWithGuard x })
-            |> verifyDigitsAsString "ABCDEF"
+            |> TaskSeq.skipWhileInclusiveAsync (fun x -> task { return x < 5 })
+            |> verifyDigitsAsString "GHIJ"
+    }
+
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-skipWhileInclusive+A returns the empty sequence if always true`` variant = task {
+        do!
+            Gen.getSeqImmutable variant
+            |> TaskSeq.skipWhileInclusive ((<) -1)
+            |> verifyEmpty
+
+        do!
+            Gen.getSeqImmutable variant
+            |> TaskSeq.skipWhileInclusiveAsync (fun x -> task { return true })
+            |> verifyEmpty
     }
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusive+A always pick at least the first item`` variant = task {
+    let ``TaskSeq-skipWhileInclusive+A always skips at least the first item`` variant = task {
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusive ((=) 0)
-            |> verifyDigitsAsString "A"
+            |> TaskSeq.skipWhileInclusive ((=) 0)
+            |> verifyDigitsAsString "BCDEFGHIJ"
 
         do!
             Gen.getSeqImmutable variant
-            |> TaskSeq.takeWhileInclusiveAsync ((=) 0 >> Task.fromResult)
-            |> verifyDigitsAsString "A"
+            |> TaskSeq.skipWhileInclusiveAsync ((=) 0 >> Task.fromResult)
+            |> verifyDigitsAsString "BCDEFGHIJ"
     }
 
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhile filters correctly`` variant =
+    let ``TaskSeq-skipWhile filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhile condWithGuard
+        |> TaskSeq.skipWhile condWithGuard
         |> verifyDigitsAsString "ABCDE"
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhileAsync filters correctly`` variant =
+    let ``TaskSeq-skipWhileAsync filters correctly`` variant =
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.takeWhileAsync (fun x -> task { return condWithGuard x })
+        |> TaskSeq.skipWhileAsync (fun x -> task { return condWithGuard x })
         |> verifyDigitsAsString "ABCDE"
 
     [<Theory>]
@@ -144,7 +158,7 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
+    let ``TaskSeq-skipWhileXXX prove it does not read beyond the failing yield`` (inclusive, isAsync) = task {
         let mutable x = 42 // for this test, the potential mutation should not actually occur
         let functionToTest = getFunction inclusive isAsync ((=) 42)
 
@@ -169,7 +183,7 @@ module SideEffects =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX prove side effects are executed`` (inclusive, isAsync) = task {
+    let ``TaskSeq-skipWhileXXX prove side effects are executed`` (inclusive, isAsync) = task {
         let mutable x = 41
         let functionToTest = getFunction inclusive isAsync ((>) 50)
 
@@ -194,11 +208,11 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhile consumes the prefix of a longer sequence, with mutation`` variant = task {
+    let ``TaskSeq-skipWhile consumes the prefix of a longer sequence, with mutation`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! first =
-            TaskSeq.takeWhile (fun x -> x < 5) ts
+            TaskSeq.skipWhile (fun x -> x < 5) ts
             |> TaskSeq.toArrayAsync
 
         let expected = [| 1..4 |]
@@ -206,18 +220,18 @@ module SideEffects =
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
         let! repeat =
-            TaskSeq.takeWhile (fun x -> x < 5) ts
+            TaskSeq.skipWhile (fun x -> x < 5) ts
             |> TaskSeq.toArrayAsync
 
         repeat |> should not' (equal expected)
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-takeWhileInclusiveAsync consumes the prefix for a longer sequence, with mutation`` variant = task {
+    let ``TaskSeq-skipWhileInclusiveAsync consumes the prefix for a longer sequence, with mutation`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
 
         let! first =
-            TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
+            TaskSeq.skipWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
             |> TaskSeq.toArrayAsync
 
         let expected = [| 1..5 |]
@@ -225,7 +239,7 @@ module SideEffects =
 
         // side effect, reiterating causes it to resume from where we left it (minus the failing item)
         let! repeat =
-            TaskSeq.takeWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
+            TaskSeq.skipWhileInclusiveAsync (fun x -> task { return x < 5 }) ts
             |> TaskSeq.toArrayAsync
 
         repeat |> should not' (equal expected)
@@ -237,7 +251,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX exclude all items after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-skipWhileXXX exclude all items after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         [ 1; 2; 2; 3; 3; 2; 1 ]
@@ -250,7 +264,7 @@ module Other =
     [<InlineData(false, true)>]
     [<InlineData(true, false)>]
     [<InlineData(true, true)>]
-    let ``TaskSeq-takeWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
+    let ``TaskSeq-skipWhileXXX stops consuming after predicate fails`` (inclusive, isAsync) =
         let functionToTest = With.getFunction inclusive isAsync
 
         seq {
