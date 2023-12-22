@@ -72,6 +72,82 @@ type TaskSeq =
     static member lengthByAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
 
     /// <summary>
+    /// Returns the greatest of all elements of the sequence, compared via <see cref="Operators.max" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The largest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input task sequence is empty.</exception>
+    static member max: source: TaskSeq<'T> -> Task<'T> when 'T: comparison
+
+    /// <summary>
+    /// Returns the smallest of all elements of the sequence, compared via <see cref="Operators.min" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The smallest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input task sequence is empty.</exception>
+    static member min: source: TaskSeq<'T> -> Task<'T> when 'T: comparison
+
+    /// <summary>
+    /// Returns the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />
+    /// on the result of applying the function <paramref name="projection" /> to each element.
+    ///
+    /// If <paramref name="projection" /> is asynchronous, use <see cref="TaskSeq.maxByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The largest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input sequence is empty.</exception>
+    static member maxBy: projection: ('T -> 'U) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+
+    /// <summary>
+    /// Returns the smallest of all elements of the task sequence, compared via <see cref="Operators.min" />
+    /// on the result of applying the function <paramref name="projection" /> to each element.
+    ///
+    /// If <paramref name="projection" /> is asynchronous, use <see cref="TaskSeq.minByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The smallest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input sequence is empty.</exception>
+    static member minBy: projection: ('T -> 'U) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+
+    /// <summary>
+    /// Returns the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />
+    /// on the result of applying the function <paramref name="projection" /> to each element.
+    ///
+    /// If <paramref name="projection" /> is synchronous, use <see cref="TaskSeq.maxBy" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The largest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input sequence is empty.</exception>
+    static member maxByAsync: projection: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+
+    /// <summary>
+    /// Returns the smallest of all elements of the task sequence, compared via <see cref="Operators.min" />
+    /// on the result of applying the function <paramref name="projection" /> to each element.
+    ///
+    /// If <paramref name="projection" /> is synchronous, use <see cref="TaskSeq.minBy" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The smallest element of the sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input sequence is empty.</exception>
+    static member minByAsync: projection: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+
+    /// <summary>
     /// Returns a task sequence that is given by the delayed specification of a task sequence.
     /// </summary>
     ///
