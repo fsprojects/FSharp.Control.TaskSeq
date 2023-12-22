@@ -314,15 +314,15 @@ type TaskSeq private () =
 
     static member exists predicate source =
         Internal.tryFind (Predicate predicate) source
-        |> Task.map (Option.isSome)
+        |> Task.map Option.isSome
 
     static member existsAsync predicate source =
         Internal.tryFind (PredicateAsync predicate) source
-        |> Task.map (Option.isSome)
+        |> Task.map Option.isSome
 
     static member contains value source =
         Internal.tryFind (Predicate((=) value)) source
-        |> Task.map (Option.isSome)
+        |> Task.map Option.isSome
 
     static member pick chooser source =
         Internal.tryPick (TryPick chooser) source
@@ -347,8 +347,6 @@ type TaskSeq private () =
     static member findIndexAsync predicate source =
         Internal.tryFindIndex (PredicateAsync predicate) source
         |> Task.map (Option.defaultWith Internal.raiseNotFound)
-
-
 
     //
     // zip/unzip/fold etc functions
