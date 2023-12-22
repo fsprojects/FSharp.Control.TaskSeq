@@ -734,6 +734,11 @@ module internal TaskSeqInternal =
             let! notEmpty = e.MoveNextAsync()
             let mutable cont = notEmpty
 
+            let inclusive =
+                match whileKind with
+                | Inclusive -> true
+                | Exclusive -> false
+
             match predicate with
             | Predicate predicate -> // takeWhile(Inclusive)?
                 while cont do
@@ -742,9 +747,8 @@ module internal TaskSeqInternal =
                         let! hasMore = e.MoveNextAsync()
                         cont <- hasMore
                     else
-                        match whileKind with
-                        | Inclusive -> yield e.Current
-                        | Exclusive -> ()
+                        if inclusive then
+                            yield e.Current
 
                         cont <- false
 
@@ -756,9 +760,8 @@ module internal TaskSeqInternal =
                         let! hasMore = e.MoveNextAsync()
                         cont <- hasMore
                     | false ->
-                        match whileKind with
-                        | Inclusive -> yield e.Current
-                        | Exclusive -> ()
+                        if inclusive then
+                            yield e.Current
 
                         cont <- false
         }
@@ -773,6 +776,11 @@ module internal TaskSeqInternal =
             | false -> () // Nothing further to do, no matter what the rules are
             | true ->
 
+                let exclusive =
+                    match whileKind with
+                    | Exclusive -> true
+                    | Inclusive -> false
+
                 let mutable cont = true
 
                 match predicate with
@@ -782,9 +790,8 @@ module internal TaskSeqInternal =
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
                         else // Starting the ham
-                            match whileKind with
-                            | Exclusive -> yield e.Current // return the item as it does not meet the condition for skipping
-                            | Inclusive -> ()
+                            if exclusive then
+                                yield e.Current // return the item as it does not meet the condition for skipping
 
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
@@ -797,9 +804,8 @@ module internal TaskSeqInternal =
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
                         | false -> // We're starting the ham
-                            match whileKind with
-                            | Exclusive -> yield e.Current // return the item as it does not meet the condition for skipping
-                            | Inclusive -> ()
+                            if exclusive then
+                                yield e.Current // return the item as it does not meet the condition for skipping
 
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
