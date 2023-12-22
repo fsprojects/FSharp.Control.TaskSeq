@@ -903,7 +903,7 @@ module internal TaskSeqInternal =
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = ConcurrentHashSet<_>(CancellationToken.None)
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
                 do! hashSet.AddManyAsync itemsToExclude
 
                 while go do
@@ -931,7 +931,7 @@ module internal TaskSeqInternal =
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = ConcurrentHashSet<_>(CancellationToken.None)
+                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
                 do hashSet.AddMany itemsToExclude
 
                 while go do
