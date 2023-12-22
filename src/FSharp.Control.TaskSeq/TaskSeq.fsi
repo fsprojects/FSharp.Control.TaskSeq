@@ -547,10 +547,9 @@ type TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
     /// an extra zero-based index argument to the <paramref name="mapper" /> function.
-    /// The given function will be applied as elements are pulled using async enumerators retrieved from the
-    /// input task sequence.
-    ///
-    /// If <paramref name="mapper" /> is asynchronous, use <see cref="TaskSeq.mapiAsync" />.
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
     /// <param name="mapper">A function to transform items from the input task sequence that also access the current index.</param>
@@ -578,10 +577,9 @@ type TaskSeq =
     /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
     /// an extra zero-based index argument to the <paramref name="mapper" /> function.
-    /// The given function will be applied as elements are pulled using async enumerators retrieved from the
-    /// input task sequence.
-    ///
-    /// If <paramref name="mapper" /> is synchronous, use <see cref="TaskSeq.mapi" />.
+    /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
+    /// method on async enumerators retrieved from the input task sequence.
+    /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
     /// <param name="mapper">An asynchronous function to transform items from the input task sequence that also access the current index.</param>
@@ -959,9 +957,9 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
     /// given function <paramref name="predicate" /> returns <see cref="true" />, and then yields the remaining
-    /// elements. The first element where the predicate returns <see cref="false" /> is returned, which means that this
-    /// function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.skipWhileAsync" />.
+    /// elements. Elements where the predicate returns <see cref="false" /> are propagated, which means that this
+    /// function may not skip any elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to false when no more items should be skipped.</param>
@@ -973,9 +971,9 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then yields the
-    /// remaining elements. The first element where the predicate returns <see cref="false" /> is returned, which
-    /// means that this function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusiveAsync" />).
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.skipWhile" />.
+    /// remaining elements. Elements where the predicate returns <see cref="false" /> are propagated, which means that this
+    /// function may not skip any elements (see also <see cref="TaskSeq.skipWhileInclusiveAsync" />).
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhile" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be skipped.</param>
@@ -986,13 +984,13 @@ type TaskSeq =
 
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
-    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
-    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). This function skips
+    /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
     /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.skipWhileInclusiveAsync" />.
     /// </summary>`
     ///
-    /// <param name="predicate">A function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="predicate">A function that evaluates to false for the final item to be skipped.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
@@ -1000,13 +998,13 @@ type TaskSeq =
 
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
-    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
-    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). This function skips
+    /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
     /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.skipWhileInclusive" />.
     /// </summary>
     ///
-    /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="predicate">An asynchronous function that evaluates to false for the final item to be skipped.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
@@ -1248,6 +1246,9 @@ type TaskSeq =
 
     /// <summary>
     /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
+    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <code>f</code> and the elements are <code>i0...iN</code>
+    /// then computes <code>f (... (f s i0)...) iN</code>.
+    /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// argument of type <paramref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes <paramref name="f (... (f s i0)...) iN" />.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, use <see cref="TaskSeq.foldAsync" />.
@@ -1264,7 +1265,7 @@ type TaskSeq =
     /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
     /// argument of type <paramref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes <paramref name="f (... (f s i0)...) iN" />.
-    /// If the accumulator function <paramref name="folder" /> is synchronous, use <see cref="TaskSeq.fold" />.
+    /// If the accumulator function <paramref name="folder" /> is synchronous, consider using <see cref="TaskSeq.fold" />.
     /// </summary>
     ///
     /// <param name="folder">A function that updates the state with each element from the sequence.</param>
