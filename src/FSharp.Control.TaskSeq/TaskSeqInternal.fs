@@ -821,12 +821,11 @@ module internal TaskSeqInternal =
                             cont <- false
                 | Exclusive, PredicateAsync predicate -> // skipWhileAsync
                     while cont do
-                        let! shouldSkipIt = predicate e.Current
-
-                        if shouldSkipIt then
+                        match! predicate e.Current with
+                        | true ->
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
-                        else // We're starting the ham
+                        | false -> // We're starting the ham
                             yield e.Current // Yield the one that just failed the skip test
 
                             while! e.MoveNextAsync() do // propagate the rest
@@ -835,12 +834,11 @@ module internal TaskSeqInternal =
                             cont <- false
                 | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
                     while cont do
-                        let! shouldSkipIt = predicate e.Current
-
-                        if shouldSkipIt then
+                        match! predicate e.Current with
+                        | true ->
                             let! gotOne = e.MoveNextAsync()
                             cont <- gotOne
-                        else // Starting the ham, but _Inclusive_ means we skip yielding the first one that failed the predicate
+                        | false -> // Starting the ham, but _Inclusive_ means we skip yielding the first one that failed the predicate
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
 
