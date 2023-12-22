@@ -903,7 +903,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
     /// given function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
-    /// The first element where the predicate returns <see cref="false" /> is not included in the resulting sequence
+    /// Stops consuming the source and yielding items as soon as the predicate returns <c>false</c>.
     /// (see also <see cref="TaskSeq.takeWhileInclusive" />).
     /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.takeWhileAsync" />.
     /// </summary>
@@ -917,7 +917,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
-    /// The first element where the predicate returns <see cref="false" /> is not included in the resulting sequence
+    /// Stops consuming the source and yielding items as soon as the predicate returns <c>false</c>.
     /// (see also <see cref="TaskSeq.takeWhileInclusiveAsync" />).
     /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.takeWhile" />.
     /// </summary>
