@@ -796,11 +796,6 @@ module internal TaskSeqInternal =
 
                 let mutable cont = true
 
-                let exclusive =
-                    match whileKind with
-                    | Exclusive -> true
-                    | Inclusive -> false
-
                 match predicate with
                 | Predicate predicate -> // skipWhile(Inclusive)?
                     while cont do
@@ -808,8 +803,9 @@ module internal TaskSeqInternal =
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
                         else // Starting the ham
-                            if exclusive then
-                                yield e.Current // return the item as it does not meet the condition for skipping
+                            match whileKind with
+                            | Exclusive -> yield e.Current // return the item as it does not meet the condition for skipping
+                            | Inclusive -> ()
 
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
@@ -822,8 +818,9 @@ module internal TaskSeqInternal =
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
                         | false -> // We're starting the ham
-                            if exclusive then
-                                yield e.Current // Yield the one that just failed the skip test
+                            match whileKind with
+                            | Exclusive -> yield e.Current // return the item as it does not meet the condition for skipping
+                            | Inclusive -> ()
 
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
