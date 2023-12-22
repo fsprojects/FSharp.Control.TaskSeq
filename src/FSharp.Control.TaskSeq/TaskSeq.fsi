@@ -876,8 +876,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
     /// given function <paramref name="predicate" /> returns <see cref="true" />, and then yields the remaining
-    /// elements. The first element where the predicate returns <see cref="false" /> is returned, which means that this
-    /// function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
+    /// elements. Elements where the predicate returns <see cref="false" /> are propagated, which means that this
+    /// function may not skip any elements (see also <see cref="TaskSeq.skipWhileInclusive" />).
     /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileAsync" />.
     /// </summary>
     ///
@@ -890,8 +890,8 @@ type TaskSeq =
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence while the
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then yields the
-    /// remaining elements. The first element where the predicate returns <see cref="false" /> is returned, which
-    /// means that this function will skip 0 or more elements (see also <see cref="TaskSeq.skipWhileInclusiveAsync" />).
+    /// remaining elements. Elements where the predicate returns <see cref="false" /> are propagated, which means that this
+    /// function may not skip any elements (see also <see cref="TaskSeq.skipWhileInclusiveAsync" />).
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhile" />.
     /// </summary>
     ///
@@ -903,13 +903,13 @@ type TaskSeq =
 
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
-    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
-    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). This function skips
+    /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
     /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileInclusiveAsync" />.
     /// </summary>`
     ///
-    /// <param name="predicate">A function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="predicate">A function that evaluates to false for the final item to be skipped.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
@@ -917,13 +917,13 @@ type TaskSeq =
 
     /// <summary>
     /// Returns a task sequence that, when iterated, skips elements of the underlying sequence until the given
-    /// function <paramref name="predicate" /> returns <see cref="false" />, also skips that element
-    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). This function skips
+    /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
+    /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
     /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhileInclusive" />.
     /// </summary>
     ///
-    /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be skipped.</param>
+    /// <param name="predicate">An asynchronous function that evaluates to false for the final item to be skipped.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
