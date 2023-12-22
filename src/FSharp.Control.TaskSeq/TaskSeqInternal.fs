@@ -790,7 +790,7 @@ module internal TaskSeqInternal =
                                 yield e.Current
 
                             cont <- false
-                | PredicateAsync predicate -> // skipWhileAsync
+                | PredicateAsync predicate -> // skipWhile(Inclusive)?Async
                     while cont do
                         match! predicate e.Current with
                         | true ->
