@@ -199,8 +199,8 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#90][] | `singleton`        | `singleton`          |                           | |
 | &#x2705; [#209][]| `skip`             | `skip`               |                           | |
 | &#x2705; [#209][]|                    | `drop`               |                           | |
-|                  | `skipWhile`        | `skipWhile`          | `skipWhileAsync`          | |
-|                  |                    | `skipWhileInclusive` | `skipWhileInclusiveAsync` | |
+| &#x2705; [#219][]| `skipWhile`        | `skipWhile`          | `skipWhileAsync`          | |
+| &#x2705; [#219][]|                    | `skipWhileInclusive` | `skipWhileInclusiveAsync` | |
 | &#x2753;         | `sort`             |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortBy`           |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortByAscending`  |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
@@ -308,3 +308,4 @@ _The motivation for `readOnly` in `Seq` is that a cast from a mutable array or l
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 [#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
 [#217]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/217
+[#219]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/219

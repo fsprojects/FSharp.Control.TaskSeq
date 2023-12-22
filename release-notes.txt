@@ -3,9 +3,10 @@ Release notes:
 0.4.x (unreleased)
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136
     - new surface area functions, fixes #208:
-      * TaskSeq.take, TaskSeq.skip, #209
-      * TaskSeq.truncate, TaskSeq.drop, #209
-      * TaskSeq.where, TaskSeq.whereAsync, #217
+      * TaskSeq.take, skip, #209
+      * TaskSeq.truncate, drop, #209
+      * TaskSeq.where, whereAsync, #217
+      * TaskSeq.skipWhile, skipWhileInclusive, skipWhileAsync, skipWhileInclusiveAsync, #219
 
     - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
     - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184
