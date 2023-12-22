@@ -796,49 +796,35 @@ module internal TaskSeqInternal =
 
                 let mutable cont = true
 
-                match whileKind, predicate with
-                | Exclusive, Predicate predicate -> // skipWhile
+                let exclusive =
+                    match whileKind with
+                    | Exclusive -> true
+                    | Inclusive -> false
+
+                match predicate with
+                | Predicate predicate -> // skipWhile(Inclusive)?
                     while cont do
                         if predicate e.Current then // spam -> skip
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
-                        else // Starting the ham; we shouldn't skip this one
-                            yield e.Current // So we return the item as it does not meet the condition for skipping
+                        else // Starting the ham
+                            if exclusive then
+                                yield e.Current // return the item as it does not meet the condition for skipping
 
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
 
                             cont <- false
-                | Inclusive, Predicate predicate -> // skipWhileInclusive
-                    while cont do
-                        if predicate e.Current then // spam -> skip
-                            let! hasAnother = e.MoveNextAsync()
-                            cont <- hasAnother
-                        else // Starting the ham, but _Inclusive_ means we skip yielding the first one that failed the predicate
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
-
-                            cont <- false
-                | Exclusive, PredicateAsync predicate -> // skipWhileAsync
+                | PredicateAsync predicate -> // skipWhileAsync
                     while cont do
                         match! predicate e.Current with
                         | true ->
                             let! hasAnother = e.MoveNextAsync()
                             cont <- hasAnother
                         | false -> // We're starting the ham
-                            yield e.Current // Yield the one that just failed the skip test
+                            if exclusive then
+                                yield e.Current // Yield the one that just failed the skip test
 
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
-
-                            cont <- false
-                | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
-                    while cont do
-                        match! predicate e.Current with
-                        | true ->
-                            let! gotOne = e.MoveNextAsync()
-                            cont <- gotOne
-                        | false -> // Starting the ham, but _Inclusive_ means we skip yielding the first one that failed the predicate
                             while! e.MoveNextAsync() do // propagate the rest
                                 yield e.Current
 
