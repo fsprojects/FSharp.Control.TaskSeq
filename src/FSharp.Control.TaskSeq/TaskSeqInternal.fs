@@ -86,7 +86,7 @@ module internal TaskSeqInternal =
 
     let empty<'T> =
         { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator(_) =
+            member _.GetAsyncEnumerator _ =
                 { new IAsyncEnumerator<'T> with
                     member _.MoveNextAsync() = ValueTask.False
                     member _.Current = Unchecked.defaultof<'T>
@@ -96,7 +96,7 @@ module internal TaskSeqInternal =
 
     let singleton (value: 'T) =
         { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator(_) =
+            member _.GetAsyncEnumerator _ =
                 let mutable status = BeforeAll
 
                 { new IAsyncEnumerator<'T> with
@@ -927,7 +927,7 @@ module internal TaskSeqInternal =
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
+                use hashSet = ConcurrentHashSet<_>(CancellationToken.None)
                 do! hashSet.AddManyAsync itemsToExclude
 
                 while go do
@@ -955,7 +955,7 @@ module internal TaskSeqInternal =
 
             if step then
                 // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
+                use hashSet = ConcurrentHashSet<_>(CancellationToken.None)
                 do hashSet.AddMany itemsToExclude
 
                 while go do
