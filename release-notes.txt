@@ -7,6 +7,7 @@ Release notes:
       * TaskSeq.truncate, drop, #209
       * TaskSeq.where, whereAsync, #217
       * TaskSeq.skipWhile, skipWhileInclusive, skipWhileAsync, skipWhileInclusiveAsync, #219
+      * TaskSeq.max, min, maxBy, minBy, maxByAsync, minByAsync, #221
 
     - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
     - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184

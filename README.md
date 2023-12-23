@@ -289,10 +289,10 @@ This is what has been implemented so far, is planned or skipped:
 | &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `mapi`             | `mapi`               | `mapiAsync`               | |
 |                  | `mapi2`            | `mapi2`              | `mapi2Async`              | |
-|                  | `max`              | `max`                |                           | |
-|                  | `maxBy`            | `maxBy`              | `maxByAsync`              | |
-|                  | `min`              | `min`                |                           | |
-|                  | `minBy`            | `minBy`              | `minByAsync`              | |
+| &#x2705; [#221][]| `max`              | `max`                |                           | |
+| &#x2705; [#221][]| `maxBy`            | `maxBy`              | `maxByAsync`              | |
+| &#x2705; [#221][]| `min`              | `min`                |                           | |
+| &#x2705; [#221][]| `minBy`            | `minBy`              | `minByAsync`              | |
 | &#x2705; [#2][]  | `ofArray`          | `ofArray`            |                           | |
 | &#x2705; [#2][]  |                    | `ofAsyncArray`       |                           | |
 | &#x2705; [#2][]  |                    | `ofAsyncList`        |                           | |
@@ -511,7 +511,12 @@ module TaskSeq =
     val mapAsync: mapper: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
     val mapi: mapper: (int -> 'T -> 'U) -> source: TaskSeq<'T> -> TaskSeq<'U>
     val mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
-    val ofArray: source: 'T[] -> TaskSeq<'T>
+    val max: source: TaskSeq<'T> -> Task<'T> when 'T: comparison
+    val max: source: TaskSeq<'T> -> Task<'T> when 'T: comparison
+    val maxBy: projection: ('T -> 'U) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+    val minBy: projection: ('T -> 'U) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+    val maxByAsync: projection: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison
+    val minByAsync: projection: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> Task<'T> when 'U: comparison    val ofArray: source: 'T[] -> TaskSeq<'T>
     val ofAsyncArray: source: Async<'T> array -> TaskSeq<'T>
     val ofAsyncList: source: Async<'T> list -> TaskSeq<'T>
     val ofAsyncSeq: source: seq<Async<'T>> -> TaskSeq<'T>
@@ -604,6 +609,7 @@ module TaskSeq =
 [#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
 [#217]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/217
 [#219]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/219
+[#221]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/221
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
