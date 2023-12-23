@@ -32,6 +32,7 @@
     <Compile Include="TaskSeq.Last.Tests.fs" />
     <Compile Include="TaskSeq.Length.Tests.fs" />
     <Compile Include="TaskSeq.Map.Tests.fs" />
+    <Compile Include="TaskSeq.MaxMin.Tests.fs" />
     <Compile Include="TaskSeq.OfXXX.Tests.fs" />
     <Compile Include="TaskSeq.Pick.Tests.fs" />
     <Compile Include="TaskSeq.Singleton.Tests.fs" />
