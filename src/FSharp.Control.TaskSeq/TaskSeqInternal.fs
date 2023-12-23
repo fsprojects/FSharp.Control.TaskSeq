@@ -163,7 +163,6 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-
             use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable i = 0
@@ -176,6 +175,77 @@ module internal TaskSeqInternal =
                 go <- step
 
             return i
+        }
+
+    let inline maxMin ([<InlineIfLambda>] maxOrMin) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let mutable acc = e.Current
+
+            while! e.MoveNextAsync() do
+                acc <- maxOrMin e.Current acc
+
+            return acc
+        }
+
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
+    let inline maxMinBy ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projection) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let value = e.Current
+            let mutable accProjection = projection value
+            let mutable accValue = value
+
+            while! e.MoveNextAsync() do
+                let value = e.Current
+                let currentProjection = projection value
+
+                if compare accProjection currentProjection then
+                    accProjection <- currentProjection
+                    accValue <- value
+
+            return accValue
+        }
+
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
+    let inline maxMinByAsync ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projectionAsync) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let value = e.Current
+            let! projValue = projectionAsync value
+            let mutable accProjection = projValue
+            let mutable accValue = value
+
+            while! e.MoveNextAsync() do
+                let value = e.Current
+                let! currentProjection = projectionAsync value
+
+                if compare accProjection currentProjection then
+                    accProjection <- currentProjection
+                    accValue <- value
+
+            return accValue
         }
 
     let tryExactlyOne (source: TaskSeq<_>) =

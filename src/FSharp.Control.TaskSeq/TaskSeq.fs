@@ -162,6 +162,12 @@ type TaskSeq private () =
     // Utility functions
     //
 
+    static member max source = Internal.maxMin max source
+    static member min source = Internal.maxMin min source
+    static member maxBy projection source = Internal.maxMinBy (<) projection source // looks like 'less than', is 'greater than'
+    static member minBy projection source = Internal.maxMinBy (>) projection source
+    static member maxByAsync projection source = Internal.maxMinByAsync (<) projection source // looks like 'less than', is 'greater than'
+    static member minByAsync projection source = Internal.maxMinByAsync (>) projection source
     static member length source = Internal.lengthBy None source
     static member lengthOrMax max source = Internal.lengthBeforeMax max source
     static member lengthBy predicate source = Internal.lengthBy (Some(Predicate predicate)) source
