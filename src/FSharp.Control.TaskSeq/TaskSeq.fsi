@@ -157,7 +157,7 @@ type TaskSeq =
 
     /// <summary>
     /// Generates a new task sequence which, when iterated, will return successive elements by calling the given function
-    /// with the curren zero-basedt index, up to the given count. Each element is saved after its initialization for successive access to
+    /// with the current zero-based index, up to the given count. Each element is saved after its initialization for successive access to
     /// <see cref="IAsyncEnumerator.Current" />, which will not re-evaluate the <paramref name="initializer" />. However,
     /// re-iterating the returned task sequence will re-evaluate the initialization function. The returned sequence may
     /// be passed between threads safely. However, individual IEnumerator values generated from the returned sequence should
@@ -530,58 +530,58 @@ type TaskSeq =
     static member indexed: source: TaskSeq<'T> -> TaskSeq<int * 'T>
 
     /// <summary>
-    /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />.
     /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
-    /// <param name="mapping">A function to transform items from the input task sequence.</param>
+    /// <param name="mapper">A function to transform items from the input task sequence.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member map: mapper: ('T -> 'U) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
-    /// Builds a new task sequence whose elements are the results of applying the <paramref name="action" />
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
-    /// an extra zero-based index argument to the <paramref name="action" /> function.
+    /// an extra zero-based index argument to the <paramref name="mapper" /> function.
     /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
-    /// <param name="mapping">A function to transform items from the input task sequence that also access the current index.</param>
+    /// <param name="mapper">A function to transform items from the input task sequence that also access the current index.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member mapi: mapper: (int -> 'T -> 'U) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
-    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />.
     /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
-    /// <param name="mapping">An asynchronous function to transform items from the input task sequence.</param>
+    /// <param name="mapper">An asynchronous function to transform items from the input task sequence.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member mapAsync: mapper: ('T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
-    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="action" />
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="mapper" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, passing
-    /// an extra zero-based index argument to the <paramref name="action" /> function.
+    /// an extra zero-based index argument to the <paramref name="mapper" /> function.
     /// The given function will be applied as elements are pulled using the <see cref="MoveNextAsync" />
     /// method on async enumerators retrieved from the input task sequence.
     /// Does not evaluate the input sequence until requested.
     /// </summary>
     ///
-    /// <param name="mapping">An asynchronous function to transform items from the input task sequence that also access the current index.</param>
+    /// <param name="mapper">An asynchronous function to transform items from the input task sequence that also access the current index.</param>
     /// <param name="source">The input task sequence.</param>
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
@@ -716,6 +716,7 @@ type TaskSeq =
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
+    /// <param name="index">The index of the item to retrieve.</param>
     /// <returns>The nth element of the task sequence, or None if it doesn't exist.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member tryItem: index: int -> source: TaskSeq<'T> -> Task<'T option>
@@ -727,6 +728,7 @@ type TaskSeq =
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
+    /// <param name="index">The index of the item to retrieve.</param>
     /// <returns>The nth element of the task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when the sequence has insufficient length or <paramref name="index" /> is negative.</exception>
@@ -1239,8 +1241,8 @@ type TaskSeq =
 
     /// <summary>
     /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
-    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
-    /// then computes <paramref name="f (... (f s i0)...) iN" />.
+    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <code>f</code> and the elements are <code>i0...iN</code>
+    /// then computes <code>f (... (f s i0)...) iN</code>.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// </summary>
     ///
@@ -1253,8 +1255,8 @@ type TaskSeq =
 
     /// <summary>
     /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
-    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
-    /// then computes <paramref name="f (... (f s i0)...) iN" />.
+    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <code>f</code> and the elements are <code>i0...iN</code>
+    /// then computes <code>f (... (f s i0)...) iN</code>.
     /// If the accumulator function <paramref name="folder" /> is synchronous, consider using <see cref="TaskSeq.fold" />.
     /// </summary>
     ///
