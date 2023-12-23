@@ -195,6 +195,7 @@ module internal TaskSeqInternal =
             return acc
         }
 
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
     let inline maxMinBy ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projection) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
@@ -213,14 +214,14 @@ module internal TaskSeqInternal =
                 let value = e.Current
                 let currentProjection = projection value
 
-                if compare currentProjection accProjection then
+                if compare accProjection currentProjection then
                     accProjection <- currentProjection
                     accValue <- value
 
             return accValue
         }
 
-
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
     let inline maxMinByAsync ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projectionAsync) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
@@ -240,7 +241,7 @@ module internal TaskSeqInternal =
                 let value = e.Current
                 let! currentProjection = projectionAsync value
 
-                if compare currentProjection accProjection then
+                if compare accProjection currentProjection then
                     accProjection <- currentProjection
                     accValue <- value
 
