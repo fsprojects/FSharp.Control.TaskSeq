@@ -86,7 +86,7 @@ module internal TaskSeqInternal =
 
     let empty<'T> =
         { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator _ =
+            member _.GetAsyncEnumerator(_) =
                 { new IAsyncEnumerator<'T> with
                     member _.MoveNextAsync() = ValueTask.False
                     member _.Current = Unchecked.defaultof<'T>
@@ -96,7 +96,7 @@ module internal TaskSeqInternal =
 
     let singleton (value: 'T) =
         { new IAsyncEnumerable<'T> with
-            member _.GetAsyncEnumerator _ =
+            member _.GetAsyncEnumerator(_) =
                 let mutable status = BeforeAll
 
                 { new IAsyncEnumerator<'T> with
@@ -163,7 +163,6 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-
             use e = source.GetAsyncEnumerator CancellationToken.None
             let mutable go = true
             let mutable i = 0
@@ -176,6 +175,77 @@ module internal TaskSeqInternal =
                 go <- step
 
             return i
+        }
+
+    let inline maxMin ([<InlineIfLambda>] maxOrMin) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let mutable acc = e.Current
+
+            while! e.MoveNextAsync() do
+                acc <- maxOrMin e.Current acc
+
+            return acc
+        }
+
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
+    let inline maxMinBy ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projection) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let value = e.Current
+            let mutable accProjection = projection value
+            let mutable accValue = value
+
+            while! e.MoveNextAsync() do
+                let value = e.Current
+                let currentProjection = projection value
+
+                if compare accProjection currentProjection then
+                    accProjection <- currentProjection
+                    accValue <- value
+
+            return accValue
+        }
+
+    // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
+    let inline maxMinByAsync ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projectionAsync) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! nonEmpty = e.MoveNextAsync()
+
+            if not nonEmpty then
+                raiseEmptySeq ()
+
+            let value = e.Current
+            let! projValue = projectionAsync value
+            let mutable accProjection = projValue
+            let mutable accValue = value
+
+            while! e.MoveNextAsync() do
+                let value = e.Current
+                let! currentProjection = projectionAsync value
+
+                if compare accProjection currentProjection then
+                    accProjection <- currentProjection
+                    accValue <- value
+
+            return accValue
         }
 
     let tryExactlyOne (source: TaskSeq<_>) =
@@ -732,38 +802,56 @@ module internal TaskSeqInternal =
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
             let! notEmpty = e.MoveNextAsync()
-            let mutable cont = notEmpty
+            let mutable more = notEmpty
 
-            let inclusive =
-                match whileKind with
-                | Inclusive -> true
-                | Exclusive -> false
+            match whileKind, predicate with
+            | Exclusive, Predicate predicate -> // takeWhile
+                while more do
+                    let value = e.Current
+                    more <- predicate value
 
-            match predicate with
-            | Predicate predicate -> // takeWhile(Inclusive)?
-                while cont do
-                    if predicate e.Current then
-                        yield e.Current
+                    if more then
+                        // yield ONLY if predicate is true
+                        yield value
                         let! hasMore = e.MoveNextAsync()
-                        cont <- hasMore
-                    else
-                        if inclusive then
-                            yield e.Current
+                        more <- hasMore
 
-                        cont <- false
+            | Inclusive, Predicate predicate -> // takeWhileInclusive
+                while more do
+                    let value = e.Current
+                    more <- predicate value
 
-            | PredicateAsync predicate -> // takeWhile(Inclusive)?Async
-                while cont do
-                    match! predicate e.Current with
-                    | true ->
-                        yield e.Current
+                    // yield regardless of result of predicate
+                    yield value
+
+                    if more then
                         let! hasMore = e.MoveNextAsync()
-                        cont <- hasMore
-                    | false ->
-                        if inclusive then
-                            yield e.Current
+                        more <- hasMore
 
-                        cont <- false
+            | Exclusive, PredicateAsync predicate -> // takeWhileAsync
+                while more do
+                    let value = e.Current
+                    let! passed = predicate value
+                    more <- passed
+
+                    if more then
+                        // yield ONLY if predicate is true
+                        yield value
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
+
+            | Inclusive, PredicateAsync predicate -> // takeWhileInclusiveAsync
+                while more do
+                    let value = e.Current
+                    let! passed = predicate value
+                    more <- passed
+
+                    // yield regardless of predicate
+                    yield value
+
+                    if more then
+                        let! hasMore = e.MoveNextAsync()
+                        more <- hasMore
         }
 
     let skipWhile whileKind predicate (source: TaskSeq<_>) =
@@ -771,46 +859,77 @@ module internal TaskSeqInternal =
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
+            let! moveFirst = e.MoveNextAsync()
+            let mutable more = moveFirst
 
-            match! e.MoveNextAsync() with
-            | false -> () // Nothing further to do, no matter what the rules are
-            | true ->
+            match whileKind, predicate with
+            | Exclusive, Predicate predicate -> // skipWhile
+                while more && predicate e.Current do
+                    let! hasMore = e.MoveNextAsync()
+                    more <- hasMore
 
-                let exclusive =
-                    match whileKind with
-                    | Exclusive -> true
-                    | Inclusive -> false
+                if more then
+                    // yield the last one where the predicate was false
+                    // (this ensures we skip 0 or more)
+                    yield e.Current
 
+                    while! e.MoveNextAsync() do // get the rest
+                        yield e.Current
+
+            | Inclusive, Predicate predicate -> // skipWhileInclusive
+                while more && predicate e.Current do
+                    let! hasMore = e.MoveNextAsync()
+                    more <- hasMore
+
+                if more then
+                    // yield the rest (this ensures we skip 1 or more)
+                    while! e.MoveNextAsync() do
+                        yield e.Current
+
+            | Exclusive, PredicateAsync predicate -> // skipWhileAsync
                 let mutable cont = true
 
-                match predicate with
-                | Predicate predicate -> // skipWhile(Inclusive)?
-                    while cont do
-                        if predicate e.Current then // spam -> skip
-                            let! hasAnother = e.MoveNextAsync()
-                            cont <- hasAnother
-                        else // Starting the ham
-                            if exclusive then
-                                yield e.Current // return the item as it does not meet the condition for skipping
+                if more then
+                    let! hasMore = predicate e.Current
+                    cont <- hasMore
 
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
+                while more && cont do
+                    let! moveNext = e.MoveNextAsync()
 
-                            cont <- false
-                | PredicateAsync predicate -> // skipWhile(Inclusive)?Async
-                    while cont do
-                        match! predicate e.Current with
-                        | true ->
-                            let! hasAnother = e.MoveNextAsync()
-                            cont <- hasAnother
-                        | false -> // We're starting the ham
-                            if exclusive then
-                                yield e.Current // return the item as it does not meet the condition for skipping
+                    if moveNext then
+                        let! hasMore = predicate e.Current
+                        cont <- hasMore
 
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
+                    more <- moveNext
 
-                            cont <- false
+                if more then
+                    // yield the last one where the predicate was false
+                    // (this ensures we skip 0 or more)
+                    yield e.Current
+
+                    while! e.MoveNextAsync() do // get the rest
+                        yield e.Current
+
+            | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
+                let mutable cont = true
+
+                if more then
+                    let! hasMore = predicate e.Current
+                    cont <- hasMore
+
+                while more && cont do
+                    let! moveNext = e.MoveNextAsync()
+
+                    if moveNext then
+                        let! hasMore = predicate e.Current
+                        cont <- hasMore
+
+                    more <- moveNext
+
+                if more then
+                    // get the rest, this gives 1 or more semantics
+                    while! e.MoveNextAsync() do
+                        yield e.Current
         }
 
     // Consider turning using an F# version of this instead?
@@ -859,10 +978,12 @@ module internal TaskSeqInternal =
                 go <- step
         }
 
-        interface IDisposable with
-            override _.Dispose() =
-                if isNull _rwLock |> not then
+        interface IAsyncDisposable with
+            override _.DisposeAsync() =
+                if not (isNull _rwLock) then
                     _rwLock.Dispose()
+
+                ValueTask.CompletedTask
 
     let except itemsToExclude (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
