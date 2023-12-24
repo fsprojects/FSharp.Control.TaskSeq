@@ -11,7 +11,7 @@ open FSharp.Control
 
 [<Fact>]
 let ``CE empty taskSeq with MoveNextAsync -- untyped`` () = task {
-    let tskSeq = taskSeq { do ignore () }
+    let tskSeq = taskSeq { do () }
 
     Assert.IsAssignableFrom<IAsyncEnumerable<obj>>(tskSeq)
     |> ignore
@@ -32,16 +32,16 @@ let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
-    use _e = tskSeq.GetAsyncEnumerator()
-    use _e = tskSeq.GetAsyncEnumerator()
-    use _e = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
     ()
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
-    use enumerator = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
     use enumerator = tskSeq.GetAsyncEnumerator()
     do! Assert.moveNextAndCheck false enumerator
 }
@@ -86,7 +86,7 @@ let ``CE empty taskSeq, GetAsyncEnumerator + MoveNextAsync 100x in a loop`` vari
     let tskSeq = Gen.getEmptyVariant variant
 
     // let's get the enumerator a few times
-    for i in 0..100 do
+    for _ in 0..100 do
         use enumerator = tskSeq.GetAsyncEnumerator()
         do! Assert.moveNextAndCheck false enumerator // these are all empty
 }
@@ -202,7 +202,7 @@ let ``CE taskSeq, MoveNext too far`` () = task {
     do! Assert.moveNextAndCheck false enum // third item: false
 
     // then call it bunch of times to ensure we don't get an InvalidOperationException, see issue #39 and PR #42
-    for i in 0..100 do
+    for _ in 0..100 do
         do! Assert.moveNextAndCheck false enum
 
     // after whatever amount of time MoveNextAsync, we can still safely call Current
@@ -234,7 +234,7 @@ let ``CE taskSeq, call GetAsyncEnumerator twice, both should have equal behavior
 
 [<Fact>]
 let ``CE seq -- comparison --, call GetEnumerator twice`` () = task {
-    // this test is for behavioral comparisoni between the same Async test above with TaskSeq
+    // this test is for behavioral comparison between the same Async test above with TaskSeq
     let sq = seq {
         yield 1
         yield 2

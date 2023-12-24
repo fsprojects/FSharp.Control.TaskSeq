@@ -79,6 +79,8 @@ module DelayHelper =
 /// Default for <paramref name="µsecMin" /> and <paramref name="µsecMax" />
 /// are 10,000µs and 30,000µs respectively (or 10ms and 30ms).
 /// </summary>
+/// <param name="µsecMin">Minimum delay in µs</param>
+/// <param name="µsecMax">Maximum delay in µs</param>
 type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     let mutable x = 0
 
@@ -98,7 +100,7 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     /// Uses the defaults for <paramref name="µsecMin" /> and <paramref name="µsecMax" />
     /// with 10,000µs and 30,000µs respectively (or 10ms and 30ms).
     /// </summary>
-    new() = new DummyTaskFactory(10_000L<µs>, 30_000L<µs>)
+    new() = DummyTaskFactory(10_000L<µs>, 30_000L<µs>)
 
     /// <summary>
     /// Creates dummy tasks with a randomized delay and a mutable state,
@@ -106,12 +108,14 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     /// Values <paramref name="msecMin" /> and <paramref name="msecMax" /> can be
     /// given in milliseconds.
     /// </summary>
+    /// <param name="msecMin">Minimum delay in ms</param>
+    /// <param name="msecMax">Maximum delay in ms</param>
     new(msecMin: int<ms>, msecMax: int<ms>) = new DummyTaskFactory(int64 msecMin * 1000L<µs>, int64 msecMax * 1000L<µs>)
 
 
     /// Bunch of delayed tasks that randomly have a yielding delay of 10-30ms, therefore having overlapping execution times.
     member _.CreateDelayedTasks_SideEffect total = [
-        for i in 0 .. total - 1 do
+        for _ in 0 .. total - 1 do
             fun () -> runTaskDelayed ()
     ]
 
@@ -123,7 +127,7 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
 
     /// Bunch of delayed tasks without internally using Task.Delay, therefore hot-started and immediately finished.
     member _.CreateDirectTasks_SideEffect total = [
-        for i in 0 .. total - 1 do
+        for _ in 0 .. total - 1 do
             fun () -> runTaskDirect ()
     ]
 
@@ -468,7 +472,7 @@ module TestUtils =
 
             | SeqWithSideEffect.Sequential_For -> taskSeq {
                 // F# BUG? coloring disappears?
-                for x = 0 to 9 do
+                for _ = 0 to 9 do
                     i <- i + 1
                     yield i
               }
@@ -528,7 +532,7 @@ module TestUtils =
         /// Will add 1 to the passed integer upon disposing.
         let getEmptyDisposableTaskSeq (disposed: int ref) =
             { new IAsyncEnumerable<'T> with
-                member _.GetAsyncEnumerator(_) =
+                member _.GetAsyncEnumerator _ =
                     { new IAsyncEnumerator<'T> with
                         member _.MoveNextAsync() = ValueTask.False
                         member _.Current = Unchecked.defaultof<'T>
@@ -540,7 +544,7 @@ module TestUtils =
         /// The singleton value is '42'. Will add 1 to the passed integer upon disposing.
         let getSingletonDisposableTaskSeq (disposed: int ref) =
             { new IAsyncEnumerable<int> with
-                member _.GetAsyncEnumerator(_) =
+                member _.GetAsyncEnumerator _ =
                     let mutable status = BeforeAll
 
                     { new IAsyncEnumerator<int> with

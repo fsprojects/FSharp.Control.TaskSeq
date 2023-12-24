@@ -194,7 +194,7 @@ module SideEffects =
     }
 
     [<Fact>]
-    let ``TaskSeq-skip prove that an exception from the taskseq is thrown instead of exception from function`` () =
+    let ``TaskSeq-skip prove that an exception from the taskSeq is thrown instead of exception from function`` () =
         let items = taskSeq {
             yield 42
             yield! [ 1; 2 ]

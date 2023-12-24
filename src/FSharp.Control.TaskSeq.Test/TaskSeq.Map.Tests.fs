@@ -182,11 +182,11 @@ module SideEffects =
 
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-map can access mutables which are mutated in correct order`` variant =
+    let ``TaskSeq-map can access mutables that are mutated in correct order`` variant =
         let mutable sum = 0
 
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.map (fun item ->
+        |> TaskSeq.map (fun _ ->
             sum <- sum + 1
             char (sum + 64))
         |> validateSequence
@@ -221,7 +221,7 @@ module SideEffects =
         let mutable sum = 0
 
         Gen.getSeqWithSideEffect variant
-        |> TaskSeq.mapAsync (fun item -> task {
+        |> TaskSeq.mapAsync (fun _ -> task {
             sum <- sum + 1
             return char (sum + 64)
         })

@@ -38,10 +38,10 @@ let ``CE taskSeq with nested yield!`` () = task {
     let control = seq {
         yield! [ 1..10 ]
 
-        for i in 0..9 do
+        for _ in 0..9 do
             yield! [ 1..2 ]
 
-            for i in 0..2 do
+            for _ in 0..2 do
                 yield! seq { yield 42 }
 
                 for i in 100..102 do
@@ -51,10 +51,10 @@ let ``CE taskSeq with nested yield!`` () = task {
     let tskSeq = taskSeq {
         yield! Gen.sideEffectTaskSeq 10
 
-        for i in 0..9 do
+        for _ in 0..9 do
             yield! Gen.sideEffectTaskSeq 2
 
-            for i in 0..2 do
+            for _ in 0..2 do
                 yield! taskSeq { yield 42 }
 
                 for i in 100..102 do
@@ -87,31 +87,31 @@ let ``CE taskSeq with nested deeply yield! perf test 8521 nested tasks`` () = ta
         yield! createTasks 10
 
         // nestings amount to 8512 sequences of [1;2]
-        for i in 0..2 do
+        for _ in 0..2 do
             yield! createTasks 2
 
-            for i in 0..2 do
+            for _ in 0..2 do
                 yield! createTasks 2
 
-                for i in 0..2 do
+                for _ in 0..2 do
                     yield! createTasks 2
 
-                    for i in 0..2 do
+                    for _ in 0..2 do
                         yield! createTasks 2
 
-                        for i in 0..2 do
+                        for _ in 0..2 do
                             yield! createTasks 2
 
-                            for i in 0..2 do
+                            for _ in 0..2 do
                                 yield! createTasks 2
 
-                        for i in 0..2 do
+                        for _ in 0..2 do
                             yield! createTasks 2
 
-                            for i in 0..2 do
+                            for _ in 0..2 do
                                 yield! createTasks 2
 
-                                for i in 0..2 do
+                                for _ in 0..2 do
                                     yield! createTasks 2
 
                         yield! TaskSeq.empty
@@ -153,7 +153,7 @@ let ``CE taskSeq: 1000 TaskDelay-delayed tasks using yield!`` () = task {
 [<Fact>]
 let ``CE taskSeq: 1000 sync-running tasks using yield!`` () = task {
     // Smoke performance test
-    // Runs in a few 10's of ms, because of absense of Task.Delay
+    // Runs in a few 10's of ms, because of absence of Task.Delay
     // should generally be about as fast as `task`, see below
     let tskSeq = taskSeq { yield! Gen.sideEffectTaskSeq_Sequential 1000 }
     let! data = tskSeq |> TaskSeq.toListAsync
@@ -185,7 +185,7 @@ let ``CE task: 1000 TaskDelay-delayed tasks using for-loop`` () = task {
 
 [<Fact>]
 let ``CE task: 1000 list of sync-running tasks using for-loop`` () = task {
-    // runs in a few 10's of ms, because of absense of Task.Delay
+    // runs in a few 10's of ms, because of absence of Task.Delay
     // for smoke-test comparison with taskSeq
     let tasks = DummyTaskFactory().CreateDirectTasks_SideEffect 1000
     let mutable i = 0
@@ -199,7 +199,7 @@ let ``CE task: 1000 list of sync-running tasks using for-loop`` () = task {
 
 [<Fact>]
 let ``CE task: 5000 list of sync-running tasks using for-loop`` () = task {
-    // runs in a few 100's of ms, because of absense of Task.Delay
+    // runs in a few 100's of ms, because of absence of Task.Delay
     // for smoke-test comparison with taskSeq
     let tasks = DummyTaskFactory().CreateDirectTasks_SideEffect 5000
     let mutable i = 0

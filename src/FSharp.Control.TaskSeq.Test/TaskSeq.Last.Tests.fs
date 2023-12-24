@@ -109,11 +109,11 @@ module SideEffects =
             x <- x + 1
         }
 
-        let! fortytwo = one |> TaskSeq.last
-        let! fortythree = one |> TaskSeq.last // side effect, re-iterating!
+        let! fortyTwo = one |> TaskSeq.last
+        let! fortyThree = one |> TaskSeq.last // side effect, re-iterating!
 
-        fortytwo |> should equal 42
-        fortythree |> should equal 43
+        fortyTwo |> should equal 42
+        fortyThree |> should equal 43
     }
 
     [<Fact>]
@@ -125,13 +125,12 @@ module SideEffects =
             x <- x + 1
         }
 
-        let! fortytwo = one |> TaskSeq.tryLast
-        fortytwo |> should equal (Some 42)
+        let! fortyTwo = one |> TaskSeq.tryLast
+        fortyTwo |> should equal (Some 42)
 
         // side effect, reiterating causes it to execute again!
-        let! fortythree = one |> TaskSeq.tryLast
-        fortythree |> should equal (Some 43)
-
+        let! fortyThree = one |> TaskSeq.tryLast
+        fortyThree |> should equal (Some 43)
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]

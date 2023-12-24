@@ -192,7 +192,7 @@ module SideEffects =
 
         first |> should equal expected
         repeat |> should equal expected // if we read too far, this is now [|43, 86|]
-        x |> should equal 42 // expect: side-effect at end of taskseq not executed
+        x |> should equal 42 // expect: side-effect at end of taskSeq not executed
     }
 
     [<Fact>]
@@ -207,7 +207,7 @@ module SideEffects =
 
 
     [<Fact>]
-    let ``TaskSeq-take prove that an exception from the taskseq is thrown instead of exception from function`` () =
+    let ``TaskSeq-take prove that an exception from the taskSeq is thrown instead of exception from function`` () =
         let items = taskSeq {
             yield 42
             yield! [ 1; 2 ]
@@ -235,5 +235,5 @@ module SideEffects =
 
         first |> should equal expected
         repeat |> should equal expected // if we read too far, this is now [|43, 86|]
-        x |> should equal 42 // expect: side-effect at end of taskseq not executed
+        x |> should equal 42 // expect: side-effect at end of taskSeq not executed
     }

@@ -23,11 +23,11 @@ module EmptySeq =
     }
 
     [<Fact>]
-    let ``Async-for CE must execute side effect in empty taskseq`` () = async {
+    let ``Async-for CE must execute side effect in empty taskSeq`` () = async {
         let mutable data = 0
         let values = taskSeq { do data <- 42 }
 
-        for x in values do
+        for _ in values do
             ()
 
         data |> should equal 42
@@ -121,7 +121,7 @@ module Other =
         let disposed = ref 0
         let values = Gen.getEmptyDisposableTaskSeq disposed
 
-        for x in values do
+        for _ in values do
             ()
 
         // the DisposeAsync should be called by now
