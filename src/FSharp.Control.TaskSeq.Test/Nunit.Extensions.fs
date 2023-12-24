@@ -134,7 +134,7 @@ module ExtraCustomMatchers =
 
         CustomMatcher<obj>(
             $"Throws %s{ex.Name} (Below, XUnit does not show actual value properly)",
-            (fun fn -> (testForThrowing (fn :?> (unit -> Task))).Result)
+            (fun fn -> (testForThrowing (fn :?> unit -> Task)).Result)
         )
 
     /// <summary>
@@ -170,7 +170,7 @@ module ExtraCustomMatchers =
 
         CustomMatcher<obj>(
             $"Throws %s{ex.Name} (Below, XUnit does not show actual value properly)",
-            (fun fn -> (testForThrowing (fn :?> (unit -> Task))).Result)
+            (fun fn -> (testForThrowing (fn :?> unit -> Task)).Result)
         )
 
     let inline assertThrows ty (f: unit -> 'U) = f >> ignore |> should throw ty
