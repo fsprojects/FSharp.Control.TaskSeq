@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Nunit.Extensions.fs" />
+    <Compile Include="Xunit.Extensions.fs" />
     <Compile Include="TestUtils.fs" />
     <Compile Include="TaskSeq.Append.Tests.fs" />
     <Compile Include="TaskSeq.Cast.Tests.fs" />
