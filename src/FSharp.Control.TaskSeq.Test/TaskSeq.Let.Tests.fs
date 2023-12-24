@@ -40,7 +40,7 @@ let ``CE taskSeq: use 'let!' with a task<string>`` () =
     |> Task.map (should equal "test")
 
 [<Fact>]
-let ``CE taskSeq: use 'let!' with a valueTask<unit>`` () =
+let ``CE taskSeq: use 'let!' with a ValueTask<unit>`` () =
     let mutable value = 0
 
     taskSeq {
@@ -51,7 +51,7 @@ let ``CE taskSeq: use 'let!' with a valueTask<unit>`` () =
     |> Task.map (fun _ -> value |> should equal 1)
 
 [<Fact>]
-let ``CE taskSeq: use 'let!' with a valueTask<string>`` () =
+let ``CE taskSeq: use 'let!' with a ValueTask<string>`` () =
     taskSeq {
         let! test = ValueTask.ofTask (task { return "test" })
         yield test
@@ -60,7 +60,7 @@ let ``CE taskSeq: use 'let!' with a valueTask<string>`` () =
     |> Task.map (should equal "test")
 
 [<Fact>]
-let ``CE taskSeq: use 'let!' with a non-generic valueTask`` () =
+let ``CE taskSeq: use 'let!' with a non-generic ValueTask`` () =
     let mutable value = 0
 
     taskSeq {
@@ -135,7 +135,7 @@ let ``CE taskSeq: use 'let!' with all kinds of overloads at once`` () =
             }
             |> ValueTask<int>
 
-        let! c = ValueTask<_>(4) // valueTask that completes immediately
+        let! c = ValueTask<_>(4) // ValueTask that completes immediately
         let! _ = Task.Factory.StartNew(fun () -> value <- value + 1) // non-generic Task with side effect
         let! d = Task.fromResult 99 // normal Task that completes immediately
         let! _ = Async.Sleep 0 // unit Async

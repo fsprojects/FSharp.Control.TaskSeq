@@ -32,16 +32,16 @@ let ``CE empty taskSeq with MoveNextAsync -- typed`` variant = task {
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
-    use _e = tskSeq.GetAsyncEnumerator()
-    use _e = tskSeq.GetAsyncEnumerator()
-    use _e = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
     ()
 }
 
 [<Theory; ClassData(typeof<TestEmptyVariants>)>]
 let ``CE  empty taskSeq, GetAsyncEnumerator multiple times and then MoveNextAsync`` variant = task {
     let tskSeq = Gen.getEmptyVariant variant
-    use _enumerator = tskSeq.GetAsyncEnumerator()
+    use _ = tskSeq.GetAsyncEnumerator()
     use enumerator = tskSeq.GetAsyncEnumerator()
     do! Assert.moveNextAndCheck false enumerator
 }
