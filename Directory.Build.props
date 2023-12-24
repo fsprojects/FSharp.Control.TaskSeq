@@ -1,3 +1,7 @@
 <Project>
   <Import Project="Version.props" />
+  <PropertyGroup>
+    <!-- Fail CI warning FS3511: This state machine is not statically compilable.-->
+    <WarningsAsErrors>FS3511</WarningsAsErrors>
+  </PropertyGroup>
 </Project>

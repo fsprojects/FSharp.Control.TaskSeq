@@ -27,11 +27,9 @@ Generates optimized IL code through resumable state machines, and comes with a c
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OtherFlags></OtherFlags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OtherFlags></OtherFlags>
     <Tailcalls>True</Tailcalls>
   </PropertyGroup>
 
