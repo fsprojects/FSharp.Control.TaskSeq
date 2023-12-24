@@ -95,6 +95,7 @@ module SideEffects =
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-appendSeq consumes whole sequence once incl after-effects`` variant =
+        // TODO use variant
         let mutable i = 0
 
         let ts = taskSeq {
@@ -110,6 +111,7 @@ module SideEffects =
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-prependSeq consumes whole sequence once incl after-effects`` variant =
+        // TODO use variant
         let mutable i = 0
 
         taskSeq {

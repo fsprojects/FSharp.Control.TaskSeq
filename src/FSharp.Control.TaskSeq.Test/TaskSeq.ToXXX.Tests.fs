@@ -138,6 +138,7 @@ module SideEffects =
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-toListAsync should execute side effects multiple times`` variant = task {
+        // TODO use variant
         let tq = Gen.sideEffectTaskSeq 10
         let! (results1: list<_>) = tq |> TaskSeq.toListAsync
         let! (results2: list<_>) = tq |> TaskSeq.toListAsync

@@ -52,6 +52,7 @@ module EmptySeq =
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-except no side effect in exclude seq if source seq is empty`` variant =
+        // TODO use variant
         let mutable i = 0
 
         let exclude = taskSeq {
@@ -98,6 +99,7 @@ module Immutable =
 
     [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
     let ``TaskSeq-exceptOfSeq removes duplicates`` variant =
+        // TODO use variant
         TaskSeq.ofList [ 1; 1; 2; 3; 4; 12; 12; 12; 13; 13; 13; 13; 13; 99 ]
         |> TaskSeq.exceptOfSeq [ 1..10 ]
         |> TaskSeq.toArrayAsync
