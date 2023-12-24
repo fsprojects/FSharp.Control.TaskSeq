@@ -296,7 +296,7 @@ module SideSeffects =
     }
 
     [<Theory; ClassData(typeof<JustMinMaxBy>)>]
-    let ``TaskSeq-minBy, maxBy with sequence that changes length`` (minMax: MinMax) = task {
+    let ``TaskSeq-minBy, maxBy with sequence that changes length`` (minMax: MinMax) =
         let mutable i = 0
 
         let ts = taskSeq {
@@ -311,7 +311,8 @@ module SideSeffects =
             else
                 minMaxFn id ts |> Task.map (should equal v)
 
-        do! test (MinMax.getByFunction minMax) 10
-        do! test (MinMax.getByFunction minMax) 20
-        do! test (MinMax.getByFunction minMax) 30
-    }
+        task {
+            do! test (MinMax.getByFunction minMax) 10
+            do! test (MinMax.getByFunction minMax) 20
+            do! test (MinMax.getByFunction minMax) 30
+        }
