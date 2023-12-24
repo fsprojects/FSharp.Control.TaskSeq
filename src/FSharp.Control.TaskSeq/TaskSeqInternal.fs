@@ -978,12 +978,10 @@ module internal TaskSeqInternal =
                 go <- step
         }
 
-        interface IAsyncDisposable with
-            override _.DisposeAsync() =
+        interface IDisposable with
+            override _.Dispose() =
                 if not (isNull _rwLock) then
                     _rwLock.Dispose()
-
-                ValueTask.CompletedTask
 
     let except itemsToExclude (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
