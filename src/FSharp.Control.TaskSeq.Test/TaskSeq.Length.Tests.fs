@@ -89,7 +89,7 @@ module Immutable =
         do! run (fun x -> x % 3 = 2) |> Task.map (should equal 3) // [2; 5; 8]
     }
 
-module SideSeffects =
+module SideEffects =
     [<Fact>]
     let ``TaskSeq-length prove we execute after-effects`` () = task {
         let mutable i = 0

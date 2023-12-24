@@ -213,7 +213,7 @@ module Immutable =
         min |> should equal 10 // because -10 maps to item 10
     }
 
-module SideSeffects =
+module SideEffects =
     [<Fact>]
     let ``TaskSeq-max, maxBy, maxByAsync prove we execute after-effects`` () = task {
         let mutable i = 0

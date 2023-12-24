@@ -98,10 +98,10 @@ module SideEffects =
             x <- x + 1 // we never get here
         }
 
-        let! fortytwo = one |> TaskSeq.head
+        let! fortyTwo = one |> TaskSeq.head
         let! stillFortyTwo = one |> TaskSeq.head // the statement after 'yield' will never be reached
 
-        fortytwo |> should equal 42
+        fortyTwo |> should equal 42
         stillFortyTwo |> should equal 42
     }
 
@@ -114,8 +114,8 @@ module SideEffects =
             x <- x + 1 // we never get here
         }
 
-        let! fortytwo = one |> TaskSeq.tryHead
-        fortytwo |> should equal (Some 42)
+        let! fortyTwo = one |> TaskSeq.tryHead
+        fortyTwo |> should equal (Some 42)
 
         // the statement after 'yield' will never be reached, the mutable will not be updated
         let! stillFortyTwo = one |> TaskSeq.tryHead

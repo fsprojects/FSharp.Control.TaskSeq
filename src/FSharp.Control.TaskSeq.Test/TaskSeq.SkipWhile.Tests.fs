@@ -1,7 +1,5 @@
 module TaskSeq.Tests.skipWhile
 
-open System
-
 open Xunit
 open FsUnit.Xunit
 

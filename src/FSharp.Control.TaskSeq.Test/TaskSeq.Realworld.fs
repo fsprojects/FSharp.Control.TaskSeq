@@ -13,14 +13,14 @@ open Xunit.Abstractions
 
 /// Just a naive, simple in-memory reader that acts as an IAsyncEnumerable to use with tests
 /// IMPORTANT: currently this is not thread-safe!!!
-type AsyncBufferedReader(output: ITestOutputHelper, data, blockSize) =
+type AsyncBufferedReader(_output: ITestOutputHelper, data, blockSize) =
     let stream = new MemoryStream(data: byte[])
     let buffered = new BufferedStream(stream, blockSize)
     let mutable current = ValueNone
     let mutable lastPos = 0L
 
     interface IAsyncEnumerable<byte[]> with
-        member reader.GetAsyncEnumerator(ct) =
+        member reader.GetAsyncEnumerator _ =
             { new IAsyncEnumerator<_> with
                 member this.Current = (reader :> IAsyncEnumerator<_>).Current
                 member this.MoveNextAsync() = (reader :> IAsyncEnumerator<_>).MoveNextAsync()

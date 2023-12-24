@@ -180,9 +180,9 @@ module SideEffects =
         // point of this test: just calling 'map' won't execute anything of the sequence!
         let _ =
             ts
-            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
-            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
-            |> TaskSeq.collect (fun x -> taskSeq { yield 10 })
+            |> TaskSeq.collect (fun _ -> taskSeq { yield 10 })
+            |> TaskSeq.collect (fun _ -> taskSeq { yield 10 })
+            |> TaskSeq.collect (fun _ -> taskSeq { yield 10 })
 
         // multiple maps have no effect unless executed
         i |> should equal 0
@@ -201,9 +201,9 @@ module SideEffects =
         // point of this test: just calling 'map' won't execute anything of the sequence!
         let _ =
             ts
-            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
-            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
-            |> TaskSeq.collectAsync (fun x -> task { return taskSeq { yield 10 } })
+            |> TaskSeq.collectAsync (fun _ -> task { return taskSeq { yield 10 } })
+            |> TaskSeq.collectAsync (fun _ -> task { return taskSeq { yield 10 } })
+            |> TaskSeq.collectAsync (fun _ -> task { return taskSeq { yield 10 } })
 
         // multiple maps have no effect unless executed
         i |> should equal 0
@@ -222,9 +222,9 @@ module SideEffects =
         // point of this test: just calling 'map' won't execute anything of the sequence!
         let _ =
             ts
-            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
-            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
-            |> TaskSeq.collectSeq (fun x -> seq { yield 10 })
+            |> TaskSeq.collectSeq (fun _ -> seq { yield 10 })
+            |> TaskSeq.collectSeq (fun _ -> seq { yield 10 })
+            |> TaskSeq.collectSeq (fun _ -> seq { yield 10 })
 
         // multiple maps have no effect unless executed
         i |> should equal 0
@@ -243,9 +243,9 @@ module SideEffects =
         // point of this test: just calling 'map' won't execute anything of the sequence!
         let _ =
             ts
-            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
-            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
-            |> TaskSeq.collectSeqAsync (fun x -> task { return seq { yield 10 } })
+            |> TaskSeq.collectSeqAsync (fun _ -> task { return seq { yield 10 } })
+            |> TaskSeq.collectSeqAsync (fun _ -> task { return seq { yield 10 } })
+            |> TaskSeq.collectSeqAsync (fun _ -> task { return seq { yield 10 } })
 
         // multiple maps have no effect unless executed
         i |> should equal 0

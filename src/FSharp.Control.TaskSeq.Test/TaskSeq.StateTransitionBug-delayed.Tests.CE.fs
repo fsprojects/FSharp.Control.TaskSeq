@@ -79,7 +79,7 @@ let ``CE taskSeq, MoveNext too far`` () = task {
     do! Assert.moveNextAndCheck false enum // third item: false
 
     // then call it bunch of times to ensure we don't get an InvalidOperationException, see issue #39 and PR #42
-    for i in 0..100 do
+    for _ in 0..100 do
         do! Assert.moveNextAndCheck false enum
 
     // after whatever amount of time MoveNextAsync, we can still safely call Current

@@ -22,7 +22,7 @@ let ``CE taskSeq: use 'do!' with a task<unit>`` () =
     |> Task.map (fun _ -> value |> should equal 1)
 
 [<Fact>]
-let ``CE taskSeq: use 'do!' with a valuetask<unit>`` () =
+let ``CE taskSeq: use 'do!' with a valueTask<unit>`` () =
     let mutable value = 0
 
     taskSeq { do! ValueTask.ofTask (task { do value <- value + 1 }) }
@@ -30,7 +30,7 @@ let ``CE taskSeq: use 'do!' with a valuetask<unit>`` () =
     |> Task.map (fun _ -> value |> should equal 1)
 
 [<Fact>]
-let ``CE taskSeq: use 'do!' with a non-generic valuetask`` () =
+let ``CE taskSeq: use 'do!' with a non-generic valueTask`` () =
     let mutable value = 0
 
     taskSeq { do! ValueTask(task { do value <- value + 1 }) }
@@ -92,8 +92,8 @@ let ``CE taskSeq: use 'do!' with all kinds of overloads at once`` () =
         do! task { do value <- value + 1 } |> Task.ignore
         do! ValueTask <| task { do value <- value + 1 }
         do! ValueTask.ofTask (task { do value <- value + 1 })
-        do! ValueTask<_>(()) // unit valuetask that completes immediately
-        do! Task.fromResult (()) // unit Task that completes immediately
+        do! ValueTask<_>(()) // unit valueTask that completes immediately
+        do! Task.fromResult () // unit Task that completes immediately
         do! Task.Delay 0
         do! Async.Sleep 0
         do! async { value <- value + 1 } // eq 4
