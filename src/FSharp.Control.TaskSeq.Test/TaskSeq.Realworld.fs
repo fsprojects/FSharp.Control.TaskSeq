@@ -44,8 +44,6 @@ type AsyncBufferedReader(_output: ITestOutputHelper, data, blockSize) =
                 let! bytesRead = buffered.ReadAsync(mem, 0, mem.Length) // offset refers to offset in target buffer, not source
                 lastPos <- buffered.Position
 
-                let x: seq<Guid> = seq { 1 } |> Seq.cast
-
                 if bytesRead > 0 then
                     current <- ValueSome mem
                     return true
@@ -102,11 +100,14 @@ type ``Real world tests``(output: ITestOutputHelper) =
 
     [<Fact(Skip = "Broken test, faulty streaming test-implementation")>]
     let ``Reading a 10MB buffered IAsync stream from start to finish`` () = task {
+        // TODO: fix this test Remove underscores of the vars and rerun the test with
+        // all lined uncommented
         let mutable count = 0
-        use reader = AsyncBufferedReader(output, Array.init 2048 byte, 256)
+        use reader = new AsyncBufferedReader(output, Array.init 2048 byte, 256)
         let expected = Array.init 256 byte
 
-        let ts = taskSeq {
+        // TODO: use this
+        let _ts = taskSeq {
             for data in reader do
                 do count <- count + 1
 
@@ -116,7 +117,7 @@ type ``Real world tests``(output: ITestOutputHelper) =
                 yield data
         }
 
-        // the following is extremely slow, which is why we just use F#'s comparison instead
+        // the following is extremely slow in XUnit/FsUnit, which is why we just use F#'s comparison instead
         // Using this takes 67s, compared to 0.25s using normal F# comparison.
         // reader |> TaskSeq.toArray |> should equal expected // VERY SLOW!!
 

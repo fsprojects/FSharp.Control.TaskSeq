@@ -126,8 +126,8 @@ module Immutable =
         twentyFive |> should equal "foo"
     }
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-pick happy path first item of seq`` variant = task {
+    [<Fact>]
+    let ``TaskSeq-pick happy path first item of seq`` () = task {
         let! first =
             Gen.sideEffectTaskSeqMicro 50L<µs> 1000L<µs> 50
             |> TaskSeq.pick (fun x -> if x = 1 then Some $"first{x}" else None) // dummy tasks seq starts at 1

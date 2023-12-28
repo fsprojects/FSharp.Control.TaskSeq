@@ -54,12 +54,14 @@ module EmptySeq =
     let ``TaskSeq-except no side effect in exclude seq if source seq is empty`` variant =
         let mutable i = 0
 
+        // The `exclude` argument of TaskSeq.except is only iterated after the first item
+        // from the input. With empty input, this is not evaluated
         let exclude = taskSeq {
-            i <- i + 1
+            i <- i + 1 // we test that we never get here
             yield 12
         }
 
-        TaskSeq.empty
+        Gen.getEmptyVariant variant
         |> TaskSeq.except exclude
         |> verifyEmpty
         |> Task.map (fun () -> i |> should equal 0) // exclude seq is only enumerated after first item in source
@@ -96,8 +98,8 @@ module Immutable =
         |> TaskSeq.except (Gen.getSeqImmutable variant)
         |> verifyEmpty
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-exceptOfSeq removes duplicates`` variant =
+    [<Fact>]
+    let ``TaskSeq-exceptOfSeq removes duplicates`` () =
         TaskSeq.ofList [ 1; 1; 2; 3; 4; 12; 12; 12; 13; 13; 13; 13; 13; 99 ]
         |> TaskSeq.exceptOfSeq [ 1..10 ]
         |> TaskSeq.toArrayAsync

@@ -93,8 +93,8 @@ module SideEffects =
         |> validateSequence
         |> Task.map (fun () -> i |> should equal 2)
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-appendSeq consumes whole sequence once incl after-effects`` variant =
+    [<Fact>]
+    let ``TaskSeq-appendSeq consumes whole sequence once incl after-effects`` () =
         let mutable i = 0
 
         let ts = taskSeq {
@@ -108,8 +108,8 @@ module SideEffects =
         |> validateSequence
         |> Task.map (fun () -> i |> should equal 2)
 
-    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
-    let ``TaskSeq-prependSeq consumes whole sequence once incl after-effects`` variant =
+    [<Fact>]
+    let ``TaskSeq-prependSeq consumes whole sequence once incl after-effects`` () =
         let mutable i = 0
 
         taskSeq {
