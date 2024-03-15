@@ -12,13 +12,6 @@ type internal AsyncEnumStatus =
     | AfterAll
 
 [<Struct>]
-type internal WhileKind =
-    /// The item under test is included (or skipped) even when the predicate returns false
-    | Inclusive
-    /// The item under test is always excluded (or not skipped)
-    | Exclusive
-
-[<Struct>]
 type internal TakeOrSkipKind =
     /// use the Seq.take semantics, raises exception if not enough elements
     | Take
@@ -796,140 +789,76 @@ module internal TaskSeqInternal =
 
                 }
 
-    let takeWhile whileKind predicate (source: TaskSeq<_>) =
+    let takeWhile isInclusive predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
             let! notEmpty = e.MoveNextAsync()
-            let mutable more = notEmpty
+            let mutable hasMore = notEmpty
 
-            match whileKind, predicate with
-            | Exclusive, Predicate predicate -> // takeWhile
-                while more do
-                    let value = e.Current
-                    more <- predicate value
+            match predicate with
+            | Predicate synchronousPredicate ->
+                while hasMore && synchronousPredicate e.Current do
+                    yield e.Current
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
 
-                    if more then
-                        // yield ONLY if predicate is true
-                        yield value
-                        let! hasMore = e.MoveNextAsync()
-                        more <- hasMore
+            | PredicateAsync asyncPredicate ->
+                let mutable predicateHolds = true
 
-            | Inclusive, Predicate predicate -> // takeWhileInclusive
-                while more do
-                    let value = e.Current
-                    more <- predicate value
+                while hasMore && predicateHolds do // TODO: check perf if `while!` is going to be better or equal
+                    let! predicateIsTrue = asyncPredicate e.Current
 
-                    // yield regardless of result of predicate
-                    yield value
+                    if predicateIsTrue then
+                        yield e.Current
+                        let! cont = e.MoveNextAsync()
+                        hasMore <- cont
 
-                    if more then
-                        let! hasMore = e.MoveNextAsync()
-                        more <- hasMore
+                    predicateHolds <- predicateIsTrue
 
-            | Exclusive, PredicateAsync predicate -> // takeWhileAsync
-                while more do
-                    let value = e.Current
-                    let! passed = predicate value
-                    more <- passed
-
-                    if more then
-                        // yield ONLY if predicate is true
-                        yield value
-                        let! hasMore = e.MoveNextAsync()
-                        more <- hasMore
-
-            | Inclusive, PredicateAsync predicate -> // takeWhileInclusiveAsync
-                while more do
-                    let value = e.Current
-                    let! passed = predicate value
-                    more <- passed
-
-                    // yield regardless of predicate
-                    yield value
-
-                    if more then
-                        let! hasMore = e.MoveNextAsync()
-                        more <- hasMore
+            // "inclusive" means: always return the item that we pulled, regardless of the result of applying the predicate
+            // and only stop thereafter. The non-inclusive versions, in contrast, do not return the item under which the predicate is false.
+            if hasMore && isInclusive then
+                yield e.Current
         }
 
-    let skipWhile whileKind predicate (source: TaskSeq<_>) =
+    let skipWhile isInclusive predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! moveFirst = e.MoveNextAsync()
-            let mutable more = moveFirst
+            let! notEmpty = e.MoveNextAsync()
+            let mutable hasMore = notEmpty
 
-            match whileKind, predicate with
-            | Exclusive, Predicate predicate -> // skipWhile
-                while more && predicate e.Current do
-                    let! hasMore = e.MoveNextAsync()
-                    more <- hasMore
+            match predicate with
+            | Predicate synchronousPredicate ->
+                while hasMore && synchronousPredicate e.Current do
+                    // keep skipping
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
 
-                if more then
-                    // yield the last one where the predicate was false
-                    // (this ensures we skip 0 or more)
-                    yield e.Current
+            | PredicateAsync asyncPredicate ->
+                let mutable predicateHolds = true
 
-                    while! e.MoveNextAsync() do // get the rest
-                        yield e.Current
+                while hasMore && predicateHolds do // TODO: check perf if `while!` is going to be better or equal
+                    let! predicateIsTrue = asyncPredicate e.Current
 
-            | Inclusive, Predicate predicate -> // skipWhileInclusive
-                while more && predicate e.Current do
-                    let! hasMore = e.MoveNextAsync()
-                    more <- hasMore
+                    if predicateIsTrue then
+                        // keep skipping
+                        let! cont = e.MoveNextAsync()
+                        hasMore <- cont
 
-                if more then
-                    // yield the rest (this ensures we skip 1 or more)
-                    while! e.MoveNextAsync() do
-                        yield e.Current
+                    predicateHolds <- predicateIsTrue
 
-            | Exclusive, PredicateAsync predicate -> // skipWhileAsync
-                let mutable cont = true
+            // "inclusive" means: always skip the item that we pulled, regardless of the result of applying the predicate
+            // and only stop thereafter. The non-inclusive versions, in contrast, do not skip the item under which the predicate is false.
+            if hasMore && not isInclusive then
+                yield e.Current // don't skip, unless inclusive
 
-                if more then
-                    let! hasMore = predicate e.Current
-                    cont <- hasMore
-
-                while more && cont do
-                    let! moveNext = e.MoveNextAsync()
-
-                    if moveNext then
-                        let! hasMore = predicate e.Current
-                        cont <- hasMore
-
-                    more <- moveNext
-
-                if more then
-                    // yield the last one where the predicate was false
-                    // (this ensures we skip 0 or more)
-                    yield e.Current
-
-                    while! e.MoveNextAsync() do // get the rest
-                        yield e.Current
-
-            | Inclusive, PredicateAsync predicate -> // skipWhileInclusiveAsync
-                let mutable cont = true
-
-                if more then
-                    let! hasMore = predicate e.Current
-                    cont <- hasMore
-
-                while more && cont do
-                    let! moveNext = e.MoveNextAsync()
-
-                    if moveNext then
-                        let! hasMore = predicate e.Current
-                        cont <- hasMore
-
-                    more <- moveNext
-
-                if more then
-                    // get the rest, this gives 1 or more semantics
-                    while! e.MoveNextAsync() do
-                        yield e.Current
+            // propagate the rest
+            while! e.MoveNextAsync() do
+                yield e.Current
         }
 
     // Consider turning using an F# version of this instead?
