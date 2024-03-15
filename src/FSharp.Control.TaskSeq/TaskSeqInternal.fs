@@ -796,44 +796,36 @@ module internal TaskSeqInternal =
 
                 }
 
-    let takeWhile whileKind predicate (source: TaskSeq<_>) =
+    let takeWhile isInclusive predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
             let! notEmpty = e.MoveNextAsync()
-            let mutable cont = notEmpty
-
-            let inclusive =
-                match whileKind with
-                | Inclusive -> true
-                | Exclusive -> false
+            let mutable hasMore = notEmpty
 
             match predicate with
-            | Predicate predicate -> // takeWhile(Inclusive)?
-                while cont do
-                    if predicate e.Current then
+            | Predicate synchronousPredicate ->
+                while hasMore && synchronousPredicate e.Current do
+                    yield e.Current
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            | PredicateAsync asyncPredicate ->
+                let mutable predicateHolds = true
+                while hasMore && predicateHolds do
+                    let! predicateIsTrue = asyncPredicate e.Current
+                    if predicateIsTrue then
                         yield e.Current
-                        let! hasMore = e.MoveNextAsync()
-                        cont <- hasMore
-                    else
-                        if inclusive then
-                            yield e.Current
+                        let! cont = e.MoveNextAsync()
+                        hasMore <- cont
 
-                        cont <- false
+                    predicateHolds <- predicateIsTrue
 
-            | PredicateAsync predicate -> // takeWhile(Inclusive)?Async
-                while cont do
-                    match! predicate e.Current with
-                    | true ->
-                        yield e.Current
-                        let! hasMore = e.MoveNextAsync()
-                        cont <- hasMore
-                    | false ->
-                        if inclusive then
-                            yield e.Current
-
-                        cont <- false
+            // "inclusive" means: always return the item that we pulled, regardless of the result of applying the predicate
+            // and only stop thereafter. The non-inclusive versions, in contrast, do not return the item under which the predicate is false.
+            if hasMore && isInclusive then
+                yield e.Current
         }
 
     let skipWhile whileKind predicate (source: TaskSeq<_>) =

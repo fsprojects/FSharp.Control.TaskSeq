@@ -299,10 +299,10 @@ type TaskSeq private () =
     static member take count source = Internal.skipOrTake Take count source
     static member truncate count source = Internal.skipOrTake Truncate count source
 
-    static member takeWhile predicate source = Internal.takeWhile Exclusive (Predicate predicate) source
-    static member takeWhileAsync predicate source = Internal.takeWhile Exclusive (PredicateAsync predicate) source
-    static member takeWhileInclusive predicate source = Internal.takeWhile Inclusive (Predicate predicate) source
-    static member takeWhileInclusiveAsync predicate source = Internal.takeWhile Inclusive (PredicateAsync predicate) source
+    static member takeWhile predicate source = Internal.takeWhile false (Predicate predicate) source
+    static member takeWhileAsync predicate source = Internal.takeWhile false (PredicateAsync predicate) source
+    static member takeWhileInclusive predicate source = Internal.takeWhile true (Predicate predicate) source
+    static member takeWhileInclusiveAsync predicate source = Internal.takeWhile true (PredicateAsync predicate) source
     static member skipWhile predicate source = Internal.skipWhile Exclusive (Predicate predicate) source
     static member skipWhileAsync predicate source = Internal.skipWhile Exclusive (PredicateAsync predicate) source
     static member skipWhileInclusive predicate source = Internal.skipWhile Inclusive (Predicate predicate) source
