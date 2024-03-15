@@ -1246,8 +1246,8 @@ type TaskSeq =
 
     /// <summary>
     /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
-    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <code>f</code> and the elements are <code>i0...iN</code>
-    /// then computes <code>f (... (f s i0)...) iN</code>.
+    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
+    /// then computes<paramref name="f (... (f s i0)...) iN" />.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// argument of type <paramref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes <paramref name="f (... (f s i0)...) iN" />.
