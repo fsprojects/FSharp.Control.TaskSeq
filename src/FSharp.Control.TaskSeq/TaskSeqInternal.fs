@@ -12,13 +12,6 @@ type internal AsyncEnumStatus =
     | AfterAll
 
 [<Struct>]
-type internal WhileKind =
-    /// The item under test is included (or skipped) even when the predicate returns false
-    | Inclusive
-    /// The item under test is always excluded (or not skipped)
-    | Exclusive
-
-[<Struct>]
 type internal TakeOrSkipKind =
     /// use the Seq.take semantics, raises exception if not enough elements
     | Take
@@ -813,8 +806,10 @@ module internal TaskSeqInternal =
 
             | PredicateAsync asyncPredicate ->
                 let mutable predicateHolds = true
-                while hasMore && predicateHolds do
+
+                while hasMore && predicateHolds do // TODO: check perf if `while!` is going to be better or equal
                     let! predicateIsTrue = asyncPredicate e.Current
+
                     if predicateIsTrue then
                         yield e.Current
                         let! cont = e.MoveNextAsync()
@@ -828,51 +823,42 @@ module internal TaskSeqInternal =
                 yield e.Current
         }
 
-    let skipWhile whileKind predicate (source: TaskSeq<_>) =
+    let skipWhile isInclusive predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
+            let! notEmpty = e.MoveNextAsync()
+            let mutable hasMore = notEmpty
 
-            match! e.MoveNextAsync() with
-            | false -> () // Nothing further to do, no matter what the rules are
-            | true ->
+            match predicate with
+            | Predicate synchronousPredicate ->
+                while hasMore && synchronousPredicate e.Current do
+                    // keep skipping
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
 
-                let exclusive =
-                    match whileKind with
-                    | Exclusive -> true
-                    | Inclusive -> false
+            | PredicateAsync asyncPredicate ->
+                let mutable predicateHolds = true
 
-                let mutable cont = true
+                while hasMore && predicateHolds do // TODO: check perf if `while!` is going to be better or equal
+                    let! predicateIsTrue = asyncPredicate e.Current
 
-                match predicate with
-                | Predicate predicate -> // skipWhile(Inclusive)?
-                    while cont do
-                        if predicate e.Current then // spam -> skip
-                            let! hasAnother = e.MoveNextAsync()
-                            cont <- hasAnother
-                        else // Starting the ham
-                            if exclusive then
-                                yield e.Current // return the item as it does not meet the condition for skipping
+                    if predicateIsTrue then
+                        // keep skipping
+                        let! cont = e.MoveNextAsync()
+                        hasMore <- cont
 
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
+                    predicateHolds <- predicateIsTrue
 
-                            cont <- false
-                | PredicateAsync predicate -> // skipWhile(Inclusive)?Async
-                    while cont do
-                        match! predicate e.Current with
-                        | true ->
-                            let! hasAnother = e.MoveNextAsync()
-                            cont <- hasAnother
-                        | false -> // We're starting the ham
-                            if exclusive then
-                                yield e.Current // return the item as it does not meet the condition for skipping
+            // "inclusive" means: always skip the item that we pulled, regardless of the result of applying the predicate
+            // and only stop thereafter. The non-inclusive versions, in contrast, do not skip the item under which the predicate is false.
+            if hasMore && not isInclusive then
+                yield e.Current // don't skip, unless inclusive
 
-                            while! e.MoveNextAsync() do // propagate the rest
-                                yield e.Current
-
-                            cont <- false
+            // propagate the rest
+            while! e.MoveNextAsync() do
+                yield e.Current
         }
 
     // Consider turning using an F# version of this instead?
