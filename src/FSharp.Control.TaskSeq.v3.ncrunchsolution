@@ -4,6 +4,8 @@
     <CustomEnvironmentVariables>
       <Value>TASKSEQ_LOG_VERBOSE = false</Value>
     </CustomEnvironmentVariables>
+    <EnableRDI>False</EnableRDI>
+    <RdiConfigured>True</RdiConfigured>
     <SolutionConfigured>True</SolutionConfigured>
   </Settings>
 </SolutionConfiguration>
