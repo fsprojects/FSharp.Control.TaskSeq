@@ -49,6 +49,11 @@ type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitAction of init_item: (int -> 'T)
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
+[<Struct>]
+type internal ManyOrOne<'T> =
+    | Many of source_seq: TaskSeq<'T>
+    | One of source_item: 'T
+
 module internal TaskSeqInternal =
     /// Raise an NRE for arguments that are null. Only used for 'source' parameters, never for function parameters.
     let inline checkNonNull argName arg =
@@ -57,7 +62,10 @@ module internal TaskSeqInternal =
 
     let inline raiseEmptySeq () = invalidArg "source" "The input task sequence was empty."
 
-    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative"
+    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative."
+
+    let inline raiseOutOfBounds name =
+        invalidArg name "The value or index must be within the bounds of the task sequence."
 
     let inline raiseInsufficient () =
         // this is correct, it is NOT an InvalidOperationException (see Seq.fs in F# Core)
@@ -859,6 +867,90 @@ module internal TaskSeqInternal =
             // propagate the rest
             while! e.MoveNextAsync() do
                 yield e.Current
+        }
+
+    /// InsertAt or InsertManyAt
+    let insertAt index valueOrValues (source: TaskSeq<_>) =
+        if index < 0 then
+            raiseCannotBeNegative (nameof index)
+
+        taskSeq {
+            let mutable i = 0
+
+            for item in source do
+                if i = index then
+                    match valueOrValues with
+                    | Many values -> yield! values
+                    | One value -> yield value
+
+                yield item
+                i <- i + 1
+
+            // allow inserting at the end
+            if i = index then
+                match valueOrValues with
+                | Many values -> yield! values
+                | One value -> yield value
+
+            if i < index then
+                raiseOutOfBounds (nameof index)
+        }
+
+    let removeAt index (source: TaskSeq<'T>) =
+        if index < 0 then
+            raiseCannotBeNegative (nameof index)
+
+        taskSeq {
+            let mutable i = 0
+
+            for item in source do
+                if i <> index then
+                    yield item
+
+                i <- i + 1
+
+            // cannot remove past end of sequence
+            if i <= index then
+                raiseOutOfBounds (nameof index)
+        }
+
+    let removeManyAt index count (source: TaskSeq<'T>) =
+        if index < 0 then
+            raiseCannotBeNegative (nameof index)
+
+        taskSeq {
+            let mutable i = 0
+            let indexEnd = index + count
+
+            for item in source do
+                if i < index || i >= indexEnd then
+                    yield item
+
+                i <- i + 1
+
+            // cannot remove past end of sequence
+            if i <= index then
+                raiseOutOfBounds (nameof index)
+        }
+
+    let updateAt index value (source: TaskSeq<'T>) =
+        if index < 0 then
+            raiseCannotBeNegative (nameof index)
+
+        taskSeq {
+            let mutable i = 0
+
+            for item in source do
+                if i <> index then // most common scenario on top (cpu prediction)
+                    yield item
+                else
+                    yield value
+
+                i <- i + 1
+
+            // cannot update past end of sequence
+            if i <= index then
+                raiseOutOfBounds (nameof index)
         }
 
     // Consider turning using an F# version of this instead?

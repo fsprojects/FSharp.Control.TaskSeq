@@ -1241,6 +1241,7 @@ type TaskSeq =
     ///
     /// <param name="source1">The first input task sequence.</param>
     /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The result task sequence of tuples.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
     static member zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 
@@ -1275,3 +1276,65 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member foldAsync:
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
+    /// Return a new task sequence with a new item inserted before the given index.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the item should be inserted.</param>
+    /// <param name="value">The value to insert.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member insertAt: index: int -> value: 'T -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the new items inserted before the given index.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the items should be inserted.</param>
+    /// <param name="value">The values to insert.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member insertManyAt: index: int -> values: TaskSeq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the item at the given index removed.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the item should be removed.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member removeAt: index: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the number of items starting at a given index removed.
+    /// If <paramref name="count" /> is negative or zero, no items are removed. If <paramref name="index" />
+    /// + <paramref name="count" /> is greater than source length, but <paramref name="index" /> is not, then
+    /// all items until end of sequence are removed.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the items should be removed.</param>
+    /// <param name="count">The number of items to remove.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member removeManyAt: index: int -> count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the item at a given index set to the new value.
+    /// </summary>
+    ///
+    /// <param name="index">The index of the item to be replaced.</param>
+    /// <param name="value">The new value.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member updateAt: index: int -> value: 'T -> source: TaskSeq<'T> -> TaskSeq<'T>
