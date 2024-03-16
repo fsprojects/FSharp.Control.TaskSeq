@@ -1,6 +1,6 @@
 namespace FSharp.Control
 
-#nowarn "1204" // This construct is for use by compiled F# code ans should not be used directly.
+#nowarn "1204" // This construct is for use by compiled F# code and should not be used directly.
 
 [<AutoOpen>]
 module TaskExtensions =

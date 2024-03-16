@@ -8,8 +8,8 @@ open Microsoft.FSharp.Core.CompilerServices
 open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 
 // note: these are *not* experimental features anymore, but they forgot to switch off the flag
-#nowarn "57" // Experimental library feature, requires '--languversion:preview'.
-#nowarn "1204" // This construct is for use by compiled F# code ans should not be used directly.
+#nowarn "57" // Experimental library feature, requires '--langversion:preview'.
+#nowarn "1204" // This construct is for use by compiled F# code and should not be used directly.
 
 [<AutoOpen>]
 module TaskExtensions =
@@ -42,6 +42,8 @@ module TaskExtensions =
 
                         // This will yield with __stack_fin = false
                         // This will resume with __stack_fin = true
+
+                        // NOTE (AB): if this extra let-binding isn't here, we get NRE exceptions, infinite loops (end of seq not signaled) and warning FS3513
                         let __stack_yield_fin = ResumableCode.Yield().Invoke(&sm)
                         __stack_condition_fin <- __stack_yield_fin
 
