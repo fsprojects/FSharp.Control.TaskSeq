@@ -2,7 +2,8 @@ namespace FSharp.Control
 
 open System.Diagnostics
 
-#nowarn "57" // note: this is *not* an experimental feature, but they forgot to switch off the flag
+// note: this is *not* an experimental feature, but they forgot to switch off the flag
+#nowarn "57" // Experimental library feature, requires '--langversion:preview'.
 
 open System
 open System.Collections.Generic
@@ -12,7 +13,7 @@ open System.Runtime.CompilerServices
 open System.Threading.Tasks.Sources
 
 open FSharp.Core.CompilerServices
-open FSharp.Core.CompilerServices.StateMachineHelpers
+open FSharp.Core.CompilerServices.StateMachineHelpers // raises warning FS0057
 open FSharp.Control
 
 
@@ -394,7 +395,7 @@ type TaskSeqBuilder() =
 
         ResumableCode.Combine(task1, task2)
 
-    /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the CE
+    /// Used by `For`. Unclear if the new `while!` (from F# 8.0) hits this
     member inline _.WhileAsync([<InlineIfLambda>] condition: unit -> ValueTask<bool>, body: ResumableTSC<'T>) : ResumableTSC<'T> =
         let mutable condition_res = true
 
@@ -414,8 +415,11 @@ type TaskSeqBuilder() =
 
                     let task = __stack_vtask.AsTask()
                     let mutable awaiter = task.GetAwaiter()
+
                     // This will yield with __stack_fin = false
                     // This will resume with __stack_fin = true
+
+                    // NOTE (AB): if this extra let-binding isn't here, we get NRE exceptions, infinite loops (end of seq not signaled) and warning FS3513
                     let __stack_yield_fin = ResumableCode.Yield().Invoke(&sm)
                     __stack_condition_fin <- __stack_yield_fin
 
