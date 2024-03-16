@@ -37,6 +37,7 @@
     <Compile Include="TaskSeq.MaxMin.Tests.fs" />
     <Compile Include="TaskSeq.OfXXX.Tests.fs" />
     <Compile Include="TaskSeq.Pick.Tests.fs" />
+    <Compile Include="TaskSeq.RemoveAt.Tests.fs" />
     <Compile Include="TaskSeq.Singleton.Tests.fs" />
     <Compile Include="TaskSeq.Skip.Tests.fs" />
     <Compile Include="TaskSeq.SkipWhile.Tests.fs" />

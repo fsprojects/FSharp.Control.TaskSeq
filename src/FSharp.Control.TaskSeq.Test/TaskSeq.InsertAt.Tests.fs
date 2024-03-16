@@ -23,7 +23,7 @@ module EmptySeq =
         |> verifySingleton 42
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
-    let ``TaskSeq-insertAt(1) on empty input should throw InvalidOperation`` variant =
+    let ``TaskSeq-insertAt(1) on empty input should throw ArgumentException`` variant =
         fun () ->
             Gen.getEmptyVariant variant
             |> TaskSeq.insertAt 1 42
