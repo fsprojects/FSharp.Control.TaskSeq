@@ -1241,6 +1241,7 @@ type TaskSeq =
     ///
     /// <param name="source1">The first input task sequence.</param>
     /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The result task sequence of tuples.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
     static member zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 
@@ -1275,3 +1276,27 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member foldAsync:
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
+    /// Return a new task sequence with a new item inserted before the given index.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the item should be inserted.</param>
+    /// <param name="value">The value to insert.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member insertAt: index: int -> value: 'T -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the new items inserted before the given index.
+    /// </summary>
+    ///
+    /// <param name="index">The index where the items should be inserted.</param>
+    /// <param name="value">The values to insert.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member insertManyAt: index: int -> values: TaskSeq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>

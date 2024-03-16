@@ -49,6 +49,11 @@ type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitAction of init_item: (int -> 'T)
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
+[<Struct>]
+type internal ManyOrOne<'T> =
+    | Many of source_seq: TaskSeq<'T>
+    | One of source_item: 'T
+
 module internal TaskSeqInternal =
     /// Raise an NRE for arguments that are null. Only used for 'source' parameters, never for function parameters.
     let inline checkNonNull argName arg =
@@ -859,6 +864,33 @@ module internal TaskSeqInternal =
             // propagate the rest
             while! e.MoveNextAsync() do
                 yield e.Current
+        }
+
+    /// InsertAt or InsertManyAt
+    let insertAt index valueOrValues (source: TaskSeq<_>) =
+        if index < 0 then
+            invalidArg "index" "index cannot be negative."
+
+        taskSeq {
+            let mutable i = 0
+
+            for item in source do
+                if i = index then
+                    match valueOrValues with
+                    | Many values -> yield! values
+                    | One value -> yield value
+
+                yield item
+                i <- i + 1
+
+            // allow inserting at the end
+            if i = index then
+                match valueOrValues with
+                | Many values -> yield! values
+                | One value -> yield value
+
+            if i < index then
+                invalidArg "index" "index must be within the bounds of the task sequence."
         }
 
     // Consider turning using an F# version of this instead?
