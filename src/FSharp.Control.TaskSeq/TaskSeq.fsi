@@ -3,8 +3,6 @@ namespace FSharp.Control
 open System.Collections.Generic
 open System.Threading.Tasks
 
-#nowarn "1204"
-
 [<AutoOpen>]
 module TaskSeqExtensions =
     module TaskSeq =

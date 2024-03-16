@@ -4,8 +4,6 @@ open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
-#nowarn "57"
-
 // Just for convenience
 module Internal = TaskSeqInternal
 

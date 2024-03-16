@@ -7,9 +7,9 @@ open System.Threading.Tasks
 open Microsoft.FSharp.Core.CompilerServices
 open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 
-#nowarn "57"
-#nowarn "1204"
-#nowarn "3513"
+// note: these are *not* experimental features anymore, but they forgot to switch off the flag
+#nowarn "57" // Experimental library feature, requires '--languversion:preview'.
+#nowarn "1204" // This construct is for use by compiled F# code ans should not be used directly.
 
 [<AutoOpen>]
 module TaskExtensions =

@@ -2,7 +2,8 @@ namespace FSharp.Control
 
 open System.Diagnostics
 
-#nowarn "57" // note: this is *not* an experimental feature, but they forgot to switch off the flag
+// note: this is *not* an experimental feature, but they forgot to switch off the flag
+#nowarn "57" // Experimental library feature, requires '--languversion:preview'.
 
 open System
 open System.Collections.Generic
@@ -12,7 +13,7 @@ open System.Runtime.CompilerServices
 open System.Threading.Tasks.Sources
 
 open FSharp.Core.CompilerServices
-open FSharp.Core.CompilerServices.StateMachineHelpers
+open FSharp.Core.CompilerServices.StateMachineHelpers // raises warning FS0057
 open FSharp.Control
 
 
