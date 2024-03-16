@@ -49,6 +49,11 @@ module ValueTask =
     val inline ignore: vtask: ValueTask<'T> -> ValueTask
 
 module Task =
+    /// A successfully completed Task of boolean that has the value false.
+    val False: Task<bool>
+
+    /// A successfully completed Task of boolean that has the value true.
+    val True: Task<bool>
 
     /// Convert an Async<'T> into a Task<'T>
     val inline ofAsync: async: Async<'T> -> Task<'T>
