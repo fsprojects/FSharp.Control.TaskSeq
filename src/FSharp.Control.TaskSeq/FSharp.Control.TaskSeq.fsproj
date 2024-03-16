@@ -45,6 +45,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <Compile Include="DebugUtils.fs" />
     <Compile Include="Utils.fsi" />
     <Compile Include="Utils.fs" />
+    <Compile Include="TaskEx.Operators.fs" />
     <Compile Include="TaskSeqBuilder.fsi" />
     <Compile Include="TaskSeqBuilder.fs" />
     <Compile Include="TaskSeqInternal.fs" />
