@@ -933,6 +933,26 @@ module internal TaskSeqInternal =
                 raiseOutOfBounds (nameof index)
         }
 
+    let updateAt index value (source: TaskSeq<'T>) =
+        if index < 0 then
+            raiseCannotBeNegative (nameof index)
+
+        taskSeq {
+            let mutable i = 0
+
+            for item in source do
+                if i <> index then // most common scenario on top (cpu prediction)
+                    yield item
+                else
+                    yield value
+
+                i <- i + 1
+
+            // cannot update past end of sequence
+            if i <= index then
+                raiseOutOfBounds (nameof index)
+        }
+
     // Consider turning using an F# version of this instead?
     // https://github.com/i3arnon/ConcurrentHashSet
     type ConcurrentHashSet<'T when 'T: equality>(ct) =

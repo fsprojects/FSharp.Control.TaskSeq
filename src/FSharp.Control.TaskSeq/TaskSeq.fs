@@ -319,6 +319,7 @@ type TaskSeq private () =
     static member insertManyAt index values source = Internal.insertAt index (Many values) source
     static member removeAt index source = Internal.removeAt index source
     static member removeManyAt index count source = Internal.removeManyAt index count source
+    static member updateAt index value source = Internal.updateAt index value source
 
     static member except itemsToExclude source = Internal.except itemsToExclude source
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source

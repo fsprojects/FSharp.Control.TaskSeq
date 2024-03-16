@@ -1326,3 +1326,15 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
     static member removeManyAt: index: int -> count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Return a new task sequence with the item at a given index set to the new value.
+    /// </summary>
+    ///
+    /// <param name="index">The index of the item to be replaced.</param>
+    /// <param name="value">The new value.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The result task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
+    static member updateAt: index: int -> value: 'T -> source: TaskSeq<'T> -> TaskSeq<'T>
