@@ -62,7 +62,10 @@ module internal TaskSeqInternal =
 
     let inline raiseEmptySeq () = invalidArg "source" "The input task sequence was empty."
 
-    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative"
+    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative."
+
+    let inline raiseOutOfBounds name =
+        invalidArg name "The value or index must be within the bounds of the task sequence."
 
     let inline raiseInsufficient () =
         // this is correct, it is NOT an InvalidOperationException (see Seq.fs in F# Core)
@@ -869,7 +872,7 @@ module internal TaskSeqInternal =
     /// InsertAt or InsertManyAt
     let insertAt index valueOrValues (source: TaskSeq<_>) =
         if index < 0 then
-            invalidArg "index" "index cannot be negative."
+            raiseCannotBeNegative (nameof index)
 
         taskSeq {
             let mutable i = 0
@@ -890,7 +893,7 @@ module internal TaskSeqInternal =
                 | One value -> yield value
 
             if i < index then
-                invalidArg "index" "index must be within the bounds of the task sequence."
+                raiseOutOfBounds (nameof index)
         }
 
     // Consider turning using an F# version of this instead?

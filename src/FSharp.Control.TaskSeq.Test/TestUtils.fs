@@ -139,11 +139,23 @@ module TestUtils =
         |> TaskSeq.toArrayAsync
         |> Task.map (Array.isEmpty >> should be True)
 
+    /// Verifies that a task sequence contains exactly one item
+    let verifySingleton value ts =
+        ts
+        |> TaskSeq.toArrayAsync
+        |> Task.map (should equal [| value |])
+
     /// Verifies that a task sequence contains integers 1-10, by converting to an array and comparing.
     let verify1To10 ts =
         ts
         |> TaskSeq.toArrayAsync
         |> Task.map (should equal [| 1..10 |])
+
+    /// Verifies that a task sequence contains integers 1-10, by converting to an array and comparing.
+    let verify0To9 ts =
+        ts
+        |> TaskSeq.toArrayAsync
+        |> Task.map (should equal [| 0..9 |])
 
     /// Turns a sequence of integers into a string, starting with A for '1', Z for 26 etc.
     let verifyDigitsAsString expected =

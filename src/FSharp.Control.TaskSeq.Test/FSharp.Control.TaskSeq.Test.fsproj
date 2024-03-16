@@ -27,6 +27,7 @@
     <Compile Include="TaskSeq.Head.Tests.fs" />
     <Compile Include="TaskSeq.Indexed.Tests.fs" />
     <Compile Include="TaskSeq.Init.Tests.fs" />
+    <Compile Include="TaskSeq.InsertAt.Tests.fs" />
     <Compile Include="TaskSeq.IsEmpty.fs" />
     <Compile Include="TaskSeq.Item.Tests.fs" />
     <Compile Include="TaskSeq.Iter.Tests.fs" />
