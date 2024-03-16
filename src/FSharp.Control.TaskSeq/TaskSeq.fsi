@@ -50,7 +50,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
     /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.lengthByAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.lengthByAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
@@ -61,7 +61,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the length of the sequence of all items for which the <paramref name="predicate" /> returns true.
     /// This operation requires the whole sequence to be evaluated and should not be used on potentially infinite sequences.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.lengthBy" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.lengthBy" />.
     /// </summary>
     ///
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
@@ -93,7 +93,7 @@ type TaskSeq =
     /// Returns the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />
     /// on the result of applying the function <paramref name="projection" /> to each element.
     ///
-    /// If <paramref name="projection" /> is asynchronous, use <see cref="TaskSeq.maxByAsync" />.
+    /// If <paramref name="projection" /> is asynchronous, consider using <see cref="TaskSeq.maxByAsync" />.
     /// </summary>
     ///
     /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
@@ -107,7 +107,7 @@ type TaskSeq =
     /// Returns the smallest of all elements of the task sequence, compared via <see cref="Operators.min" />
     /// on the result of applying the function <paramref name="projection" /> to each element.
     ///
-    /// If <paramref name="projection" /> is asynchronous, use <see cref="TaskSeq.minByAsync" />.
+    /// If <paramref name="projection" /> is asynchronous, consider using <see cref="TaskSeq.minByAsync" />.
     /// </summary>
     ///
     /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
@@ -121,7 +121,7 @@ type TaskSeq =
     /// Returns the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />
     /// on the result of applying the function <paramref name="projection" /> to each element.
     ///
-    /// If <paramref name="projection" /> is synchronous, use <see cref="TaskSeq.maxBy" />.
+    /// If <paramref name="projection" /> is synchronous, consider using <see cref="TaskSeq.maxBy" />.
     /// </summary>
     ///
     /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
@@ -135,7 +135,7 @@ type TaskSeq =
     /// Returns the smallest of all elements of the task sequence, compared via <see cref="Operators.min" />
     /// on the result of applying the function <paramref name="projection" /> to each element.
     ///
-    /// If <paramref name="projection" /> is synchronous, use <see cref="TaskSeq.minBy" />.
+    /// If <paramref name="projection" /> is synchronous, consider using <see cref="TaskSeq.minBy" />.
     /// </summary>
     ///
     /// <param name="projection">A function to transform items from the input sequence into comparable keys.</param>
@@ -502,7 +502,7 @@ type TaskSeq =
 
     /// <summary>
     /// Casts each item in the untyped input task sequence. If the input sequence contains value types
-    /// it is recommended to use <see cref="TaskSeq.unbox" /> instead.
+    /// it is recommended to consider using <see cref="TaskSeq.unbox" /> instead.
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
@@ -573,7 +573,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="mapper" /> is asynchronous, use <see cref="TaskSeq.mapAsync" />.
+    /// If <paramref name="mapper" /> is asynchronous, consider using <see cref="TaskSeq.mapAsync" />.
     /// </summary>
     ///
     /// <param name="mapper">A function to transform items from the input task sequence.</param>
@@ -603,7 +603,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="mapper" /> is synchronous, use <see cref="TaskSeq.map" />.
+    /// If <paramref name="mapper" /> is synchronous, consider using <see cref="TaskSeq.map" />.
     /// </summary>
     ///
     /// <param name="mapper">An asynchronous function to transform items from the input task sequence.</param>
@@ -634,7 +634,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="binder" /> is asynchronous, use <see cref="TaskSeq.collectAsync" />.
+    /// If <paramref name="binder" /> is asynchronous, consider using <see cref="TaskSeq.collectAsync" />.
     /// </summary>
     ///
     /// <param name="binder">A function to transform items from the input task sequence into a task sequence.</param>
@@ -650,7 +650,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="binder" /> is asynchronous, use <see cref="TaskSeq.collectSeqAsync" />.
+    /// If <paramref name="binder" /> is asynchronous, consider using <see cref="TaskSeq.collectSeqAsync" />.
     /// </summary>
     ///
     /// <param name="binder">A function to transform items from the input task sequence into a regular sequence.</param>
@@ -666,7 +666,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="binder" /> is synchronous, use <see cref="TaskSeq.collect" />.
+    /// If <paramref name="binder" /> is synchronous, consider using <see cref="TaskSeq.collect" />.
     /// </summary>
     ///
     /// <param name="binder">An asynchronous function to transform items from the input task sequence into a task sequence.</param>
@@ -683,7 +683,7 @@ type TaskSeq =
     /// The given function will be applied as elements are pulled using async enumerators retrieved from the
     /// input task sequence.
     ///
-    /// If <paramref name="binder" /> is synchronous, use <see cref="TaskSeq.collectSeqAsync" />.
+    /// If <paramref name="binder" /> is synchronous, consider using <see cref="TaskSeq.collectSeqAsync" />.
     /// </summary>
     ///
     /// <param name="binder">An asynchronous function to transform items from the input task sequence into a regular sequence.</param>
@@ -801,7 +801,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
     /// a sequence comprised of the results where the function returns <see cref="Some(x)" />.
-    /// If <paramref name="chooser" /> is asynchronous, use <see cref="TaskSeq.chooseAsync" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseAsync" />.
     /// </summary>
     ///
     /// <param name="chooser">A function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
@@ -814,7 +814,7 @@ type TaskSeq =
     /// Applies the given asynchronous function <paramref name="chooser" /> to each element of the task sequence.
     /// Returns a sequence comprised of the results where the function returns a <see cref="task" /> result
     /// of <see cref="Some(x)" />.
-    /// If <paramref name="chooser" /> is synchronous, use <see cref="TaskSeq.choose" />.
+    /// If <paramref name="chooser" /> is synchronous, consider using <see cref="TaskSeq.choose" />.
     /// </summary>
     ///
     /// <param name="chooser">An asynchronous function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
@@ -826,7 +826,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a new task sequence containing only the elements of the collection
     /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.filterAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.filterAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the output or not.</param>
@@ -838,7 +838,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a new task sequence containing only the elements of the input sequence
     /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.filter" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.filter" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function to test whether an item in the input sequence should be included in the output or not.</param>
@@ -850,7 +850,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a new task sequence containing only the elements of the collection
     /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.whereAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.whereAsync" />.
     ///
     /// Alias for <see cref="TaskSeq.filter" />.
     /// </summary>
@@ -864,7 +864,7 @@ type TaskSeq =
     /// <summary>
     /// Returns a new task sequence containing only the elements of the input sequence
     /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.where" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.where" />.
     ///
     /// Alias for <see cref="TaskSeq.filterAsync" />.
     /// </summary>
@@ -942,7 +942,7 @@ type TaskSeq =
     /// given function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
     /// Stops consuming the source and yielding items as soon as the predicate returns <c>false</c>.
     /// (see also <see cref="TaskSeq.takeWhileInclusive" />).
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.takeWhileAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeWhileAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to false when no more items should be returned.</param>
@@ -956,7 +956,7 @@ type TaskSeq =
     /// given asynchronous function <paramref name="predicate" /> returns <see cref="true" />, and then returns no further elements.
     /// Stops consuming the source and yielding items as soon as the predicate returns <c>false</c>.
     /// (see also <see cref="TaskSeq.takeWhileInclusiveAsync" />).
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.takeWhile" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeWhile" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be returned.</param>
@@ -970,7 +970,7 @@ type TaskSeq =
     /// function <paramref name="predicate" /> returns <see cref="false" />, returns that element
     /// and then returns no further elements (see also <see cref="TaskSeq.takeWhile" />). This function returns
     /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.takeWhileInclusiveAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.takeWhileInclusiveAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to false when no more items should be returned.</param>
@@ -984,7 +984,7 @@ type TaskSeq =
     /// asynchronous function <paramref name="predicate" /> returns <see cref="false" />, returns that element
     /// and then returns no further elements (see also <see cref="TaskSeq.takeWhileAsync" />). This function returns
     /// at least one element of a non-empty sequence, or the empty task sequence if the input is empty.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.takeWhileInclusive" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.takeWhileInclusive" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to false when no more items should be returned.</param>
@@ -1026,7 +1026,7 @@ type TaskSeq =
     /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
     /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhile" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.skipWhileInclusiveAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.skipWhileInclusiveAsync" />.
     /// </summary>`
     ///
     /// <param name="predicate">A function that evaluates to false for the final item to be skipped.</param>
@@ -1040,7 +1040,7 @@ type TaskSeq =
     /// function <paramref name="predicate" /> returns <see cref="false" />, <i>also skips that element</i>
     /// and then yields the remaining elements (see also <see cref="TaskSeq.skipWhileAsync" />). It will thus always skip
     /// at least one element of a non-empty sequence, or returns the empty task sequence if the input is empty.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.skipWhileInclusive" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.skipWhileInclusive" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to false for the final item to be skipped.</param>
@@ -1052,7 +1052,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />.
-    /// If <paramref name="chooser" /> is asynchronous, use <see cref="TaskSeq.tryPickAsync" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.tryPickAsync" />.
     /// </summary>
     /// <param name="chooser">A function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
     /// <param name="source">The input task sequence.</param>
@@ -1063,7 +1063,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />.
-    /// If <paramref name="chooser" /> is synchronous, use <see cref="TaskSeq.tryPick" />.
+    /// If <paramref name="chooser" /> is synchronous, consider using <see cref="TaskSeq.tryPick" />.
     /// </summary>
     /// <param name="chooser">An asynchronous function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
     /// <param name="source">The input task sequence.</param>
@@ -1074,7 +1074,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the first element for which the given function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.tryFindAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.tryFindAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1086,7 +1086,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the first element for which the given asynchronous function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.tryFind" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.tryFind" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1098,7 +1098,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the index, starting from zero, for which the given function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.tryFindIndexAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.tryFindIndexAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1110,7 +1110,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the index, starting from zero, for which the given asynchronous function <paramref name="predicate" /> returns
     /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.tryFindIndex" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.tryFindIndex" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1122,7 +1122,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />. Throws an exception if none is found.
-    /// If <paramref name="chooser" /> is asynchronous, use <see cref="TaskSeq.pickAsync" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.pickAsync" />.
     /// </summary>
     ///
     /// <param name="chooser">A function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
@@ -1135,7 +1135,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />. Throws an exception if none is found.
-    /// If <paramref name="chooser" /> is synchronous, use <see cref="TaskSeq.pick" />.
+    /// If <paramref name="chooser" /> is synchronous, consider using <see cref="TaskSeq.pick" />.
     /// </summary>
     ///
     /// <param name="chooser">An asynchronous function to transform items of type <paramref name="'T" /> into options of type <paramref name="'U" />.</param>
@@ -1148,7 +1148,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the first element for which the given function <paramref name="predicate" /> returns <see cref="true" />.
     /// Throws an exception if none is found.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.findAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1161,7 +1161,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the first element for which the given asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
     /// Throws an exception if none is found.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.find" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.find" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1174,7 +1174,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the index, starting from zero, of the first element for which the given function <paramref name="predicate" />
     /// returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is asynchronous, use <see cref="TaskSeq.findIndexAsync" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findIndexAsync" />.
     /// </summary>
     ///
     /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1187,7 +1187,7 @@ type TaskSeq =
     /// <summary>
     /// Returns the index, starting from zero, of the first element for which the given function <paramref name="predicate" />
     /// returns <see cref="true" />.
-    /// If <paramref name="predicate" /> is synchronous, use <see cref="TaskSeq.findIndex" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.findIndex" />.
     /// </summary>
     ///
     /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
@@ -1291,7 +1291,7 @@ type TaskSeq =
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// argument of type <paramref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes <paramref name="f (... (f s i0)...) iN" />.
-    /// If the accumulator function <paramref name="folder" /> is asynchronous, use <see cref="TaskSeq.foldAsync" />.
+    /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// </summary>
     ///
     /// <param name="folder">A function that updates the state with each element from the sequence.</param>
