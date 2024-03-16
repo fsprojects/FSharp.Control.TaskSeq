@@ -191,6 +191,42 @@ type TaskSeq private () =
                 yield! (ts :> TaskSeq<'T>)
         }
 
+    static member concat(sources: TaskSeq<'T seq>) = // NOTE: we cannot use flex types on two overloads
+        Internal.checkNonNull (nameof sources) sources
+
+        taskSeq {
+            for ts in sources do
+                // no null-check of inner seqs, similar to seq
+                yield! ts
+        }
+
+    static member concat(sources: TaskSeq<'T[]>) =
+        Internal.checkNonNull (nameof sources) sources
+
+        taskSeq {
+            for ts in sources do
+                // no null-check of inner arrays, similar to seq
+                yield! ts
+        }
+
+    static member concat(sources: TaskSeq<'T list>) =
+        Internal.checkNonNull (nameof sources) sources
+
+        taskSeq {
+            for ts in sources do
+                // no null-check of inner lists, similar to seq
+                yield! ts
+        }
+
+    static member concat(sources: TaskSeq<ResizeArray<'T>>) =
+        Internal.checkNonNull (nameof sources) sources
+
+        taskSeq {
+            for ts in sources do
+                // no null-check of inner resize arrays, similar to seq
+                yield! ts
+        }
+
     static member append (source1: TaskSeq<'T>) (source2: TaskSeq<'T>) =
         Internal.checkNonNull (nameof source1) source1
         Internal.checkNonNull (nameof source2) source2

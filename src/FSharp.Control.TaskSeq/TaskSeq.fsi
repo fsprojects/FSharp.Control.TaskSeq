@@ -215,13 +215,54 @@ type TaskSeq =
 
     /// <summary>
     /// Combines the given task sequence of task sequences and concatenates them end-to-end, to form a
-    /// new flattened, single task sequence. Each task sequence is awaited item by item, before the next is iterated.
+    /// new flattened, single task sequence, like <paramref name="TaskSeq.collect id"/>. Each task sequence is
+    /// awaited and consumed in full, before the next one is iterated.
     /// </summary>
     ///
     /// <param name="sources">The input task-sequence-of-task-sequences.</param>
-    /// <returns>The resulting task sequence.</returns>
+    /// <returns>The resulting, flattened task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
     static member concat: sources: TaskSeq<#TaskSeq<'T>> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Combines the given task sequence of sequences and concatenates them end-to-end, to form a
+    /// new flattened, single task sequence.
+    /// </summary>
+    ///
+    /// <param name="sources">The input task sequence of sequences.</param>
+    /// <returns>The resulting, flattened task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
+    static member concat: sources: TaskSeq<'T seq> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Combines the given task sequence of arrays and concatenates them end-to-end, to form a
+    /// new flattened, single task sequence.
+    /// </summary>
+    ///
+    /// <param name="sources">The input task sequence of arrays.</param>
+    /// <returns>The resulting, flattened task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
+    static member concat: sources: TaskSeq<'T[]> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Combines the given task sequence of lists and concatenates them end-to-end, to form a
+    /// new flattened, single task sequence.
+    /// </summary>
+    ///
+    /// <param name="sources">The input task sequence of lists.</param>
+    /// <returns>The resulting, flattened task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
+    static member concat: sources: TaskSeq<'T list> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Combines the given task sequence of resizable arrays and concatenates them end-to-end, to form a
+    /// new flattened, single task sequence.
+    /// </summary>
+    ///
+    /// <param name="sources">The input task sequence of resizable arrays.</param>
+    /// <returns>The resulting, flattened task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence of task sequences is null.</exception>
+    static member concat: sources: TaskSeq<ResizeArray<'T>> -> TaskSeq<'T>
 
     /// <summary>
     /// Concatenates task sequences <paramref name="source1" /> and <paramref name="source2" /> in order as a single
