@@ -358,6 +358,9 @@ type TaskSeq private () =
     static member except itemsToExclude source = Internal.except itemsToExclude source
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
+    static member forall predicate source = Internal.forall (Predicate predicate) source
+    static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source
+
     static member exists predicate source =
         Internal.tryFind (Predicate predicate) source
         |> Task.map Option.isSome

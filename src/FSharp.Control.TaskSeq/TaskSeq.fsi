@@ -876,6 +876,30 @@ type TaskSeq =
     static member whereAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Tests if all elements of the sequence satisfy the given predicate. Stops evaluating
+    /// as soon as <paramref name="predicate" /> returns <see cref="false" />.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.forallAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test an element of the input sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task that, after awaiting, holds true if every element of the sequence satisfies the predicate; false otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member forall: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<bool>
+
+    /// <summary>
+    /// Tests if all elements of the sequence satisfy the given asynchronous predicate. Stops evaluating
+    /// as soon as <paramref name="predicate" /> returns <see cref="false" />.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.forall" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test an element of the input sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task that, after awaiting, holds true if every element of the sequence satisfies the predicate; false otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member forallAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<bool>
+
+    /// <summary>
     /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the underlying
     /// sequence, and then yields the remainder. Raises an exception if there are not <paramref name="count" />
     /// items. See <see cref="TaskSeq.drop" /> for a version that does not raise an exception.
