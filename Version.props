@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <!-- updating this version will trigger a publish after merge to 'main' -->
-    <Version>0.4.0-alpha.1</Version>
+    <Version>0.4.0</Version>
   </PropertyGroup>
 </Project>
