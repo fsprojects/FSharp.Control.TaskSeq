@@ -4,7 +4,7 @@
 
 # TaskSeq<!-- omit in toc -->
 
-An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module, that allows seamless use of asynchronous sequences similar to F#'s native `seq` and `task` CE's.
+An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module and functions, that allow seamless use of asynchronous sequences similar to F#'s native `seq` and `task` CE's.
 
 * Latest stable version: [0.3.0 is on NuGet][nuget].
 * Latest prerelease version: [0.4.0-alpha.1 is on NuGet][nuget].
@@ -52,7 +52,7 @@ See [release notes.txt](release-notes.txt) for the version history of `TaskSeq`.
 
 ## Overview
 
-The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][3] given by a call to [`GetAsyncEnumerator()`][6].
+The `IAsyncEnumerable` interface was added to .NET in `.NET Core 3.0` and is part of `.NET Standard 2.1`. The main use-case was for iterative asynchronous, sequential enumeration over some resource. For instance, an event stream or a REST API interface with pagination, asynchronous reading over a list of files and accumulating the results, where each action can be modeled as a [`MoveNextAsync`][4] call on the [`IAsyncEnumerator<'T>`][3] given by a call to [`GetAsyncEnumerator()`][6].
 
 Since the introduction of `task` in F# the call for a native implementation of _task sequences_ has grown, in particular because proper iteration over an `IAsyncEnumerable` has proven challenging, especially if one wants to avoid mutable variables. This library is an answer to that call and applies the same _resumable state machine_ approach with `taskSeq`.
 
@@ -92,7 +92,7 @@ F# Interactive (FSI):
 > #r "nuget: FSharp.Control.TaskSeq"
 
 // or with specific version
-> #r "nuget: FSharp.Control.TaskSeq, 0.2.2"
+> #r "nuget: FSharp.Control.TaskSeq, 0.4.0"
 ```
 
 Paket:
@@ -111,7 +111,7 @@ As package reference in `fsproj` or `csproj` file:
 
 ```xml
 <!-- replace version with most recent version -->
-<PackageReference Include="FSharp.Control.TaskSeq" Version="0.2.2" />
+<PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0" />
 ```
 
 ### Examples
@@ -196,24 +196,48 @@ There are more differences:
 | **[`Current`][5]**         | [Returns `'T`][5]                                                               | n/a                                                                  |
 | **Cancellation**           | See [#133][], until 0.3.0: use `GetAsyncEnumerator(cancelToken)`                | Implicit token flows to all subtasks per `async` semantics           |
 | **Performance**            | Very high, negligible allocations                                               | Slower, more allocations, due to using `async` and cont style        |
-| **Parallelism**            | Possible with ChildTask; support will follow                                    | Supported explicitly                                                 |
+| **Parallelism**            | Unclear, interface is meant for _sequential/async_ processing                   | Supported by extension functions                                     |
 
 <sup>¹⁾ <a id="tsnote1"></a>_Both `AsyncSeq` and `TaskSeq` use a type called `IAsyncEnumerable<'T>`, but only `TaskSeq` uses the type from the BCL Generic Collections. `AsyncSeq` supports .NET Framework 4.6.x and NetStandard 2.0 as well, which do not have this type in the BCL._</sup>
 
 ## Status & planning
 
-This project has stable features currently, but before we go full "version one", we'd like to complete the surface area. This section covers the status of that, with a full list of implemented functions below. Here's the shortlist:
+The `TaskSeq` project already has a wide array of functions and functionalities, see overview below. The current status is: *STABLE*. However, certain features we'd really like to add:
 
-- [x] Stabilize and battle-test `taskSeq` resumable code. **DONE**
-- [x] A growing set of module functions `TaskSeq`, see below for progress. **DONE & IN PROGRESS**
-- [x] Packaging and publishing on Nuget, **DONE, PUBLISHED SINCE: 7 November 2022**. See https://www.nuget.org/packages/FSharp.Control.TaskSeq
-- [x] Add `Async` variants for functions taking HOF arguments. **DONE**
-- [ ] Add generated docs to <https://fsprojects.github.io>
-- [ ] Expand surface area based on `AsyncSeq`. **ONGOING**
+- [x] Take existing `taskSeq` resumable code from F# and fix it. **DONE**
+- [x] Add almost all functions from `Seq` that could apply to `TaskSeq` (full overview below). **MOSTLY DONE, STILL TODO**
+- [ ] Add remaining relevant functions from `Seq`. **PLANNED FOR 0.4.x**
+  - [x] `min` / `max` / `minBy` / `maxBy` & async variant (see [#221])
+  - [x] `insertAt` / `updateAt` and related (see [#236])
+  - [ ] `average` / `averageBy`, `sum` and related
+  - [x] `forall` / `forallAsync` (see [#240])
+  - [x] `skip` / `drop` / `truncate` / `take` (see [#209])
+  - [ ] `chunkBySize` / `windowed`
+  - [ ] `compareWith`
+  - [ ] `distinct`
+  - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
+  - [ ] `mapFold`
+  - [ ] `pairwise` / `allpairs` / `permute` / `distinct` / `distinctBy`
+  - [ ] `replicate`
+  - [ ] `reduce` / `scan`
+  - [ ] `unfold`
+- [x] Publish package on Nuget, **DONE, PUBLISHED SINCE: 7 November 2022**. See https://www.nuget.org/packages/FSharp.Control.TaskSeq
+- [x] Make `TaskSeq` interoperable with `Task` by expanding the latter with a `for .. in .. do` that acceps task sequences
+- [x] Add to/from functions to seq, list, array
+- [ ] Add applicable functions from `AsyncSeq`. **PLANNED FOR 0.5-alpha**
+- [ ] (Better) support for cancellations
+  - [ ] Make the tasks cancellable with token (see [#133]). **PLANNED FOR 0.5-alpha**
+  - [ ] Support `ConfiguredCancelableAsyncEnumerable` (see [#167]). **PLANNED FOR 0.5-alpha**
+  - [ ] Interop with `cancellableTask` and `valueTask` from [`IcedTasks`][24]
+- [ ] Interop with `AsyncSeq`.
+- [ ] (maybe) Support any awaitable type in the function lib (that is: where a `Task` is required, accept a `ValueTask` and `Async` as well)
+- [ ] Add `TaskEx` functionality (separate lib). **DISCUSSION**
+- [ ] Move documentation to <https://fsprojects.github.io>
 
 ### Implementation progress
 
-As of 9 November 2022: [Nuget package available][21]. In this phase, we will frequently update the package, see [release notes.txt](release-notes.txt). Current version:
+ * As of 9 November 2022: [Nuget package available][21]. In this phase, we will frequently update the package, see [release notes.txt](release-notes.txt). Current version:
+ * Major update: 17 March 2024, version 0.4.0
 
 [![Nuget](https://img.shields.io/nuget/vpre/FSharp.Control.TaskSeq)](https://www.nuget.org/packages/FSharp.Control.TaskSeq/)
 
@@ -245,10 +269,15 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
 |                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
 | &#x2705; [#69][] | `concat`           | `concat`             |                           | |
+| &#x2705; [#237][]| `concat` (list)    | `concat` (list)      |                           | |
+| &#x2705; [#237][]| `concat` (array)   | `concat` (array)     |                           | |
+| &#x2705; [#237][]| `concat` (r-array) | `concat` (r-array)   |                           | |
+| &#x2705; [#237][]| `concat` (seq)     | `concat` (seq)       |                           | |
 | &#x2705; [#70][] | `contains`         | `contains`           |                           | |
 | &#x2705; [#82][] | `delay`            | `delay`              |                           | |
 |                  | `distinct`         | `distinct`           |                           | |
 |                  | `distinctBy`       | `dictinctBy`         | `distinctByAsync`         | |
+| &#x2705; [#209][]|                    | `drop`               |                           | |
 | &#x2705; [#2][]  | `empty`            | `empty`              |                           | |
 | &#x2705; [#23][] | `exactlyOne`       | `exactlyOne`         |                           | |
 | &#x2705; [#83][] | `except`           | `except`             |                           | |
@@ -264,15 +293,15 @@ This is what has been implemented so far, is planned or skipped:
 |                  | `fold2`            | `fold2`              | `fold2Async`              | |
 | &#x1f6ab;        | `foldBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x1f6ab;        | `foldBack2`        |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-|                  | `forall`           | `forall`             | `forallAsync`             | |
+| &#x2705; [#240][]| `forall`           | `forall`             | `forallAsync`             | |
 |                  | `forall2`          | `forall2`            | `forall2Async`            | |
 | &#x2753;         | `groupBy`          | `groupBy`            | `groupByAsync`            | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705; [#23][] | `head`             | `head`               |                           | |
 | &#x2705; [#68][] | `indexed`          | `indexed`            |                           | |
 | &#x2705; [#69][] | `init`             | `init`               | `initAsync`               | |
 | &#x2705; [#69][] | `initInfinite`     | `initInfinite`       | `initInfiniteAsync`       | |
-|                  | `insertAt`         | `insertAt`           |                           | |
-|                  | `insertManyAt`     | `insertManyAt`       |                           | |
+| &#x2705; [#236][]| `insertAt`         | `insertAt`           |                           | |
+| &#x2705; [#236][]| `insertManyAt`     | `insertManyAt`       |                           | |
 | &#x2705; [#23][] | `isEmpty`          | `isEmpty`            |                           | |
 | &#x2705; [#23][] | `item`             | `item`               |                           | |
 | &#x2705; [#2][]  | `iter`             | `iter`               | `iterAsync`               | |
@@ -310,15 +339,14 @@ This is what has been implemented so far, is planned or skipped:
 | &#x1f6ab;        | `readOnly`         |                      |                           | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
 |                  | `reduce`           | `reduce`             | `reduceAsync`             | |
 | &#x1f6ab;        | `reduceBack`       |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-|                  | `removeAt`         | `removeAt`           |                           | |
-|                  | `removeManyAt`     | `removeManyAt`       |                           | |
+| &#x2705; [#236][]| `removeAt`         | `removeAt`           |                           | |
+| &#x2705; [#236][]| `removeManyAt`     | `removeManyAt`       |                           | |
 |                  | `replicate`        | `replicate`          |                           | |
 | &#x2753;         | `rev`              |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |                  | `scan`             | `scan`               | `scanAsync`               | |
 | &#x1f6ab;        | `scanBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#90][] | `singleton`        | `singleton`          |                           | |
 | &#x2705; [#209][]| `skip`             | `skip`               |                           | |
-| &#x2705; [#209][]|                    | `drop`               |                           | |
 | &#x2705; [#219][]| `skipWhile`        | `skipWhile`          | `skipWhileAsync`          | |
 | &#x2705; [#219][]|                    | `skipWhileInclusive` | `skipWhileInclusiveAsync` | |
 | &#x2753;         | `sort`             |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
@@ -352,7 +380,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#23][] | `tryPick`          | `tryPick`            | `tryPickAsync`            | |
 | &#x2705; [#76][] |                    | `tryTail`            |                           | |
 |                  | `unfold`           | `unfold`             | `unfoldAsync`             | |
-|                  | `updateAt`         | `updateAt`           |                           | |
+| &#x2705; [#236][]| `updateAt`         | `updateAt`           |                           | |
 | &#x2705; [#217][]| `where`            | `where`              | `whereAsync`              | |
 |                  | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
@@ -473,6 +501,10 @@ module TaskSeq =
     val collectSeq: binder: ('T -> #seq<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
     val collectSeqAsync: binder: ('T -> #Task<'SeqU>) -> source: TaskSeq<'T> -> TaskSeq<'U> when 'SeqU :> seq<'U>
     val concat: sources: TaskSeq<#TaskSeq<'T>> -> TaskSeq<'T>
+    val concat: sources: TaskSeq<'T seq> -> TaskSeq<'T>
+    val concat: sources: TaskSeq<'T list> -> TaskSeq<'T>
+    val concat: sources: TaskSeq<'T array> -> TaskSeq<'T>
+    val concat: sources: TaskSeq<ResizeArray<'T>> -> TaskSeq<'T>
     val contains<'T when 'T: equality> : value: 'T -> source: TaskSeq<'T> -> Task<bool>
     val delay: generator: (unit -> TaskSeq<'T>) -> TaskSeq<'T>
     val drop: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
@@ -490,12 +522,16 @@ module TaskSeq =
     val findIndexAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
     val fold: folder: ('State -> 'T -> 'State) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
     val foldAsync: folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+    val forall: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<bool>
+    val forallAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<bool>
     val head: source: TaskSeq<'T> -> Task<'T>
     val indexed: source: TaskSeq<'T> -> TaskSeq<int * 'T>
     val init: count: int -> initializer: (int -> 'T) -> TaskSeq<'T>
     val initAsync: count: int -> initializer: (int -> #Task<'T>) -> TaskSeq<'T>
     val initInfinite: initializer: (int -> 'T) -> TaskSeq<'T>
     val initInfiniteAsync: initializer: (int -> #Task<'T>) -> TaskSeq<'T>
+    val insertAt: position:int -> value:'T -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val insertManyAt: position:int -> values:TaskSeq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
     val isEmpty: source: TaskSeq<'T> -> Task<bool>
     val item: index: int -> source: TaskSeq<'T> -> Task<'T>
     val iter: action: ('T -> unit) -> source: TaskSeq<'T> -> Task<unit>
@@ -529,6 +565,8 @@ module TaskSeq =
     val pick: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> Task<'U>
     val pickAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> Task<'U>
     val prependSeq: source1: seq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
+    val removeAt: position:int -> source: TaskSeq<'T> -> TaskSeq<'T>
+    val removeManyAt: position:int -> count:int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val singleton: source: 'T -> TaskSeq<'T>
     val skip: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
     val tail: source: TaskSeq<'T> -> Task<TaskSeq<'T>>
@@ -559,6 +597,7 @@ module TaskSeq =
     val where: predicate: ('T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
     val whereAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
     val unbox<'U when 'U: struct> : source: TaskSeq<obj> -> TaskSeq<'U>
+    val updateAt: position:int -> value:'T -> source: TaskSeq<'T> -> TaskSeq<'T>
     val zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 ```
 
@@ -590,6 +629,7 @@ module TaskSeq =
 [21]: https://www.nuget.org/packages/FSharp.Control.TaskSeq#versions-body-tab
 [22]: https://fsprojects.github.io/FSharp.Control.AsyncSeq/reference/fsharp-control-asyncseq.html#toAsyncEnum
 [23]: https://fsprojects.github.io/FSharp.Control.AsyncSeq/reference/fsharp-control-asyncseq.html#fromAsyncEnum
+[24]: https://github.com/TheAngryByrd/IcedTasks
 
 [#2]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/2
 [#11]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/11
@@ -606,10 +646,14 @@ module TaskSeq =
 [#90]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/90
 [#126]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/126
 [#133]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/133
+[#167]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/167
 [#209]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/209
 [#217]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/217
 [#219]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/219
 [#221]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/221
+[#237]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/237
+[#236]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/236
+[#240]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/240
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
