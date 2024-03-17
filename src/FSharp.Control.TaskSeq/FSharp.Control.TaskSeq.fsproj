@@ -13,7 +13,7 @@
 The 'taskSeq' computation expression adds support for awaitable asynchronous sequences with similar ease of use and performance to F#'s 'task' CE, with minimal overhead through ValueTask under the hood. TaskSeq brings 'seq' and 'task' together in a safe way.
 
 Generates optimized IL code through resumable state machines, and comes with a comprehensive set of functions in module 'TaskSeq'. See README for documentation and more info.</Description>
-    <Copyright>Copyright 2023</Copyright>
+    <Copyright>Copyright 2022-2024</Copyright>
     <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</RepositoryUrl>
     <PackageIcon>taskseq-icon.png</PackageIcon>
@@ -22,7 +22,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>
-    <PackageTags>taskseq;f#;computation expression;IAsyncEnumerable;task;async;asyncseq;</PackageTags>
+    <PackageTags>taskseq;f#;fsharp;asyncseq;seq;sequences;sequential;threading;computation expression;IAsyncEnumerable;task;async;iteration</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>

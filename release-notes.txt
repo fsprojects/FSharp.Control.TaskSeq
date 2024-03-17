@@ -1,38 +1,43 @@
 
 Release notes:
-0.4.x (unreleased)
-    - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136
+0.4.0
+    - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
     - new surface area functions, fixes #208:
       * TaskSeq.take, skip, #209
       * TaskSeq.truncate, drop, #209
       * TaskSeq.where, whereAsync, #217
       * TaskSeq.skipWhile, skipWhileInclusive, skipWhileAsync, skipWhileInclusiveAsync, #219
       * TaskSeq.max, min, maxBy, minBy, maxByAsync, minByAsync, #221
+      * TaskSeq.insertAt, insertManyAt, removeAt, removeManyAt, updateAt, #236
+      * TaskSeq.forall, forallAsync, #240
+      * TaskSeq.concat (overloads: seq, array, resizearray, list), #237
 
     - Performance: less thread hops with 'StartImmediateAsTask' instead of 'StartAsTask', fixes #135
-    - BINARY INCOMPATIBILITY: 'TaskSeq' module is now static members on 'TaskSeq<_>', fixes #184
+    - Performance: several inline and allocation improvements
+    - BINARY INCOMPATIBILITY: 'TaskSeq' module replaced by static members on 'TaskSeq<_>', fixes #184
     - DEPRECATIONS (warning FS0044):
       - type 'taskSeq<_>' is renamed to 'TaskSeq<_>', fixes #193
       - function 'ValueTask.ofIValueTaskSource` renamed to `ValueTask.ofSource`, fixes #193
       - function `ValueTask.FromResult` is renamed to `ValueTask.fromResult`, fixes #193
 
 0.4.0-alpha.1
-    - fixes not calling Dispose for 'use!', 'use', or `finally` blocks #157 (by @bartelink)
+    - bugfix: not calling Dispose for 'use!', 'use', or `finally` blocks #157 (by @bartelink)
     - BREAKING CHANGE: null args now raise ArgumentNullException instead of NullReferenceException, #127
     - adds `let!` and `do!` support for F#'s Async<'T>, #79, #114
     - adds TaskSeq.takeWhile, takeWhileAsync, takeWhileInclusive, takeWhileInclusiveAsync, #126 (by @bartelink)
     - adds AsyncSeq vs TaskSeq comparison chart, #131
-    - removes release-notes.txt from file dependencies, but keep in the package, #138
+    - bugfix: removes release-notes.txt from file dependencies, but keep in the package, #138
 
 0.3.0
-    - internal renames, improved doc comments, signature files for complex types, hide internal-only types, fixes #112.
+    - improved xml doc comments, signature files for exposing types, fixes #112.
     - adds support for static TaskLike, allowing the same let! and do! overloads that F# task supports, fixes #110.
     - implements 'do!' for non-generic Task like with Task.Delay, fixes #43.
-    - adds support for 'for .. in ..' with task sequences in F# tasks and async, #75, #93 and #99 (with help from @theangrybyrd).
+    - task and async CEs extended with support for 'for .. in ..do' with TaskSeq, #75, #93, #99 (in part by @theangrybyrd).
     - adds TaskSeq.singleton, #90 (by @gusty).
-    - fixes overload resolution bug with 'use' and 'use!', #97 (thanks @peterfaria).
+    - bugfix: fixes overload resolution bug with 'use' and 'use!', #97 (thanks @peterfaria).
     - improves TaskSeq.empty by not relying on resumable state, #89 (by @gusty).
-    - does not throw exceptions anymore for unequal lengths in TaskSeq.zip, fixes #32.
+    - bugfix: does not throw exceptions anymore for unequal lengths in TaskSeq.zip, fixes #32.
+    - BACKWARD INCOMPATIBILITY: several internal-only types now hidden
 
 0.2.2
     - removes TaskSeq.toSeqCachedAsync, which was incorrectly named. Use toSeq or toListAsync instead.
