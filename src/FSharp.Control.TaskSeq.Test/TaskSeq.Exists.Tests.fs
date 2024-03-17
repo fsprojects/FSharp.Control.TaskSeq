@@ -82,7 +82,7 @@ module Immutable =
 
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-exists KeyNotFoundException only sometimes for mutated state`` variant = task {
+    let ``TaskSeq-exists success only sometimes for mutated state`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
         let finder = (=) 11
 
@@ -100,7 +100,7 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
-    let ``TaskSeq-existsAsync KeyNotFoundException only sometimes for mutated state`` variant = task {
+    let ``TaskSeq-existsAsync success only sometimes for mutated state`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
         let finder x = task { return x = 11 }
 
@@ -201,7 +201,7 @@ module SideEffects =
         found |> should be True
         i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
-        // find some next item. We do get a new iterator, but mutable state is now starting at '1'
+        // find some next item. We do get a new iterator, but mutable state is now still starting at '0'
         let! found = ts |> TaskSeq.exists ((=) 4)
         found |> should be True
         i |> should equal 4 // only partial evaluation!
@@ -221,7 +221,7 @@ module SideEffects =
         found |> should be True
         i |> should equal 0 // notice that it should be one higher if the statement after 'yield' is evaluated
 
-        // find some next item. We do get a new iterator, but mutable state is now starting at '1'
+        // find some next item. We do get a new iterator, but mutable state is now still starting at '0'
         let! found = ts |> TaskSeq.existsAsync (fun x -> task { return x = 4 })
         found |> should be True
         i |> should equal 4 // only partial evaluation!

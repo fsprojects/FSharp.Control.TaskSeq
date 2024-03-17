@@ -690,18 +690,54 @@ module internal TaskSeqInternal =
 
         taskSeq {
             match predicate with
-            | Predicate predicate ->
+            | Predicate syncPredicate ->
                 for item in source do
-                    if predicate item then
+                    if syncPredicate item then
                         yield item
 
-            | PredicateAsync predicate ->
+            | PredicateAsync asyncPredicate ->
                 for item in source do
-                    match! predicate item with
+                    match! asyncPredicate item with
                     | true -> yield item
                     | false -> ()
         }
 
+    let forall predicate (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        match predicate with
+        | Predicate syncPredicate -> task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable state = true
+            let! cont = e.MoveNextAsync()
+            let mutable hasMore = cont
+
+            while state && hasMore do
+                state <- syncPredicate e.Current
+
+                if state then
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            return state
+          }
+
+        | PredicateAsync asyncPredicate -> task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable state = true
+            let! cont = e.MoveNextAsync()
+            let mutable hasMore = cont
+
+            while state && hasMore do
+                let! pred = asyncPredicate e.Current
+                state <- pred
+
+                if state then
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            return state
+          }
 
     let skipOrTake skipOrTake count (source: TaskSeq<_>) =
         checkNonNull (nameof source) source

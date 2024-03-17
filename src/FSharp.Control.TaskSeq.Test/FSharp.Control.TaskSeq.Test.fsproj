@@ -24,6 +24,7 @@
     <Compile Include="TaskSeq.FindIndex.Tests.fs" />
     <Compile Include="TaskSeq.Find.Tests.fs" />
     <Compile Include="TaskSeq.Fold.Tests.fs" />
+    <Compile Include="TaskSeq.Forall.Tests.fs" />
     <Compile Include="TaskSeq.Head.Tests.fs" />
     <Compile Include="TaskSeq.Indexed.Tests.fs" />
     <Compile Include="TaskSeq.Init.Tests.fs" />
