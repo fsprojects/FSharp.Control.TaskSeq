@@ -5,6 +5,10 @@ open FsUnit.Xunit
 
 open FSharp.Control
 
+///
+/// EXAMPLE OF USING BIND AND YIELD AND CUSTOM:
+/// https://github.com/cannorin/FSharp.CommandLine/blob/master/src/FSharp.CommandLine/commands.fs
+///
 
 module CEs =
 
@@ -192,8 +196,10 @@ module CEs =
             let y = 2
             let z = 3
             let! foo = Unchecked.defaultof<M<double>>
-            Name "a"
-            Member 4.0
+            // leaving the following two lines in creates an "expected to have type unit" error
+            //Name "a"
+            //Member 4.0
+            () // cannot end with a let!
         }
 
         let z7: M<double> = ce {
