@@ -20,7 +20,7 @@ module CEs =
         Variables: 'Vars
     }
 
-    type M<'T> = M<'T, unit>
+    type M<'T> = M<'T, obj List>
 
     type CE() =
 
@@ -29,7 +29,7 @@ module CEs =
             IsMember = None
             IsMember2 = false
             Members = []
-            Variables = ()
+            Variables = []
         }
 
         member _.Combine(model1: M<'T>, model2: M<'T>) : M<'T> =
@@ -53,7 +53,7 @@ module CEs =
                 IsMember = newIsMember
                 IsMember2 = newIsMember2
                 Members = List.append model1.Members model2.Members
-                Variables = ()
+                Variables = []
             }
 
         member _.Delay(f) : M<'T, 'Vars> = f ()
@@ -63,7 +63,7 @@ module CEs =
             IsMember = model.IsMember
             IsMember2 = model.IsMember2
             Members = model.Members
-            Variables = ()
+            Variables = []
         }
 
         member this.For(methods, f) : M<'T> =
@@ -85,7 +85,7 @@ module CEs =
             IsMember = None
             IsMember2 = false
             Members = [ item ]
-            Variables = ()
+            Variables = []
         }
 
         // Only for packing/unpacking the implicit variable space
@@ -127,8 +127,11 @@ module CEs =
         [<CustomOperation("Name", MaintainsVariableSpaceUsingBind = true)>]
         member _.setName(model: M<'T, 'Vars>, [<ProjectionParameter>] name: ('Vars -> string)) : M<'T, 'Vars> = {
             model with
-                Name = Some(name model.Variables)
+                Name = let m = Unchecked.defaultof<M<_, _>> in Some(name m.Variables)
         }
+
+        //[<CustomOperation("Name", MaintainsVariableSpaceUsingBind = true)>]
+        //member _.setName(model: M<'T, 'Vars * 'Vars2>, [<ProjectionParameter>] name: ('Vars -> string)) : M<'T, 'Vars> = Unchecked.defaultof<_>
 
         [<CustomOperation("IsMember", MaintainsVariableSpaceUsingBind = true)>]
         member _.setIsMember(model: M<'T, 'Vars>, [<ProjectionParameter>] isMember: ('Vars -> bool)) : M<'T, 'Vars> = {
@@ -161,6 +164,14 @@ module CEs =
     module Test =
         let x: M<double> = ce { Name "Fred" }
 
+        let queryTest = query {
+            for i in [ 1..10 ] do
+                where (i < 10)
+                minBy (i + -i)
+        //headOrDefault
+        //sumBy 10
+        }
+
         let x2: M<double> = ce {
             Name "Fred"
             IsMember true
@@ -186,7 +197,7 @@ module CEs =
         }
 
         let z5: M<double> = ce {
-            Name "a"
+            Name("a" + "b")
             Name "b"
         //42 // removing this line results in compiler error
         }
@@ -203,9 +214,18 @@ module CEs =
         }
 
         let z7: M<double> = ce {
-            let x = "a"
-            Name(x + "b")
-            Member 4.0
+            let a = "a"
+            let b = "b"
+            let c = "c"
+            let! (d: int) = Unchecked.defaultof<_>
+            let e = ""
+            let! (f: System.Guid) = Unchecked.defaultof<_>
+            //Name("b")
+            //Member 4.0
+            //return ()
+            //let x = "b"
+            //let! x = Unchecked.defaultof<_>
+            return []
         }
 
         let z8: M<double> = ce {
