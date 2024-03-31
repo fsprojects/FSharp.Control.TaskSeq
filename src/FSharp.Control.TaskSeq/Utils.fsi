@@ -6,10 +6,10 @@ open System.Threading.Tasks.Sources
 
 [<AutoOpen>]
 module ValueTaskExtensions =
-    type System.Threading.Tasks.ValueTask with
+    type ValueTask with
 
         /// (Extension member) Gets a task that has already completed successfully.
-        static member inline CompletedTask: System.Threading.Tasks.ValueTask
+        static member inline CompletedTask: ValueTask
 
 module ValueTask =
 
