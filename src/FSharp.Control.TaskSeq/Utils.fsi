@@ -56,10 +56,10 @@ module Task =
     /// Starts a running instance of an Async<'T>, represented as a Task<'T>
     val inline ofAsync: async: Async<'T> -> Task<'T>
 
-    /// Convert a unit-task into a Task<unit>
+    /// Convert a non-generic Task into a Task<unit>
     val inline ofTask: task': Task -> Task<unit>
 
-    /// Convert a non-task function into a task-returning function
+    /// Convert a plain function into a task-returning function
     val inline apply: func: ('a -> 'b) -> ('a -> Task<'b>)
 
     /// Convert a Task<'T> into an Async<'T>
@@ -69,8 +69,8 @@ module Task =
     val inline toValueTask: task: Task<'T> -> ValueTask<'T>
 
     /// <summary>
-    /// Convert a ValueTask&lt;'T> to a Task&lt;'T>. To use a non-generic ValueTask,
-    /// consider using: <paramref name="myValueTask |> Task.ofValueTask |> Task.ofTask" />.
+    /// Convert a ValueTask&lt;'T> to a Task&lt;'T>. For a non-generic ValueTask,
+    /// consider: <paramref name="myValueTask |> Task.ofValueTask |> Task.ofTask" />.
     /// </summary>
     val inline ofValueTask: valueTask: ValueTask<'T> -> Task<'T>
 
@@ -88,7 +88,7 @@ module Async =
     /// Convert an Task<'T> into an Async<'T>
     val inline ofTask: task: Task<'T> -> Async<'T>
 
-    /// Convert a unit-task into an Async<unit>
+    /// Convert a non-generic Task into an Async<unit>
     val inline ofUnitTask: task: Task -> Async<unit>
 
     /// Starts a running instance of an Async<'T>, represented as a Task<'T>
