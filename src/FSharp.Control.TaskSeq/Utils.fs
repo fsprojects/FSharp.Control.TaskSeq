@@ -2,8 +2,6 @@ namespace FSharp.Control
 
 open System.Threading.Tasks
 open System
-open System.Diagnostics
-open System.Threading
 
 [<AutoOpen>]
 module ValueTaskExtensions =
@@ -24,15 +22,15 @@ module ValueTask =
     let inline ofSource taskSource version = ValueTask<bool>(taskSource, version)
     let inline ofTask (task: Task<'T>) = ValueTask<'T> task
 
-    let inline ignore (vtask: ValueTask<'T>) =
+    let inline ignore (valueTask: ValueTask<'T>) =
         // this implementation follows Stephen Toub's advice, see:
         // https://github.com/dotnet/runtime/issues/31503#issuecomment-554415966
-        if vtask.IsCompletedSuccessfully then
+        if valueTask.IsCompletedSuccessfully then
             // ensure any side effect executes
-            vtask.Result |> ignore
+            valueTask.Result |> ignore
             ValueTask()
         else
-            ValueTask(vtask.AsTask())
+            ValueTask(valueTask.AsTask())
 
     [<Obsolete "From version 0.4.0 onward, 'ValueTask.FromResult' is deprecated in favor of 'ValueTask.fromResult'. It will be removed in an upcoming release.">]
     let inline FromResult (value: 'T) = ValueTask<'T> value
@@ -72,14 +70,12 @@ module Async =
     let inline ofTask (task: Task<'T>) = Async.AwaitTask task
     let inline ofUnitTask (task: Task) = Async.AwaitTask task
     let inline toTask (async: Async<'T>) = task { return! async }
-    let inline bind binder (task: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder task }
 
-    let inline ignore (async': Async<'T>) = async {
-        let! _ = async'
-        return ()
-    }
+    let inline ignore (async: Async<'T>) = Async.Ignore async
 
     let inline map mapper (async: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async {
         let! result = async
         return mapper result
     }
+
+    let inline bind binder (async: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder async }
