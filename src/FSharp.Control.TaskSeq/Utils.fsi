@@ -55,7 +55,7 @@ module Task =
     /// Create a task from a value
     val inline fromResult: value: 'U -> Task<'U>
 
-    /// Starts a running instance of an Async<'T>, represented as a Task<'T>
+    /// Starts the `Async<'T>` computation, returning the associated `Task<'T>`
     val inline ofAsync: async: Async<'T> -> Task<'T>
 
     /// Convert a non-generic Task into a Task<unit>
