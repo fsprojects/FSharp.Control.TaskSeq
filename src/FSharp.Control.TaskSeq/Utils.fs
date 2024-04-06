@@ -1,19 +1,14 @@
 namespace FSharp.Control
 
-open System.Threading.Tasks
 open System
+open System.Threading.Tasks
 
 [<AutoOpen>]
 module ValueTaskExtensions =
-    /// Extensions for ValueTask that are not available in NetStandard 2.1, but are
-    /// available in .NET 5+. We put them in Extension space to mimic the behavior of NetStandard 2.1
     type ValueTask with
-
-        /// (Extension member) Gets a task that has already completed successfully.
         static member inline CompletedTask =
-            // This mimics how it is done in .NET itself
+            // This mimics how it is done in net5.0 and later internally
             Unchecked.defaultof<ValueTask>
-
 
 module ValueTask =
     let False = ValueTask<bool>()
@@ -37,7 +32,6 @@ module ValueTask =
 
     [<Obsolete "From version 0.4.0 onward, 'ValueTask.ofIValueTaskSource' is deprecated in favor of 'ValueTask.ofSource'. It will be removed in an upcoming release.">]
     let inline ofIValueTaskSource taskSource version = ofSource taskSource version
-
 
 module Task =
     let inline fromResult (value: 'U) : Task<'U> = Task.FromResult value

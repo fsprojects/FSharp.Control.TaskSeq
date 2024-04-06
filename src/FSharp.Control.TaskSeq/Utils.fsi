@@ -6,9 +6,11 @@ open System.Threading.Tasks.Sources
 
 [<AutoOpen>]
 module ValueTaskExtensions =
+
+    /// Shims back-filling .NET 5+ functionality for use on netstandard2.1
     type ValueTask with
 
-        /// (Extension member) Gets a task that has already completed successfully.
+        /// (Extension member) Gets a ValueTask that has already completed successfully.
         static member inline CompletedTask: ValueTask
 
 module ValueTask =
