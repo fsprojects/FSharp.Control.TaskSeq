@@ -52,7 +52,7 @@ module ValueTask =
 
 module Task =
 
-    /// Create a task from a value
+    /// Creates a Task<'U> that's completed successfully with the specified result.
     val inline fromResult: value: 'U -> Task<'U>
 
     /// Starts the `Async<'T>` computation, returning the associated `Task<'T>`
