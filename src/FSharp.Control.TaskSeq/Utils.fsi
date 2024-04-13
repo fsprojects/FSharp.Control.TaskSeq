@@ -93,7 +93,7 @@ module Async =
     /// Convert a non-generic Task into an Async<unit>
     val inline ofUnitTask: task: Task -> Async<unit>
 
-    /// Starts a running instance of an Async<'T>, represented as a Task<'T>
+    /// Starts the `Async<'T>` computation, returning the associated `Task<'T>`
     val inline toTask: async: Async<'T> -> Task<'T>
 
     /// Convert an Async<'T> into an Async<unit>, ignoring the result
