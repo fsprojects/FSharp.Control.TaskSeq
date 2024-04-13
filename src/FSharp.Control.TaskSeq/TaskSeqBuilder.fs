@@ -525,9 +525,9 @@ module LowPriority =
         // and we need a way to distinguish these two methods.
         //
         // Types handled:
-        //  - ValueTask (non-generic, because it implements GetResult() -> unit)
+        //  - (non-generic) ValueTask (because it implements GetResult() -> unit)
         //  - ValueTask<'T> (because it implements GetResult() -> 'TResult)
-        //  - Task (non-generic, because it implements GetResult() -> unit)
+        //  - (non-generic) Task (because it implements GetResult() -> unit)
         //  - any other type that implements GetAwaiter()
         //
         // Not handled:

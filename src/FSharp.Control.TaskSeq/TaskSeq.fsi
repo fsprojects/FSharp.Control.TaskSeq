@@ -274,7 +274,7 @@ type TaskSeq =
     static member append: source1: TaskSeq<'T> -> source2: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Concatenates a task sequence <paramref name="source1" /> with a non-async F# <see cref="seq" /> in <paramref name="source2" />
+    /// Concatenates a task sequence <paramref name="source1" /> with a (non-async) F# <see cref="seq" /> in <paramref name="source2" />
     /// and returns a single task sequence.
     /// </summary>
     ///
@@ -285,7 +285,7 @@ type TaskSeq =
     static member appendSeq: source1: TaskSeq<'T> -> source2: seq<'T> -> TaskSeq<'T>
 
     /// <summary>
-    /// Concatenates a non-async F# <see cref="seq" /> in <paramref name="source1" /> with a task sequence in <paramref name="source2" />
+    /// Concatenates a (non-async) F# <see cref="seq" /> in <paramref name="source1" /> with a task sequence in <paramref name="source2" />
     /// and returns a single task sequence.
     /// </summary>
     ///
