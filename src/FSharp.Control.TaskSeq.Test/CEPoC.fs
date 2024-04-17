@@ -10,6 +10,75 @@ open FSharp.Control
 /// https://github.com/cannorin/FSharp.CommandLine/blob/master/src/FSharp.CommandLine/commands.fs
 ///
 
+module Cmd =
+    open FSharp.CommandLine
+
+    let fileOption = commandOption {
+        names [ "f"; "file" ]
+        description "Name of a file to use (Default index: 0)"
+        takes (format("%s:%i").withNames [ "filename"; "index" ])
+        takes (format("%s").map (fun filename -> (filename, 0)))
+        suggests (fun _ -> [ CommandSuggestion.Files None ])
+    }
+
+    type Verbosity =
+        | Quiet
+        | Normal
+        | Full
+        | Custom of int
+
+    let verbosityOption = commandOption {
+        names [ "v"; "verbosity" ]
+        description "Display this amount of information in the log."
+        takes (regex @"q(uiet)?$" |> asConst Quiet)
+        takes (regex @"n(ormal)?$" |> asConst Quiet)
+        takes (regex @"f(ull)?$" |> asConst Full)
+        takes (format("custom:%i").map (fun level -> Custom level))
+        takes (format("c:%i").map (fun level -> Custom level))
+    }
+
+    let mainCommand () =
+        let x = CommandBuilder()
+
+        let c1 = command {
+            name "main"
+            description "The main command."
+            opt files in fileOption |> CommandOption.zeroOrMore
+
+            opt verbosity in verbosityOption
+                             |> CommandOption.zeroOrExactlyOne
+                             |> CommandOption.whenMissingUse Normal
+
+            do printfn "%A, %A" files verbosity
+            let! x = command { name "main" }
+            name "foo"
+            //for x in 1 .. 3 do
+            //    yield 42
+
+            //for x in 1 .. 3 do
+            //    yield 42
+
+            do printfn "%A, %A" files verbosity
+            let! x = command { name "main" }
+            description "The main command."
+
+            return "foo"
+        }
+
+        command {
+            let! x = c1
+            name "main"
+            description "The main command."
+            opt files in fileOption |> CommandOption.zeroOrMore
+
+            opt verbosity in verbosityOption
+                             |> CommandOption.zeroOrExactlyOne
+                             |> CommandOption.whenMissingUse Normal
+
+            do printfn "%A, %A" files verbosity
+            return "foo"
+        }
+
 module CEs =
 
     type M<'T, 'Vars> = {
