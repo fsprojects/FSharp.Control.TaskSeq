@@ -16,8 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary to the base test project, which uses the lowest possible denominator -->
-    <PackageReference Update="FSharp.Core" Version="7.0.401" />
+    <!--
+      IMPORTANT: Our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary
+                 to the main test project, which uses the lowest possible denominator (6.0.1)
+                 By NOT including the reference, the F# compiler will automatically choose the
+                 highest version available.
+                 This ensures that, if we have a forwards compat issue, we will get an error.
+    -->
     <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0-alpha.1" />
     <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.10.0" />
     <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />

@@ -60,7 +60,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- align test project with minimal required version for TaskSeq, which is 6.0.1 at the moment -->
+    <!--
+      Align test project with minimal required version for TaskSeq, which is 6.0.1 at the moment.
+      This updates the default reference (which is the highest stable version) to be the oldest,
+      still compatible version of the TaskSeq library.
+    -->
     <PackageReference Update="FSharp.Core" Version="6.0.1" />
     <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />

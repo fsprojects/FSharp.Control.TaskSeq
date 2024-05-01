@@ -57,7 +57,15 @@ Generates optimized IL code through resumable state machines, and comes with a c
   </ItemGroup>
 
   <ItemGroup>
-    <!-- maximal compatibility with minimal required FSharp.Core version for TaskSeq -->
-    <PackageReference Update="FSharp.Core" Version="6.0.1" />
+    <!--
+      Maximum compatibility with minimally required FSharp.Core version for TaskSeq
+      IMPORTANT: Leave this in! F# automatically adds an FSharp.Core reference if absent
+                 but it chooses the highest stable version by default (8.0+). This way, we
+                 stick to being most compatible.
+    -->
+    <PackageReference Update="FSharp.Core" Version="6.0.1">
+      <!-- if using "remove unused references", this prevents FSharp.Core from being shown in that list -->
+      <TreatAsUsed>true</TreatAsUsed>
+    </PackageReference>
   </ItemGroup>
 </Project>
