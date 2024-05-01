@@ -16,18 +16,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary to the base test project, which uses the lowest possible denominator -->
-    <PackageReference Update="FSharp.Core" Version="7.0.401" />
-    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0-alpha.1" />
-    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.10.0" />
+    <!--
+      IMPORTANT: Our smoketests use the highest RTM (non-alpha) FSharp.Core, contrary
+                 to the main test project, which uses the lowest possible denominator (6.0.1)
+                 By NOT including the reference, the F# compiler will automatically choose the
+                 highest version available.
+                 This ensures that, if we have a forwards compat issue, we will get an error.
+    -->
+    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0" />
+    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.15.1" />
     <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageReference Include="xunit" Version="2.7.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3">
+    <PackageReference Include="xunit" Version="2.8.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.0">
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
