@@ -6,6 +6,7 @@ open FsUnit
 open Xunit
 
 open FSharp.Control
+open System.Threading
 
 [<Fact>]
 let ``CE taskSeq: use 'do'`` () =
@@ -56,6 +57,56 @@ let ``CE taskSeq: use 'do!' with a task-delay`` () =
     }
     |> verifyEmpty
     |> Task.map (fun _ -> value |> should equal 2)
+
+//module CancellationToken =
+//    [<Fact>]
+//    let ``CE taskSeq: use 'do!' with a default cancellation-token`` () =
+//        let mutable value = 0
+
+//        taskSeq {
+//            do value <- value + 1
+//            do! CancellationToken()
+//            do value <- value + 1
+//        }
+//        |> verifyEmpty
+//        |> Task.map (fun _ -> value |> should equal 2)
+
+//    [<Fact>]
+//    let ``CE taskSeq: use 'do!' with a timer cancellation-token - explicit`` () = task {
+//        let mutable value = 0
+//        use tokenSource = new CancellationTokenSource(500)
+
+//        return!
+//            taskSeq {
+//                do! tokenSource.Token // this sets the token for this taskSeq
+//                do value <- value + 1
+//                do! Task.Delay(300, tokenSource.Token)
+//                do! Task.Delay(300, tokenSource.Token)
+//                do! Task.Delay(300, tokenSource.Token)
+//                do value <- value + 1
+//            }
+//            |> verifyEmpty
+//            |> Task.map (fun _ -> value |> should equal 2)
+//    }
+
+
+//    [<Fact>]
+//    let ``CE taskSeq: use 'do!' with a timer cancellation-token - implicit`` () = task {
+//        let mutable value = 0
+//        use tokenSource = new CancellationTokenSource(500)
+
+//        return!
+//            taskSeq {
+//                do! tokenSource.Token // this sets the token for this taskSeq
+//                do value <- value + 1
+//                do! Task.Delay(300)
+//                do! Task.Delay(300)
+//                do! Task.Delay(300)
+//                do value <- value + 1
+//            }
+//            |> verifyEmpty
+//            |> Task.map (fun _ -> value |> should equal 2)
+//    }
 
 [<Fact>]
 let ``CE taskSeq: use 'do!' with Async`` () =
