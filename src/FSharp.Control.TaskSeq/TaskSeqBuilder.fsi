@@ -173,7 +173,7 @@ module LowPriority =
     type TaskSeqBuilder with
 
         [<NoEagerConstraintApplication>]
-        member inline Bind< ^TaskLike, 'T, 'U, ^Awaiter, 'TOverall> :
+        member inline Bind< ^TaskLike, 'T, 'U, ^Awaiter> :
             task: ^TaskLike * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
                 when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
                 and ^Awaiter :> ICriticalNotifyCompletion

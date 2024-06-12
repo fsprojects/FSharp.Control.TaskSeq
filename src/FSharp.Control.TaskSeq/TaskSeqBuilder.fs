@@ -534,7 +534,7 @@ module LowPriority =
         //  - Task<'T> (because it only implements GetResult() -> unit, not GetResult() -> 'TResult)
 
         [<NoEagerConstraintApplication>]
-        member inline _.Bind< ^TaskLike, 'T, 'U, ^Awaiter, 'TOverall
+        member inline _.Bind< ^TaskLike, 'T, 'U, ^Awaiter
             when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
             and ^Awaiter :> ICriticalNotifyCompletion
             and ^Awaiter: (member get_IsCompleted: unit -> bool)
