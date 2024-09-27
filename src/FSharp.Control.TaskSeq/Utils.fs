@@ -34,6 +34,8 @@ module ValueTask =
     let inline ofIValueTaskSource taskSource version = ofSource taskSource version
 
 module Task =
+    let False = Task.FromResult false
+    let True = Task.FromResult true
     let inline fromResult (value: 'U) : Task<'U> = Task.FromResult value
     let inline ofAsync (async: Async<'T>) = task { return! async }
     let inline ofTask (task': Task) = task { do! task' }

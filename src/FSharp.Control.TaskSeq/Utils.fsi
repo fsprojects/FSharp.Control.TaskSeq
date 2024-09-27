@@ -51,6 +51,11 @@ module ValueTask =
     val inline ignore: valueTask: ValueTask<'T> -> ValueTask
 
 module Task =
+    /// A successfully completed Task of boolean that has the value false.
+    val False: Task<bool>
+
+    /// A successfully completed Task of boolean that has the value true.
+    val True: Task<bool>
 
     /// Creates a Task<'U> that's completed successfully with the specified result.
     val inline fromResult: value: 'U -> Task<'U>
