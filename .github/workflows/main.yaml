@@ -44,7 +44,7 @@ jobs:
         shell: cmd
         run: ./build.cmd ci -release
       - name: Publish test results - release
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         if: always()
         with:
           name: Report release tests

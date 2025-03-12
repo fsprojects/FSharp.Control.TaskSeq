@@ -13,7 +13,7 @@ jobs:
   test-report-release:
     runs-on: windows-latest
     steps:
-    - uses: dorny/test-reporter@v1
+    - uses: dorny/test-reporter@v2
       with:
         artifact: test-results-release    # artifact name
         name: Report release tests        # Name of the check run which will be created
@@ -23,7 +23,7 @@ jobs:
   test-report-debug:
     runs-on: windows-latest
     steps:
-    - uses: dorny/test-reporter@v1
+    - uses: dorny/test-reporter@v2
       with:
         artifact: test-results-debug      # artifact name
         name: Report debug tests          # Name of the check run which will be created
