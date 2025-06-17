@@ -252,6 +252,8 @@ type TaskSeq private () =
             yield! source2
         }
 
+    static member chunkBySize (chunkSize: int) (source: TaskSeq<'T>) = Internal.chunkBySize chunkSize source
+
     //
     // iter/map/collect functions
     //

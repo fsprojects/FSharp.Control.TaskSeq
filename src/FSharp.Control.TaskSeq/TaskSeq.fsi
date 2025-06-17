@@ -823,6 +823,15 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member chooseAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
+    /// <summary>Divides the input sequence into chunks of size at most <c>chunkSize</c>.</summary>
+    ///
+    /// <param name="chunkSize">The maximum size of each chunk.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The task sequence divided into chunks.</returns>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when <c>chunkSize</c> is not positive.</exception>
+    static member chunkBySize: chunkSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
+
     /// <summary>
     /// Returns a new task sequence containing only the elements of the collection
     /// for which the given function <paramref name="predicate" /> returns <see cref="true" />.
