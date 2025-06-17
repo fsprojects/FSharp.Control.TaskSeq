@@ -1098,8 +1098,10 @@ module internal TaskSeqInternal =
 
         }
 
-    let chunkBySize chunkSize (source: TaskSeq<'T>): TaskSeq<'T[]> =
-        if chunkSize < 1 then invalidArg (nameof chunkSize) $"The value must be positive, but was %i{chunkSize}."
+    let chunkBySize chunkSize (source: TaskSeq<'T>) : TaskSeq<'T[]> =
+        if chunkSize < 1 then
+            invalidArg (nameof chunkSize) $"The value must be positive, but was %i{chunkSize}."
+
         checkNonNull (nameof source) source
 
         taskSeq {
@@ -1110,14 +1112,17 @@ module internal TaskSeqInternal =
 
             if step then
                 let buffer = ResizeArray<_>()
+
                 while go do
                     buffer.Add e.Current
+
                     if buffer.Count = chunkSize then
                         yield buffer.ToArray()
                         buffer.Clear()
 
                     let! step = e.MoveNextAsync()
                     go <- step
+
                 if buffer.Count > 0 then
                     yield buffer.ToArray()
         }

@@ -27,19 +27,29 @@ module EmptySeq =
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-chunkBySize(1) has no effect on empty input`` variant =
         // no `task` block needed
-        Gen.getEmptyVariant variant |> TaskSeq.chunkBySize 1 |> verifyEmpty
+        Gen.getEmptyVariant variant
+        |> TaskSeq.chunkBySize 1
+        |> verifyEmpty
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-chunkBySize(99) has no effect on empty input`` variant =
         // no `task` block needed
-        Gen.getEmptyVariant variant |> TaskSeq.chunkBySize 99 |> verifyEmpty
+        Gen.getEmptyVariant variant
+        |> TaskSeq.chunkBySize 99
+        |> verifyEmpty
 
     [<Fact>]
     let ``TaskSeq-chunkBySize(-1) should throw ArgumentException on any input`` () =
-        fun () -> TaskSeq.empty<int> |> TaskSeq.chunkBySize -1 |> consumeTaskSeq
+        fun () ->
+            TaskSeq.empty<int>
+            |> TaskSeq.chunkBySize -1
+            |> consumeTaskSeq
         |> should throwAsyncExact typeof<ArgumentException>
 
-        fun () -> TaskSeq.init 10 id |> TaskSeq.chunkBySize -1 |> consumeTaskSeq
+        fun () ->
+            TaskSeq.init 10 id
+            |> TaskSeq.chunkBySize -1
+            |> consumeTaskSeq
         |> should throwAsyncExact typeof<ArgumentException>
 
     [<Fact>]
@@ -123,7 +133,7 @@ module SideEffects =
         Gen.getSeqWithSideEffect variant
         |> TaskSeq.chunkBySize 5
         |> TaskSeq.toArrayAsync
-        |> Task.map (shouldEqual [| [| 1 .. 5 |]; [| 6 .. 10 |] |])
+        |> Task.map (shouldEqual [| [| 1..5 |]; [| 6..10 |] |])
 
     [<Fact>]
     let ``TaskSeq-chunkBySize prove we execute empty-seq side-effects`` () = task {
@@ -173,13 +183,29 @@ module SideEffects =
         let ts = Gen.getSeqWithSideEffect variant
         let mutable sum = 0
 
-        do! TaskSeq.chunkBySize 1 ts |> TaskSeq.collect TaskSeq.ofArray |> TaskSeq.iter (fun item -> sum <- sum + item)
-        do! TaskSeq.chunkBySize 2 ts |> TaskSeq.collect TaskSeq.ofArray |> TaskSeq.iter (fun item -> sum <- sum + item)
-        do! TaskSeq.chunkBySize 3 ts |> TaskSeq.collect TaskSeq.ofArray |> TaskSeq.iter (fun item -> sum <- sum + item)
-        do! TaskSeq.chunkBySize 4 ts |> TaskSeq.collect TaskSeq.ofArray |> TaskSeq.iter (fun item -> sum <- sum + item)
+        do!
+            TaskSeq.chunkBySize 1 ts
+            |> TaskSeq.collect TaskSeq.ofArray
+            |> TaskSeq.iter (fun item -> sum <- sum + item)
+
+        do!
+            TaskSeq.chunkBySize 2 ts
+            |> TaskSeq.collect TaskSeq.ofArray
+            |> TaskSeq.iter (fun item -> sum <- sum + item)
+
+        do!
+            TaskSeq.chunkBySize 3 ts
+            |> TaskSeq.collect TaskSeq.ofArray
+            |> TaskSeq.iter (fun item -> sum <- sum + item)
+
+        do!
+            TaskSeq.chunkBySize 4 ts
+            |> TaskSeq.collect TaskSeq.ofArray
+            |> TaskSeq.iter (fun item -> sum <- sum + item)
 
         sum |> should equal 820 // side-effected tasks, so 'item' DOES CHANGE, each next iteration starts 10 higher
     }
+
     [<Fact>]
     let ``TaskSeq-chunkBySize prove that an exception from the taskSeq is thrown`` () =
         let items = taskSeq {
