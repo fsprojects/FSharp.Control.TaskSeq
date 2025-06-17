@@ -211,7 +211,7 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [ ] `average` / `averageBy`, `sum` and related
   - [x] `forall` / `forallAsync` (see [#240])
   - [x] `skip` / `drop` / `truncate` / `take` (see [#209])
-  - [x] `chunkBySize` (see [TODO])
+  - [x] `chunkBySize` (see [#265])
   - [ ] `windowed`
   - [ ] `compareWith`
   - [ ] `distinct`
@@ -264,7 +264,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#67][] |                    |                      | `box`                     | |
 | &#x2705; [#67][] |                    |                      | `unbox`                   | |
 | &#x2705; [#23][] | `choose`           | `choose`             | `chooseAsync`             | |
-| &#x2705; [TODO][]| `chunkBySize`      | `chunkBySize`        |                           | |
+| &#x2705; [#265][]| `chunkBySize`      | `chunkBySize`        |                           | |
 | &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
 |                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
