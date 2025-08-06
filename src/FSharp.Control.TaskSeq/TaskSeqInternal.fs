@@ -1097,3 +1097,22 @@ module internal TaskSeqInternal =
                     go <- step
 
         }
+
+    let distinctUntilChanged (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone ->
+                    yield current
+                    maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    if previous = current then
+                        () // skip
+                    else
+                        yield current
+                        maybePrevious <- ValueSome current
+        }
