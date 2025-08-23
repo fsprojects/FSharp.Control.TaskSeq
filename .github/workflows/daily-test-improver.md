@@ -41,6 +41,11 @@ tools:
       WebSearch:
       # Configure bash build commands here, or enabled the agentics/shared/build-tools.md file at the end of this file and edit there
       #Bash: [":*"]
+      Bash:
+      - ":*"
+      # - "dotnet build:*"
+      # - "dotnet test:*"
+      # - "reportgenerator:*"
 
 steps:
   - name: Checkout repository
