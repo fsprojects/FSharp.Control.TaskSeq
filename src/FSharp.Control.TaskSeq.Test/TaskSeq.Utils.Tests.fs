@@ -78,9 +78,7 @@ module ValueTaskTests =
 
     [<Fact>]
     let ``Obsolete ValueTask.FromResult still works`` () = task {
-        #pragma warning disable "CS0618" // Obsolete warning
         let! result = ValueTask.FromResult 42
-        #pragma warning restore "CS0618"
         result |> should equal 42
     }
 
