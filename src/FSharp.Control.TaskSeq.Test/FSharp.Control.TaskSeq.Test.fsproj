@@ -57,6 +57,8 @@
     <Compile Include="TaskSeq.Do.Tests.fs" />
     <Compile Include="TaskSeq.Let.Tests.fs" />
     <Compile Include="TaskSeq.Using.Tests.fs" />
+    <Compile Include="TaskSeq.Internal.Tests.fs" />
+    <Compile Include="TaskSeq.Builder.Tests.fs" />
   </ItemGroup>
 
   <ItemGroup>
