@@ -1,0 +1,53 @@
+name: 'Coverage Steps'
+description: 'Run tests with coverage collection for daily test improver'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      
+    - name: Restore dotnet tools
+      shell: bash
+      run: dotnet tool restore
+      
+    - name: Build solution
+      shell: bash 
+      run: dotnet build src/FSharp.Control.TaskSeq.sln -c Release
+      
+    - name: Run tests with coverage
+      shell: bash
+      run: |
+        dotnet test src/FSharp.Control.TaskSeq.Test/FSharp.Control.TaskSeq.Test.fsproj \
+          -c Release \
+          --collect:"XPlat Code Coverage" \
+          --results-directory ./TestResults \
+          --logger "console;verbosity=detailed"
+          
+    - name: Install ReportGenerator
+      shell: bash
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      
+    - name: Generate coverage report
+      shell: bash
+      run: |
+        reportgenerator \
+          -reports:"./TestResults/**/coverage.cobertura.xml" \
+          -targetdir:"./CoverageReport" \
+          -reporttypes:"Html;TextSummary;Cobertura"
+          
+    - name: Display coverage summary
+      shell: bash
+      run: cat ./CoverageReport/Summary.txt
+      
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: ./CoverageReport/
+        
+    - name: Upload coverage data
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-data
+        path: ./TestResults/
