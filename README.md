@@ -229,7 +229,7 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [ ] Make the tasks cancellable with token (see [#133]). **PLANNED FOR 0.5-alpha**
   - [ ] Support `ConfiguredCancelableAsyncEnumerable` (see [#167]). **PLANNED FOR 0.5-alpha**
   - [ ] Interop with `cancellableTask` and `valueTask` from [`IcedTasks`][24]
-- [ ] Interop with `AsyncSeq`.
+- [x] Interop with `AsyncSeq` (implemented in `FSharp.Control.AsyncSeq` package).
 - [ ] (maybe) Support any awaitable type in the function lib (that is: where a `Task` is required, accept a `ValueTask` and `Async` as well)
 - [ ] Add `TaskEx` functionality (separate lib). **DISCUSSION**
 - [ ] Move documentation to <https://fsprojects.github.io>
