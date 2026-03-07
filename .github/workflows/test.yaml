@@ -16,6 +16,8 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v4
+        with:
+          cache: true
 
       # cache NuGet packages to avoid re-downloading on every run
       - name: Cache NuGet packages
@@ -54,6 +56,8 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v4
+        with:
+          cache: true
 
       # cache NuGet packages to avoid re-downloading on every run
       - name: Cache NuGet packages
