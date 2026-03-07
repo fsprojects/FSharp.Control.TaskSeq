@@ -1,7 +1,9 @@
 {
-  "last_run": "2026-03-07T19:11:00Z",
-  "last_run_id": "22805368102",
-  "comments_made": [],
+  "last_run": "2026-03-07T19:56:00Z",
+  "last_run_id": "22806096007",
+  "comments_made": [
+    { "issue": 269, "date": "2026-03-07", "summary": "Root cause analysis for nested-loop NRE in Release mode, workarounds provided" }
+  ],
   "prs_created": [
     {
       "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
@@ -10,24 +12,25 @@
       "created": "2026-03-07"
     },
     {
-      "branch": "repo-assist/perf-init-remove-lazy-2026-03",
-      "title": "perf: remove unnecessary Lazy allocation in TaskSeq.init per iteration",
+      "branch": "repo-assist/test-nested-loops-2026-03",
+      "title": "test: add nested for-loop tests for task and async CE extensions",
       "status": "open",
       "created": "2026-03-07"
     }
   ],
-  "issues_commented": [],
+  "issues_commented": [269],
   "monthly_activity_issue": {
     "title": "[Repo Assist] Monthly Activity 2026-03",
+    "number": 285,
     "month": "2026-03",
     "status": "open"
   },
   "issue_backlog_cursor": 0,
   "label_backlog_cursor": 0,
-  "notes": "First run. 6 unlabelled issues: #280, #269, #261, #259, #246, #245. Need to label next run. Build fails on newer F# (FS3873) - submitted PR to fix. TaskSeq.init had unnecessary Lazy per item - submitted perf PR. Test projects target net6.0 (EOL) - good candidate for future Task 4. No global.json - future engineering investment. Previous runs: none (first run).",
+  "notes": "perf-init-remove-lazy PR was merged as #284. fix-deprecated-seq-expr PR still open. test-nested-loops PR open. All 6 previously unlabelled issues now labelled (#245, #246, #259, #261, #269, #288). Issue #288 is new (chunkBySize feature request by dsyme, referencing closed PR #265). Good candidate for future Task 5/10: implement TaskSeq.chunkBySize properly.",
   "known_issues": {
-    "build_failure_newer_fsharp": "FS3873 in TaskSeq.Concat.Tests.fs - PR submitted",
-    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future work",
-    "no_global_json": "No global.json to pin SDK version - future work"
+    "nested_loop_nre_release_mode": "#269 - NRE when nesting loops with tuple destructuring in Release, fallback dynamic path bug, possibly F# compiler issue",
+    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future Task 4 work",
+    "global_json_missing_before_run2": "global.json was added (10.0.103) - but 10.0.102 is the installed version in this runner"
   }
 }
