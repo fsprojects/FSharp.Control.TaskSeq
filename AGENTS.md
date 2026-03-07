@@ -7,7 +7,7 @@ FSharp.Control.TaskSeq is an F# library providing a `taskSeq` computation expres
 ## Repository Layout
 
 - `src/FSharp.Control.TaskSeq/` — Main library (netstandard2.1)
-- `src/FSharp.Control.TaskSeq.Test/` — xUnit test project (net6.0)
+- `src/FSharp.Control.TaskSeq.Test/` — xUnit test project (net9.0)
 - `src/FSharp.Control.TaskSeq.SmokeTests/` — Smoke/integration tests
 - `src/FSharp.Control.TaskSeq.sln` — Solution file
 - `Version.props` — Single source of truth for the package version
@@ -97,7 +97,7 @@ All workflows are in `.github/workflows/`:
 - F# source files use `.fs` extension; signature files use `.fsi`.
 - `TreatWarningsAsErrors` is enabled for all projects.
 - File ordering matters in F# — the `<Compile>` order in `.fsproj` files defines compilation order.
-- The library targets `netstandard2.1`; tests target `net6.0` with `FSharp.Core` pinned to `6.0.1`.
+- The library targets `netstandard2.1`; tests target `net9.0` with `FSharp.Core` pinned to `6.0.1` (intentional: ensures compatibility with the minimum supported version).
 - NuGet packages are output to the `packages/` directory.
 
 ## Release Notes
