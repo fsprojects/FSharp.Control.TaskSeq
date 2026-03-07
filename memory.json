@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-07T21:02:15Z",
-  "run_id": "22807147162",
+  "last_run": "2026-03-07T21:13:55Z",
+  "run_id": "22807334785",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z"
@@ -41,9 +41,20 @@
       "status": "open"
     },
     {
+      "pr": 298,
       "branch": "repo-assist/test-choose-expand-2026-03",
       "description": "Expand choose/chooseAsync and filter/filterAsync tests (8+5 new tests)",
-      "status": "open (PR pending number)"
+      "status": "open"
+    },
+    {
+      "branch": "repo-assist/feat-reduce-2026-03",
+      "description": "Add TaskSeq.reduce / TaskSeq.reduceAsync (75 tests, ref #289)",
+      "status": "open (PR number TBD - created this run)"
+    },
+    {
+      "branch": "repo-assist/feat-unfold-2026-03",
+      "description": "Add TaskSeq.unfold / TaskSeq.unfoldAsync (14 tests, ref #289)",
+      "status": "open (PR number TBD - created this run)"
     }
   ],
   "issues_backlog_cursor": 290,
@@ -51,5 +62,5 @@
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "Issue #289 (dsyme): align with AsyncSeq. Done: pairwise (#293), scan/scanAsync (#296). Next: unfold, windowed, reduce. Comment posted on #289 this run with progress/roadmap. Issue #290 (CI perf) addressed by PR #295. Issue #269 has Repo Assist comment already. PR #292 merged. PR #291 (test-nested-loops) also merged. Monthly activity issue #285 updated."
+  "notes": "Issue #289 (dsyme): align with AsyncSeq. Done: pairwise (#293), scan/scanAsync (#296), choose/chooseAsync tests (#298), reduce/reduceAsync (this run), unfold/unfoldAsync (this run). Next: windowed, chunkBySize (#258), sumBy/averageBy. Issue #269 (NullReferenceException nested loops in Release) - likely F# compiler bug, not directly fixable in TaskSeq. Monthly activity issue #285 updated."
 }
