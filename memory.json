@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-07T20:24:58Z",
-  "run_id": "22806558082",
+  "last_run": "2026-03-07T20:42:03Z",
+  "run_id": "22806827100",
   "monthly_activity_issue": 285,
   "comments_made": {},
   "prs_created": [
@@ -21,11 +21,32 @@
       "status": "open"
     },
     {
+      "pr": 293,
       "branch": "repo-assist/test-forward-pairwise-2026-03",
       "description": "Add TaskSeq.pairwise (ref #289); expand distinctUntilChanged tests",
       "status": "open"
+    },
+    {
+      "pr": 295,
+      "branch": "repo-assist/ci-test-perf-2026-03-647061314c105ab1",
+      "description": "NuGet caching (actions/cache@v4) + reduce DummyTaskFactory test delays",
+      "status": "open (created by concurrent run, addresses #290)"
+    },
+    {
+      "branch": "repo-assist/feat-scan-2026-03",
+      "description": "Add TaskSeq.scan / TaskSeq.scanAsync (54 tests, ref #289)",
+      "status": "open (PR pending creation)"
+    },
+    {
+      "branch": "repo-assist/eng-nuget-cache-2026-03",
+      "description": "CI: add cache:true to setup-dotnet@v4 in all 4 workflows (alt to #295)",
+      "status": "open (PR pending creation)"
     }
   ],
   "issues_backlog_cursor": 290,
-  "notes": "Issue #289 (dsyme): align with AsyncSeq functions — do bit by bit. Done pairwise. Next: scan/scanAsync, windowed, unfold. Issue #269 (null ref release mode) needs investigation — likely F# compiler bug. Issues #290, #289 unlabelled."
+  "labels_applied": {
+    "289": ["enhancement"],
+    "290": ["performance", "enhancement"]
+  },
+  "notes": "Issue #289 (dsyme): align with AsyncSeq functions — do bit by bit. Done: pairwise, scan/scanAsync. Next: windowed, unfold. Issue #290 (CI perf) addressed by PR #295 (existing) and repo-assist/eng-nuget-cache-2026-03 (new). Note: repo-assist/eng-nuget-cache-2026-03 overlaps with #295 caching — maintainer should pick one. Issue #269 (null ref release mode) needs investigation."
 }

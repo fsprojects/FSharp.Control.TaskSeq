@@ -1,21 +1,19 @@
 {
-  "last_run": "2026-03-07T20:31:52Z",
-  "last_run_id": "22806660407",
+  "last_run": "2026-03-07T20:00:59Z",
+  "last_run_id": "22806158228",
   "comments_made": [],
   "prs_created": [
     {
-      "branch": "repo-assist/test-perf-improve-2026-03",
-      "title": "perf/test: replace ConcurrentHashSet with plain HashSet in except; add zip/indexed tests",
-      "pr_number": 292,
+      "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
+      "title": "Fix FS3873: replace deprecated bare range expressions in tests",
       "status": "open",
       "created": "2026-03-07"
     },
     {
-      "branch": "repo-assist/ci-test-perf-2026-03",
-      "title": "perf/ci: add NuGet caching and reduce test delays",
+      "branch": "repo-assist/test-perf-improve-2026-03",
+      "title": "perf/test: replace ConcurrentHashSet with HashSet in except; add zip/indexed tests",
       "status": "open",
-      "created": "2026-03-07",
-      "closes": 290
+      "created": "2026-03-07"
     }
   ],
   "issues_commented": [],
@@ -27,9 +25,10 @@
   },
   "issue_backlog_cursor": 0,
   "label_backlog_cursor": 0,
-  "notes": "Run 3 (2026-03-07T20:31). Triggered by /repo-assist on issue #290 (CI perf). Created PR repo-assist/ci-test-perf-2026-03 adding NuGet caching to CI workflows and reducing test delays. PR #292 (test-perf-improve) still open for review. fix-deprecated-seq-expr PR appears merged (checked off in issue #285). Unlabelled issues pending: #280, #269, #261, #259, #246, #245.",
+  "notes": "Run 2 (2026-03-07T20:00). PR #284 (perf-init-remove-lazy) merged into main. Still open: fix-deprecated-seq-expr PR, test-perf-improve-2026-03 PR. 6 unlabelled issues: #280, #269, #261, #259, #246, #245 — label next run. Issues to comment on: #280, #269. Future: upgrade test projects net6.0->net8.0.",
   "known_issues": {
-    "test_delays_reduced": "DummyTaskFactory 10-30ms → 1-5ms, AsyncYielded 15-50ms → 1-5ms, longDelay 20-70ms → Task.Delay(1) ~15ms"
-  },
-  "checked_off_by_maintainer": ["repo-assist/fix-deprecated-seq-expr-2026-03"]
+    "build_failure_newer_fsharp": "FS3873 in TaskSeq.Concat.Tests.fs - PR submitted fix-deprecated-seq-expr-2026-03",
+    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future work",
+    "concurrent_hashset_removed": "ConcurrentHashSet replaced with plain HashSet in except/exceptOfSeq - PR test-perf-improve-2026-03"
+  }
 }
