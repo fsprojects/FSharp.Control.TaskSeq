@@ -1,10 +1,11 @@
 {
-  "last_run": "2026-03-07T23:26:16Z",
-  "run_id": "22809459169",
+  "last_run": "2026-03-07T23:39:41Z",
+  "run_id": "22809661324",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
-    "258": "2026-03-07T21:48:07Z"
+    "258": "2026-03-07T21:48:07Z",
+    "245": "2026-03-07T23:39:00Z"
   },
   "prs_created": [
     {
@@ -87,13 +88,19 @@
       "pr": 306,
       "branch": "repo-assist/feat-mapfold-2026-03",
       "description": "Add TaskSeq.mapFold / TaskSeq.mapFoldAsync (56 tests)",
+      "status": "open"
+    },
+    {
+      "pr": "307-est",
+      "branch": "repo-assist/feat-groupby-countby-partition-2026-03",
+      "description": "Add TaskSeq.groupBy/groupByAsync, countBy/countByAsync, partition/partitionAsync (195 tests)",
       "status": "open - created this run"
     }
   ],
-  "issues_backlog_cursor": 290,
+  "issues_backlog_cursor": 245,
   "labels_applied": {
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "4 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/sumBy/averageBy), #305 (distinct+exists-perf), #306 (mapFold/mapFoldAsync). All CI pending. Next: consider groupBy/countBy, or investigate issue #269 (NullReferenceException in nested loops, Release mode - possibly F# compiler bug). global.json updated to use SDK 10.0.102 (10.0.103 not available)."
+  "notes": "5 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/sumBy/averageBy), #305 (distinct+exists-perf), #306 (mapFold/mapFoldAsync), #307-est (groupBy/countBy/partition). Commented on #245 (upload-artifact@v4 already resolved). Next: investigate issue #269 (NullReferenceException in nested loops, Release mode - possibly F# compiler bug); or consider splitAt/transpose/allPairs."
 }
