@@ -28,7 +28,7 @@ module Immutable =
 
     [<Fact>]
     let ``TaskSeq-isEmpty returns false for delayed singleton sequence`` () =
-        Gen.sideEffectTaskSeqMs 200<ms> 400<ms> 3
+        Gen.sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 3
         |> TaskSeq.isEmpty
         |> Task.map (should be False)
 

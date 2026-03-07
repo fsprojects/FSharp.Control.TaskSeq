@@ -104,7 +104,7 @@ module Other =
     [<Fact>]
     let ``TaskSeq-exactlyOne gets the only item in a singleton sequence - variant`` () = task {
         let! exactlyOne =
-            Gen.sideEffectTaskSeqMs 50<ms> 300<ms> 1
+            Gen.sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 1
             |> TaskSeq.exactlyOne
 
         exactlyOne |> should equal 1
@@ -113,7 +113,7 @@ module Other =
     [<Fact>]
     let ``TaskSeq-tryExactlyOne gets the only item in a singleton sequence - variant`` () = task {
         let! exactlyOne =
-            Gen.sideEffectTaskSeqMs 50<ms> 300<ms> 1
+            Gen.sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 1
             |> TaskSeq.tryExactlyOne
 
         exactlyOne |> should be Some'
