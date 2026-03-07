@@ -1308,6 +1308,17 @@ type TaskSeq =
     static member distinctUntilChanged<'T when 'T: equality> : source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a task sequence of each element in the source paired with its successor.
+    /// The sequence is empty if the source has fewer than two elements.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of consecutive element pairs.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member pairwise: source: TaskSeq<'T> -> TaskSeq<'T * 'T>
+
+    /// <summary>
     /// Combines the two task sequences into a new task sequence of pairs. The two sequences need not have equal lengths:
     /// when one sequence is exhausted any remaining elements in the other sequence are ignored.
     /// </summary>

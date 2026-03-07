@@ -359,6 +359,7 @@ type TaskSeq private () =
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
+    static member pairwise source = Internal.pairwise source
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
     static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source

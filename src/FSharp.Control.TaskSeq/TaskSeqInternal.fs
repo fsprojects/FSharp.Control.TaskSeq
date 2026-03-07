@@ -1058,3 +1058,17 @@ module internal TaskSeqInternal =
                         yield current
                         maybePrevious <- ValueSome current
         }
+
+    let pairwise (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone -> maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    yield previous, current
+                    maybePrevious <- ValueSome current
+        }
