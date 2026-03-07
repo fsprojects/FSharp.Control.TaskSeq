@@ -102,4 +102,12 @@ All workflows are in `.github/workflows/`:
 
 ## Release Notes
 
-When making changes, update the release notes and bump the version appropriately
+**Required**: Every PR that adds features, fixes bugs, or makes user-visible changes **must** include an update to `release-notes.txt`. Add a bullet under the appropriate version heading (currently `0.5.0`). The format is:
+
+```
+0.5.0
+    - adds TaskSeq.myFunction and TaskSeq.myFunctionAsync, #<issue>
+    - fixes <description>, #<issue>
+```
+
+If you are bumping to a new version, also update `Version.props`. PRs that touch library source (`src/FSharp.Control.TaskSeq/`) without updating `release-notes.txt` are incomplete.
