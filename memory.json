@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-07T23:04:21Z",
-  "run_id": "22809111943",
+  "last_run": "2026-03-07T23:26:16Z",
+  "run_id": "22809459169",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
@@ -78,9 +78,15 @@
       "status": "open"
     },
     {
-      "pr": "TBD",
+      "pr": 305,
       "branch": "repo-assist/perf-exists-distinct-2026-03",
       "description": "Perf: optimize exists/existsAsync/contains (avoid Option allocation); add distinct/distinctBy/distinctByAsync (75 tests)",
+      "status": "open"
+    },
+    {
+      "pr": 306,
+      "branch": "repo-assist/feat-mapfold-2026-03",
+      "description": "Add TaskSeq.mapFold / TaskSeq.mapFoldAsync (56 tests)",
       "status": "open - created this run"
     }
   ],
@@ -89,5 +95,5 @@
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "Issue #289 closed by dsyme. Issue #290 closed by dsyme. Three open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/sumBy/averageBy), and new 'perf-exists-distinct' (distinct/distinctBy + exists perf). Next: consider mapFold/mapFoldAsync, investigate issue #269 (NullReferenceException in nested loops, Release mode)."
+  "notes": "4 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/sumBy/averageBy), #305 (distinct+exists-perf), #306 (mapFold/mapFoldAsync). All CI pending. Next: consider groupBy/countBy, or investigate issue #269 (NullReferenceException in nested loops, Release mode - possibly F# compiler bug). global.json updated to use SDK 10.0.102 (10.0.103 not available)."
 }
