@@ -1419,8 +1419,43 @@ type TaskSeq =
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'State>
 
     /// <summary>
-    /// Applies the function <paramref name="folder" /> to each element of the task sequence, threading an accumulator
-    /// argument through the computation. The first element is used as the initial state. If the input function is
+    /// Applies the function <paramref name="mapping" /> to each element of the task sequence, threading an accumulator
+    /// argument through the computation, while also generating a new mapped element for each input element.
+    /// If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then
+    /// computes both the mapped results <paramref name="r0...rN" /> and the final state in a single pass.
+    /// The result is a pair of an array of mapped values and the final state.
+    /// If the mapping function <paramref name="mapping" /> is asynchronous, consider using <see cref="TaskSeq.mapFoldAsync" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function that maps each element to a result while also updating the state.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning a pair of the array of mapped results and the final state.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member mapFold:
+        mapping: ('State -> 'T -> 'Result * 'State) -> state: 'State -> source: TaskSeq<'T> -> Task<'Result[] * 'State>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="mapping" /> to each element of the task sequence,
+    /// threading an accumulator argument through the computation, while also generating a new mapped element for each input element.
+    /// If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then
+    /// computes both the mapped results <paramref name="r0...rN" /> and the final state in a single pass.
+    /// The result is a pair of an array of mapped values and the final state.
+    /// If the mapping function <paramref name="mapping" /> is synchronous, consider using <see cref="TaskSeq.mapFold" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function that maps each element to a result while also updating the state.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning a pair of the array of mapped results and the final state.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member mapFoldAsync:
+        mapping: ('State -> 'T -> #Task<'Result * 'State>) ->
+        state: 'State ->
+        source: TaskSeq<'T> ->
+            Task<'Result[] * 'State>
+
+
     /// <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then computes
     /// <paramref name="f (... (f i0 i1)...) iN" />. Raises <see cref="T:System.ArgumentException" /> when the
     /// sequence is empty.

@@ -5,6 +5,7 @@ Release notes:
     - update engineering to .NET 9/10
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289
+    - adds TaskSeq.mapFold and TaskSeq.mapFoldAsync
 
 0.4.0
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
