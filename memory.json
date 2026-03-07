@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-07T21:48:07Z",
-  "run_id": "22807900207",
+  "last_run": "2026-03-07T22:17:02Z",
+  "run_id": "22808370721",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
@@ -13,7 +13,7 @@
       "status": "merged as #284"
     },
     {
-      "branch": "repo-assist/fix-deprecated-seq-expr-2026-03-0eb1b56b474fc6bf",
+      "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
       "description": "Fix FS3873 deprecated range expressions",
       "status": "changes already merged to main, branch closed"
     },
@@ -26,49 +26,49 @@
     {
       "pr": 293,
       "branch": "repo-assist/test-forward-pairwise-2026-03",
-      "description": "Add TaskSeq.pairwise (ref #289); expand distinctUntilChanged tests",
-      "status": "open"
+      "description": "Add TaskSeq.pairwise; expand distinctUntilChanged tests",
+      "status": "merged"
     },
     {
       "pr": 295,
       "branch": "repo-assist/ci-test-perf-2026-03",
       "description": "NuGet caching (actions/cache@v4) + reduce DummyTaskFactory test delays",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 296,
       "branch": "repo-assist/feat-scan-2026-03",
       "description": "Add TaskSeq.scan / TaskSeq.scanAsync (54 tests, ref #289)",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 298,
       "branch": "repo-assist/test-choose-expand-2026-03",
       "description": "Expand choose/chooseAsync and filter/filterAsync tests (8+5 new tests)",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 299,
       "branch": "repo-assist/feat-reduce-2026-03",
       "description": "Add TaskSeq.reduce / TaskSeq.reduceAsync (75 tests, ref #289)",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 300,
       "branch": "repo-assist/feat-unfold-2026-03",
       "description": "Add TaskSeq.unfold / TaskSeq.unfoldAsync (14 tests, ref #289)",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 301,
       "branch": "repo-assist/docs-agents-net9-2026-03",
       "description": "Fix AGENTS.md: update test target reference from net6.0 to net9.0",
-      "status": "open"
+      "status": "merged"
     },
     {
-      "pr": "TBD (~302)",
-      "branch": "repo-assist/feat-chunkbysize-2026-03",
-      "description": "Add TaskSeq.chunkBySize (36 tests, closes #258)",
+      "pr": "TBD",
+      "branch": "repo-assist/feat-windowed-chunkbysize-2026-03",
+      "description": "Add TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed; ring-buffer perf impl; 171 tests",
       "status": "open - created this run"
     }
   ],
@@ -77,5 +77,5 @@
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "Issue #289 (dsyme): align with AsyncSeq. Done: pairwise (#293), scan/scanAsync (#296), choose/chooseAsync tests (#298), reduce/reduceAsync (#299), unfold/unfoldAsync (#300), chunkBySize (new PR this run). Next: windowed, sumBy/averageBy. Issue #269 commented (NullReferenceException nested loops) - workarounds provided. Issue #290 CLOSED by dsyme at ~21:55 UTC. Monthly activity issue #285 updated. PR #301 = docs-agents-net9-2026-03."
+  "notes": "Issue #289 (dsyme): align with AsyncSeq. Done: pairwise (#293), scan/scanAsync (#296), choose/chooseAsync tests (#298), reduce/reduceAsync (#299), unfold/unfoldAsync (#300), chunkBySize + windowed (new PR this run, closes #258). Next: sumBy/averageBy, distinct/distinctBy. Issue #290 CLOSED by dsyme. Monthly activity issue #285 updated. All previous PRs have been merged by dsyme."
 }
