@@ -141,3 +141,84 @@ module Other =
         disposed.Value |> should equal 1
         sum |> should equal 42
     }
+
+// Tests for nested for loops in the async CE with IAsyncEnumerable as the outer sequence.
+// Related to: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/269
+module NestedLoops =
+    [<Fact>]
+    let ``Async-for CE with nested regular list inside taskSeq loop`` () = async {
+        // outer: IAsyncEnumerable<int list>, inner: regular list
+        let outer = taskSeq {
+            yield [ 1; 2; 3 ]
+            yield [ 4; 5 ]
+            yield [ 6; 7; 8; 9; 10 ]
+        }
+
+        let mutable sum = 0
+
+        for inner in outer do
+            for x in inner do
+                sum <- sum + x
+
+        sum |> should equal 55
+    }
+
+    [<Fact>]
+    let ``Async-for CE with nested array inside taskSeq loop`` () = async {
+        // outer: IAsyncEnumerable<int[]>, inner: regular array
+        let outer = taskSeq {
+            yield [| 1; 2; 3 |]
+            yield [| 4; 5 |]
+        }
+
+        let mutable sum = 0
+
+        for inner in outer do
+            for x in inner do
+                sum <- sum + x
+
+        sum |> should equal 15
+    }
+
+    [<Fact>]
+    let ``Async-for CE with nested tuple-destructuring array inside taskSeq loop`` () = async {
+        // outer: IAsyncEnumerable<int[]>, inner: zipped array with tuple destructuring
+        // this pattern reproduces the scenario from issue #269
+        let outer = taskSeq { yield [| 1; 2; 3 |] }
+        let mutable sum = 0
+
+        for arr in outer do
+            for (a, b) in Array.zip arr arr do
+                sum <- sum + a + b
+
+        // (1+1) + (2+2) + (3+3) = 12
+        sum |> should equal 12
+    }
+
+    [<Fact>]
+    let ``Async-for CE with nested taskSeq inside taskSeq loop`` () = async {
+        // outer: IAsyncEnumerable<IAsyncEnumerable<int>>, inner: taskSeq
+        let inner1 = taskSeq {
+            yield 1
+            yield 2
+            yield 3
+        }
+
+        let inner2 = taskSeq {
+            yield 4
+            yield 5
+        }
+
+        let outer = taskSeq {
+            yield inner1
+            yield inner2
+        }
+
+        let mutable sum = 0
+
+        for inner in outer do
+            for x in inner do
+                sum <- sum + x
+
+        sum |> should equal 15
+    }
