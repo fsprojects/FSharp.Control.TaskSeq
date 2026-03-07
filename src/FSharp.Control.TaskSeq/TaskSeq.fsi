@@ -1351,6 +1351,35 @@ type TaskSeq =
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
 
     /// <summary>
+    /// Like <see cref="TaskSeq.fold" />, but returns the sequence of intermediate results and the final result.
+    /// The first element of the output sequence is always the initial state. If the input task sequence
+    /// has <c>N</c> elements, the output task sequence has <c>N + 1</c> elements.
+    /// If the folder function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.scanAsync" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state with each element from the sequence.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>A task sequence of states, starting with the initial state and applying the folder to each element.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member scan: folder: ('State -> 'T -> 'State) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'State>
+
+    /// <summary>
+    /// Like <see cref="TaskSeq.foldAsync" />, but returns the sequence of intermediate results and the final result.
+    /// The first element of the output sequence is always the initial state. If the input task sequence
+    /// has <c>N</c> elements, the output task sequence has <c>N + 1</c> elements.
+    /// If the folder function <paramref name="folder" /> is synchronous, consider using <see cref="TaskSeq.scan" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state with each element from the sequence.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>A task sequence of states, starting with the initial state and applying the folder to each element.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member scanAsync:
+        folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'State>
+
+    /// <summary>
     /// Return a new task sequence with a new item inserted before the given index.
     /// </summary>
     ///
