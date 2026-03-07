@@ -98,9 +98,9 @@ type DummyTaskFactory(µsecMin: int64<µs>, µsecMax: int64<µs>) =
     /// Creates dummy tasks with a randomized delay and a mutable state,
     /// to ensure we properly test whether processing is done ordered or not.
     /// Uses the defaults for <paramref name="µsecMin" /> and <paramref name="µsecMax" />
-    /// with 10,000µs and 30,000µs respectively (or 10ms and 30ms).
+    /// with 1,000µs and 5,000µs respectively (or 1ms and 5ms).
     /// </summary>
-    new() = DummyTaskFactory(10_000L<µs>, 30_000L<µs>)
+    new() = DummyTaskFactory(1_000L<µs>, 5_000L<µs>)
 
     /// <summary>
     /// Creates dummy tasks with a randomized delay and a mutable state,
@@ -164,8 +164,9 @@ module TestUtils =
         >> TaskSeq.toArrayAsync
         >> Task.map (String >> should equal expected)
 
-    /// Delays (no spin-wait!) between 20 and 70ms, assuming a 15.6ms resolution clock
-    let longDelay () = task { do! Task.Delay(Random().Next(20, 70)) }
+    /// Waits using a real timer-based async delay (not spin-wait), causing an OS-level async yield point.
+    /// On Windows, Task.Delay has ~15ms timer resolution, so this actually waits ~15ms.
+    let longDelay () = task { do! Task.Delay 1 }
 
     /// Spin-waits, occasionally normal delay, between 50µs - 18,000µs
     let microDelay () = task { do! DelayHelper.delayTask 50L<µs> 18_000L<µs> (fun _ -> ()) }
@@ -324,8 +325,8 @@ module TestUtils =
                     yield x
             }
 
-        /// Create a bunch of dummy tasks, each lasting between 10-30ms with spin-wait delays.
-        let sideEffectTaskSeq = sideEffectTaskSeqMicro 10_000L<µs> 30_000L<µs>
+        /// Create a bunch of dummy tasks, each lasting between 1-5ms with spin-wait delays.
+        let sideEffectTaskSeq = sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs>
 
         /// Returns any of a set of variants that each create an empty sequence in a creative way.
         /// Please extend this with more cases.
@@ -428,7 +429,7 @@ module TestUtils =
             | SeqImmutable.AsyncYielded ->
                 // by returning the 'side effect seq' from the closure of the CE,
                 // the side-effect will NOT execute again
-                taskSeq { yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10 }
+                taskSeq { yield! sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 10 }
             | SeqImmutable.AsyncYielded_Nested ->
                 // let's deeply nest the sequence, which should not cause extra side effects being executed.
                 taskSeq {
@@ -442,7 +443,7 @@ module TestUtils =
                                                 yield! taskSeq {
                                                     // by returning the 'side effect seq' from the closure of the CE,
                                                     // the side-effect will NOT execute again
-                                                    yield! sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+                                                    yield! sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 10
                                                 }
                                             }
                                         }
@@ -520,12 +521,12 @@ module TestUtils =
 
             // delay just enough with a spin-wait to occasionally cause a thread-yield
             | SeqWithSideEffect.ThreadSpinWait -> sideEffectTaskSeqMicro 50L<µs> 5_000L<µs> 10
-            | SeqWithSideEffect.AsyncYielded -> sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+            | SeqWithSideEffect.AsyncYielded -> sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 10
             | SeqWithSideEffect.AsyncYielded_Nested ->
                 // let's deeply nest the sequence, which should not cause extra side effects being executed.
                 // NOTE: this list of tasks must be defined OUTSIDE the scope, otherwise, mutability on 2nd
                 //       iteration will not kick in!
-                let nestedTaskSeq = sideEffectTaskSeqMicro 15_000L<µs> 50_000L<µs> 10
+                let nestedTaskSeq = sideEffectTaskSeqMicro 1_000L<µs> 5_000L<µs> 10
 
                 taskSeq {
                     yield! taskSeq {
