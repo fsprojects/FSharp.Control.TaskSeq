@@ -975,58 +975,7 @@ module internal TaskSeqInternal =
                 raiseOutOfBounds (nameof index)
         }
 
-    // Consider turning using an F# version of this instead?
-    // https://github.com/i3arnon/ConcurrentHashSet
-    type ConcurrentHashSet<'T when 'T: equality>(ct) =
-        let _rwLock = new ReaderWriterLockSlim()
-        let hashSet = HashSet<'T>(Array.empty, HashIdentity.Structural)
-
-        member _.Add item =
-            _rwLock.EnterWriteLock()
-
-            try
-                hashSet.Add item
-            finally
-                _rwLock.ExitWriteLock()
-
-        member _.AddMany items =
-            _rwLock.EnterWriteLock()
-
-            try
-                for item in items do
-                    hashSet.Add item |> ignore
-
-            finally
-                _rwLock.ExitWriteLock()
-
-        member _.AddManyAsync(source: TaskSeq<'T>) = task {
-            use e = source.GetAsyncEnumerator(ct)
-            let mutable go = true
-            let! step = e.MoveNextAsync()
-            go <- step
-
-            while go do
-                // NOTE: r/w lock cannot cross thread boundaries. Should we use SemaphoreSlim instead?
-                // or alternatively, something like this: https://github.com/StephenCleary/AsyncEx/blob/8a73d0467d40ca41f9f9cf827c7a35702243abb8/src/Nito.AsyncEx.Coordination/AsyncReaderWriterLock.cs#L16
-                // not sure how they compare.
-
-                _rwLock.EnterWriteLock()
-
-                try
-                    hashSet.Add e.Current |> ignore
-                finally
-                    _rwLock.ExitWriteLock()
-
-                let! step = e.MoveNextAsync()
-                go <- step
-        }
-
-        interface IDisposable with
-            override _.Dispose() =
-                if not (isNull _rwLock) then
-                    _rwLock.Dispose()
-
-    let except itemsToExclude (source: TaskSeq<_>) =
+    let except (itemsToExclude: TaskSeq<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
         checkNonNull (nameof itemsToExclude) itemsToExclude
 
@@ -1037,9 +986,18 @@ module internal TaskSeqInternal =
             go <- step
 
             if step then
-                // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
-                do! hashSet.AddManyAsync itemsToExclude
+                // only create hashset by the time we actually start iterating;
+                // taskSeq enumerates sequentially, so a plain HashSet suffices — no locking needed.
+                let hashSet = HashSet<_>(HashIdentity.Structural)
+
+                use excl = itemsToExclude.GetAsyncEnumerator CancellationToken.None
+                let! exclStep = excl.MoveNextAsync()
+                let mutable exclGo = exclStep
+
+                while exclGo do
+                    hashSet.Add excl.Current |> ignore
+                    let! exclStep = excl.MoveNextAsync()
+                    exclGo <- exclStep
 
                 while go do
                     let current = e.Current
@@ -1065,9 +1023,9 @@ module internal TaskSeqInternal =
             go <- step
 
             if step then
-                // only create hashset by the time we actually start iterating
-                use hashSet = new ConcurrentHashSet<_>(CancellationToken.None)
-                do hashSet.AddMany itemsToExclude
+                // only create hashset by the time we actually start iterating;
+                // initialize directly from the seq — taskSeq is sequential so no locking needed.
+                let hashSet = HashSet<_>(itemsToExclude, HashIdentity.Structural)
 
                 while go do
                     let current = e.Current

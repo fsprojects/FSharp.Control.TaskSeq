@@ -118,6 +118,61 @@ module Performance =
         combined |> Array.last |> should equal (length, length)
     }
 
+module UnequalLength =
+    [<Fact>]
+    let ``TaskSeq-zip stops at shorter first sequence`` () = task {
+        // documented: "when one sequence is exhausted any remaining elements in the other sequence are ignored"
+        let short = taskSeq { yield! [ 1..5 ] }
+        let long = taskSeq { yield! [ 1..10 ] }
+        let! combined = TaskSeq.zip short long |> TaskSeq.toArrayAsync
+        combined |> should be (haveLength 5)
+
+        combined
+        |> should equal (Array.init 5 (fun i -> i + 1, i + 1))
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip stops at shorter second sequence`` () = task {
+        // documented: "when one sequence is exhausted any remaining elements in the other sequence are ignored"
+        let long = taskSeq { yield! [ 1..10 ] }
+        let short = taskSeq { yield! [ 1..3 ] }
+        let! combined = TaskSeq.zip long short |> TaskSeq.toArrayAsync
+        combined |> should be (haveLength 3)
+
+        combined
+        |> should equal (Array.init 3 (fun i -> i + 1, i + 1))
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip with first sequence empty returns empty`` () =
+        // documented: remaining elements in the longer sequence are ignored
+        let empty = taskSeq { yield! ([]: int list) }
+        let nonEmpty = taskSeq { yield! [ 1..10 ] }
+        TaskSeq.zip empty nonEmpty |> verifyEmpty
+
+    [<Fact>]
+    let ``TaskSeq-zip with second sequence empty returns empty`` () =
+        // documented: remaining elements in the longer sequence are ignored
+        let nonEmpty = taskSeq { yield! [ 1..10 ] }
+        let empty = taskSeq { yield! ([]: int list) }
+        TaskSeq.zip nonEmpty empty |> verifyEmpty
+
+    [<Fact>]
+    let ``TaskSeq-zip with singleton first and longer second returns singleton`` () = task {
+        let one = taskSeq { yield 42 }
+        let many = taskSeq { yield! [ 1..10 ] }
+        let! combined = TaskSeq.zip one many |> TaskSeq.toArrayAsync
+        combined |> should equal [| (42, 1) |]
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip with longer first and singleton second returns singleton`` () = task {
+        let many = taskSeq { yield! [ 1..10 ] }
+        let one = taskSeq { yield 99 }
+        let! combined = TaskSeq.zip many one |> TaskSeq.toArrayAsync
+        combined |> should equal [| (1, 99) |]
+    }
+
 module Other =
     [<Fact>]
     let ``TaskSeq-zip zips different types`` () = task {
