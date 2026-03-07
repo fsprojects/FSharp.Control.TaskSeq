@@ -1,9 +1,7 @@
 {
-  "last_run": "2026-03-07T19:56:00Z",
-  "last_run_id": "22806096007",
-  "comments_made": [
-    { "issue": 269, "date": "2026-03-07", "summary": "Root cause analysis for nested-loop NRE in Release mode, workarounds provided" }
-  ],
+  "last_run": "2026-03-07T20:00:59Z",
+  "last_run_id": "22806158228",
+  "comments_made": [],
   "prs_created": [
     {
       "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
@@ -12,13 +10,13 @@
       "created": "2026-03-07"
     },
     {
-      "branch": "repo-assist/test-nested-loops-2026-03",
-      "title": "test: add nested for-loop tests for task and async CE extensions",
+      "branch": "repo-assist/test-perf-improve-2026-03",
+      "title": "perf/test: replace ConcurrentHashSet with HashSet in except; add zip/indexed tests",
       "status": "open",
       "created": "2026-03-07"
     }
   ],
-  "issues_commented": [269],
+  "issues_commented": [],
   "monthly_activity_issue": {
     "title": "[Repo Assist] Monthly Activity 2026-03",
     "number": 285,
@@ -27,10 +25,10 @@
   },
   "issue_backlog_cursor": 0,
   "label_backlog_cursor": 0,
-  "notes": "perf-init-remove-lazy PR was merged as #284. fix-deprecated-seq-expr PR still open. test-nested-loops PR open. All 6 previously unlabelled issues now labelled (#245, #246, #259, #261, #269, #288). Issue #288 is new (chunkBySize feature request by dsyme, referencing closed PR #265). Good candidate for future Task 5/10: implement TaskSeq.chunkBySize properly.",
+  "notes": "Run 2 (2026-03-07T20:00). PR #284 (perf-init-remove-lazy) merged into main. Still open: fix-deprecated-seq-expr PR, test-perf-improve-2026-03 PR. 6 unlabelled issues: #280, #269, #261, #259, #246, #245 — label next run. Issues to comment on: #280, #269. Future: upgrade test projects net6.0->net8.0.",
   "known_issues": {
-    "nested_loop_nre_release_mode": "#269 - NRE when nesting loops with tuple destructuring in Release, fallback dynamic path bug, possibly F# compiler issue",
-    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future Task 4 work",
-    "global_json_missing_before_run2": "global.json was added (10.0.103) - but 10.0.102 is the installed version in this runner"
+    "build_failure_newer_fsharp": "FS3873 in TaskSeq.Concat.Tests.fs - PR submitted fix-deprecated-seq-expr-2026-03",
+    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future work",
+    "concurrent_hashset_removed": "ConcurrentHashSet replaced with plain HashSet in except/exceptOfSeq - PR test-perf-improve-2026-03"
   }
 }
