@@ -1308,6 +1308,17 @@ type TaskSeq =
     static member distinctUntilChanged<'T when 'T: equality> : source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a task sequence of each element in the source paired with its successor.
+    /// The sequence is empty if the source has fewer than two elements.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of consecutive element pairs.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member pairwise: source: TaskSeq<'T> -> TaskSeq<'T * 'T>
+
+    /// <summary>
     /// Combines the two task sequences into a new task sequence of pairs. The two sequences need not have equal lengths:
     /// when one sequence is exhausted any remaining elements in the other sequence are ignored.
     /// </summary>
@@ -1378,6 +1389,38 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member scanAsync:
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'State>
+
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element of the task sequence, threading an accumulator
+    /// argument through the computation. The first element is used as the initial state. If the input function is
+    /// <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then computes
+    /// <paramref name="f (... (f i0 i1)...) iN" />. Raises <see cref="T:System.ArgumentException" /> when the
+    /// sequence is empty.
+    /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.reduceAsync" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state with each element from the sequence.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The final state value after applying the reduction function to all elements.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input task sequence is empty.</exception>
+    static member reduce: folder: ('T -> 'T -> 'T) -> source: TaskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to each element of the task sequence, threading
+    /// an accumulator argument through the computation. The first element is used as the initial state. If the input
+    /// function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then computes
+    /// <paramref name="f (... (f i0 i1)...) iN" />. Raises <see cref="T:System.ArgumentException" /> when the
+    /// sequence is empty.
+    /// If the accumulator function <paramref name="folder" /> is synchronous, consider using <see cref="TaskSeq.reduce" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state with each element from the sequence.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The final state value after applying the reduction function to all elements.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when the input task sequence is empty.</exception>
+    static member reduceAsync: folder: ('T -> 'T -> #Task<'T>) -> source: TaskSeq<'T> -> Task<'T>
 
     /// <summary>
     /// Return a new task sequence with a new item inserted before the given index.

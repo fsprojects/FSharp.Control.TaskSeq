@@ -359,6 +359,7 @@ type TaskSeq private () =
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
+    static member pairwise source = Internal.pairwise source
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
     static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source
@@ -408,3 +409,5 @@ type TaskSeq private () =
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
     static member scan folder state source = Internal.scan (FolderAction folder) state source
     static member scanAsync folder state source = Internal.scan (AsyncFolderAction folder) state source
+    static member reduce folder source = Internal.reduce (FolderAction folder) source
+    static member reduceAsync folder source = Internal.reduce (AsyncFolderAction folder) source

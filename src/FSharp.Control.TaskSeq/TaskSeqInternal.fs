@@ -394,6 +394,37 @@ module internal TaskSeqInternal =
                 yield state
           }
 
+    let reduce folder (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
+
+            if not hasFirst then
+                raiseEmptySeq ()
+
+            let mutable result = e.Current
+            let! step = e.MoveNextAsync()
+            let mutable go = step
+
+            match folder with
+            | FolderAction folder ->
+                while go do
+                    result <- folder result e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | AsyncFolderAction folder ->
+                while go do
+                    let! tempResult = folder result e.Current
+                    result <- tempResult
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return result
+        }
+
     let toResizeArrayAsync source =
         checkNonNull (nameof source) source
 
@@ -1080,4 +1111,18 @@ module internal TaskSeqInternal =
                     else
                         yield current
                         maybePrevious <- ValueSome current
+        }
+
+    let pairwise (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone -> maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    yield previous, current
+                    maybePrevious <- ValueSome current
         }
