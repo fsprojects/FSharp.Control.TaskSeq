@@ -525,16 +525,16 @@ module LowPriority =
         // and we need a way to distinguish these two methods.
         //
         // Types handled:
-        //  - ValueTask (non-generic, because it implements GetResult() -> unit)
+        //  - (non-generic) ValueTask (because it implements GetResult() -> unit)
         //  - ValueTask<'T> (because it implements GetResult() -> 'TResult)
-        //  - Task (non-generic, because it implements GetResult() -> unit)
+        //  - (non-generic) Task (because it implements GetResult() -> unit)
         //  - any other type that implements GetAwaiter()
         //
         // Not handled:
         //  - Task<'T> (because it only implements GetResult() -> unit, not GetResult() -> 'TResult)
 
         [<NoEagerConstraintApplication>]
-        member inline _.Bind< ^TaskLike, 'T, 'U, ^Awaiter, 'TOverall
+        member inline _.Bind< ^TaskLike, 'T, 'U, ^Awaiter
             when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
             and ^Awaiter :> ICriticalNotifyCompletion
             and ^Awaiter: (member get_IsCompleted: unit -> bool)

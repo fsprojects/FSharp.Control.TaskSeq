@@ -62,7 +62,21 @@ module internal TaskSeqInternal =
 
     let inline raiseEmptySeq () = invalidArg "source" "The input task sequence was empty."
 
-    let inline raiseCannotBeNegative name = invalidArg name "The value must be non-negative."
+    /// Moves the enumerator to its first element, assuming it has just been allocated.
+    /// Raises "The input sequence was empty" if there was no first element.
+    let inline moveFirstOrRaiseUnsafe (e: IAsyncEnumerator<_>) = task {
+        let! hasFirst = e.MoveNextAsync()
+
+        if not hasFirst then
+            invalidArg "source" "The input task sequence was empty."
+    }
+
+    /// Tests the given integer value and raises if it is -1 or lower.
+    let inline raiseCannotBeNegative name value =
+        if value >= 0 then
+            ()
+        else
+            invalidArg name $"The value must be non-negative, but was {value}."
 
     let inline raiseOutOfBounds name =
         invalidArg name "The value or index must be within the bounds of the task sequence."
@@ -183,10 +197,7 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! nonEmpty = e.MoveNextAsync()
-
-            if not nonEmpty then
-                raiseEmptySeq ()
+            do! moveFirstOrRaiseUnsafe e
 
             let mutable acc = e.Current
 
@@ -202,10 +213,7 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! nonEmpty = e.MoveNextAsync()
-
-            if not nonEmpty then
-                raiseEmptySeq ()
+            do! moveFirstOrRaiseUnsafe e
 
             let value = e.Current
             let mutable accProjection = projection value
@@ -228,10 +236,7 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let! nonEmpty = e.MoveNextAsync()
-
-            if not nonEmpty then
-                raiseEmptySeq ()
+            do! moveFirstOrRaiseUnsafe e
 
             let value = e.Current
             let! projValue = projectionAsync value
@@ -276,7 +281,10 @@ module internal TaskSeqInternal =
 
         let count =
             match count with
-            | Some c -> if c >= 0 then c else raiseCannotBeNegative (nameof count)
+            | Some c ->
+                raiseCannotBeNegative (nameof count) c
+                c
+
             | None -> Int32.MaxValue
 
         match initializer with
@@ -741,9 +749,7 @@ module internal TaskSeqInternal =
 
     let skipOrTake skipOrTake count (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
-
-        if count < 0 then
-            raiseCannotBeNegative (nameof count)
+        raiseCannotBeNegative (nameof count) count
 
         match skipOrTake with
         | Skip ->
@@ -907,8 +913,7 @@ module internal TaskSeqInternal =
 
     /// InsertAt or InsertManyAt
     let insertAt index valueOrValues (source: TaskSeq<_>) =
-        if index < 0 then
-            raiseCannotBeNegative (nameof index)
+        raiseCannotBeNegative (nameof index) index
 
         taskSeq {
             let mutable i = 0
@@ -933,8 +938,7 @@ module internal TaskSeqInternal =
         }
 
     let removeAt index (source: TaskSeq<'T>) =
-        if index < 0 then
-            raiseCannotBeNegative (nameof index)
+        raiseCannotBeNegative (nameof index) index
 
         taskSeq {
             let mutable i = 0
@@ -951,8 +955,7 @@ module internal TaskSeqInternal =
         }
 
     let removeManyAt index count (source: TaskSeq<'T>) =
-        if index < 0 then
-            raiseCannotBeNegative (nameof index)
+        raiseCannotBeNegative (nameof index) index
 
         taskSeq {
             let mutable i = 0
@@ -970,8 +973,7 @@ module internal TaskSeqInternal =
         }
 
     let updateAt index value (source: TaskSeq<'T>) =
-        if index < 0 then
-            raiseCannotBeNegative (nameof index)
+        raiseCannotBeNegative (nameof index) index
 
         taskSeq {
             let mutable i = 0

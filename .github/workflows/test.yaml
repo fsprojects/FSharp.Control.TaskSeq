@@ -9,7 +9,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -25,7 +25,7 @@ jobs:
         run: ./build.cmd ci -release
 
       # upload test results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: test-results-release
@@ -39,7 +39,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -55,7 +55,7 @@ jobs:
         run: ./build.cmd ci -debug
 
       # upload test results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: test-results-debug
