@@ -406,3 +406,5 @@ type TaskSeq private () =
     static member zip source1 source2 = Internal.zip source1 source2
     static member fold folder state source = Internal.fold (FolderAction folder) state source
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
+    static member reduce folder source = Internal.reduce (FolderAction folder) source
+    static member reduceAsync folder source = Internal.reduce (AsyncFolderAction folder) source

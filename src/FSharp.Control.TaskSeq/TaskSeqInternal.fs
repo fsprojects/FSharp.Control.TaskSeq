@@ -371,6 +371,37 @@ module internal TaskSeqInternal =
             return result
         }
 
+    let reduce folder (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
+
+            if not hasFirst then
+                raiseEmptySeq ()
+
+            let mutable result = e.Current
+            let! step = e.MoveNextAsync()
+            let mutable go = step
+
+            match folder with
+            | FolderAction folder ->
+                while go do
+                    result <- folder result e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | AsyncFolderAction folder ->
+                while go do
+                    let! tempResult = folder result e.Current
+                    result <- tempResult
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return result
+        }
+
     let toResizeArrayAsync source =
         checkNonNull (nameof source) source
 
