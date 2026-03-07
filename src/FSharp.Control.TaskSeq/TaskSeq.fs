@@ -175,6 +175,9 @@ type TaskSeq private () =
     static member initAsync count initializer = Internal.init (Some count) (InitActionAsync initializer)
     static member initInfiniteAsync initializer = Internal.init None (InitActionAsync initializer)
 
+    static member unfold generator state = Internal.unfold generator state
+    static member unfoldAsync generator state = Internal.unfoldAsync generator state
+
     static member delay(generator: unit -> TaskSeq<'T>) =
         { new IAsyncEnumerable<'T> with
             member _.GetAsyncEnumerator(ct) = generator().GetAsyncEnumerator(ct)
