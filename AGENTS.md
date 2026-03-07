@@ -99,3 +99,7 @@ All workflows are in `.github/workflows/`:
 - File ordering matters in F# — the `<Compile>` order in `.fsproj` files defines compilation order.
 - The library targets `netstandard2.1`; tests target `net6.0` with `FSharp.Core` pinned to `6.0.1`.
 - NuGet packages are output to the `packages/` directory.
+
+## Release Notes
+
+When making changes, update the release notes and bump the version appropriately
