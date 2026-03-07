@@ -1,5 +1,9 @@
 
 Release notes:
+
+0.5.0
+    - update engineering to .NET 9/10
+
 0.4.0
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
     - new surface area functions, fixes #208:
