@@ -5,6 +5,9 @@ Release notes:
     - update engineering to .NET 9/10
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289
+    - adds TaskSeq.groupBy and TaskSeq.groupByAsync, #289
+    - adds TaskSeq.countBy and TaskSeq.countByAsync, #289
+    - adds TaskSeq.partition and TaskSeq.partitionAsync, #289
 
 0.4.0
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
