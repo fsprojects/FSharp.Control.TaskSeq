@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
   </PropertyGroup>
 
@@ -20,6 +20,7 @@
     <Compile Include="TaskSeq.Empty.Tests.fs" />
     <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
     <Compile Include="TaskSeq.Except.Tests.fs" />
+    <Compile Include="TaskSeq.DistinctUntilChanged.Tests.fs" />
     <Compile Include="TaskSeq.Exists.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />
     <Compile Include="TaskSeq.FindIndex.Tests.fs" />

@@ -277,7 +277,6 @@ module internal TaskSeqInternal =
 
     let init count initializer = taskSeq {
         let mutable i = 0
-        let mutable value: Lazy<'T> = Unchecked.defaultof<_>
 
         let count =
             match count with
@@ -290,28 +289,13 @@ module internal TaskSeqInternal =
         match initializer with
         | InitAction init ->
             while i < count do
-                // using Lazy gives us locking and safe multiple access to the cached value, if
-                // multiple threads access the same item through the same enumerator (which is
-                // bad practice, but hey, who're we to judge).
-                if isNull value then
-                    value <- Lazy<_>.Create(fun () -> init i)
-
-                yield value.Force()
-                value <- Unchecked.defaultof<_>
+                yield init i
                 i <- i + 1
 
         | InitActionAsync asyncInit ->
             while i < count do
-                // using Lazy gives us locking and safe multiple access to the cached value, if
-                // multiple threads access the same item through the same enumerator (which is
-                // bad practice, but hey, who're we to judge).
-                if isNull value then
-                    // TODO: is there a 'Lazy' we can use with Task?
-                    let! value' = asyncInit i
-                    value <- Lazy<_>.CreateFromValue value'
-
-                yield value.Force()
-                value <- Unchecked.defaultof<_>
+                let! result = asyncInit i
+                yield result
                 i <- i + 1
 
     }
@@ -1096,4 +1080,23 @@ module internal TaskSeqInternal =
                     let! step = e.MoveNextAsync()
                     go <- step
 
+        }
+
+    let distinctUntilChanged (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone ->
+                    yield current
+                    maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    if previous = current then
+                        () // skip
+                    else
+                        yield current
+                        maybePrevious <- ValueSome current
         }
