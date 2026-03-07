@@ -1347,6 +1347,40 @@ type TaskSeq =
     static member pairwise: source: TaskSeq<'T> -> TaskSeq<'T * 'T>
 
     /// <summary>
+    /// Divides the input task sequence into chunks of size at most <paramref name="chunkSize" />.
+    /// The last chunk may be smaller than <paramref name="chunkSize" /> if the source sequence does not divide evenly.
+    /// Returns an empty task sequence when the source is empty.
+    ///
+    /// If <paramref name="chunkSize" /> is not positive, an <see cref="T:System.ArgumentException" /> is raised immediately
+    /// (before the sequence is evaluated).
+    /// </summary>
+    ///
+    /// <param name="chunkSize">The maximum number of elements in each chunk. Must be positive.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of non-overlapping array chunks.</returns>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="chunkSize" /> is not positive.</exception>
+    static member chunkBySize: chunkSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
+
+    /// <summary>
+    /// Returns a task sequence of sliding windows of a given size over the source sequence.
+    /// Each window is a fresh array of exactly <paramref name="windowSize" /> consecutive elements.
+    /// The result is empty if the source has fewer than <paramref name="windowSize" /> elements.
+    ///
+    /// Uses a ring buffer internally to avoid redundant copies, yielding one allocation per window.
+    ///
+    /// If <paramref name="windowSize" /> is not positive, an <see cref="T:System.ArgumentException" /> is raised immediately
+    /// (before the sequence is evaluated).
+    /// </summary>
+    ///
+    /// <param name="windowSize">The number of elements in each window. Must be positive.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of overlapping array windows.</returns>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="windowSize" /> is not positive.</exception>
+    static member windowed: windowSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
+
+    /// <summary>
     /// Combines the two task sequences into a new task sequence of pairs. The two sequences need not have equal lengths:
     /// when one sequence is exhausted any remaining elements in the other sequence are ignored.
     /// </summary>

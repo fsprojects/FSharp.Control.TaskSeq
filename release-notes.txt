@@ -5,6 +5,9 @@ Release notes:
     - update engineering to .NET 9/10
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289
+    - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
+    - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
+    - adds TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed, #289
 
 0.4.0
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
