@@ -14,8 +14,8 @@ open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicOperators
 [<AutoOpen>]
 module TaskExtensions =
 
-    // Add asynchronous for loop to the 'task' computation builder
-    type Microsoft.FSharp.Control.TaskBuilder with
+    // Add asynchronous for loop to the 'task' and 'backgroundTask' computation builders
+    type TaskBuilderBase with
 
         /// Used by `For`. F# currently doesn't support `while!`, so this cannot be called directly from the task CE
         /// This code is mostly a copy of TaskSeq.WhileAsync.
