@@ -300,6 +300,32 @@ module internal TaskSeqInternal =
 
     }
 
+    let unfold generator state = taskSeq {
+        let mutable go = true
+        let mutable currentState = state
+
+        while go do
+            match generator currentState with
+            | None -> go <- false
+            | Some(value, nextState) ->
+                yield value
+                currentState <- nextState
+    }
+
+    let unfoldAsync generator state = taskSeq {
+        let mutable go = true
+        let mutable currentState = state
+
+        while go do
+            let! result = (generator currentState: Task<_>)
+
+            match result with
+            | None -> go <- false
+            | Some(value, nextState) ->
+                yield value
+                currentState <- nextState
+    }
+
     let iter action (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
