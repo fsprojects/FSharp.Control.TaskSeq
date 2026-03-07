@@ -397,6 +397,29 @@ module internal TaskSeqInternal =
             return result
         }
 
+    let scan folder initial (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        match folder with
+        | FolderAction folder -> taskSeq {
+            let mutable state = initial
+            yield state
+
+            for item in source do
+                state <- folder state item
+                yield state
+          }
+
+        | AsyncFolderAction folder -> taskSeq {
+            let mutable state = initial
+            yield state
+
+            for item in source do
+                let! newState = folder state item
+                state <- newState
+                yield state
+          }
+
     let reduce folder (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
