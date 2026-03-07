@@ -87,6 +87,50 @@ module Immutable =
 
     }
 
+module Immutable2 =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filter keeps all when predicate is always true`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filter (fun _ -> true)
+        |> verify1To10
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filterAsync keeps all when predicate is always true`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filterAsync (fun _ -> Task.fromResult true)
+        |> verify1To10
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filter returns empty when predicate is always false`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filter (fun _ -> false)
+        |> verifyEmpty
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-filterAsync returns empty when predicate is always false`` variant =
+        Gen.getSeqImmutable variant
+        |> TaskSeq.filterAsync (fun _ -> Task.fromResult false)
+        |> verifyEmpty
+
+    [<Fact>]
+    let ``TaskSeq-filter evaluates each element exactly once`` () = task {
+        let mutable count = 0
+
+        let ts = taskSeq {
+            for i in 1..5 do
+                count <- count + 1
+                yield i
+        }
+
+        let! xs =
+            ts
+            |> TaskSeq.filter (fun x -> x % 2 = 0)
+            |> TaskSeq.toListAsync
+
+        count |> should equal 5
+        xs |> should equal [ 2; 4 ]
+    }
+
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-filter filters correctly`` variant = task {
