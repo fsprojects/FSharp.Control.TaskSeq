@@ -1,8 +1,10 @@
 {
-  "last_run": "2026-03-07T20:42:03Z",
-  "run_id": "22806827100",
+  "last_run": "2026-03-07T21:02:15Z",
+  "run_id": "22807147162",
   "monthly_activity_issue": 285,
-  "comments_made": {},
+  "comments_made": {
+    "289": "2026-03-07T21:02:15Z"
+  },
   "prs_created": [
     {
       "branch": "repo-assist/perf-init-remove-lazy-2026-03",
@@ -12,13 +14,13 @@
     {
       "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
       "description": "Fix FS3873 deprecated range expressions",
-      "status": "open"
+      "status": "open (branch: fix-deprecated-seq-expr-2026-03-0eb1b56b474fc6bf)"
     },
     {
       "pr": 292,
       "branch": "repo-assist/test-perf-improve-2026-03",
       "description": "ConcurrentHashSet->HashSet in except; zip/indexed tests",
-      "status": "open"
+      "status": "merged"
     },
     {
       "pr": 293,
@@ -28,19 +30,20 @@
     },
     {
       "pr": 295,
-      "branch": "repo-assist/ci-test-perf-2026-03-647061314c105ab1",
+      "branch": "repo-assist/ci-test-perf-2026-03",
       "description": "NuGet caching (actions/cache@v4) + reduce DummyTaskFactory test delays",
-      "status": "open (created by concurrent run, addresses #290)"
+      "status": "open"
     },
     {
+      "pr": 296,
       "branch": "repo-assist/feat-scan-2026-03",
       "description": "Add TaskSeq.scan / TaskSeq.scanAsync (54 tests, ref #289)",
-      "status": "open (PR pending creation)"
+      "status": "open"
     },
     {
-      "branch": "repo-assist/eng-nuget-cache-2026-03",
-      "description": "CI: add cache:true to setup-dotnet@v4 in all 4 workflows (alt to #295)",
-      "status": "open (PR pending creation)"
+      "branch": "repo-assist/test-choose-expand-2026-03",
+      "description": "Expand choose/chooseAsync and filter/filterAsync tests (8+5 new tests)",
+      "status": "open (PR pending number)"
     }
   ],
   "issues_backlog_cursor": 290,
@@ -48,5 +51,5 @@
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "Issue #289 (dsyme): align with AsyncSeq functions — do bit by bit. Done: pairwise, scan/scanAsync. Next: windowed, unfold. Issue #290 (CI perf) addressed by PR #295 (existing) and repo-assist/eng-nuget-cache-2026-03 (new). Note: repo-assist/eng-nuget-cache-2026-03 overlaps with #295 caching — maintainer should pick one. Issue #269 (null ref release mode) needs investigation."
+  "notes": "Issue #289 (dsyme): align with AsyncSeq. Done: pairwise (#293), scan/scanAsync (#296). Next: unfold, windowed, reduce. Comment posted on #289 this run with progress/roadmap. Issue #290 (CI perf) addressed by PR #295. Issue #269 has Repo Assist comment already. PR #292 merged. PR #291 (test-nested-loops) also merged. Monthly activity issue #285 updated."
 }
