@@ -249,8 +249,8 @@ module SideEffect =
         let mutable i = 0
 
         taskSeq {
-            yield ResizeArray { 1..10 }
-            yield ResizeArray { 1..10 }
+            yield ResizeArray [1..10]
+            yield ResizeArray [1..10]
 
             yield
                 ResizeArray(
