@@ -5,7 +5,7 @@ namespace FSharp.Control
 [<AutoOpen>]
 module TaskExtensions =
 
-    type TaskBuilder with
+    type TaskBuilderBase with
 
         /// <summary>
         /// Inside <see cref="task" />, iterate over all values of a <see cref="taskSeq" />.
