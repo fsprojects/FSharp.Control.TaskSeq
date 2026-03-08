@@ -570,6 +570,35 @@ module LowPriority =
                     sm.Data.current <- ValueNone
                     false)
 
+        // YieldFromFinal for generic task-like in tail call position (handles do! in tail position).
+        // Handles: non-generic Task, non-generic ValueTask, ValueTask<unit>, and other unit-returning task-likes.
+        // NOT handled: Task<'T> (see HighPriority below for that).
+        [<NoEagerConstraintApplication>]
+        member inline _.YieldFromFinal< ^TaskLike, 'T, ^Awaiter
+            when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
+            and ^Awaiter :> ICriticalNotifyCompletion
+            and ^Awaiter: (member get_IsCompleted: unit -> bool)
+            and ^Awaiter: (member GetResult: unit -> unit)>
+            (task: ^TaskLike)
+            : ResumableTSC<'T> =
+
+            // Inline the await pattern to avoid constraint propagation issues with Bind.
+            ResumableTSC<'T>(fun sm ->
+                let mutable awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
+                let mutable __stack_fin = true
+
+                if not (^Awaiter: (member get_IsCompleted: unit -> bool) awaiter) then
+                    let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
+                    __stack_fin <- __stack_fin2
+
+                if __stack_fin then
+                    (^Awaiter: (member GetResult: unit -> unit) awaiter)
+                    true // zero: signal done, no elements
+                else
+                    sm.Data.awaiter <- awaiter
+                    sm.Data.current <- ValueNone
+                    false)
+
 
 [<AutoOpen>]
 module MediumPriority =
@@ -606,6 +635,17 @@ module MediumPriority =
                     .Invoke(&sm))
 
         member inline this.YieldFrom(source: IAsyncEnumerable<'T>) = this.For(source, (fun v -> this.Yield(v)))
+
+        /// Called by the F# compiler when <c>yield!</c> appears in a tail-call position within a
+        /// <c>taskSeq</c>. Currently behaves identically to <c>YieldFrom</c>; the method exists
+        /// so F# 10+ can call it for tail-positioned <c>yield!</c> expressions. A zero-copy
+        /// tail-delegation optimisation requires additional state-machine driver support and is
+        /// left as future work.
+        member inline this.YieldFromFinal(source: IAsyncEnumerable<'T>) : ResumableTSC<'T> = this.YieldFrom(source)
+
+        /// Called by the F# compiler when <c>yield!</c> appears in a tail-call position over a
+        /// synchronous sequence. Behaves identically to <c>YieldFrom</c>.
+        member inline this.YieldFromFinal(source: seq<'T>) : ResumableTSC<'T> = this.YieldFrom(source)
 
 [<AutoOpen>]
 module HighPriority =
@@ -680,6 +720,13 @@ module HighPriority =
                     sm.Data.awaiter <- awaiter
                     sm.Data.current <- ValueNone
                     false)
+
+        // YieldFromFinal for Task<'T> and Async<'T> in tail call position (handles do! in tail position).
+        // Task<unit> needs its own overload here (at HighPriority) for the same reason Bind does:
+        // TaskAwaiter<unit>.GetResult() -> unit differs from TaskAwaiter.GetResult() -> void.
+        member inline this.YieldFromFinal(task: Task<unit>) : ResumableTSC<'T> = this.Bind(task, (fun () -> this.Zero()))
+
+        member inline this.YieldFromFinal(computation: Async<unit>) : ResumableTSC<'T> = this.Bind(computation, (fun () -> this.Zero()))
 
 [<AutoOpen>]
 module TaskSeqBuilder =

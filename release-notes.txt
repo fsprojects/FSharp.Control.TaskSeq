@@ -2,6 +2,7 @@
 Release notes:
 
 0.5.0
+    - adds YieldFromFinal to the taskSeq builder for F# 10 compatibility (tail-positioned yield! and do!), #62
     - update engineering to .NET 9/10
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289

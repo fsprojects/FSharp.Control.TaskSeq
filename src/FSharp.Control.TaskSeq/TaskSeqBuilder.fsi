@@ -180,6 +180,20 @@ module LowPriority =
                 and ^Awaiter: (member get_IsCompleted: unit -> bool)
                 and ^Awaiter: (member GetResult: unit -> 'T)
 
+        /// <summary>
+        /// Called by the F# compiler when <c>do!</c> with a unit-returning task-like appears in a
+        /// tail-call position. Handles non-generic <c>Task</c>, non-generic <c>ValueTask</c>,
+        /// <c>ValueTask&lt;unit&gt;</c>, and other unit-returning task-likes. Falls back to
+        /// <c>Bind</c> + <c>Zero</c>, signalling sequence end after awaiting the task.
+        /// </summary>
+        [<NoEagerConstraintApplication>]
+        member inline YieldFromFinal< ^TaskLike, 'T, ^Awaiter> :
+            task: ^TaskLike -> ResumableTSC<'T>
+                when ^TaskLike: (member GetAwaiter: unit -> ^Awaiter)
+                and ^Awaiter :> ICriticalNotifyCompletion
+                and ^Awaiter: (member get_IsCompleted: unit -> bool)
+                and ^Awaiter: (member GetResult: unit -> unit)
+
 /// <summary>
 /// Contains low priority extension methods for the main builder class for the <see cref="taskSeq" /> computation expression.
 /// The <see cref="LowPriority" />, <see cref="MediumPriority" /> and <see cref="HighPriority" /> modules are not meant to be
@@ -198,6 +212,21 @@ module MediumPriority =
         member inline For: source: #TaskSeq<'TElement> * body: ('TElement -> ResumableTSC<'T>) -> ResumableTSC<'T>
         member inline YieldFrom: source: TaskSeq<'T> -> ResumableTSC<'T>
 
+        /// <summary>
+        /// Called by the F# compiler when <c>yield!</c> appears in a tail-call position within a
+        /// <c>taskSeq</c> computation expression. Currently behaves identically to <c>YieldFrom</c>;
+        /// the method exists so F# 10+ can recognise and call it for tail-positioned <c>yield!</c>
+        /// expressions without a compilation error.
+        /// </summary>
+        member inline YieldFromFinal: source: TaskSeq<'T> -> ResumableTSC<'T>
+
+        /// <summary>
+        /// Called by the F# compiler when <c>yield!</c> appears in a tail-call position within a
+        /// <c>taskSeq</c> computation expression over a synchronous sequence. Behaves identically
+        /// to <c>YieldFrom</c>.
+        /// </summary>
+        member inline YieldFromFinal: source: seq<'T> -> ResumableTSC<'T>
+
 /// <summary>
 /// Contains low priority extension methods for the main builder class for the <see cref="taskSeq" /> computation expression.
 /// The <see cref="LowPriority" />, <see cref="MediumPriority" /> and <see cref="HighPriority" /> modules are not meant to be
@@ -209,3 +238,15 @@ module HighPriority =
 
         member inline Bind: task: Task<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
         member inline Bind: computation: Async<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
+
+        /// <summary>
+        /// Called by the F# compiler when <c>do!</c> with a <c>Task&lt;unit&gt;</c> appears in a
+        /// tail-call position. Signals sequence end after awaiting the task.
+        /// </summary>
+        member inline YieldFromFinal: task: Task<unit> -> ResumableTSC<'T>
+
+        /// <summary>
+        /// Called by the F# compiler when <c>do!</c> with an <c>Async&lt;unit&gt;</c> appears in a
+        /// tail-call position. Signals sequence end after the async computation completes.
+        /// </summary>
+        member inline YieldFromFinal: computation: Async<unit> -> ResumableTSC<'T>
