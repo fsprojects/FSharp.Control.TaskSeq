@@ -7,6 +7,7 @@ Release notes:
     - adds TaskSeq.pairwise, #289
     - adds TaskSeq.rev, sort, sortDescending, sortBy, sortByAsync,
       sortByDescending, sortByDescendingAsync, sortWith
+    - fixes: CancellationToken passed to GetAsyncEnumerator is now honored in MoveNextAsync, #179
 
 0.4.0
     - overhaul all doc comments, add exceptions, improve IDE quick-info experience, #136, #220, #234
