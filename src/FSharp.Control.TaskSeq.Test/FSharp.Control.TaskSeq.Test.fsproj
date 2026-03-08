@@ -30,6 +30,7 @@
     <Compile Include="TaskSeq.Scan.Tests.fs" />
     <Compile Include="TaskSeq.MapFold.Tests.fs" />
     <Compile Include="TaskSeq.Reduce.Tests.fs" />
+    <Compile Include="TaskSeq.GroupBy.Tests.fs" />
     <Compile Include="TaskSeq.Forall.Tests.fs" />
     <Compile Include="TaskSeq.Head.Tests.fs" />
     <Compile Include="TaskSeq.Indexed.Tests.fs" />

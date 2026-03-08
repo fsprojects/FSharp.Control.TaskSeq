@@ -516,5 +516,16 @@ type TaskSeq private () =
     static member scanAsync folder state source = Internal.scan (AsyncFolderAction folder) state source
     static member reduce folder source = Internal.reduce (FolderAction folder) source
     static member reduceAsync folder source = Internal.reduce (AsyncFolderAction folder) source
+
+    //
+    // groupBy/countBy/partition
+    //
+
+    static member groupBy projection source = Internal.groupBy (ProjectorAction projection) source
+    static member groupByAsync projection source = Internal.groupBy (AsyncProjectorAction projection) source
+    static member countBy projection source = Internal.countBy (ProjectorAction projection) source
+    static member countByAsync projection source = Internal.countBy (AsyncProjectorAction projection) source
+    static member partition predicate source = Internal.partition (Predicate predicate) source
+    static member partitionAsync predicate source = Internal.partition (PredicateAsync predicate) source
     static member mapFold mapping state source = Internal.mapFold (MapFolderAction mapping) state source
     static member mapFoldAsync mapping state source = Internal.mapFold (AsyncMapFolderAction mapping) state source

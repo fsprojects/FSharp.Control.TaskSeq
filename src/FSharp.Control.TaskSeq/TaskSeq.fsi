@@ -1660,6 +1660,113 @@ type TaskSeq =
     static member reduceAsync: folder: ('T -> 'T -> #Task<'T>) -> source: TaskSeq<'T> -> Task<'T>
 
     /// <summary>
+    /// Applies a key-generating function to each element of a task sequence and yields a sequence of unique keys
+    /// and arrays of all elements that have each key, in order of first occurrence of each key.
+    /// The returned array preserves the original order of elements within each group.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the projection function <paramref name="projection" /> is asynchronous, consider using
+    /// <see cref="TaskSeq.groupByAsync" />.
+    /// </remarks>
+    ///
+    /// <param name="projection">A function that transforms each element into a key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning an array of <c>(key, elements[])</c> pairs.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member groupBy: projection: ('T -> 'Key) -> source: TaskSeq<'T> -> Task<('Key * 'T[])[]> when 'Key: equality
+
+    /// <summary>
+    /// Applies an asynchronous key-generating function to each element of a task sequence and yields a sequence of
+    /// unique keys and arrays of all elements that have each key, in order of first occurrence of each key.
+    /// The returned array preserves the original order of elements within each group.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the projection function <paramref name="projection" /> is synchronous, consider using
+    /// <see cref="TaskSeq.groupBy" />.
+    /// </remarks>
+    ///
+    /// <param name="projection">An asynchronous function that transforms each element into a key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning an array of <c>(key, elements[])</c> pairs.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member groupByAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> Task<('Key * 'T[])[]> when 'Key: equality
+
+    /// <summary>
+    /// Applies a key-generating function to each element of a task sequence and returns a task with an array of
+    /// unique keys and their element counts, in order of first occurrence of each key.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the projection function <paramref name="projection" /> is asynchronous, consider using
+    /// <see cref="TaskSeq.countByAsync" />.
+    /// </remarks>
+    ///
+    /// <param name="projection">A function that transforms each element into a key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning an array of <c>(key, count)</c> pairs.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member countBy: projection: ('T -> 'Key) -> source: TaskSeq<'T> -> Task<('Key * int)[]> when 'Key: equality
+
+    /// <summary>
+    /// Applies an asynchronous key-generating function to each element of a task sequence and returns a task with
+    /// an array of unique keys and their element counts, in order of first occurrence of each key.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the projection function <paramref name="projection" /> is synchronous, consider using
+    /// <see cref="TaskSeq.countBy" />.
+    /// </remarks>
+    ///
+    /// <param name="projection">An asynchronous function that transforms each element into a key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning an array of <c>(key, count)</c> pairs.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member countByAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> Task<('Key * int)[]> when 'Key: equality
+
+    /// <summary>
+    /// Splits the task sequence into two arrays: those for which the given predicate returns <c>true</c>,
+    /// and those for which it returns <c>false</c>. The relative order of elements within each partition is preserved.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the predicate function <paramref name="predicate" /> is asynchronous, consider using
+    /// <see cref="TaskSeq.partitionAsync" />.
+    /// </remarks>
+    ///
+    /// <param name="predicate">A function that returns <c>true</c> for elements to include in the first array.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning a tuple of two arrays: <c>(trueItems, falseItems)</c>.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member partition: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T[] * 'T[]>
+
+    /// <summary>
+    /// Splits the task sequence into two arrays using an asynchronous predicate: those for which the predicate returns
+    /// <c>true</c>, and those for which it returns <c>false</c>. The relative order of elements within each partition
+    /// is preserved.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function consumes the entire source task sequence before returning.
+    /// If the predicate function <paramref name="predicate" /> is synchronous, consider using
+    /// <see cref="TaskSeq.partition" />.
+    /// </remarks>
+    ///
+    /// <param name="predicate">An asynchronous function that returns <c>true</c> for elements to include in the first array.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning a tuple of two arrays: <c>(trueItems, falseItems)</c>.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member partitionAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T[] * 'T[]>
+
+    /// <summary>
     /// Return a new task sequence with a new item inserted before the given index.
     /// </summary>
     ///

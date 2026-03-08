@@ -50,6 +50,11 @@ type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
 [<Struct>]
+type internal ProjectorAction<'T, 'Key, 'TaskKey when 'TaskKey :> Task<'Key>> =
+    | ProjectorAction of projector: ('T -> 'Key)
+    | AsyncProjectorAction of async_projector: ('T -> 'TaskKey)
+
+[<Struct>]
 type internal MapFolderAction<'T, 'State, 'Result, 'TaskResultState when 'TaskResultState :> Task<'Result * 'State>> =
     | MapFolderAction of map_folder_action: ('State -> 'T -> 'Result * 'State)
     | AsyncMapFolderAction of async_map_folder_action: ('State -> 'T -> 'TaskResultState)
@@ -1281,6 +1286,123 @@ module internal TaskSeqInternal =
                 | ValueSome previous ->
                     yield previous, current
                     maybePrevious <- ValueSome current
+        }
+
+    let groupBy (projector: ProjectorAction<'T, 'Key, _>) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let groups = Dictionary<'Key, ResizeArray<'T>>(HashIdentity.Structural)
+            let order = ResizeArray<'Key>()
+            let! step = e.MoveNextAsync()
+            let mutable go = step
+
+            match projector with
+            | ProjectorAction proj ->
+                while go do
+                    let key = proj e.Current
+                    let mutable ra = Unchecked.defaultof<_>
+
+                    if not (groups.TryGetValue(key, &ra)) then
+                        ra <- ResizeArray()
+                        groups[key] <- ra
+                        order.Add key
+
+                    ra.Add e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | AsyncProjectorAction proj ->
+                while go do
+                    let! key = proj e.Current
+                    let mutable ra = Unchecked.defaultof<_>
+
+                    if not (groups.TryGetValue(key, &ra)) then
+                        ra <- ResizeArray()
+                        groups[key] <- ra
+                        order.Add key
+
+                    ra.Add e.Current
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return
+                Array.init order.Count (fun i ->
+                    let k = order[i]
+                    k, groups[k].ToArray())
+        }
+
+    let countBy (projector: ProjectorAction<'T, 'Key, _>) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let counts = Dictionary<'Key, int>(HashIdentity.Structural)
+            let order = ResizeArray<'Key>()
+            let! step = e.MoveNextAsync()
+            let mutable go = step
+
+            match projector with
+            | ProjectorAction proj ->
+                while go do
+                    let key = proj e.Current
+                    let mutable count = 0
+
+                    if not (counts.TryGetValue(key, &count)) then
+                        order.Add key
+
+                    counts[key] <- count + 1
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | AsyncProjectorAction proj ->
+                while go do
+                    let! key = proj e.Current
+                    let mutable count = 0
+
+                    if not (counts.TryGetValue(key, &count)) then
+                        order.Add key
+
+                    counts[key] <- count + 1
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return Array.init order.Count (fun i -> let k = order[i] in k, counts[k])
+        }
+
+    let partition (predicate: PredicateAction<'T, _>) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let trueItems = ResizeArray<'T>()
+            let falseItems = ResizeArray<'T>()
+            let! step = e.MoveNextAsync()
+            let mutable go = step
+
+            match predicate with
+            | Predicate pred ->
+                while go do
+                    let item = e.Current
+
+                    if pred item then
+                        trueItems.Add item
+                    else
+                        falseItems.Add item
+
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | PredicateAsync pred ->
+                while go do
+                    let item = e.Current
+                    let! result = pred item
+                    if result then trueItems.Add item else falseItems.Add item
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return trueItems.ToArray(), falseItems.ToArray()
         }
 
     let chunkBySize chunkSize (source: TaskSeq<'T>) : TaskSeq<'T[]> =
