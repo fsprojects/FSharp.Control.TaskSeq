@@ -1511,3 +1511,97 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when index is below 0 or greater than source length.</exception>
     static member updateAt: index: int -> value: 'T -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence with elements in reverse order. This function requires the full sequence to be
+    /// materialised into memory before streaming the results back.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The reversed task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member rev: source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in ascending order. This function requires the full sequence to be
+    /// materialised into memory before streaming the sorted results back.
+    /// If the projection function is asynchronous, consider using <see cref="TaskSeq.sortByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sort<'T when 'T: comparison> : source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in descending order. This function requires the full sequence to be
+    /// materialised into memory before streaming the sorted results back.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortDescending<'T when 'T: comparison> : source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in ascending order by the given projection. This function requires the
+    /// full sequence to be materialised into memory before streaming the sorted results back.
+    /// If the projection function is asynchronous, consider using <see cref="TaskSeq.sortByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform elements of the input sequence into the type being compared.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortBy<'T, 'Key when 'Key: comparison> :
+        projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in descending order by the given projection. This function requires the
+    /// full sequence to be materialised into memory before streaming the sorted results back.
+    /// If the projection function is asynchronous, consider using <see cref="TaskSeq.sortByDescendingAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform elements of the input sequence into the type being compared.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByDescending<'T, 'Key when 'Key: comparison> :
+        projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in ascending order by the given asynchronous projection. This function
+    /// requires the full sequence to be materialised into memory before streaming the sorted results back.
+    /// If the projection function is synchronous, consider using <see cref="TaskSeq.sortBy" />.
+    /// </summary>
+    ///
+    /// <param name="projection">An asynchronous function to transform elements of the input sequence into the type being compared.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByAsync<'T, 'Key when 'Key: comparison> :
+        projection: ('T -> Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence in descending order by the given asynchronous projection. This function
+    /// requires the full sequence to be materialised into memory before streaming the sorted results back.
+    /// If the projection function is synchronous, consider using <see cref="TaskSeq.sortByDescending" />.
+    /// </summary>
+    ///
+    /// <param name="projection">An asynchronous function to transform elements of the input sequence into the type being compared.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByDescendingAsync<'T, 'Key when 'Key: comparison> :
+        projection: ('T -> Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of a task sequence using the given comparison function. This function requires the full
+    /// sequence to be materialised into memory before streaming the sorted results back.
+    /// </summary>
+    ///
+    /// <param name="comparer">A function that compares two elements and returns an integer indicating their relative order.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortWith: comparer: ('T -> 'T -> int) -> source: TaskSeq<'T> -> TaskSeq<'T>

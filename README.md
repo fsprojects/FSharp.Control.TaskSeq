@@ -341,18 +341,19 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#236][]| `removeAt`         | `removeAt`           |                           | |
 | &#x2705; [#236][]| `removeManyAt`     | `removeManyAt`       |                           | |
 |                  | `replicate`        | `replicate`          |                           | |
-| &#x2753;         | `rev`              |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705;          | `rev`              | `rev`                |                           | materializes sequence before yielding |
 |                  | `scan`             | `scan`               | `scanAsync`               | |
 | &#x1f6ab;        | `scanBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#90][] | `singleton`        | `singleton`          |                           | |
 | &#x2705; [#209][]| `skip`             | `skip`               |                           | |
 | &#x2705; [#219][]| `skipWhile`        | `skipWhile`          | `skipWhileAsync`          | |
 | &#x2705; [#219][]|                    | `skipWhileInclusive` | `skipWhileInclusiveAsync` | |
-| &#x2753;         | `sort`             |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortBy`           |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortByAscending`  |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortByDescending` |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-| &#x2753;         | `sortWith`         |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705;          | `sort`             | `sort`               |                           | materializes sequence before yielding |
+|                   |                    | `sortDescending`     |                           | materializes sequence before yielding |
+| &#x2705;          | `sortBy`           | `sortBy`             | `sortByAsync`             | materializes sequence before yielding |
+| &#x2705;          | `sortByAscending`  | `sortBy`             | `sortByAsync`             | same as `sortBy`; materializes sequence before yielding |
+| &#x2705;          | `sortByDescending` | `sortByDescending`   | `sortByDescendingAsync`   | materializes sequence before yielding |
+| &#x2705;          | `sortWith`         | `sortWith`           |                           | materializes sequence before yielding |
 |                  | `splitInto`        | `splitInto`          |                           | |
 |                  | `sum`              | `sum`                |                           | |
 |                  | `sumBy`            | `sumBy`              | `sumByAsync`              | |

@@ -1152,3 +1152,92 @@ module internal TaskSeqInternal =
                     yield previous, current
                     maybePrevious <- ValueSome current
         }
+
+    let rev (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            let arr = resizeArr.ToArray()
+
+            for i = arr.Length - 1 downto 0 do
+                yield arr.[i]
+        }
+
+    let sort (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            yield! resizeArr.ToArray() |> Array.sort
+        }
+
+    let sortDescending (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            yield! resizeArr.ToArray() |> Array.sortDescending
+        }
+
+    let sortBy (projection: 'T -> 'Key) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            yield! resizeArr.ToArray() |> Array.sortBy projection
+        }
+
+    let sortByDescending (projection: 'T -> 'Key) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            yield! resizeArr.ToArray() |> Array.sortByDescending projection
+        }
+
+    let sortByAsync (projection: 'T -> Task<'Key>) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! pairs = task {
+                let! resizeArr = toResizeArrayAsync source
+                let arr = resizeArr.ToArray()
+                let kvs = ResizeArray(arr.Length)
+
+                for item in arr do
+                    let! k = projection item
+                    kvs.Add(k, item)
+
+                return kvs.ToArray()
+            }
+
+            yield! pairs |> Array.sortBy fst |> Array.map snd
+        }
+
+    let sortByDescendingAsync (projection: 'T -> Task<'Key>) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! pairs = task {
+                let! resizeArr = toResizeArrayAsync source
+                let arr = resizeArr.ToArray()
+                let kvs = ResizeArray(arr.Length)
+
+                for item in arr do
+                    let! k = projection item
+                    kvs.Add(k, item)
+
+                return kvs.ToArray()
+            }
+
+            yield! pairs |> Array.sortByDescending fst |> Array.map snd
+        }
+
+    let sortWith (comparer: 'T -> 'T -> int) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! resizeArr = toResizeArrayAsync source
+            yield! resizeArr.ToArray() |> Array.sortWith comparer
+        }

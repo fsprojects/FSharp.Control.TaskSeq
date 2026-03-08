@@ -414,3 +414,16 @@ type TaskSeq private () =
     static member scanAsync folder state source = Internal.scan (AsyncFolderAction folder) state source
     static member reduce folder source = Internal.reduce (FolderAction folder) source
     static member reduceAsync folder source = Internal.reduce (AsyncFolderAction folder) source
+
+    //
+    // sort/rev functions (require full materialisation before streaming)
+    //
+
+    static member rev source = Internal.rev source
+    static member sort source = Internal.sort source
+    static member sortDescending source = Internal.sortDescending source
+    static member sortBy projection source = Internal.sortBy projection source
+    static member sortByDescending projection source = Internal.sortByDescending projection source
+    static member sortByAsync projection source = Internal.sortByAsync projection source
+    static member sortByDescendingAsync projection source = Internal.sortByDescendingAsync projection source
+    static member sortWith comparer source = Internal.sortWith comparer source
