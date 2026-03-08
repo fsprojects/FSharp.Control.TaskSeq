@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-07T23:39:41Z",
-  "run_id": "22809661324",
+  "last_run": "2026-03-07T23:58:31Z",
+  "run_id": "22809944210",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
@@ -18,89 +18,25 @@
       "description": "Fix FS3873 deprecated range expressions",
       "status": "changes already merged to main, branch closed"
     },
-    {
-      "pr": 292,
-      "branch": "repo-assist/test-perf-improve-2026-03",
-      "description": "ConcurrentHashSet->HashSet in except; zip/indexed tests",
-      "status": "merged"
-    },
-    {
-      "pr": 293,
-      "branch": "repo-assist/test-forward-pairwise-2026-03",
-      "description": "Add TaskSeq.pairwise; expand distinctUntilChanged tests",
-      "status": "merged"
-    },
-    {
-      "pr": 295,
-      "branch": "repo-assist/ci-test-perf-2026-03",
-      "description": "NuGet caching (actions/cache@v4) + reduce DummyTaskFactory test delays",
-      "status": "merged"
-    },
-    {
-      "pr": 296,
-      "branch": "repo-assist/feat-scan-2026-03",
-      "description": "Add TaskSeq.scan / TaskSeq.scanAsync (54 tests, ref #289)",
-      "status": "merged"
-    },
-    {
-      "pr": 298,
-      "branch": "repo-assist/test-choose-expand-2026-03",
-      "description": "Expand choose/chooseAsync and filter/filterAsync tests (8+5 new tests)",
-      "status": "merged"
-    },
-    {
-      "pr": 299,
-      "branch": "repo-assist/feat-reduce-2026-03",
-      "description": "Add TaskSeq.reduce / TaskSeq.reduceAsync (75 tests, ref #289)",
-      "status": "merged"
-    },
-    {
-      "pr": 300,
-      "branch": "repo-assist/feat-unfold-2026-03",
-      "description": "Add TaskSeq.unfold / TaskSeq.unfoldAsync (14 tests, ref #289)",
-      "status": "merged"
-    },
-    {
-      "pr": 301,
-      "branch": "repo-assist/docs-agents-net9-2026-03",
-      "description": "Fix AGENTS.md: update test target reference from net6.0 to net9.0",
-      "status": "merged"
-    },
-    {
-      "pr": 303,
-      "branch": "repo-assist/feat-windowed-chunkbysize-2026-03",
-      "description": "Add TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed; ring-buffer perf impl; 171 tests",
-      "status": "open"
-    },
-    {
-      "pr": 304,
-      "branch": "repo-assist/feat-sumby-averageby-2026-03",
-      "description": "Add TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync (147 tests)",
-      "status": "open"
-    },
-    {
-      "pr": 305,
-      "branch": "repo-assist/perf-exists-distinct-2026-03",
-      "description": "Perf: optimize exists/existsAsync/contains (avoid Option allocation); add distinct/distinctBy/distinctByAsync (75 tests)",
-      "status": "open"
-    },
-    {
-      "pr": 306,
-      "branch": "repo-assist/feat-mapfold-2026-03",
-      "description": "Add TaskSeq.mapFold / TaskSeq.mapFoldAsync (56 tests)",
-      "status": "open"
-    },
-    {
-      "pr": "307-est",
-      "branch": "repo-assist/feat-groupby-countby-partition-2026-03",
-      "description": "Add TaskSeq.groupBy/groupByAsync, countBy/countByAsync, partition/partitionAsync (195 tests)",
-      "status": "open - created this run"
-    }
+    { "pr": 292, "branch": "repo-assist/test-perf-improve-2026-03", "description": "ConcurrentHashSet->HashSet in except; zip/indexed tests", "status": "merged" },
+    { "pr": 293, "branch": "repo-assist/test-forward-pairwise-2026-03", "description": "Add TaskSeq.pairwise; expand distinctUntilChanged tests", "status": "merged" },
+    { "pr": 295, "branch": "repo-assist/ci-test-perf-2026-03", "description": "NuGet caching (actions/cache@v4) + reduce DummyTaskFactory test delays", "status": "merged" },
+    { "pr": 296, "branch": "repo-assist/feat-scan-2026-03", "description": "Add TaskSeq.scan / TaskSeq.scanAsync (54 tests, ref #289)", "status": "merged" },
+    { "pr": 298, "branch": "repo-assist/test-choose-expand-2026-03", "description": "Expand choose/chooseAsync and filter/filterAsync tests (8+5 new tests)", "status": "merged" },
+    { "pr": 299, "branch": "repo-assist/feat-reduce-2026-03", "description": "Add TaskSeq.reduce / TaskSeq.reduceAsync (75 tests, ref #289)", "status": "merged" },
+    { "pr": 300, "branch": "repo-assist/feat-unfold-2026-03", "description": "Add TaskSeq.unfold / TaskSeq.unfoldAsync (14 tests, ref #289)", "status": "merged" },
+    { "pr": 301, "branch": "repo-assist/docs-agents-net9-2026-03", "description": "Fix AGENTS.md: update test target reference from net6.0 to net9.0", "status": "merged" },
+    { "pr": 303, "branch": "repo-assist/feat-windowed-chunkbysize-2026-03", "description": "Add TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed; ring-buffer perf impl; 171 tests", "status": "open" },
+    { "pr": 304, "branch": "repo-assist/feat-sumby-averageby-2026-03", "description": "Add TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync (147 tests)", "status": "open" },
+    { "pr": 305, "branch": "repo-assist/perf-exists-distinct-2026-03", "description": "Perf: optimize exists/existsAsync/contains (avoid Option allocation); add distinct/distinctBy/distinctByAsync (75 tests)", "status": "open" },
+    { "pr": 306, "branch": "repo-assist/feat-mapfold-2026-03", "description": "Add TaskSeq.mapFold / TaskSeq.mapFoldAsync (56 tests)", "status": "open" },
+    { "pr": 307, "branch": "repo-assist/feat-groupby-countby-partition-2026-03", "description": "Add TaskSeq.groupBy/groupByAsync, countBy/countByAsync, partition/partitionAsync (195 tests)", "status": "open" },
+    { "pr": "308-est", "branch": "repo-assist/feat-replicate-zip3-2026-03", "description": "Add TaskSeq.replicate (13 tests) and TaskSeq.zip3 (47 tests); update README", "status": "open - created this run" }
   ],
   "issues_backlog_cursor": 245,
   "labels_applied": {
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "5 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/sumBy/averageBy), #305 (distinct+exists-perf), #306 (mapFold/mapFoldAsync), #307-est (groupBy/countBy/partition). Commented on #245 (upload-artifact@v4 already resolved). Next: investigate issue #269 (NullReferenceException in nested loops, Release mode - possibly F# compiler bug); or consider splitAt/transpose/allPairs."
+  "notes": "6 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/averageBy), #305 (distinct+exists-perf), #306 (mapFold), #307 (groupBy/countBy/partition), #308-est (replicate+zip3). Issue #269 (NRE in nested loops, Release) already commented on. Next: could consider sortBy/sort/rev (require pre-materialisation - note1 items in README), or investigating #179 (CancellationToken not registered)."
 }
