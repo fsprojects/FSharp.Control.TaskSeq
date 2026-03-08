@@ -13,6 +13,107 @@ module TaskSeqExtensions =
     module TaskSeq =
         let empty<'T> = Internal.empty<'T>
 
+        let inline sum (source: TaskSeq< ^T >) : Task< ^T > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^T>
+
+                while! e.MoveNextAsync() do
+                    acc <- acc + e.Current
+
+                return acc
+            }
+
+        let inline sumBy (projection: 'T -> ^U) (source: TaskSeq<'T>) : Task< ^U > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^U>
+
+                while! e.MoveNextAsync() do
+                    acc <- acc + projection e.Current
+
+                return acc
+            }
+
+        let inline sumByAsync (projection: 'T -> Task< ^U >) (source: TaskSeq<'T>) : Task< ^U > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^U>
+
+                while! e.MoveNextAsync() do
+                    let! value = projection e.Current
+                    acc <- acc + value
+
+                return acc
+            }
+
+        let inline average (source: TaskSeq< ^T >) : Task< ^T > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^T>
+                let mutable count = 0
+
+                while! e.MoveNextAsync() do
+                    acc <- acc + e.Current
+                    count <- count + 1
+
+                if count = 0 then
+                    invalidArg (nameof source) "The input task sequence was empty."
+
+                return LanguagePrimitives.DivideByInt acc count
+            }
+
+        let inline averageBy (projection: 'T -> ^U) (source: TaskSeq<'T>) : Task< ^U > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^U>
+                let mutable count = 0
+
+                while! e.MoveNextAsync() do
+                    acc <- acc + projection e.Current
+                    count <- count + 1
+
+                if count = 0 then
+                    invalidArg (nameof source) "The input task sequence was empty."
+
+                return LanguagePrimitives.DivideByInt acc count
+            }
+
+        let inline averageByAsync (projection: 'T -> Task< ^U >) (source: TaskSeq<'T>) : Task< ^U > =
+            if obj.ReferenceEquals(source, null) then
+                nullArg (nameof source)
+
+            task {
+                use e = source.GetAsyncEnumerator(System.Threading.CancellationToken.None)
+                let mutable acc = Unchecked.defaultof< ^U>
+                let mutable count = 0
+
+                while! e.MoveNextAsync() do
+                    let! value = projection e.Current
+                    acc <- acc + value
+                    count <- count + 1
+
+                if count = 0 then
+                    invalidArg (nameof source) "The input task sequence was empty."
+
+                return LanguagePrimitives.DivideByInt acc count
+            }
+
 
 [<Sealed; AbstractClass>]
 type TaskSeq private () =
@@ -166,6 +267,7 @@ type TaskSeq private () =
     static member minBy projection source = Internal.maxMinBy (>) projection source
     static member maxByAsync projection source = Internal.maxMinByAsync (<) projection source // looks like 'less than', is 'greater than'
     static member minByAsync projection source = Internal.maxMinByAsync (>) projection source
+
     static member length source = Internal.lengthBy None source
     static member lengthOrMax max source = Internal.lengthBeforeMax max source
     static member lengthBy predicate source = Internal.lengthBy (Some(Predicate predicate)) source
@@ -363,6 +465,8 @@ type TaskSeq private () =
 
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
     static member pairwise source = Internal.pairwise source
+    static member chunkBySize chunkSize source = Internal.chunkBySize chunkSize source
+    static member windowed windowSize source = Internal.windowed windowSize source
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
     static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source
@@ -425,3 +529,5 @@ type TaskSeq private () =
     static member countByAsync projection source = Internal.countBy (AsyncProjectorAction projection) source
     static member partition predicate source = Internal.partition (Predicate predicate) source
     static member partitionAsync predicate source = Internal.partition (PredicateAsync predicate) source
+    static member mapFold mapping state source = Internal.mapFold (MapFolderAction mapping) state source
+    static member mapFoldAsync mapping state source = Internal.mapFold (AsyncMapFolderAction mapping) state source
