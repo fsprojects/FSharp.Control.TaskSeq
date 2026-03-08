@@ -20,6 +20,7 @@
     <Compile Include="TaskSeq.ExactlyOne.Tests.fs" />
     <Compile Include="TaskSeq.Except.Tests.fs" />
     <Compile Include="TaskSeq.DistinctUntilChanged.Tests.fs" />
+    <Compile Include="TaskSeq.Distinct.Tests.fs" />
     <Compile Include="TaskSeq.Pairwise.Tests.fs" />
     <Compile Include="TaskSeq.Exists.Tests.fs" />
     <Compile Include="TaskSeq.Filter.Tests.fs" />

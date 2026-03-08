@@ -463,6 +463,10 @@ type TaskSeq private () =
     static member except itemsToExclude source = Internal.except itemsToExclude source
     static member exceptOfSeq itemsToExclude source = Internal.exceptOfSeq itemsToExclude source
 
+    static member distinct source = Internal.distinct source
+    static member distinctBy projection source = Internal.distinctBy projection source
+    static member distinctByAsync projection source = Internal.distinctByAsync projection source
+
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
     static member pairwise source = Internal.pairwise source
     static member chunkBySize chunkSize source = Internal.chunkBySize chunkSize source
@@ -471,17 +475,11 @@ type TaskSeq private () =
     static member forall predicate source = Internal.forall (Predicate predicate) source
     static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source
 
-    static member exists predicate source =
-        Internal.tryFind (Predicate predicate) source
-        |> Task.map Option.isSome
+    static member exists predicate source = Internal.exists (Predicate predicate) source
 
-    static member existsAsync predicate source =
-        Internal.tryFind (PredicateAsync predicate) source
-        |> Task.map Option.isSome
+    static member existsAsync predicate source = Internal.exists (PredicateAsync predicate) source
 
-    static member contains value source =
-        Internal.tryFind (Predicate((=) value)) source
-        |> Task.map Option.isSome
+    static member contains value source = Internal.contains value source
 
     static member pick chooser source =
         Internal.tryPick (TryPick chooser) source

@@ -852,6 +852,100 @@ module internal TaskSeqInternal =
             return state
           }
 
+    /// Direct bool-returning exists, avoiding the Option<'T> allocation that tryFind+isSome would incur.
+    let exists predicate (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        match predicate with
+        | Predicate syncPredicate -> task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable found = false
+            let! cont = e.MoveNextAsync()
+            let mutable hasMore = cont
+
+            while not found && hasMore do
+                found <- syncPredicate e.Current
+
+                if not found then
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            return found
+          }
+
+        | PredicateAsync asyncPredicate -> task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable found = false
+            let! cont = e.MoveNextAsync()
+            let mutable hasMore = cont
+
+            while not found && hasMore do
+                let! pred = asyncPredicate e.Current
+                found <- pred
+
+                if not found then
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            return found
+          }
+
+    /// Direct bool-returning contains, avoiding the Option<'T> allocation and closure that tryFind+isSome would incur.
+    let contains (value: 'T) (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable found = false
+            let! cont = e.MoveNextAsync()
+            let mutable hasMore = cont
+
+            while not found && hasMore do
+                if e.Current = value then
+                    found <- true
+                else
+                    let! cont = e.MoveNextAsync()
+                    hasMore <- cont
+
+            return found
+        }
+
+    let distinct (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            // only create hashset when we start iterating; sequential so plain HashSet suffices
+            let seen = HashSet<_>(HashIdentity.Structural)
+
+            for item in source do
+                if seen.Add item then
+                    yield item
+        }
+
+    let distinctBy (projection: _ -> _) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let seen = HashSet<_>(HashIdentity.Structural)
+
+            for item in source do
+                if seen.Add(projection item) then
+                    yield item
+        }
+
+    let distinctByAsync (projection: _ -> #Task<_>) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let seen = HashSet<_>(HashIdentity.Structural)
+
+            for item in source do
+                let! key = projection item
+
+                if seen.Add key then
+                    yield item
+        }
+
     let skipOrTake skipOrTake count (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
         raiseCannotBeNegative (nameof count) count
