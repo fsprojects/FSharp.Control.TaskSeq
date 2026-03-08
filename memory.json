@@ -1,6 +1,6 @@
 {
-  "last_run": "2026-03-08T07:04:28Z",
-  "run_id": "22816103275",
+  "last_run": "2026-03-08T13:10:41Z",
+  "run_id": "22821730993",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
@@ -8,15 +8,21 @@
     "245": "2026-03-07T23:39:00Z",
     "261": "2026-03-08T00:16:00Z",
     "246": "2026-03-08T07:04:28Z",
-    "259": "2026-03-08T07:04:28Z"
+    "259": "2026-03-08T07:04:28Z",
+    "269": "2026-03-07T20:11:40Z",
+    "167": "2026-03-08T13:10:41Z"
   },
   "prs_created": [
-    { "pr": 315, "branch": "repo-assist/eng-package-validation-2026-03", "description": "eng: enable EnablePackageValidation in fsproj (closes #259)", "status": "open - created this run" }
+    { "pr": 315, "branch": "repo-assist/eng-package-validation-2026-03", "description": "eng: enable EnablePackageValidation in fsproj (closes #259)", "status": "open" },
+    { "pr": "~316", "branch": "repo-assist/improve-rev-sort-2026-03", "description": "feat: add TaskSeq.rev, sort, etc.", "status": "SHOULD BE CLOSED - duplicates rejected PR #309" }
   ],
-  "issues_backlog_cursor": 259,
+  "issues_backlog_cursor": 167,
   "labels_applied": {
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "All previous Repo Assist PRs #303-313 have been merged! PR #314 was a human PR bumping version to 0.6.0. Next PR will be ~#315. Open issues: #62 (tail recursion, vFuture), #78 (CancellableTasks interop), #129 (AggregateException), #133 (cancellation tokens), #139-143 (TaskEx), #167 (ConfiguredCancelableAsyncEnumerable), #246 (dynamic resumable code), #259 (Package Validation - PR #315 open). Good future tasks: implement TaskSeqDynamic<T> for #246, support ConfiguredCancelableAsyncEnumerable via ofConfiguredCancelable helper (#167), investigate allPairs/transpose/splitInto."
+  "maintainer_rejections": {
+    "rev-sort-sortBy-sortWith": "PR #309 closed by dsyme: 'Let's not do these, they aren't very useful' (2026-03-08). Do NOT re-implement TaskSeq.rev, sort, sortDescending, sortBy, sortByDescending, sortWith, sortByAsync, sortByDescendingAsync."
+  },
+  "notes": "IMPORTANT: dsyme rejected rev/sort/sortBy/sortWith functions in PR #309. Do not re-implement. PR ~#316 from this run is a mistake - duplicates #309 and should be closed. Open issues: #62 (tail recursion, vFuture), #78 (CancellableTasks interop), #129 (AggregateException), #133 (cancellation tokens), #139-143 (TaskEx), #167 (ConfiguredCancelableAsyncEnumerable - commented with workaround), #246 (dynamic resumable code), #259 (Package Validation - PR #315 open). Good future tasks: TaskSeq.withCancellation helper (#167), investigate allPairs/transpose/splitInto (check with maintainers first). PR #315 (package validation) still open."
 }
