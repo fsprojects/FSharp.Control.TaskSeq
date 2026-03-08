@@ -1309,6 +1309,7 @@ module internal TaskSeqInternal =
                     go <- step
 
             return trueItems.ToArray(), falseItems.ToArray()
+        }
 
     let chunkBySize chunkSize (source: TaskSeq<'T>) : TaskSeq<'T[]> =
         if chunkSize < 1 then
