@@ -211,15 +211,16 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [ ] `average` / `averageBy`, `sum` and related
   - [x] `forall` / `forallAsync` (see [#240])
   - [x] `skip` / `drop` / `truncate` / `take` (see [#209])
-  - [ ] `chunkBySize` / `windowed`
+  - [x] `chunkBySize` / `windowed` (see [#258])
   - [ ] `compareWith`
   - [ ] `distinct`
   - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
   - [ ] `mapFold`
-  - [ ] `pairwise` / `allpairs` / `permute` / `distinct` / `distinctBy`
+  - [x] `pairwise` (see [#293])
+  - [ ] `allpairs` / `permute` / `distinct` / `distinctBy`
   - [ ] `replicate`
-  - [ ] `reduce` / `scan`
-  - [ ] `unfold`
+  - [x] `reduce` / `scan` (see [#299], [#296])
+  - [x] `unfold` (see [#300])
 - [x] Publish package on Nuget, **DONE, PUBLISHED SINCE: 7 November 2022**. See https://www.nuget.org/packages/FSharp.Control.TaskSeq
 - [x] Make `TaskSeq` interoperable with `Task` by expanding the latter with a `for .. in .. do` that acceps task sequences
 - [x] Add to/from functions to seq, list, array
@@ -263,7 +264,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#67][] |                    |                      | `box`                     | |
 | &#x2705; [#67][] |                    |                      | `unbox`                   | |
 | &#x2705; [#23][] | `choose`           | `choose`             | `chooseAsync`             | |
-|                  | `chunkBySize`      | `chunkBySize`        |                           | |
+| &#x2705; [#258][] | `chunkBySize`      | `chunkBySize`        |                           | |
 | &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
 |                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
@@ -332,17 +333,17 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#2][]  |                    | `ofTaskArray`        |                           | |
 | &#x2705; [#2][]  |                    | `ofTaskList`         |                           | |
 | &#x2705; [#2][]  |                    | `ofTaskSeq`          |                           | |
-|                  | `pairwise`         | `pairwise`           |                           | |
+| &#x2705; [#293][] | `pairwise`         | `pairwise`           |                           | |
 |                  | `permute`          | `permute`            | `permuteAsync`            | |
 | &#x2705; [#23][] | `pick`             | `pick`               | `pickAsync`               | |
 | &#x1f6ab;        | `readOnly`         |                      |                           | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
-|                  | `reduce`           | `reduce`             | `reduceAsync`             | |
+| &#x2705; [#299][] | `reduce`           | `reduce`             | `reduceAsync`             | |
 | &#x1f6ab;        | `reduceBack`       |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#236][]| `removeAt`         | `removeAt`           |                           | |
 | &#x2705; [#236][]| `removeManyAt`     | `removeManyAt`       |                           | |
 |                  | `replicate`        | `replicate`          |                           | |
 | &#x2753;         | `rev`              |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-|                  | `scan`             | `scan`               | `scanAsync`               | |
+| &#x2705; [#296][] | `scan`             | `scan`               | `scanAsync`               | |
 | &#x1f6ab;        | `scanBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#90][] | `singleton`        | `singleton`          |                           | |
 | &#x2705; [#209][]| `skip`             | `skip`               |                           | |
@@ -378,10 +379,10 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#23][] | `tryLast`          | `tryLast`            |                           | |
 | &#x2705; [#23][] | `tryPick`          | `tryPick`            | `tryPickAsync`            | |
 | &#x2705; [#76][] |                    | `tryTail`            |                           | |
-|                  | `unfold`           | `unfold`             | `unfoldAsync`             | |
+| &#x2705; [#300][] | `unfold`           | `unfold`             | `unfoldAsync`             | |
 | &#x2705; [#236][]| `updateAt`         | `updateAt`           |                           | |
 | &#x2705; [#217][]| `where`            | `where`              | `whereAsync`              | |
-|                  | `windowed`         | `windowed`           |                           | |
+| &#x2705; [#258][] | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
 |                  | `zip3`             | `zip3`               |                           | |
 |                  |                    | `zip4`               |                           | |
@@ -653,6 +654,11 @@ module TaskSeq =
 [#237]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/237
 [#236]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/236
 [#240]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/240
+[#258]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/258
+[#293]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/293
+[#296]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/296
+[#299]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/299
+[#300]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/300
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
