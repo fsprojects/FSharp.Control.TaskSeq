@@ -6,7 +6,7 @@
 
 An implementation of [`IAsyncEnumerable<'T>`][3] as a computation expression: `taskSeq { ... }` with an accompanying `TaskSeq` module and functions, that allow seamless use of asynchronous sequences similar to F#'s native `seq` and `task` CE's.
 
-* Latest stable version: [0.4.0 is on NuGet][nuget].
+* Latest stable version is [on NuGet][nuget].
 
 ## Release notes<!-- omit in toc -->
 
@@ -170,7 +170,7 @@ let feedFromTwitter user pwd = taskSeq {
 
 ## Choosing between `AsyncSeq` and `TaskSeq`
 
-The [`AsyncSeq`][11] and `TaskSeq` libraries both operate on asynchronous sequences, but there are a few fundamental differences. The most notable being that the former _does not_ implement `IAsyncEnumerable<'T>`, though it does have a type of that name with different semantics (not surprising; it predates the definition of the modern one). Another key difference is that `TaskSeq` uses `ValueTask`s for the asynchronous computations, whereas `AsyncSeq` uses F#'s `Async<'T>`.
+The [`AsyncSeq`][11] and `TaskSeq` libraries both operate on asynchronous sequences, but there are a few fundamental differences. The most notable being that `TaskSeq` uses `ValueTask`s and state machines for asynchronous computations with much lower overhead, whereas `AsyncSeq` uses F#'s `Async<'T>`.
 
 There are more differences:
 
@@ -178,7 +178,7 @@ There are more differences:
 |----------------------------|---------------------------------------------------------------------------------|----------------------------------------------------------------------|
 | **Frameworks**             | .NET 5.0+, NetStandard 2.1                                                      | .NET 5.0+, NetStandard 2.0 and 2.1, .NET Framework 4.6.1+            |
 | **F# concept of**          | `task`                                                                          | `async`                                                              |
-| **Underlying type**        | [`Generic.IAsyncEnumerable<'T>`][3] <sup>[note #1](#tsnote1 "Full name System.Collections.Generic.IAsyncEnumerable&lt;'T>.")</sup>| Its own type, also called `IAsyncEnumerable<'T>`<sup>[note #1](#tsnote1 "Full name FSharp.Control.IAsyncEnumerable&lt;'T>.")</sup> |
+| **Underlying type**        | [`IAsyncEnumerable<'T>`][3] <sup>[note #1](#tsnote1 "Full name System.Collections.Generic.IAsyncEnumerable&lt;'T>.")</sup>| Its own type, also called `IAsyncEnumerable<'T>`<sup>[note #1](#tsnote1 "Full name System.Collections.Generic.IAsyncEnumerable&lt;'T>.")</sup> |
 | **Implementation**         | State machine (statically compiled)                                             | No state machine, continuation style                                 |
 | **Semantics**              | `seq`-like: on-demand                                                           | `seq`-like: on-demand                                                |
 | **Disposability**          | Asynchronous, through [`IAsyncDisposable`][7]                                   | Synchronous, through `IDisposable`                                   |
@@ -195,7 +195,7 @@ There are more differences:
 | **[`Current`][5]**         | [Returns `'T`][5]                                                               | n/a                                                                  |
 | **Cancellation**           | See [#133][], until 0.3.0: use `GetAsyncEnumerator(cancelToken)`                | Implicit token flows to all subtasks per `async` semantics           |
 | **Performance**            | Very high, negligible allocations                                               | Slower, more allocations, due to using `async` and cont style        |
-| **Parallelism**            | Unclear, interface is meant for _sequential/async_ processing                   | Supported by extension functions                                     |
+| **Parallelism**            | Interface is meant for _sequential/async_ processing                   | Supported by extension functions                                     |
 
 <sup>¹⁾ <a id="tsnote1"></a>_Both `AsyncSeq` and `TaskSeq` use a type called `IAsyncEnumerable<'T>`, but only `TaskSeq` uses the type from the BCL Generic Collections. `AsyncSeq` supports .NET Framework 4.6.x and NetStandard 2.0 as well, which do not have this type in the BCL._</sup>
 
