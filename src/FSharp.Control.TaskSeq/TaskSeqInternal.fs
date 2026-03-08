@@ -50,6 +50,11 @@ type internal InitAction<'T, 'TaskT when 'TaskT :> Task<'T>> =
     | InitActionAsync of async_init_item: (int -> 'TaskT)
 
 [<Struct>]
+type internal MapFolderAction<'T, 'State, 'Result, 'TaskResultState when 'TaskResultState :> Task<'Result * 'State>> =
+    | MapFolderAction of map_folder_action: ('State -> 'T -> 'Result * 'State)
+    | AsyncMapFolderAction of async_map_folder_action: ('State -> 'T -> 'TaskResultState)
+
+[<Struct>]
 type internal ManyOrOne<'T> =
     | Many of source_seq: TaskSeq<'T>
     | One of source_item: 'T
@@ -449,6 +454,37 @@ module internal TaskSeqInternal =
                     go <- step
 
             return result
+        }
+
+    let mapFold (folder: MapFolderAction<_, _, _, _>) initial (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let mutable state = initial
+            let results = ResizeArray()
+            let! step = e.MoveNextAsync()
+            go <- step
+
+            match folder with
+            | MapFolderAction folder ->
+                while go do
+                    let result, newState = folder state e.Current
+                    results.Add result
+                    state <- newState
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | AsyncMapFolderAction folder ->
+                while go do
+                    let! (result, newState) = folder state e.Current
+                    results.Add result
+                    state <- newState
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return results.ToArray(), state
         }
 
     let toResizeArrayAsync source =
