@@ -134,6 +134,14 @@ module internal TaskSeqInternal =
                 }
         }
 
+    let replicate count value =
+        raiseCannotBeNegative (nameof count) count
+
+        taskSeq {
+            for _ in 1..count do
+                yield value
+        }
+
     /// Returns length unconditionally, or based on a predicate
     let lengthBy predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
@@ -511,6 +519,29 @@ module internal TaskSeqInternal =
                 let! step1 = e1.MoveNextAsync()
                 let! step2 = e2.MoveNextAsync()
                 go <- step1 && step2
+        }
+
+    let zip3 (source1: TaskSeq<_>) (source2: TaskSeq<_>) (source3: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            go <- step1 && step2 && step3
+
+            while go do
+                yield e1.Current, e2.Current, e3.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                go <- step1 && step2 && step3
         }
 
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
