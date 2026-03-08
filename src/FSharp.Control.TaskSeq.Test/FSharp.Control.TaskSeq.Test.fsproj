@@ -49,6 +49,7 @@
     <Compile Include="TaskSeq.Pick.Tests.fs" />
     <Compile Include="TaskSeq.RemoveAt.Tests.fs" />
     <Compile Include="TaskSeq.Singleton.Tests.fs" />
+    <Compile Include="TaskSeq.Replicate.Tests.fs" />
     <Compile Include="TaskSeq.Skip.Tests.fs" />
     <Compile Include="TaskSeq.SkipWhile.Tests.fs" />
     <Compile Include="TaskSeq.Tail.Tests.fs" />

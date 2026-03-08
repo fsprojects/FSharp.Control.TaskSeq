@@ -218,7 +218,7 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [ ] `mapFold`
   - [x] `pairwise` (see [#293])
   - [ ] `allpairs` / `permute` / `distinct` / `distinctBy`
-  - [ ] `replicate`
+  - [x] `replicate`
   - [x] `reduce` / `scan` (see [#299], [#296])
   - [x] `unfold` (see [#300])
 - [x] Publish package on Nuget, **DONE, PUBLISHED SINCE: 7 November 2022**. See https://www.nuget.org/packages/FSharp.Control.TaskSeq
@@ -341,7 +341,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x1f6ab;        | `reduceBack`       |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#236][]| `removeAt`         | `removeAt`           |                           | |
 | &#x2705; [#236][]| `removeManyAt`     | `removeManyAt`       |                           | |
-|                  | `replicate`        | `replicate`          |                           | |
+| &#x2705;          | `replicate`        | `replicate`          |                           | |
 | &#x2753;         | `rev`              |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705; [#296][] | `scan`             | `scan`               | `scanAsync`               | |
 | &#x1f6ab;        | `scanBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
@@ -384,7 +384,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#217][]| `where`            | `where`              | `whereAsync`              | |
 | &#x2705; [#258][] | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
-|                  | `zip3`             | `zip3`               |                           | |
+| &#x2705;          | `zip3`             | `zip3`               |                           | |
 |                  |                    | `zip4`               |                           | |
 
 

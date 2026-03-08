@@ -123,6 +123,7 @@ type TaskSeq private () =
     // the 'private ()' ensure that a constructor is emitted, which is required by IL
 
     static member singleton(value: 'T) = Internal.singleton value
+    static member replicate count value = Internal.replicate count value
 
     static member isEmpty source = Internal.isEmpty source
 
@@ -510,6 +511,7 @@ type TaskSeq private () =
     //
 
     static member zip source1 source2 = Internal.zip source1 source2
+    static member zip3 source1 source2 source3 = Internal.zip3 source1 source2 source3
     static member fold folder state source = Internal.fold (FolderAction folder) state source
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
     static member scan folder state source = Internal.scan (FolderAction folder) state source

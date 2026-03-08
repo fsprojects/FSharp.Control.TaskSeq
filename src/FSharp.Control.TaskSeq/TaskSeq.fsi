@@ -104,6 +104,16 @@ type TaskSeq =
     static member singleton: value: 'T -> TaskSeq<'T>
 
     /// <summary>
+    /// Creates a task sequence by replicating <paramref name="value" /> a total of <paramref name="count" /> times.
+    /// </summary>
+    ///
+    /// <param name="count">The number of times to replicate the value.</param>
+    /// <param name="value">The value to replicate.</param>
+    /// <returns>A task sequence containing <paramref name="count" /> copies of <paramref name="value" />.</returns>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is negative.</exception>
+    static member replicate: count: int -> value: 'T -> TaskSeq<'T>
+
+    /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
     /// </summary>
     ///
@@ -1532,7 +1542,19 @@ type TaskSeq =
     static member zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
 
     /// <summary>
-    /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an accumulator
+    /// Combines the three task sequences into a new task sequence of triples. The three sequences need not have equal lengths:
+    /// when one sequence is exhausted any remaining elements in the other sequences are ignored.
+    /// </summary>
+    ///
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <param name="source3">The third input task sequence.</param>
+    /// <returns>The result task sequence of triples.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when any of the three input task sequences is null.</exception>
+    static member zip3:
+        source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'T1 * 'T2 * 'T3>
+
+    /// <summary>
     /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes<paramref name="f (... (f s i0)...) iN" />.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
