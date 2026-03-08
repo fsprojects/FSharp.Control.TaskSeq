@@ -11,7 +11,7 @@ on:
       - completed
 jobs:
   test-report-release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: dorny/test-reporter@v2
       with:
@@ -21,7 +21,7 @@ jobs:
         reporter: dotnet-trx              # Format of test results
 
   test-report-debug:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: dorny/test-reporter@v2
       with:
