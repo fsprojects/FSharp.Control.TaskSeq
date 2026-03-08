@@ -62,6 +62,7 @@
     <Compile Include="TaskSeq.Do.Tests.fs" />
     <Compile Include="TaskSeq.Let.Tests.fs" />
     <Compile Include="TaskSeq.Using.Tests.fs" />
+    <Compile Include="TaskSeq.CancellationToken.Tests.fs" />
   </ItemGroup>
 
   <ItemGroup>
