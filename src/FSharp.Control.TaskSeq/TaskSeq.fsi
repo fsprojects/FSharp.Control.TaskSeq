@@ -1410,6 +1410,62 @@ type TaskSeq =
     static member exceptOfSeq<'T when 'T: equality> : itemsToExclude: seq<'T> -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a new task sequence that contains no duplicate entries, using generic hash and equality comparisons.
+    /// If an element occurs multiple times in the sequence, only the first occurrence is returned.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function iterates the whole sequence and buffers all unique elements in a hash set, so it should not
+    /// be used on potentially infinite sequences.
+    /// </remarks>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A sequence with duplicate elements removed.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member distinct<'T when 'T: equality> : source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence that contains no duplicate entries according to the generic hash and equality
+    /// comparisons on the keys returned by the given projection function.
+    /// If two elements have the same projected key, only the first occurrence is returned.
+    /// If the projection function is asynchronous, consider using <see cref="TaskSeq.distinctByAsync" />.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function iterates the whole sequence and buffers all unique keys in a hash set, so it should not
+    /// be used on potentially infinite sequences.
+    /// </remarks>
+    ///
+    /// <param name="projection">A function that transforms each element to a key that is used for equality comparison.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A sequence with elements whose projected keys are distinct.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member distinctBy<'T, 'Key when 'Key: equality> :
+        projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence that contains no duplicate entries according to the generic hash and equality
+    /// comparisons on the keys returned by the given asynchronous projection function.
+    /// If two elements have the same projected key, only the first occurrence is returned.
+    /// If the projection function is synchronous, consider using <see cref="TaskSeq.distinctBy" />.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// This function iterates the whole sequence and buffers all unique keys in a hash set, so it should not
+    /// be used on potentially infinite sequences.
+    /// </remarks>
+    ///
+    /// <param name="projection">An asynchronous function that transforms each element to a key used for equality comparison.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A sequence with elements whose projected keys are distinct.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member distinctByAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'T> when 'Key: equality
+
+    /// <summary>
     /// Returns a new task sequence without consecutive duplicate elements.
     /// </summary>
     ///

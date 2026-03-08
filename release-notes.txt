@@ -4,6 +4,10 @@ Release notes:
 0.6.0
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289
+    - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
+    - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
+    - adds TaskSeq.distinct, TaskSeq.distinctBy, TaskSeq.distinctByAsync
+    - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
     - adds TaskSeq.mapFold and TaskSeq.mapFoldAsync
     - adds TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync
     - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
