@@ -1531,6 +1531,103 @@ type TaskSeq =
     static member windowed: windowSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
 
     /// <summary>
+    /// Returns a new task sequence with the elements in the reverse order. This function materializes the source sequence.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The reversed task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member rev: source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in ascending order. This function materializes the source sequence.
+    /// The elements must support comparison (i.e. implement <see cref="T:System.IComparable" />).
+    /// For a descending sort, use <see cref="TaskSeq.sortDescending" />.
+    /// For sorting by a projection, use <see cref="TaskSeq.sortBy" /> or <see cref="TaskSeq.sortByDescending" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sort: source: TaskSeq<'T> -> TaskSeq<'T> when 'T: comparison
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in descending order. This function materializes the source sequence.
+    /// The elements must support comparison (i.e. implement <see cref="T:System.IComparable" />).
+    /// For an ascending sort, use <see cref="TaskSeq.sort" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence in descending order.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortDescending: source: TaskSeq<'T> -> TaskSeq<'T> when 'T: comparison
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in ascending order using the given <paramref name="projection" />
+    /// to produce the sort key. This function materializes the source sequence.
+    /// The projected key must support comparison.
+    /// If <paramref name="projection" /> is asynchronous, consider using <see cref="TaskSeq.sortByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform elements into the sort key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortBy: projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'T> when 'Key: comparison
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in descending order using the given <paramref name="projection" />
+    /// to produce the sort key. This function materializes the source sequence.
+    /// The projected key must support comparison.
+    /// If <paramref name="projection" /> is asynchronous, consider using <see cref="TaskSeq.sortByDescendingAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function to transform elements into the sort key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence in descending order.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByDescending: projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'T> when 'Key: comparison
+
+    /// <summary>
+    /// Sorts the elements of the task sequence using the given pairwise comparison <paramref name="comparer" />.
+    /// This function materializes the source sequence.
+    /// </summary>
+    ///
+    /// <param name="comparer">A function that returns a negative integer, zero, or a positive integer to indicate ordering.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortWith: comparer: ('T -> 'T -> int) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in ascending order using an asynchronous <paramref name="projection" />
+    /// to produce the sort key. This function materializes the source sequence and evaluates each projection once.
+    /// The projected key must support comparison.
+    /// If <paramref name="projection" /> is synchronous, consider using <see cref="TaskSeq.sortBy" />.
+    /// </summary>
+    ///
+    /// <param name="projection">An async function to transform elements into the sort key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'T> when 'Key: comparison
+
+    /// <summary>
+    /// Sorts the elements of the task sequence in descending order using an asynchronous <paramref name="projection" />
+    /// to produce the sort key. This function materializes the source sequence and evaluates each projection once.
+    /// The projected key must support comparison.
+    /// If <paramref name="projection" /> is synchronous, consider using <see cref="TaskSeq.sortByDescending" />.
+    /// </summary>
+    ///
+    /// <param name="projection">An async function to transform elements into the sort key.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The sorted task sequence in descending order.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member sortByDescendingAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'T> when 'Key: comparison
+
+    /// <summary>
     /// Combines the two task sequences into a new task sequence of pairs. The two sequences need not have equal lengths:
     /// when one sequence is exhausted any remaining elements in the other sequence are ignored.
     /// </summary>

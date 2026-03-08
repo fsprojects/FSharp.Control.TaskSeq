@@ -531,3 +531,16 @@ type TaskSeq private () =
     static member partitionAsync predicate source = Internal.partition (PredicateAsync predicate) source
     static member mapFold mapping state source = Internal.mapFold (MapFolderAction mapping) state source
     static member mapFoldAsync mapping state source = Internal.mapFold (AsyncMapFolderAction mapping) state source
+
+    //
+    // rev/sort functions
+    //
+
+    static member rev source = Internal.rev source
+    static member sort source = Internal.sort source
+    static member sortDescending source = Internal.sortDescending source
+    static member sortBy projection source = Internal.sortBy projection source
+    static member sortByDescending projection source = Internal.sortByDescending projection source
+    static member sortWith comparer source = Internal.sortWith comparer source
+    static member sortByAsync projection source = Internal.sortByAsync projection source
+    static member sortByDescendingAsync projection source = Internal.sortByDescendingAsync projection source

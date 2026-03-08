@@ -1489,3 +1489,144 @@ module internal TaskSeqInternal =
 
                     yield result
         }
+
+    let rev (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+
+            for i in arr.Length - 1 .. -1 .. 0 do
+                yield arr[i]
+        }
+
+    let sort (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+            Array.sortInPlace arr
+
+            for item in arr do
+                yield item
+        }
+
+    let sortDescending (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+            Array.sortInPlaceWith (fun a b -> compare b a) arr
+
+            for item in arr do
+                yield item
+        }
+
+    let sortBy (projection: 'T -> 'Key) (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+            Array.sortInPlaceBy projection arr
+
+            for item in arr do
+                yield item
+        }
+
+    let sortByDescending (projection: 'T -> 'Key) (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+            Array.sortInPlaceWith (fun a b -> compare (projection b) (projection a)) arr
+
+            for item in arr do
+                yield item
+        }
+
+    let sortWith (comparer: 'T -> 'T -> int) (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let res = ResizeArray<'T>()
+
+            for item in source do
+                res.Add item
+
+            let arr = res.ToArray()
+            Array.sortInPlaceWith comparer arr
+
+            for item in arr do
+                yield item
+        }
+
+    let sortByAsync (projection: 'T -> #Task<'Key>) (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let items = ResizeArray<'T>()
+
+            for item in source do
+                items.Add item
+
+            let count = items.Count
+            let keys = Array.zeroCreate<'Key> count
+
+            for i in 0 .. count - 1 do
+                let! k = projection items[i]
+                keys[i] <- k
+
+            let indices = Array.init count id
+            Array.sortInPlaceWith (fun i j -> compare keys[i] keys[j]) indices
+
+            for idx in indices do
+                yield items[idx]
+        }
+
+    let sortByDescendingAsync (projection: 'T -> #Task<'Key>) (source: TaskSeq<'T>) : TaskSeq<'T> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let items = ResizeArray<'T>()
+
+            for item in source do
+                items.Add item
+
+            let count = items.Count
+            let keys = Array.zeroCreate<'Key> count
+
+            for i in 0 .. count - 1 do
+                let! k = projection items[i]
+                keys[i] <- k
+
+            let indices = Array.init count id
+            Array.sortInPlaceWith (fun i j -> compare keys[j] keys[i]) indices
+
+            for idx in indices do
+                yield items[idx]
+        }
