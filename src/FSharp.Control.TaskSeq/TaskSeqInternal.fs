@@ -1188,3 +1188,57 @@ module internal TaskSeqInternal =
                     yield previous, current
                     maybePrevious <- ValueSome current
         }
+
+    let chunkBySize chunkSize (source: TaskSeq<'T>) : TaskSeq<'T[]> =
+        if chunkSize < 1 then
+            invalidArg (nameof chunkSize) $"The value must be positive, but was %i{chunkSize}."
+
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            // Use a fixed-size array with a count index to avoid ResizeArray overhead.
+            let buffer = Array.zeroCreate<'T> chunkSize
+            let mutable count = 0
+
+            for item in source do
+                buffer.[count] <- item
+                count <- count + 1
+
+                if count = chunkSize then
+                    yield Array.copy buffer
+                    count <- 0
+
+            if count > 0 then
+                // Last partial chunk: copy only the filled portion.
+                yield buffer.[0 .. count - 1]
+        }
+
+    let windowed windowSize (source: TaskSeq<_>) =
+        if windowSize <= 0 then
+            invalidArg (nameof windowSize) $"The value must be positive, but was %i{windowSize}."
+
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            // Ring buffer: arr holds elements in circular order.
+            // 'count' tracks total elements seen; count % windowSize is the next write position.
+            let arr = Array.zeroCreate windowSize
+            let mutable count = 0
+
+            for item in source do
+                arr.[count % windowSize] <- item
+                count <- count + 1
+
+                if count >= windowSize then
+                    // Copy ring buffer in source order into a fresh array.
+                    let result = Array.zeroCreate windowSize
+                    let start = count % windowSize // index of oldest element in the ring
+
+                    if start = 0 then
+                        Array.blit arr 0 result 0 windowSize
+                    else
+                        Array.blit arr start result 0 (windowSize - start)
+                        Array.blit arr 0 result (windowSize - start) start
+
+                    yield result
+        }
