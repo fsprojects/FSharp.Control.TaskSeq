@@ -25,6 +25,10 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <PackageTags>taskseq;f#;fsharp;asyncseq;seq;sequences;sequential;threading;computation expression;IAsyncEnumerable;task;async;iteration</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- Validate package structure and (when PackageValidationBaselineVersion is set) binary compatibility -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <!-- Set this to the last published version to enforce binary compatibility, e.g. 0.4.0 -->
+    <!-- <PackageValidationBaselineVersion>0.4.0</PackageValidationBaselineVersion> -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
