@@ -242,6 +242,11 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
                 Debug.logInfo "at MoveNextAsync: normal resumption scenario"
 
                 let data = this._machine.Data
+
+                // Honor the cancellation token passed to GetAsyncEnumerator (fixes #179).
+                // ThrowIfCancellationRequested() is a no-op for CancellationToken.None.
+                data.cancellationToken.ThrowIfCancellationRequested()
+
                 data.promiseOfValueOrEnd.Reset()
                 let mutable ts = this
 
