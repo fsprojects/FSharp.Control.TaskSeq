@@ -1,11 +1,12 @@
 {
-  "last_run": "2026-03-07T23:58:31Z",
-  "run_id": "22809944210",
+  "last_run": "2026-03-08T01:16:14Z",
+  "run_id": "22811088865",
   "monthly_activity_issue": 285,
   "comments_made": {
     "289": "2026-03-07T21:02:15Z",
     "258": "2026-03-07T21:48:07Z",
-    "245": "2026-03-07T23:39:00Z"
+    "245": "2026-03-07T23:39:00Z",
+    "261": "2026-03-08T00:16:00Z"
   },
   "prs_created": [
     {
@@ -31,12 +32,16 @@
     { "pr": 305, "branch": "repo-assist/perf-exists-distinct-2026-03", "description": "Perf: optimize exists/existsAsync/contains (avoid Option allocation); add distinct/distinctBy/distinctByAsync (75 tests)", "status": "open" },
     { "pr": 306, "branch": "repo-assist/feat-mapfold-2026-03", "description": "Add TaskSeq.mapFold / TaskSeq.mapFoldAsync (56 tests)", "status": "open" },
     { "pr": 307, "branch": "repo-assist/feat-groupby-countby-partition-2026-03", "description": "Add TaskSeq.groupBy/groupByAsync, countBy/countByAsync, partition/partitionAsync (195 tests)", "status": "open" },
-    { "pr": "308-est", "branch": "repo-assist/feat-replicate-zip3-2026-03", "description": "Add TaskSeq.replicate (13 tests) and TaskSeq.zip3 (47 tests); update README", "status": "open - created this run" }
+    { "pr": 308, "branch": "repo-assist/feat-replicate-zip3-2026-03", "description": "Add TaskSeq.replicate (13 tests) and TaskSeq.zip3 (47 tests); update README", "status": "open" },
+    { "pr": 309, "branch": "repo-assist/feat-sort-rev-2026-03", "description": "Add TaskSeq.rev, sort, sortDescending, sortBy/Async, sortByDescending/Async, sortWith (101 tests)", "status": "open" },
+    { "pr": 310, "branch": "repo-assist/feat-yieldfromfinal-fsharp10-2026-03", "description": "Add YieldFromFinal overloads for F# 10 compatibility (closes #62)", "status": "open" },
+    { "pr": "311-est", "branch": "repo-assist/fix-cancellation-token-179-2026-03", "description": "Fix: honor CancellationToken in MoveNextAsync; 8 new tests (closes #179)", "status": "open - created this run" },
+    { "pr": "312-est", "branch": "repo-assist/ci-eng-test-report-ubuntu-2026-03", "description": "CI: switch test-reporter workflow to ubuntu-latest", "status": "open - created this run" }
   ],
   "issues_backlog_cursor": 245,
   "labels_applied": {
     "289": ["enhancement"],
     "290": ["performance", "enhancement"]
   },
-  "notes": "6 open Repo Assist PRs: #303 (chunkBySize+windowed), #304 (sum/averageBy), #305 (distinct+exists-perf), #306 (mapFold), #307 (groupBy/countBy/partition), #308-est (replicate+zip3). Issue #269 (NRE in nested loops, Release) already commented on. Next: could consider sortBy/sort/rev (require pre-materialisation - note1 items in README), or investigating #179 (CancellationToken not registered)."
+  "notes": "10 open Repo Assist PRs: #303-310 (features), #311 (fix #179 cancellation), #312 (ci ubuntu). Issue #179 now fixed with PR #311. Next: Consider allPairs/transpose (materialisation required), splitInto, ConfiguredCancelableAsyncEnumerable (#167). Consider addressing #129 (AggregateException wrapping) or #246 (dynamic resumable code)."
 }
