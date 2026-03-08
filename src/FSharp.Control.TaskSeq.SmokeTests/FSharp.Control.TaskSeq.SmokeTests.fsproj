@@ -23,7 +23,7 @@
                  highest version available.
                  This ensures that, if we have a forwards compat issue, we will get an error.
     -->
-    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.4.0" />
+    <PackageReference Include="FSharp.Control.TaskSeq" Version="0.6.0" />
     <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.15.1" />
     <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
