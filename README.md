@@ -214,7 +214,7 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [x] `chunkBySize` / `windowed` (see [#258])
   - [ ] `compareWith`
   - [ ] `distinct`
-  - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
+  - [ ] `exists2` / `map2` / `iter2` and related '2'-functions (partial: `exists2`, `forall2`, `forall2Async`, `fold2`, `fold2Async` done)
   - [ ] `mapFold`
   - [x] `pairwise` (see [#293])
   - [ ] `allpairs` / `permute` / `distinct` / `distinctBy`
@@ -283,18 +283,18 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#83][] | `except`           | `except`             |                           | |
 | &#x2705; [#83][] |                    | `exceptOfSeq`        |                           | |
 | &#x2705; [#70][] | `exists`           | `exists`             | `existsAsync`             | |
-|                  | `exists2`          | `exists2`            |                           | |
+| &#x2705;         |                    | `exists2`            |                           | |
 | &#x2705; [#23][] | `filter`           | `filter`             | `filterAsync`             | |
 | &#x2705; [#23][] | `find`             | `find`               | `findAsync`               | |
 | &#x1f6ab;        | `findBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#68][] | `findIndex`        | `findIndex`          | `findIndexAsync`          | |
 | &#x1f6ab;        | `findIndexBack`    | n/a                  | n/a                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `fold`             | `fold`               | `foldAsync`               | |
-|                  | `fold2`            | `fold2`              | `fold2Async`              | |
+| &#x2705;         |                    | `fold2`              | `fold2Async`              | |
 | &#x1f6ab;        | `foldBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x1f6ab;        | `foldBack2`        |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#240][]| `forall`           | `forall`             | `forallAsync`             | |
-|                  | `forall2`          | `forall2`            | `forall2Async`            | |
+| &#x2705;         |                    | `forall2`            | `forall2Async`            | |
 | &#x2753;         | `groupBy`          | `groupBy`            | `groupByAsync`            | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705; [#23][] | `head`             | `head`               |                           | |
 | &#x2705; [#68][] | `indexed`          | `indexed`            |                           | |

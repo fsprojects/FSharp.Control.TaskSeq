@@ -17,6 +17,7 @@ Release notes:
     - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
     - adds TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed, #289
     - fixes: CancellationToken passed to GetAsyncEnumerator is now honored in MoveNextAsync, #179
+    - adds TaskSeq.exists2, forall2, forall2Async, fold2, fold2Async
 
 0.5.0
     - update engineering to .NET 9/10

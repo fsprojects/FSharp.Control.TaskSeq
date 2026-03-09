@@ -1022,6 +1022,35 @@ type TaskSeq =
     static member forallAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<bool>
 
     /// <summary>
+    /// Tests if all corresponding element pairs from the two sequences satisfy the given predicate. Stops evaluating
+    /// as soon as <paramref name="predicate" /> returns <see cref="false" /> or either sequence is exhausted. When the sequences
+    /// differ in length, the extra elements of the longer sequence are ignored.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.forall2Async" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test each pair of elements from the two input sequences.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A task that, after awaiting, holds true if every corresponding pair of elements satisfies the predicate; false otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member forall2: predicate: ('T -> 'U -> bool) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> Task<bool>
+
+    /// <summary>
+    /// Tests if all corresponding element pairs from the two sequences satisfy the given asynchronous predicate. Stops evaluating
+    /// as soon as <paramref name="predicate" /> returns <see cref="false" /> or either sequence is exhausted. When the sequences
+    /// differ in length, the extra elements of the longer sequence are ignored.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.forall2" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function to test each pair of elements from the two input sequences.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A task that, after awaiting, holds true if every corresponding pair of elements satisfies the predicate; false otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member forall2Async:
+        predicate: ('T -> 'U -> #Task<bool>) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> Task<bool>
+
+    /// <summary>
     /// Returns a task sequence that, when iterated, skips <paramref name="count" /> elements of the underlying
     /// sequence, and then yields the remainder. Raises an exception if there are not <paramref name="count" />
     /// items. See <see cref="TaskSeq.drop" /> for a version that does not raise an exception.
@@ -1382,6 +1411,19 @@ type TaskSeq =
     static member existsAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<bool>
 
     /// <summary>
+    /// Tests if any corresponding element pair from the two sequences satisfies the given predicate. Stops evaluating
+    /// as soon as <paramref name="predicate" /> returns <see cref="true" /> or either sequence is exhausted. When the sequences
+    /// differ in length, the extra elements of the longer sequence are ignored.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function to test each pair of elements from the two input sequences.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns><see cref="true" /> if any corresponding pair of elements satisfies the predicate; <see cref="false" /> otherwise.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member exists2: predicate: ('T -> 'U -> bool) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> Task<bool>
+
+    /// <summary>
     /// Returns a new task sequence with the distinct elements of the second task sequence which do not appear in the
     /// <paramref name="itemsToExclude" /> sequence, using generic hash and equality comparisons to compare values.
     /// </summary>
@@ -1584,6 +1626,46 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member foldAsync:
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to corresponding element pairs from the two sequences, threading an accumulator
+    /// argument of type <typeparamref name="'State" /> through the computation. Stops at the shorter sequence;
+    /// extra elements of the longer sequence are ignored.
+    /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.fold2Async" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state with each pair of elements from the sequences.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The state object after the folding function is applied to each corresponding pair of elements.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member fold2:
+        folder: ('State -> 'T -> 'U -> 'State) ->
+        state: 'State ->
+        source1: TaskSeq<'T> ->
+        source2: TaskSeq<'U> ->
+            Task<'State>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to corresponding element pairs from the two sequences, threading an accumulator
+    /// argument of type <typeparamref name="'State" /> through the computation. Stops at the shorter sequence;
+    /// extra elements of the longer sequence are ignored.
+    /// If the accumulator function <paramref name="folder" /> is synchronous, consider using <see cref="TaskSeq.fold2" />.
+    /// </summary>
+    ///
+    /// <param name="folder">An asynchronous function that updates the state with each pair of elements from the sequences.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The state object after the folding function is applied to each corresponding pair of elements.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member fold2Async:
+        folder: ('State -> 'T -> 'U -> #Task<'State>) ->
+        state: 'State ->
+        source1: TaskSeq<'T> ->
+        source2: TaskSeq<'U> ->
+            Task<'State>
 
     /// <summary>
     /// Like <see cref="TaskSeq.fold" />, but returns the sequence of intermediate results and the final result.

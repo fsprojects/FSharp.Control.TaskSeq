@@ -475,10 +475,12 @@ type TaskSeq private () =
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
     static member forallAsync predicate source = Internal.forall (PredicateAsync predicate) source
+    static member forall2 predicate source1 source2 = Internal.forall2 predicate source1 source2
+    static member forall2Async predicate source1 source2 = Internal.forall2Async predicate source1 source2
 
     static member exists predicate source = Internal.exists (Predicate predicate) source
-
     static member existsAsync predicate source = Internal.exists (PredicateAsync predicate) source
+    static member exists2 predicate source1 source2 = Internal.exists2 predicate source1 source2
 
     static member contains value source = Internal.contains value source
 
@@ -514,6 +516,8 @@ type TaskSeq private () =
     static member zip3 source1 source2 source3 = Internal.zip3 source1 source2 source3
     static member fold folder state source = Internal.fold (FolderAction folder) state source
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
+    static member fold2 folder state source1 source2 = Internal.fold2 folder state source1 source2
+    static member fold2Async folder state source1 source2 = Internal.fold2Async folder state source1 source2
     static member scan folder state source = Internal.scan (FolderAction folder) state source
     static member scanAsync folder state source = Internal.scan (AsyncFolderAction folder) state source
     static member reduce folder source = Internal.reduce (FolderAction folder) source

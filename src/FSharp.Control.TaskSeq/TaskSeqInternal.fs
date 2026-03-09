@@ -415,6 +415,49 @@ module internal TaskSeqInternal =
             return result
         }
 
+    let fold2 (folder: 'State -> 'T1 -> 'T2 -> 'State) state (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = state
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable hasMore = step1 && step2
+
+            while hasMore do
+                result <- folder result e1.Current e2.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                hasMore <- step1 && step2
+
+            return result
+        }
+
+    let fold2Async (folder: 'State -> 'T1 -> 'T2 -> #Task<'State>) state (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = state
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable hasMore = step1 && step2
+
+            while hasMore do
+                let! tempResult = folder result e1.Current e2.Current
+                result <- tempResult
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                hasMore <- step1 && step2
+
+            return result
+        }
+
     let scan folder initial (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
@@ -882,6 +925,77 @@ module internal TaskSeqInternal =
 
             return state
           }
+
+    let forall2 (predicate: 'T1 -> 'T2 -> bool) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable hasMore = step1 && step2
+
+            while result && hasMore do
+                result <- predicate e1.Current e2.Current
+
+                if result then
+                    let! step1 = e1.MoveNextAsync()
+                    let! step2 = e2.MoveNextAsync()
+                    hasMore <- step1 && step2
+
+            return result
+        }
+
+    let forall2Async (predicate: 'T1 -> 'T2 -> #Task<bool>) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable hasMore = step1 && step2
+
+            while result && hasMore do
+                let! pred = predicate e1.Current e2.Current
+                result <- pred
+
+                if result then
+                    let! step1 = e1.MoveNextAsync()
+                    let! step2 = e2.MoveNextAsync()
+                    hasMore <- step1 && step2
+
+            return result
+        }
+
+    /// Direct bool-returning exists2, avoiding the Option<'T> allocation that tryFind+isSome would incur.
+    let exists2 (predicate: 'T1 -> 'T2 -> bool) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable found = false
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable hasMore = step1 && step2
+
+            while not found && hasMore do
+                found <- predicate e1.Current e2.Current
+
+                if not found then
+                    let! step1 = e1.MoveNextAsync()
+                    let! step2 = e2.MoveNextAsync()
+                    hasMore <- step1 && step2
+
+            return found
+        }
 
     /// Direct bool-returning exists, avoiding the Option<'T> allocation that tryFind+isSome would incur.
     let exists predicate (source: TaskSeq<_>) =
