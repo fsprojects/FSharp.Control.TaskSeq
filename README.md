@@ -214,7 +214,7 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [x] `chunkBySize` / `windowed` (see [#258])
   - [ ] `compareWith`
   - [ ] `distinct`
-  - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
+  - [ ] `exists2` / `fold2` / `forall2` and remaining '2'-functions (`map2`, `iter2` &#x2705; now implemented)
   - [ ] `mapFold`
   - [x] `pairwise` (see [#293])
   - [ ] `allpairs` / `permute` / `distinct` / `distinctBy`
@@ -305,14 +305,14 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#23][] | `isEmpty`          | `isEmpty`            |                           | |
 | &#x2705; [#23][] | `item`             | `item`               |                           | |
 | &#x2705; [#2][]  | `iter`             | `iter`               | `iterAsync`               | |
-|                  | `iter2`            | `iter2`              | `iter2Async`              | |
+| &#x2705;          | `iter2`            | `iter2`              | `iter2Async`              | |
 | &#x2705; [#2][]  | `iteri`            | `iteri`              | `iteriAsync`              | |
 |                  | `iteri2`           | `iteri2`             | `iteri2Async`             | |
 | &#x2705; [#23][] | `last`             | `last`               |                           | |
 | &#x2705; [#53][] | `length`           | `length`             |                           | |
 | &#x2705; [#53][] |                    | `lengthBy`           | `lengthByAsync`           | |
 | &#x2705; [#2][]  | `map`              | `map`                | `mapAsync`                | |
-|                  | `map2`             | `map2`               | `map2Async`               | |
+| &#x2705;          | `map2`             | `map2`               | `map2Async`               | |
 |                  | `map3`             | `map3`               | `map3Async`               | |
 |                  | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
 | &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |

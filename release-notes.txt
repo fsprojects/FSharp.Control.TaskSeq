@@ -2,6 +2,8 @@
 Release notes:
 
 0.6.0
+    - adds TaskSeq.map2 and TaskSeq.map2Async
+    - adds TaskSeq.iter2 and TaskSeq.iter2Async
     - adds TaskSeq.scan and TaskSeq.scanAsync, #289
     - adds TaskSeq.pairwise, #289
     - adds TaskSeq.groupBy and TaskSeq.groupByAsync, #289
