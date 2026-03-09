@@ -1,24 +1,17 @@
 {
-  "last_run": "2026-03-09T01:16:28Z",
-  "run_id": "22834365869",
+  "last_run": "2026-03-09T07:13:23Z",
+  "run_id": "22842402915",
   "monthly_activity_issue": 285,
-  "comments_made": {
-    "167": "2026-03-08T13:10:41Z",
-    "246": "2026-03-08T07:04:28Z",
-    "259": "2026-03-08T07:04:28Z",
-    "261": "2026-03-08T00:16:00Z",
-    "269": "2026-03-07T20:11:40Z"
-  },
+  "comments_made": {"129":"2026-03-09","167":"2026-03-08","246":"2026-03-08","261":"2026-03-08","269":"2026-03-07"},
   "open_prs": [
-    { "pr": 316, "status": "SHOULD BE CLOSED - duplicates rejected #309" },
-    { "pr": 317, "desc": "docs: update README for 0.6.0 functions" },
-    { "pr": 318, "desc": "feat: add compareWith/compareWithAsync (58 tests)" },
-    { "pr": "~319", "branch": "repo-assist/eng-update-test-packages-2026-03", "desc": "eng: update test packages" },
-    { "pr": "~320", "branch": "repo-assist/test-sumby-sideeffects-2026-03", "desc": "test: 44 new sum/average tests" }
+    {"pr":316,"status":"CLOSE - duplicates rejected #309"},
+    {"pr":317,"desc":"docs: README 0.6.0 update"},
+    {"pr":318,"desc":"feat: compareWith/compareWithAsync"},
+    {"pr":319,"desc":"eng: update test packages"},
+    {"pr":320,"desc":"test: sum/average 44 new tests"},
+    {"pr":"~321","branch":"repo-assist/fix-async-awaitTask-129-2026-03","desc":"fix: AggregateException in async for-loop, closes #129"}
   ],
-  "issues_backlog_cursor": 167,
-  "maintainer_rejections": {
-    "rev-sort": "PR #309 closed by dsyme. Do NOT implement rev/sort/sortBy/sortWith/sortDescending."
-  },
-  "notes": "Good future tasks: exists2/map2/fold2/iter2 family. Open issues: #78 (CancellableTasks), #129 (AggregateException), #133 (cancellation tokens), #167 (ConfiguredCancelableAsyncEnumerable)."
+  "backlog_cursor": 129,
+  "rejections": {"rev-sort":"Do NOT implement rev/sort - rejected by dsyme in #309"},
+  "notes": "Future: exists2/map2/fold2/iter2. Issues: #78 CancellableTasks, #133 cancellation, #167 ConfiguredCancelableAsyncEnumerable. #62 blocked by dotnet/fsharp#19402."
 }

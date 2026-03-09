@@ -1,34 +1,4 @@
 {
-  "last_run": "2026-03-07T20:00:59Z",
-  "last_run_id": "22806158228",
-  "comments_made": [],
-  "prs_created": [
-    {
-      "branch": "repo-assist/fix-deprecated-seq-expr-2026-03",
-      "title": "Fix FS3873: replace deprecated bare range expressions in tests",
-      "status": "open",
-      "created": "2026-03-07"
-    },
-    {
-      "branch": "repo-assist/test-perf-improve-2026-03",
-      "title": "perf/test: replace ConcurrentHashSet with HashSet in except; add zip/indexed tests",
-      "status": "open",
-      "created": "2026-03-07"
-    }
-  ],
-  "issues_commented": [],
-  "monthly_activity_issue": {
-    "title": "[Repo Assist] Monthly Activity 2026-03",
-    "number": 285,
-    "month": "2026-03",
-    "status": "open"
-  },
-  "issue_backlog_cursor": 0,
-  "label_backlog_cursor": 0,
-  "notes": "Run 2 (2026-03-07T20:00). PR #284 (perf-init-remove-lazy) merged into main. Still open: fix-deprecated-seq-expr PR, test-perf-improve-2026-03 PR. 6 unlabelled issues: #280, #269, #261, #259, #246, #245 — label next run. Issues to comment on: #280, #269. Future: upgrade test projects net6.0->net8.0.",
-  "known_issues": {
-    "build_failure_newer_fsharp": "FS3873 in TaskSeq.Concat.Tests.fs - PR submitted fix-deprecated-seq-expr-2026-03",
-    "test_net60_eol": "Test projects target net6.0 (EOL since Nov 2024) - future work",
-    "concurrent_hashset_removed": "ConcurrentHashSet replaced with plain HashSet in except/exceptOfSeq - PR test-perf-improve-2026-03"
-  }
+  "last_run": "2026-03-09T07:13:23Z",
+  "monthly_activity_issue": 285
 }
