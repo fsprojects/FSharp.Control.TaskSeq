@@ -1,17 +1,18 @@
 {
-  "last_run": "2026-03-09T07:13:23Z",
-  "run_id": "22842402915",
+  "last_run": "2026-03-09T13:14:36Z",
+  "run_id": "22855101348",
   "monthly_activity_issue": 285,
-  "comments_made": {"129":"2026-03-09","167":"2026-03-08","246":"2026-03-08","261":"2026-03-08","269":"2026-03-07"},
+  "comments_made": {"129":"2026-03-09","141":"2026-03-09","167":"2026-03-08","246":"2026-03-08","261":"2026-03-08","269":"2026-03-07"},
   "open_prs": [
     {"pr":316,"status":"CLOSE - duplicates rejected #309"},
     {"pr":317,"desc":"docs: README 0.6.0 update"},
     {"pr":318,"desc":"feat: compareWith/compareWithAsync"},
     {"pr":319,"desc":"eng: update test packages"},
     {"pr":320,"desc":"test: sum/average 44 new tests"},
-    {"pr":"~321","branch":"repo-assist/fix-async-awaitTask-129-2026-03","desc":"fix: AggregateException in async for-loop, closes #129"}
+    {"pr":321,"desc":"fix: AggregateException in async for-loop, closes #129"},
+    {"pr":"~322","branch":"repo-assist/feat-map2-iter2-2026-03","desc":"feat: map2/map2Async/iter2/iter2Async, 124 tests"}
   ],
-  "backlog_cursor": 129,
+  "backlog_cursor": 141,
   "rejections": {"rev-sort":"Do NOT implement rev/sort - rejected by dsyme in #309"},
-  "notes": "Future: exists2/map2/fold2/iter2. Issues: #78 CancellableTasks, #133 cancellation, #167 ConfiguredCancelableAsyncEnumerable. #62 blocked by dotnet/fsharp#19402."
+  "notes": "Future: exists2/forall2/fold2. Issues: #78 CancellableTasks, #133 cancellation, #167 ConfiguredCancelableAsyncEnumerable. #62 blocked by dotnet/fsharp#19402."
 }
