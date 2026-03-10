@@ -354,7 +354,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2753;         | `sortByAscending`  |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortByDescending` |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortWith`         |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
-|                  | `splitInto`        | `splitInto`          |                           | |
+| &#x2705;         | `splitInto`        | `splitInto`          |                           | |
 |                  | `sum`              | `sum`                |                           | |
 |                  | `sumBy`            | `sumBy`              | `sumByAsync`              | |
 | &#x2705; [#76][] | `tail`             | `tail`               |                           | |

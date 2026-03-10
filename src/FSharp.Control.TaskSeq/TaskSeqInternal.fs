@@ -1460,6 +1460,29 @@ module internal TaskSeqInternal =
                 yield buffer.[0 .. count - 1]
         }
 
+    let splitInto count (source: TaskSeq<'T>) : TaskSeq<'T[]> =
+        if count < 1 then
+            invalidArg (nameof count) $"The value must be positive, but was %i{count}."
+
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let! ra = toResizeArrayAsync source
+            let arr = ra.ToArray()
+            let n = arr.Length
+
+            if n > 0 then
+                // Split into at most `count` chunks (fewer chunks if n < count).
+                let actual = min count n
+                let k = n / actual
+                let m = n % actual // first m chunks get one extra element
+
+                for i in 0 .. actual - 1 do
+                    let start = i * k + min i m
+                    let len = k + (if i < m then 1 else 0)
+                    yield arr.[start .. start + len - 1]
+        }
+
     let windowed windowSize (source: TaskSeq<_>) =
         if windowSize <= 0 then
             invalidArg (nameof windowSize) $"The value must be positive, but was %i{windowSize}."

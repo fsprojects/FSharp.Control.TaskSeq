@@ -1513,6 +1513,27 @@ type TaskSeq =
     static member chunkBySize: chunkSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
 
     /// <summary>
+    /// Splits the input task sequence into at most <paramref name="count" /> chunks of roughly equal size.
+    /// The last chunk may be smaller if the total number of elements does not divide evenly.
+    /// When the source has fewer elements than <paramref name="count" />, the number of chunks equals
+    /// the number of elements (each chunk has one element). Returns an empty task sequence when the
+    /// source is empty.
+    ///
+    /// Unlike <see cref="TaskSeq.chunkBySize" />, which fixes the chunk size, this function fixes
+    /// the number of chunks. The whole source sequence must be evaluated before any chunk is yielded.
+    ///
+    /// If <paramref name="count" /> is not positive, an <see cref="T:System.ArgumentException" /> is raised immediately
+    /// (before the sequence is evaluated).
+    /// </summary>
+    ///
+    /// <param name="count">The maximum number of chunks. Must be positive.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of non-overlapping array chunks.</returns>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="count" /> is not positive.</exception>
+    static member splitInto: count: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
+
+    /// <summary>
     /// Returns a task sequence of sliding windows of a given size over the source sequence.
     /// Each window is a fresh array of exactly <paramref name="windowSize" /> consecutive elements.
     /// The result is empty if the source has fewer than <paramref name="windowSize" /> elements.

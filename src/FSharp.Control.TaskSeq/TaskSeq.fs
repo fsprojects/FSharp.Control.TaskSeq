@@ -471,6 +471,7 @@ type TaskSeq private () =
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
     static member pairwise source = Internal.pairwise source
     static member chunkBySize chunkSize source = Internal.chunkBySize chunkSize source
+    static member splitInto count source = Internal.splitInto count source
     static member windowed windowSize source = Internal.windowed windowSize source
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
