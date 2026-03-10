@@ -12,7 +12,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # setup dotnet based on global.json
@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-dotnet@v4
       # cache NuGet packages to avoid re-downloading on every run
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/*.csproj', 'global.json') }}
@@ -38,7 +38,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       # setup dotnet based on global.json
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-dotnet@v4
       # cache NuGet packages to avoid re-downloading on every run
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/*.csproj', 'global.json') }}
