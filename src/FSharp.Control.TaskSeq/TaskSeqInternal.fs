@@ -585,6 +585,33 @@ module internal TaskSeqInternal =
                 go <- step1 && step2 && step3
         }
 
+    let zip4 (source1: TaskSeq<_>) (source2: TaskSeq<_>) (source3: TaskSeq<_>) (source4: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+        checkNonNull (nameof source4) source4
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            use e4 = source4.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            let! step4 = e4.MoveNextAsync()
+            go <- step1 && step2 && step3 && step4
+
+            while go do
+                yield e1.Current, e2.Current, e3.Current, e4.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                let! step4 = e4.MoveNextAsync()
+                go <- step1 && step2 && step3 && step4
+        }
+
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 

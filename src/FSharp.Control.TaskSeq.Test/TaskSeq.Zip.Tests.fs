@@ -304,3 +304,132 @@ module SideEffectsZip3 =
 
         combined |> should haveLength 10
     }
+
+//
+// TaskSeq.zip4
+//
+
+module EmptySeqZip4 =
+    [<Fact>]
+    let ``Null source is invalid for zip4`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.zip4 null TaskSeq.empty TaskSeq.empty TaskSeq.empty
+
+        assertNullArg
+        <| fun () -> TaskSeq.zip4 TaskSeq.empty null TaskSeq.empty TaskSeq.empty
+
+        assertNullArg
+        <| fun () -> TaskSeq.zip4 TaskSeq.empty TaskSeq.empty null TaskSeq.empty
+
+        assertNullArg
+        <| fun () -> TaskSeq.zip4 TaskSeq.empty TaskSeq.empty TaskSeq.empty null
+
+        assertNullArg <| fun () -> TaskSeq.zip4 null null null null
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-zip4 can zip empty sequences`` variant =
+        TaskSeq.zip4 (Gen.getEmptyVariant variant) (Gen.getEmptyVariant variant) (Gen.getEmptyVariant variant) (Gen.getEmptyVariant variant)
+        |> verifyEmpty
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-zip4 stops at first exhausted sequence`` variant =
+        // remaining sequences are non-empty but first is empty → result is empty
+        TaskSeq.zip4 (Gen.getEmptyVariant variant) (taskSeq { yield 1 }) (taskSeq { yield 2 }) (taskSeq { yield 3 })
+        |> verifyEmpty
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-zip4 stops when second sequence is empty`` variant =
+        TaskSeq.zip4 (taskSeq { yield 1 }) (Gen.getEmptyVariant variant) (taskSeq { yield 2 }) (taskSeq { yield 3 })
+        |> verifyEmpty
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-zip4 stops when third sequence is empty`` variant =
+        TaskSeq.zip4 (taskSeq { yield 1 }) (taskSeq { yield 2 }) (Gen.getEmptyVariant variant) (taskSeq { yield 3 })
+        |> verifyEmpty
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-zip4 stops when fourth sequence is empty`` variant =
+        TaskSeq.zip4 (taskSeq { yield 1 }) (taskSeq { yield 2 }) (taskSeq { yield 3 }) (Gen.getEmptyVariant variant)
+        |> verifyEmpty
+
+module ImmutableZip4 =
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-zip4 zips in correct order`` variant = task {
+        let one = Gen.getSeqImmutable variant
+        let two = Gen.getSeqImmutable variant
+        let three = Gen.getSeqImmutable variant
+        let four = Gen.getSeqImmutable variant
+        let! combined = TaskSeq.zip4 one two three four |> TaskSeq.toArrayAsync
+
+        combined |> should haveLength 10
+
+        combined
+        |> should equal (Array.init 10 (fun x -> x + 1, x + 1, x + 1, x + 1))
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip4 produces correct 4-tuples with mixed types`` () = task {
+        let one = taskSeq {
+            yield "a"
+            yield "b"
+        }
+
+        let two = taskSeq {
+            yield 1
+            yield 2
+        }
+
+        let three = taskSeq {
+            yield true
+            yield false
+        }
+
+        let four = taskSeq {
+            yield 1.0
+            yield 2.0
+        }
+
+        let! combined = TaskSeq.zip4 one two three four |> TaskSeq.toArrayAsync
+
+        combined
+        |> should equal [| ("a", 1, true, 1.0); ("b", 2, false, 2.0) |]
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip4 truncates to shortest sequence`` () = task {
+        let one = taskSeq { yield! [ 1..10 ] }
+        let two = taskSeq { yield! [ 1..5 ] }
+        let three = taskSeq { yield! [ 1..3 ] }
+        let four = taskSeq { yield! [ 1..7 ] }
+        let! combined = TaskSeq.zip4 one two three four |> TaskSeq.toArrayAsync
+
+        combined |> should haveLength 3
+
+        combined
+        |> should equal [| (1, 1, 1, 1); (2, 2, 2, 2); (3, 3, 3, 3) |]
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zip4 works with single-element sequences`` () = task {
+        let! combined =
+            TaskSeq.zip4 (TaskSeq.singleton 1) (TaskSeq.singleton "x") (TaskSeq.singleton true) (TaskSeq.singleton 42L)
+            |> TaskSeq.toArrayAsync
+
+        combined |> should equal [| (1, "x", true, 42L) |]
+    }
+
+module SideEffectsZip4 =
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-zip4 can deal with side effects in sequences`` variant = task {
+        let one = Gen.getSeqWithSideEffect variant
+        let two = Gen.getSeqWithSideEffect variant
+        let three = Gen.getSeqWithSideEffect variant
+        let four = Gen.getSeqWithSideEffect variant
+        let! combined = TaskSeq.zip4 one two three four |> TaskSeq.toArrayAsync
+
+        combined
+        |> Array.forall (fun (x, y, z, w) -> x = y && y = z && z = w)
+        |> should be True
+
+        combined |> should haveLength 10
+    }

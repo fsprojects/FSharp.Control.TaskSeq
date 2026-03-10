@@ -385,7 +385,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#258][] | `windowed`         | `windowed`           |                           | |
 | &#x2705; [#2][]  | `zip`              | `zip`                |                           | |
 | &#x2705;          | `zip3`             | `zip3`               |                           | |
-|                  |                    | `zip4`               |                           | |
+| &#x2705;          |                    | `zip4`               |                           | |
 
 
 <sup>¹⁾ <a id="note1"></a>_These functions require a form of pre-materializing through `TaskSeq.cache`, similar to the approach taken in the corresponding `Seq` functions. It doesn't make much sense to have a cached async sequence. However, `AsyncSeq` does implement these, so we'll probably do so eventually as well._</sup>
