@@ -585,6 +585,53 @@ module internal TaskSeqInternal =
                 go <- step1 && step2 && step3
         }
 
+    let map3 (mapping: 'T1 -> 'T2 -> 'T3 -> 'U) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) (source3: TaskSeq<'T3>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            go <- step1 && step2 && step3
+
+            while go do
+                yield mapping e1.Current e2.Current e3.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                go <- step1 && step2 && step3
+        }
+
+    let map3Async (mapping: 'T1 -> 'T2 -> 'T3 -> #Task<'U>) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) (source3: TaskSeq<'T3>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            go <- step1 && step2 && step3
+
+            while go do
+                let! result = mapping e1.Current e2.Current e3.Current
+                yield result
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                go <- step1 && step2 && step3
+        }
+
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 

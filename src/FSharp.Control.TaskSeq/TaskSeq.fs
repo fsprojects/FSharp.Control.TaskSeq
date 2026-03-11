@@ -512,6 +512,11 @@ type TaskSeq private () =
 
     static member zip source1 source2 = Internal.zip source1 source2
     static member zip3 source1 source2 source3 = Internal.zip3 source1 source2 source3
+    static member map3 (mapping: 'T1 -> 'T2 -> 'T3 -> 'U) source1 source2 source3 = Internal.map3 mapping source1 source2 source3
+
+    static member map3Async (mapping: 'T1 -> 'T2 -> 'T3 -> #Task<'U>) source1 source2 source3 =
+        Internal.map3Async mapping source1 source2 source3
+
     static member fold folder state source = Internal.fold (FolderAction folder) state source
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
     static member scan folder state source = Internal.scan (FolderAction folder) state source

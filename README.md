@@ -313,7 +313,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#53][] |                    | `lengthBy`           | `lengthByAsync`           | |
 | &#x2705; [#2][]  | `map`              | `map`                | `mapAsync`                | |
 |                  | `map2`             | `map2`               | `map2Async`               | |
-|                  | `map3`             | `map3`               | `map3Async`               | |
+| &#x2705;         | `map3`             | `map3`               | `map3Async`               | |
 |                  | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
 | &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `mapi`             | `mapi`               | `mapiAsync`               | |
@@ -599,6 +599,8 @@ module TaskSeq =
     val unbox<'U when 'U: struct> : source: TaskSeq<obj> -> TaskSeq<'U>
     val updateAt: position:int -> value:'T -> source: TaskSeq<'T> -> TaskSeq<'T>
     val zip: source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'T * 'U>
+    val map3: mapping: ('T1 -> 'T2 -> 'T3 -> 'U) -> source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'U>
+    val map3Async: mapping: ('T1 -> 'T2 -> 'T3 -> #Task<'U>) -> source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'U>
 ```
 
 [buildstatus]: https://github.com/fsprojects/FSharp.Control.TaskSeq/actions/workflows/main.yaml

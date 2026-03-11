@@ -750,6 +750,50 @@ type TaskSeq =
     static member mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="mapping" />
+    /// function to the corresponding elements of the three input task sequences pairwise.
+    /// The three sequences need not have equal lengths: when one sequence is exhausted any remaining elements
+    /// in the other sequences are ignored. Uses <c>CancellationToken.None</c>.
+    ///
+    /// If <paramref name="mapping" /> is asynchronous, consider using <see cref="TaskSeq.map3Async" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function to transform triples of items from the input task sequences.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <param name="source3">The third input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when any of the input task sequences is null.</exception>
+    static member map3:
+        mapping: ('T1 -> 'T2 -> 'T3 -> 'U) ->
+        source1: TaskSeq<'T1> ->
+        source2: TaskSeq<'T2> ->
+        source3: TaskSeq<'T3> ->
+            TaskSeq<'U>
+
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="mapping" />
+    /// function to the corresponding elements of the three input task sequences pairwise.
+    /// The three sequences need not have equal lengths: when one sequence is exhausted any remaining elements
+    /// in the other sequences are ignored. Uses <c>CancellationToken.None</c>.
+    ///
+    /// If <paramref name="mapping" /> is synchronous, consider using <see cref="TaskSeq.map3" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function to transform triples of items from the input task sequences.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <param name="source3">The third input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when any of the input task sequences is null.</exception>
+    static member map3Async:
+        mapping: ('T1 -> 'T2 -> 'T3 -> #Task<'U>) ->
+        source1: TaskSeq<'T1> ->
+        source2: TaskSeq<'T2> ->
+        source3: TaskSeq<'T3> ->
+            TaskSeq<'U>
+
+    /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
     /// function to each of the elements of the input task sequence in <paramref name="source" />, and concatenating the
     /// returned task sequences.
