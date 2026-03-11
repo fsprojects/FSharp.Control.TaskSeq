@@ -388,6 +388,48 @@ module internal TaskSeqInternal =
                     go <- step
         }
 
+    let iteri2 action (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let mutable i = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                do action i e1.Current e2.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                i <- i + 1
+                go <- step1 && step2
+        }
+
+    let iteri2Async action (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let mutable i = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                do! (action i e1.Current e2.Current :> Task<unit>)
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                i <- i + 1
+                go <- step1 && step2
+        }
+
     let fold folder initial (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
@@ -542,6 +584,49 @@ module internal TaskSeqInternal =
                 let! result = mapper c
                 yield result
           }
+
+    let mapi2 mapper (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let mutable i = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                yield mapper i e1.Current e2.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                i <- i + 1
+                go <- step1 && step2
+        }
+
+    let mapi2Async mapper (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let mutable i = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                let! result = (mapper i e1.Current e2.Current :> Task<_>)
+                yield result
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                i <- i + 1
+                go <- step1 && step2
+        }
 
     let zip (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
         checkNonNull (nameof source1) source1

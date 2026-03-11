@@ -307,7 +307,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#2][]  | `iter`             | `iter`               | `iterAsync`               | |
 |                  | `iter2`            | `iter2`              | `iter2Async`              | |
 | &#x2705; [#2][]  | `iteri`            | `iteri`              | `iteriAsync`              | |
-|                  | `iteri2`           | `iteri2`             | `iteri2Async`             | |
+| ✅           | `iteri2`           | `iteri2`             | `iteri2Async`             | |
 | &#x2705; [#23][] | `last`             | `last`               |                           | |
 | &#x2705; [#53][] | `length`           | `length`             |                           | |
 | &#x2705; [#53][] |                    | `lengthBy`           | `lengthByAsync`           | |
@@ -317,7 +317,7 @@ This is what has been implemented so far, is planned or skipped:
 |                  | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
 | &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `mapi`             | `mapi`               | `mapiAsync`               | |
-|                  | `mapi2`            | `mapi2`              | `mapi2Async`              | |
+| ✅           | `mapi2`            | `mapi2`              | `mapi2Async`              | |
 | &#x2705; [#221][]| `max`              | `max`                |                           | |
 | &#x2705; [#221][]| `maxBy`            | `maxBy`              | `maxByAsync`              | |
 | &#x2705; [#221][]| `min`              | `min`                |                           | |

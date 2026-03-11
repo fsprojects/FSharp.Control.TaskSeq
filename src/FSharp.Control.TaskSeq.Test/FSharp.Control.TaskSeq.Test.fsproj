@@ -40,6 +40,7 @@
     <Compile Include="TaskSeq.IsEmpty.fs" />
     <Compile Include="TaskSeq.Item.Tests.fs" />
     <Compile Include="TaskSeq.Iter.Tests.fs" />
+    <Compile Include="TaskSeq.Iteri2Mapi2.Tests.fs" />
     <Compile Include="TaskSeq.Last.Tests.fs" />
     <Compile Include="TaskSeq.Length.Tests.fs" />
     <Compile Include="TaskSeq.Map.Tests.fs" />

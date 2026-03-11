@@ -680,6 +680,36 @@ type TaskSeq =
     static member iteriAsync: action: (int -> 'T -> #Task<unit>) -> source: TaskSeq<'T> -> Task<unit>
 
     /// <summary>
+    /// Applies the <paramref name="action" /> function to each element of two task sequences simultaneously,
+    /// supplying the zero-based index as extra parameter for the <paramref name="action" /> function.
+    /// Iteration stops when either sequence is exhausted; excess elements in the longer sequence are ignored.
+    /// This function is non-blocking, but will exhaust both input sequences as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">A function to apply to corresponding pairs of elements from both task sequences, with access to the current index.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member iteri2:
+        action: (int -> 'T -> 'U -> unit) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> Task<unit>
+
+    /// <summary>
+    /// Applies the asynchronous <paramref name="action" /> function to each element of two task sequences simultaneously,
+    /// supplying the zero-based index as extra parameter for the <paramref name="action" /> function.
+    /// Iteration stops when either sequence is exhausted; excess elements in the longer sequence are ignored.
+    /// This function is non-blocking, but will exhaust both input sequences as soon as the task is evaluated.
+    /// </summary>
+    ///
+    /// <param name="action">An asynchronous function to apply to corresponding pairs of elements from both task sequences, with access to the current index.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A <see cref="unit" /> <see cref="task" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member iteri2Async:
+        action: (int -> 'T -> 'U -> #Task<unit>) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> Task<unit>
+
+    /// <summary>
     /// Builds a new task sequence whose elements are the corresponding elements of the input task
     /// sequence <paramref name="source" /> paired with the integer index (from 0) of each element.
     /// </summary>
@@ -748,6 +778,39 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member mapiAsync: mapper: (int -> 'T -> #Task<'U>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the <paramref name="mapper" />
+    /// function to corresponding elements from two input task sequences, passing an extra zero-based index argument.
+    /// Mapping stops when either sequence is exhausted; excess elements in the longer sequence are ignored.
+    /// Does not evaluate the input sequences until requested.
+    ///
+    /// If <paramref name="mapper" /> is asynchronous, consider using <see cref="TaskSeq.mapi2Async" />.
+    /// </summary>
+    ///
+    /// <param name="mapper">A function to transform corresponding pairs of elements from both task sequences, with access to the current index.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member mapi2: mapper: (int -> 'T -> 'U -> 'V) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'V>
+
+    /// <summary>
+    /// Builds a new task sequence whose elements are the results of applying the asynchronous <paramref name="mapper" />
+    /// function to corresponding elements from two input task sequences, passing an extra zero-based index argument.
+    /// Mapping stops when either sequence is exhausted; excess elements in the longer sequence are ignored.
+    /// Does not evaluate the input sequences until requested.
+    ///
+    /// If <paramref name="mapper" /> is synchronous, consider using <see cref="TaskSeq.mapi2" />.
+    /// </summary>
+    ///
+    /// <param name="mapper">An asynchronous function to transform corresponding pairs of elements from both task sequences, with access to the current index.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member mapi2Async:
+        mapper: (int -> 'T -> 'U -> #Task<'V>) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'V>
 
     /// <summary>
     /// Builds a new task sequence whose elements are the results of applying the <paramref name="binder" />
