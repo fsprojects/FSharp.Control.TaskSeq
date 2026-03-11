@@ -1555,6 +1555,18 @@ type TaskSeq =
         source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'T1 * 'T2 * 'T3>
 
     /// <summary>
+    /// Returns a new task sequence that contains all pairings of elements from the first and second task sequences.
+    /// The second task sequence is fully evaluated before iteration begins. The output is produced lazily as the first
+    /// sequence is consumed.
+    /// </summary>
+    ///
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence, which is fully evaluated before the result sequence is iterated.</param>
+    /// <returns>The result task sequence of all pairs from the two input sequences.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
+    static member allPairs: source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> TaskSeq<'T1 * 'T2>
+
+    /// <summary>
     /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
     /// then computes<paramref name="f (... (f s i0)...) iN" />.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.

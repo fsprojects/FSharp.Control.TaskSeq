@@ -585,6 +585,18 @@ module internal TaskSeqInternal =
                 go <- step1 && step2 && step3
         }
 
+    let allPairs (source1: TaskSeq<_>) (source2: TaskSeq<_>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        taskSeq {
+            let! arr2 = toResizeArrayAsync source2
+
+            for x in source1 do
+                for y in arr2 do
+                    yield x, y
+        }
+
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 

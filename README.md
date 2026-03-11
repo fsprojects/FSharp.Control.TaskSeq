@@ -253,7 +253,7 @@ This is what has been implemented so far, is planned or skipped:
 
 | Done             | `Seq`              | `TaskSeq`            | Variants                  | Remarks                                                                                                                                                                                                                                                                                                                |
 |------------------|--------------------|----------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| &#x2753;         | `allPairs`         | `allPairs`           |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705;          | `allPairs`         | `allPairs`           |                           | 
 | &#x2705; [#81][] | `append`           | `append`             |                           | |
 | &#x2705; [#81][] |                    |                      | `appendSeq`               | |
 | &#x2705; [#81][] |                    |                      | `prependSeq`              | |
