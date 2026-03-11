@@ -1,10 +1,1 @@
-{
-  "last_run": "2026-03-10T13:35:00Z",
-  "run_id": "22904159956",
-  "monthly_activity_issue": 285,
-  "comments_made": {"129":"2026-03-09","141":"2026-03-09","142":"2026-03-10","167":"2026-03-08","246":"2026-03-08","269":"2026-03-07"},
-  "open_prs": [316,317,318,319,320,321,322,324,326,327],
-  "backlog_cursor": 142,
-  "rejections": {"rev-sort": "rejected by dsyme"},
-  "notes": "PR316=error/close. PR321=AggEx fix. PR322=map2/iter2. PR324=exists2/fold2. PR326=zip4. PR327=splitInto. Next: iteri2/mapi2/map3 after 322/324 merge."
-}
+{"run":"22954286697","m":285,"comments":{"129":"0309","133":"0311","141":"0309","142":"0310","143":"0310","167":"0308","246":"0308","269":"0307"},"prs":[316,317,318,319,320,321,322,324,326,327,330],"cursor":143,"rej":{"rev-sort":"dsyme"},"next":"map3 PR created. No rev/sort."}
