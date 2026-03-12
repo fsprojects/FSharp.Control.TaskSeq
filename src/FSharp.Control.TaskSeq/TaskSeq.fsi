@@ -1576,7 +1576,37 @@ type TaskSeq =
         source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'T1 * 'T2 * 'T3>
 
     /// <summary>
-    /// argument of type <typeref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />
+    /// Applies a comparer function to corresponding elements of two task sequences, returning the result of the
+    /// first comparison that is non-zero, or zero if all compared elements are equal. The sequences are compared
+    /// element by element until one of them is exhausted; if one sequence is shorter than the other, it is considered
+    /// less than the longer sequence.
+    /// If the comparer function <paramref name="comparer" /> is asynchronous, consider using <see cref="TaskSeq.compareWithAsync" />.
+    /// </summary>
+    ///
+    /// <param name="comparer">A function that compares an element from the first sequence with one from the second, returning an integer (negative = less than, zero = equal, positive = greater than).</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A task returning the first non-zero comparison result, or zero if all elements compare equal and the sequences have equal length.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member compareWith: comparer: ('T -> 'T -> int) -> source1: TaskSeq<'T> -> source2: TaskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Applies an asynchronous comparer function to corresponding elements of two task sequences, returning the result of
+    /// the first comparison that is non-zero, or zero if all compared elements are equal. The sequences are compared
+    /// element by element until one of them is exhausted; if one sequence is shorter than the other, it is considered
+    /// less than the longer sequence.
+    /// If the comparer function <paramref name="comparer" /> is synchronous, consider using <see cref="TaskSeq.compareWith" />.
+    /// </summary>
+    ///
+    /// <param name="comparer">An asynchronous function that compares an element from the first sequence with one from the second, returning an integer (negative = less than, zero = equal, positive = greater than).</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>A task returning the first non-zero comparison result, or zero if all elements compare equal and the sequences have equal length.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either input task sequence is null.</exception>
+    static member compareWithAsync:
+        comparer: ('T -> 'T -> #Task<int>) -> source1: TaskSeq<'T> -> source2: TaskSeq<'T> -> Task<int>
+
+
     /// then computes<paramref name="f (... (f s i0)...) iN" />.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.foldAsync" />.
     /// argument of type <paramref name="'State" /> through the computation.  If the input function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />

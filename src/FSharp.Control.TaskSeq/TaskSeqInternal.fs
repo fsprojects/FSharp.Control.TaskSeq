@@ -585,6 +585,68 @@ module internal TaskSeqInternal =
                 go <- step1 && step2 && step3
         }
 
+    let compareWith (comparer: 'T -> 'T -> int) (source1: TaskSeq<'T>) (source2: TaskSeq<'T>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable has1 = step1
+            let mutable has2 = step2
+
+            while result = 0 && (has1 || has2) do
+                match has1, has2 with
+                | false, _ -> result <- -1 // source1 is shorter: less than
+                | _, false -> result <- 1 // source2 is shorter: greater than
+                | true, true ->
+                    let cmp = comparer e1.Current e2.Current
+
+                    if cmp <> 0 then
+                        result <- cmp
+                    else
+                        let! s1 = e1.MoveNextAsync()
+                        let! s2 = e2.MoveNextAsync()
+                        has1 <- s1
+                        has2 <- s2
+
+            return result
+        }
+
+    let compareWithAsync (comparer: 'T -> 'T -> #Task<int>) (source1: TaskSeq<'T>) (source2: TaskSeq<'T>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        task {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable result = 0
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let mutable has1 = step1
+            let mutable has2 = step2
+
+            while result = 0 && (has1 || has2) do
+                match has1, has2 with
+                | false, _ -> result <- -1 // source1 is shorter: less than
+                | _, false -> result <- 1 // source2 is shorter: greater than
+                | true, true ->
+                    let! cmp = comparer e1.Current e2.Current
+
+                    if cmp <> 0 then
+                        result <- cmp
+                    else
+                        let! s1 = e1.MoveNextAsync()
+                        let! s2 = e2.MoveNextAsync()
+                        has1 <- s1
+                        has2 <- s2
+
+            return result
+        }
+
     let collect (binder: _ -> #IAsyncEnumerable<_>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
