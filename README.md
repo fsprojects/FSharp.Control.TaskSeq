@@ -212,8 +212,8 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
   - [x] `forall` / `forallAsync` (see [#240])
   - [x] `skip` / `drop` / `truncate` / `take` (see [#209])
   - [x] `chunkBySize` / `windowed` (see [#258])
-  - [ ] `compareWith`
-  - [x] `distinct` / `distinctBy` (see [#305])
+  - [x] `compareWith` / `compareWithAsync`
+  - [x] `distinct`
   - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
   - [x] `mapFold` (see [#306])
   - [x] `pairwise` (see [#293])
@@ -267,7 +267,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#258][] | `chunkBySize`      | `chunkBySize`        |                           | |
 | &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
-|                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
+| &#x2705;           | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
 | &#x2705; [#69][] | `concat`           | `concat`             |                           | |
 | &#x2705; [#237][]| `concat` (list)    | `concat` (list)      |                           | |
 | &#x2705; [#237][]| `concat` (array)   | `concat` (array)     |                           | |
