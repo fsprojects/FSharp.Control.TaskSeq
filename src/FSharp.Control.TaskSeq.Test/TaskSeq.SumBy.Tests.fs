@@ -175,7 +175,7 @@ module Immutable =
     }
 
     [<Fact>]
-    let ``TaskSeq-sumBy works with float projection`` () = task {
+    let ``TaskSeq-sum works with float projection`` () = task {
         let! result = TaskSeq.ofSeq [ 1; 2; 3; 4; 5 ] |> TaskSeq.sumBy float
 
         result |> should (equalWithin 0.001) 15.0
@@ -195,6 +195,42 @@ module Immutable =
         result |> should (equalWithin 0.001f) 2.0f
     }
 
+    [<Fact>]
+    let ``TaskSeq-sum result matches Seq-sum`` () = task {
+        let items = [ 3; 1; 4; 1; 5; 9; 2; 6; 5; 3 ]
+        let expected = Seq.sum items
+
+        let! result = TaskSeq.ofList items |> TaskSeq.sum
+        result |> should equal expected
+    }
+
+    [<Fact>]
+    let ``TaskSeq-average result matches Seq-average`` () = task {
+        let items = [ 3.0; 1.0; 4.0; 1.0; 5.0; 9.0; 2.0; 6.0; 5.0; 3.0 ]
+        let expected = Seq.average items
+
+        let! result = TaskSeq.ofList items |> TaskSeq.average
+        result |> should (equalWithin 0.0001) expected
+    }
+
+    [<Fact>]
+    let ``TaskSeq-sumBy result matches Seq-sumBy`` () = task {
+        let items = [ 1; 2; 3; 4; 5 ]
+        let expected = Seq.sumBy (fun x -> x * x) items
+
+        let! result = TaskSeq.ofList items |> TaskSeq.sumBy (fun x -> x * x)
+        result |> should equal expected
+    }
+
+    [<Fact>]
+    let ``TaskSeq-averageBy result matches Seq-averageBy`` () = task {
+        let items = [ 1; 2; 3; 4; 5 ]
+        let expected = Seq.averageBy float items
+
+        let! result = TaskSeq.ofList items |> TaskSeq.averageBy float
+        result |> should (equalWithin 0.0001) expected
+    }
+
 module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-sum iterates exactly once`` variant = task {
@@ -211,8 +247,51 @@ module SideEffects =
     }
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-sumByAsync iterates exactly once`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! result = ts |> TaskSeq.sumByAsync Task.fromResult
+        result |> should equal 55
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-average iterates exactly once`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! result = ts |> TaskSeq.map float |> TaskSeq.average
+        result |> should (equalWithin 0.001) 5.5
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-averageBy iterates exactly once`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant
         let! result = ts |> TaskSeq.averageBy float
         result |> should (equalWithin 0.001) 5.5
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-averageByAsync iterates exactly once`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! result = ts |> TaskSeq.averageByAsync (float >> Task.fromResult)
+        result |> should (equalWithin 0.001) 5.5
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-sum second iteration sees side-effect values`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! first = ts |> TaskSeq.sum
+        first |> should equal 55 // 1+2+...+10
+
+        // side-effect sequences yield next 10 items (11..20) on second consumption
+        let! second = ts |> TaskSeq.sum
+        second |> should equal 155 // 11+12+...+20
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-averageBy second iteration sees side-effect values`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! first = ts |> TaskSeq.averageBy float
+        first |> should (equalWithin 0.001) 5.5 // avg(1..10) = 5.5
+
+        // side-effect sequences yield next 10 items (11..20) on second consumption
+        let! second = ts |> TaskSeq.averageBy float
+        second |> should (equalWithin 0.001) 15.5 // avg(11..20) = 15.5
     }
