@@ -14,7 +14,7 @@ description: |
   Always polite, constructive, and mindful of the project's goals.
 
 on:
-  schedule: every 6h
+  schedule: every 48 hours
   workflow_dispatch:
   slash_command:
     name: repo-assist
@@ -42,6 +42,7 @@ safe-outputs:
     draft: true
     title-prefix: "[Repo Assist] "
     labels: [automation, repo-assist]
+    protected-files: fallback-to-issue
     max: 4
   push-to-pull-request-branch:
     target: "*"
@@ -164,7 +165,7 @@ steps:
           json.dump(result, f, indent=2)
       EOF
 
-source: githubnext/agentics/workflows/repo-assist.md@5029c9574c7bd2baa70aab6c8de9ea09edf11803
+source: githubnext/agentics/workflows/repo-assist.md@346204513ecfa08b81566450d7d599556807389f
 ---
 
 # Repo Assist
