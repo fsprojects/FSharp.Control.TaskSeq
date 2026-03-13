@@ -147,9 +147,22 @@ module internal TaskSeqInternal =
     let replicate count value =
         raiseCannotBeNegative (nameof count) count
 
-        taskSeq {
-            for _ in 1..count do
-                yield value
+        // Direct object-expression implementation: avoids the taskSeq CE state machine,
+        // the 1..count range IEnumerable, and its IEnumerator — all of which are unnecessary
+        // for this simple, always-synchronous sequence. MoveNextAsync always completes
+        // synchronously, which is the optimal fast path for ValueTask consumers.
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator _ =
+                let mutable i = 0
+
+                { new IAsyncEnumerator<'T> with
+                    member _.MoveNextAsync() =
+                        i <- i + 1
+                        ValueTask<bool>(i <= count)
+
+                    member _.Current = value
+                    member _.DisposeAsync() = ValueTask.CompletedTask
+                }
         }
 
     /// Returns length unconditionally, or based on a predicate
