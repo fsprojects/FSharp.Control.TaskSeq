@@ -595,6 +595,7 @@ module internal TaskSeqInternal =
             for x in source1 do
                 for y in arr2 do
                     yield x, y
+        }
 
     let compareWith (comparer: 'T -> 'T -> int) (source1: TaskSeq<'T>) (source2: TaskSeq<'T>) =
         checkNonNull (nameof source1) source1
