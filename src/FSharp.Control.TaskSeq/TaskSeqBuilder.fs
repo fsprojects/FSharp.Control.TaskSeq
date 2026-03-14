@@ -5,6 +5,10 @@ open System.Diagnostics
 // note: this is *not* an experimental feature, but they forgot to switch off the flag
 #nowarn "57" // Experimental library feature, requires '--langversion:preview'.
 
+// Suppress "Resumable code invocation" warning for the dynamic path implementations,
+// where ResumableTSC.Invoke is called outside of a __stateMachine context by design.
+#nowarn "3513"
+
 open System
 open System.Collections.Generic
 open System.Threading
@@ -316,6 +320,234 @@ and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
 and TaskSeqResumptionFunc<'T> = ResumptionFunc<TaskSeqStateMachineData<'T>>
 and TaskSeqResumptionDynamicInfo<'T> = ResumptionDynamicInfo<TaskSeqStateMachineData<'T>>
 
+/// <summary>
+/// Concrete, non-generic implementation of <see cref="TaskSeqBase&lt;'T&gt;" /> used
+/// for the dynamic (heap-allocated) path of the <see cref="taskSeq" /> computation expression.
+/// This is used when the F# compiler cannot generate a static state machine, e.g., when
+/// the resumable code is invoked in a context not supported by <c>__stateMachine</c>.
+/// It is also used by <see cref="taskSeqDynamic" />, which always takes the dynamic path.
+/// </summary>
+[<NoComparison; NoEquality>]
+type TaskSeqDynamic<'T>() =
+    inherit TaskSeqBase<'T>()
+    let initialThreadId = Environment.CurrentManagedThreadId
+
+    /// The initial resumption function for this sequence; stored for re-enumeration (cloning).
+    [<DefaultValue(false)>]
+    val mutable _initialResumptionFunc: TaskSeqResumptionFunc<'T>
+
+    /// The dynamic state machine; its Data field is null until GetAsyncEnumerator is called.
+    [<DefaultValue(false)>]
+    val mutable _machine: TaskSeqStateMachine<'T>
+
+    member this.InitMachineData(ct: CancellationToken) =
+        let data = TaskSeqStateMachineData()
+        data.boxedSelf <- this
+        data.cancellationToken <- ct
+        data.builder <- AsyncIteratorMethodBuilder.Create()
+        this._machine.Data <- data
+
+        let res =
+            { new TaskSeqResumptionDynamicInfo<'T>(this._initialResumptionFunc) with
+                member info.MoveNext(sm: byref<TaskSeqStateMachine<'T>>) =
+                    //-- DYNAMIC RESUMABLE CODE START
+                    try
+                        Debug.logInfo "at TaskSeqDynamic.MoveNext start"
+
+                        let __stack_code_fin = info.ResumptionFunc.Invoke(&sm)
+
+                        if __stack_code_fin then
+                            Debug.logInfo "at TaskSeqDynamic.MoveNext, done"
+
+                            // Signal we're at the end (same as in the static MoveNextMethodImpl)
+                            sm.Data.promiseOfValueOrEnd.SetResult(false)
+                            sm.Data.builder.Complete()
+                            sm.Data.completed <- true
+
+                        elif sm.Data.current.IsSome then
+                            Debug.logInfo "at TaskSeqDynamic.MoveNext, still more items in enumerator"
+
+                            // Signal there's more data
+                            sm.Data.promiseOfValueOrEnd.SetResult(true)
+
+                        else
+                            // Goto request (awaiting an async operation)
+                            Debug.logInfo "at TaskSeqDynamic.MoveNext, await, MoveNextAsync has not completed yet"
+
+                            // Only capture boxedSelf (not the full struct) to avoid byref issues
+                            let boxed = sm.Data.boxedSelf
+
+                            sm.Data.awaiter.UnsafeOnCompleted(fun () ->
+                                let mutable boxed = boxed
+                                moveNextRef &boxed)
+
+                    with exn ->
+                        Debug.logInfo ("TaskSeqDynamic.MoveNext, setting exception: ", exn.Message)
+                        sm.Data.promiseOfValueOrEnd.SetException(exn)
+                        sm.Data.builder.Complete()
+
+                //-- DYNAMIC RESUMABLE CODE END
+
+                member _.SetStateMachine(_sm: byref<TaskSeqStateMachine<'T>>, _state) = () }
+
+        this._machine.ResumptionDynamicInfo <- res
+
+    // Note: Not entirely clear if this is needed, everything still compiles without it
+    interface IValueTaskSource with
+        member this.GetResult token =
+            let canMoveNext = this._machine.Data.promiseOfValueOrEnd.GetResult token
+
+            if not canMoveNext then
+                this._machine.Data.completed <- true
+
+        member this.GetStatus token = this._machine.Data.promiseOfValueOrEnd.GetStatus token
+
+        member this.OnCompleted(continuation, state, token, flags) =
+            this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+
+    // Needed for MoveNextAsync to return a ValueTask, this manages the source of the ValueTask
+    // in combination with the ManualResetValueTaskSourceCore (in promiseOfValueOrEnd).
+    interface IValueTaskSource<bool> with
+        member this.GetStatus token = this._machine.Data.promiseOfValueOrEnd.GetStatus token
+
+        member this.GetResult token =
+            let canMoveNext = this._machine.Data.promiseOfValueOrEnd.GetResult token
+
+            if not canMoveNext then
+                this._machine.Data.completed <- true
+
+            canMoveNext
+
+        member this.OnCompleted(continuation, state, token, flags) =
+            this._machine.Data.promiseOfValueOrEnd.OnCompleted(continuation, state, token, flags)
+
+    interface IAsyncStateMachine with
+        /// The MoveNext method is called by builder.MoveNext() in the resumable code
+        member this.MoveNext() =
+            this._machine.ResumptionDynamicInfo.MoveNext(&this._machine)
+
+        /// SetStateMachine is (currently) never called
+        member _.SetStateMachine(_state) = () // not needed for reference type
+
+    interface IAsyncEnumerable<'T> with
+        member this.GetAsyncEnumerator(ct) =
+            // If Data is null, it's the first time for this Enumerable to create an Enumerator;
+            // to prevent extra allocations, we return 'self', with the iterator vars set appropriately.
+            if isNull (this._machine.Data :> obj) && initialThreadId = Environment.CurrentManagedThreadId then
+                this.InitMachineData(ct)
+                this // just return 'self' here
+            else
+                Debug.logInfo "GetAsyncEnumerator (dynamic), start cloning..."
+
+                // Create a new dynamic enumerator re-using the same initial resumption function.
+                // Note: for closures that capture mutable CE-local variables, these variables are shared
+                // between all enumerators created from the same source, which is a known limitation
+                // of the dynamic path; in practice, the static path handles such cases.
+                let clone = TaskSeqDynamic<'T>()
+                clone._initialResumptionFunc <- this._initialResumptionFunc
+                clone.InitMachineData(ct)
+                Debug.logInfo "GetAsyncEnumerator (dynamic), finished cloning..."
+                clone
+
+    interface IAsyncEnumerator<'T> with
+        member this.Current =
+            match this._machine.Data.current with
+            | ValueSome x -> x
+            | ValueNone ->
+                // Returning a default value is similar to how F#'s seq<'T> behaves
+                Unchecked.defaultof<'T>
+
+        member this.MoveNextAsync() =
+            Debug.logInfo "MoveNextAsync (dynamic)..."
+
+            if isNull (this._machine.Data :> obj) then
+                // GetAsyncEnumerator was not called; cannot use as IAsyncEnumerator directly
+                Debug.logInfo "at MoveNextAsync (dynamic): Data is null"
+                ValueTask.False
+
+            elif this._machine.Data.completed then
+                Debug.logInfo "at MoveNextAsync (dynamic): completed = true"
+
+                // return False when beyond the last item
+                this._machine.Data.promiseOfValueOrEnd.Reset()
+                ValueTask.False
+
+            else
+                Debug.logInfo "at MoveNextAsync (dynamic): normal resumption scenario"
+
+                let data = this._machine.Data
+
+                // Honor the cancellation token passed to GetAsyncEnumerator (fixes #179).
+                data.cancellationToken.ThrowIfCancellationRequested()
+
+                data.promiseOfValueOrEnd.Reset()
+
+                Debug.logInfo "at MoveNextAsync (dynamic): start calling MoveNext()"
+
+                (this :> IAsyncStateMachine).MoveNext()
+
+                Debug.logInfo "at MoveNextAsync (dynamic): finished calling MoveNext()"
+
+                this.MoveNextAsyncResult()
+
+        /// Disposes of the IAsyncEnumerator (*not* the IAsyncEnumerable!!!)
+        member this.DisposeAsync() =
+            task {
+                Debug.logInfo "DisposeAsync (dynamic)..."
+
+                match this._machine.Data.disposalStack with
+                | null -> ()
+                | _ ->
+                    let mutable exn = None
+
+                    for d in Seq.rev this._machine.Data.disposalStack do
+                        try
+                            do! d ()
+                        with e ->
+                            if exn.IsNone then
+                                exn <- Some e
+
+                    match exn with
+                    | None -> ()
+                    | Some e -> raise e
+            }
+            |> ValueTask
+
+    override this.MoveNextAsyncResult() =
+        let data = this._machine.Data
+        let version = data.promiseOfValueOrEnd.Version
+        let status = data.promiseOfValueOrEnd.GetStatus(version)
+
+        match status with
+        | ValueTaskSourceStatus.Succeeded ->
+            Debug.logInfo "at MoveNextAsyncResult (dynamic): case succeeded..."
+
+            let result = data.promiseOfValueOrEnd.GetResult(version)
+
+            if not result then
+                data.current <- ValueNone
+
+            ValueTask.fromResult result
+
+        | ValueTaskSourceStatus.Faulted
+        | ValueTaskSourceStatus.Canceled
+        | ValueTaskSourceStatus.Pending as state ->
+            Debug.logInfo ("at MoveNextAsyncResult (dynamic): case ", state)
+
+            ValueTask.ofSource this version
+        | _ ->
+            Debug.logInfo "at MoveNextAsyncResult (dynamic): Unexpected state"
+            ValueTask.ofSource this version
+
+    /// <summary>
+    /// Sets the initial resumption function by wrapping the given ResumableCode.
+    /// Uses fully-expanded types (no aliases) to avoid a type alias substitution bug
+    /// in the F# compiler that causes <c>ResumptionFunc&lt;TaskSeqStateMachineData&lt;TaskSeqStateMachineData&lt;T&gt;&gt;&gt;</c>
+    /// to be generated instead of the correct <c>ResumptionFunc&lt;TaskSeqStateMachineData&lt;T&gt;&gt;</c>.
+    /// </summary>
+    member this.SetResumptionFuncFromCode(code: ResumableCode<TaskSeqStateMachineData<'T>, unit>) =
+        this._initialResumptionFunc <- ResumptionFunc<TaskSeqStateMachineData<'T>>(fun sm -> code.Invoke(&sm))
+
 type TaskSeqBuilder() =
 
     member inline _.Delay(f: unit -> ResumableTSC<'T>) = ResumableTSC<'T>(fun sm -> f().Invoke(&sm))
@@ -379,16 +611,10 @@ type TaskSeqBuilder() =
                     ts._machine <- sm
                     ts :> IAsyncEnumerable<'T>))
         else
-            //    let initialResumptionFunc = TaskSeqResumptionFunc<'T>(fun sm -> code.Invoke(&sm))
-            //    let resumptionFuncExecutor = TaskSeqResumptionExecutor<'T>(fun sm f ->
-            //            // TODO: add exception handling?
-            //            if f.Invoke(&sm) then
-            //                sm.ResumptionPoint <- -2)
-            //    let setStateMachine = SetStateMachineMethodImpl<_>(fun sm f -> ())
-            //    sm.Machine.ResumptionFuncInfo <- (initialResumptionFunc, resumptionFuncExecutor, setStateMachine)
-            //sm.Start()
-            NotImplementedException "No dynamic implementation for TaskSeq yet."
-            |> raise
+            // Dynamic path: the F# compiler could not generate a static state machine.
+            let ts = TaskSeqDynamic<'T>()
+            ts.SetResumptionFuncFromCode code
+            ts :> IAsyncEnumerable<'T>
 
 
     member inline _.Zero() : ResumableTSC<'T> =
@@ -686,7 +912,30 @@ module HighPriority =
                     sm.Data.current <- ValueNone
                     false)
 
+/// <summary>
+/// Builder type for the <see cref="taskSeqDynamic" /> computation expression,
+/// which always uses the dynamic (heap-allocated) path, bypassing the <c>__stateMachine</c>
+/// optimization. This is primarily useful for testing or for contexts where the static
+/// path is not available.
+/// </summary>
+type TaskSeqDynamicBuilder() =
+    inherit TaskSeqBuilder()
+
+    member inline _.Run(code: ResumableTSC<'T>) : IAsyncEnumerable<'T> =
+        let ts = TaskSeqDynamic<'T>()
+        ts.SetResumptionFuncFromCode code
+        ts :> IAsyncEnumerable<'T>
+
 [<AutoOpen>]
 module TaskSeqBuilder =
     /// Builds an asynchronous task sequence based on IAsyncEnumerable<'T> using computation expression syntax.
     let taskSeq = TaskSeqBuilder()
+
+    /// <summary>
+    /// Builds an asynchronous task sequence using the dynamic (heap-allocated) path, bypassing
+    /// the <c>__stateMachine</c> optimization. Equivalent to <see cref="taskSeq" /> in functionality,
+    /// but always uses the dynamic implementation regardless of whether the F# compiler could
+    /// generate a static state machine. Useful for testing the dynamic path, and for advanced
+    /// scenarios where <see cref="taskSeq" /> triggers warning <c>FS3511</c>.
+    /// </summary>
+    let taskSeqDynamic = TaskSeqDynamicBuilder()

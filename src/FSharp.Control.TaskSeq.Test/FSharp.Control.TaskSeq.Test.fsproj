@@ -62,6 +62,7 @@
     <Compile Include="TaskSeq.ChunkBySize.Tests.fs" />
     <Compile Include="TaskSeq.Windowed.Tests.fs" />
     <Compile Include="TaskSeq.Tests.CE.fs" />
+    <Compile Include="TaskSeq.Dynamic.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug-delayed.Tests.CE.fs" />
     <Compile Include="TaskSeq.Realworld.fs" />

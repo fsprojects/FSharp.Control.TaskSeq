@@ -134,6 +134,31 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     override MoveNextAsyncResult: unit -> ValueTask<bool>
 
 /// <summary>
+/// Dynamic (heap-allocated) implementation of <see cref="TaskSeqBase&lt;'T&gt;" />, used when
+/// the F# compiler cannot generate a static state machine (e.g., top-level FSI expressions that
+/// trigger warning <c>FS3511</c>), and also used by <see cref="taskSeqDynamic" />.
+/// For use by this library only.
+/// </summary>
+[<NoComparison; NoEquality>]
+type TaskSeqDynamic<'T> =
+    inherit TaskSeqBase<'T>
+    interface IAsyncEnumerator<'T>
+    interface IAsyncEnumerable<'T>
+    interface IAsyncStateMachine
+    interface IValueTaskSource<bool>
+    interface IValueTaskSource
+
+    new: unit -> TaskSeqDynamic<'T>
+
+    member InitMachineData: ct: CancellationToken -> unit
+
+    /// Sets the initial resumption function by wrapping the given code. Uses fully-expanded
+    /// types to avoid a type alias substitution bug in the F# compiler.
+    member SetResumptionFuncFromCode: code: ResumableCode<TaskSeqStateMachineData<'T>, unit> -> unit
+
+    override MoveNextAsyncResult: unit -> ValueTask<bool>
+
+/// <summary>
 /// Main builder class for the <see cref="taskSeq" /> computation expression.
 /// </summary>
 [<Class>]
@@ -155,6 +180,15 @@ type TaskSeqBuilder =
     member inline Yield: value: 'T -> ResumableTSC<'T>
     member inline Zero: unit -> ResumableTSC<'T>
 
+/// <summary>
+/// Builder type for the <see cref="taskSeqDynamic" /> computation expression, which always uses
+/// the dynamic (heap-allocated) path. See <see cref="taskSeqDynamic" /> for more information.
+/// </summary>
+[<Class>]
+type TaskSeqDynamicBuilder =
+    inherit TaskSeqBuilder
+    member inline Run: code: ResumableTSC<'T> -> TaskSeq<'T>
+
 [<AutoOpen>]
 module TaskSeqBuilder =
 
@@ -162,6 +196,14 @@ module TaskSeqBuilder =
     /// Builds an asynchronous task sequence based on <see cref="IAsyncEnumerable&lt;'T&gt;" /> using computation expression syntax.
     /// </summary>
     val taskSeq: TaskSeqBuilder
+
+    /// <summary>
+    /// Builds an asynchronous task sequence using the dynamic (heap-allocated) path. Equivalent to
+    /// <see cref="taskSeq" /> in functionality, but always uses the dynamic implementation, bypassing
+    /// the <c>__stateMachine</c> optimization. Useful for testing the dynamic path and for advanced scenarios
+    /// where <see cref="taskSeq" /> triggers warning <c>FS3511</c>.
+    /// </summary>
+    val taskSeqDynamic: TaskSeqDynamicBuilder
 
 /// <summary>
 /// Contains low priority extension methods for the main builder class for the <see cref="taskSeq" /> computation expression.
