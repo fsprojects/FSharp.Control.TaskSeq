@@ -1,6 +1,16 @@
 
 Release notes:
 
+0.7.0
+    - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
+    - test: adds 67 tests for TaskSeq.lengthOrMax (previously untested)
+    - adds TaskSeq.mapFold and TaskSeq.mapFoldAsync
+    - adds TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync
+    - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
+    - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
+    - adds TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed, #289
+    - fixes: CancellationToken passed to GetAsyncEnumerator is now honored in MoveNextAsync, #179
+
 0.6.0
     - fixes: async { for item in taskSeq do ... } no longer wraps exceptions in AggregateException, #129
     - eng: enable PackageValidationBaselineVersion=0.4.0 to enforce binary compatibility with last published release
@@ -13,14 +23,6 @@ Release notes:
     - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
     - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
     - adds TaskSeq.distinct, TaskSeq.distinctBy, TaskSeq.distinctByAsync
-    - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
-    - test: adds 67 tests for TaskSeq.lengthOrMax (previously untested)
-    - adds TaskSeq.mapFold and TaskSeq.mapFoldAsync
-    - adds TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync
-    - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
-    - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
-    - adds TaskSeq.chunkBySize (closes #258) and TaskSeq.windowed, #289
-    - fixes: CancellationToken passed to GetAsyncEnumerator is now honored in MoveNextAsync, #179
 
 0.5.0
     - update engineering to .NET 9/10
