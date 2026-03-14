@@ -7,6 +7,7 @@ open FSharp.Control
 
 //
 // TaskSeq.length
+// TaskSeq.lengthOrMax
 // TaskSeq.lengthBy
 // TaskSeq.lengthByAsync
 //
@@ -15,6 +16,7 @@ module EmptySeq =
     [<Fact>]
     let ``Null source is invalid`` () =
         assertNullArg <| fun () -> TaskSeq.length null
+        assertNullArg <| fun () -> TaskSeq.lengthOrMax 10 null
 
         assertNullArg
         <| fun () -> TaskSeq.lengthBy (fun _ -> false) null
@@ -43,6 +45,18 @@ module EmptySeq =
             Gen.getEmptyVariant variant
             |> TaskSeq.lengthByAsync (Task.apply (fun _ -> true))
 
+        len |> should equal 0
+    }
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-lengthOrMax on empty sequence returns 0 regardless of max`` variant = task {
+        let! len = Gen.getEmptyVariant variant |> TaskSeq.lengthOrMax 100
+        len |> should equal 0
+    }
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-lengthOrMax on empty sequence with max=0 returns 0`` variant = task {
+        let! len = Gen.getEmptyVariant variant |> TaskSeq.lengthOrMax 0
         len |> should equal 0
     }
 
@@ -87,6 +101,41 @@ module Immutable =
         do! run (fun x -> x % 3 = 0) |> Task.map (should equal 3) // [3; 6; 9]
         do! run (fun x -> x % 3 = 1) |> Task.map (should equal 4) // [1; 4; 7; 10]
         do! run (fun x -> x % 3 = 2) |> Task.map (should equal 3) // [2; 5; 8]
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax returns actual length when sequence is shorter than max`` variant = task {
+        // source has 10 items; max=100 → actual length 10 is returned
+        let! len = Gen.getSeqImmutable variant |> TaskSeq.lengthOrMax 100
+        len |> should equal 10
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax returns max when sequence is longer than max`` variant = task {
+        // source has 10 items; max=5 → capped at 5
+        let! len = Gen.getSeqImmutable variant |> TaskSeq.lengthOrMax 5
+        len |> should equal 5
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax returns max when sequence is exactly max`` variant = task {
+        // source has 10 items; max=10 → returns 10
+        let! len = Gen.getSeqImmutable variant |> TaskSeq.lengthOrMax 10
+        len |> should equal 10
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax with max=1 returns 1 for any non-empty sequence`` variant = task {
+        let! len = Gen.getSeqImmutable variant |> TaskSeq.lengthOrMax 1
+        len |> should equal 1
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthOrMax with max=0 always returns 0 regardless of source`` () = task {
+        // max=0: the while loop condition (i < max) is false from the start → 0 returned
+        // NOTE: the implementation still calls MoveNextAsync once before the loop
+        let! len = TaskSeq.ofList [ 1..100 ] |> TaskSeq.lengthOrMax 0
+        len |> should equal 0
     }
 
 module SideEffects =
@@ -240,4 +289,66 @@ module SideEffects =
         do! run (fun x -> x % 3 = 1) |> Task.map (should equal 3) // [13; 16; 19]  // because of side-effect run again!
         do! run (fun x -> x % 3 = 2) |> Task.map (should equal 3) // [23; 26; 29]  // id
         do! run (fun x -> x % 3 = 1) |> Task.map (should equal 4) // [31; 34; 37; 40]  // id
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax returns correct length when below max`` variant = task {
+        // side-effect sequence yields 10 items on first run
+        let! len = Gen.getSeqWithSideEffect variant |> TaskSeq.lengthOrMax 100
+        len |> should equal 10
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-lengthOrMax returns max and stops evaluation when sequence exceeds max`` variant = task {
+        // source has 10 items; max=5 → should stop early
+        // NOTE: the implementation reads one element ahead (N+1 total MoveNextAsync calls for result N)
+        let mutable evaluated = 0
+
+        let ts = taskSeq {
+            for item in Gen.getSeqWithSideEffect variant do
+                evaluated <- evaluated + 1
+                yield item
+        }
+
+        let! len = ts |> TaskSeq.lengthOrMax 5
+        len |> should equal 5
+        // exactly max+1 elements are pulled from the source due to read-ahead
+        evaluated |> should equal 6
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthOrMax stops evaluating source after reaching max - read-ahead characteristic`` () = task {
+        // NOTE: the implementation calls MoveNextAsync once before the while loop,
+        // then once more per iteration. For max=N and a longer source, this means N+1 calls total.
+        let mutable sideEffects = 0
+
+        let ts = taskSeq {
+            for i in 1..100 do
+                sideEffects <- sideEffects + 1
+                yield i
+        }
+
+        let! len = ts |> TaskSeq.lengthOrMax 7
+        len |> should equal 7
+        // max+1 elements are evaluated due to the read-ahead implementation pattern
+        sideEffects |> should equal 8
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lengthOrMax with max=0 still evaluates the first element due to read-ahead`` () = task {
+        // The implementation unconditionally calls MoveNextAsync once before entering
+        // the while loop, so even max=0 evaluates the first element of the source.
+        let mutable sideEffects = 0
+
+        let ts = taskSeq {
+            sideEffects <- sideEffects + 1
+            yield 1
+            sideEffects <- sideEffects + 1
+            yield 2
+        }
+
+        let! len = ts |> TaskSeq.lengthOrMax 0
+        len |> should equal 0
+        // one element was evaluated despite max=0
+        sideEffects |> should equal 1
     }

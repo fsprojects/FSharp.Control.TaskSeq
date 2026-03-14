@@ -13,6 +13,7 @@ Release notes:
     - adds TaskSeq.unfold and TaskSeq.unfoldAsync, #289
     - adds TaskSeq.distinct, TaskSeq.distinctBy, TaskSeq.distinctByAsync
     - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
+    - test: adds 67 tests for TaskSeq.lengthOrMax (previously untested)
     - adds TaskSeq.mapFold and TaskSeq.mapFoldAsync
     - adds TaskSeq.sum, sumBy, sumByAsync, average, averageBy, averageByAsync
     - adds TaskSeq.reduce and TaskSeq.reduceAsync, #289
