@@ -1,7 +1,7 @@
 # FSharp.Control.TaskSeq
 
 FSharp.Control.TaskSeq provides a `taskSeq` computation expression for `IAsyncEnumerable<'T>`,
-along with a comprehensive `TaskSeq` module of combinators.
+along with [a comprehensive `TaskSeq` module](https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseq.html).
 
 An **task sequence** is an asynchronous sequence in which individual elements are _awaited_:
 the next element is not necessarily available immediately.
@@ -15,6 +15,8 @@ Add the [NuGet package `FSharp.Control.TaskSeq`](https://www.nuget.org/packages/
 to your project and open the namespace:
 
 ```fsharp
+// #r "nuget: FSharp.Control.TaskSeq"
+
 open FSharp.Control
 ```
 
