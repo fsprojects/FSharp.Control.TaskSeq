@@ -23,7 +23,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <PackageReadmeFile>nuget-package-readme.md</PackageReadmeFile>
     <FsDocsLicenseLink>https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt</FsDocsReleaseNotesLink>
-    <FsDocsLogoSource>https://raw.githubusercontent.com/fsprojects/FSharp.Control.TaskSeq/main/assets/taskseq-icon.png</FsDocsLogoSource>
+    <FsDocsLogoSource>img/logo.png</FsDocsLogoSource>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>
     <PackageTags>taskseq;f#;fsharp;asyncseq;seq;sequences;sequential;threading;computation expression;IAsyncEnumerable;task;async;iteration</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
