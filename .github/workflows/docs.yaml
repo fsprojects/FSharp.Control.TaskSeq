@@ -35,7 +35,7 @@ jobs:
         run: dotnet build src/FSharp.Control.TaskSeq/FSharp.Control.TaskSeq.fsproj -c Release
 
       - name: Build docs
-        run: dotnet fsdocs build --properties Configuration=Release --eval
+        run: dotnet fsdocs build --properties Configuration=Release --eval --root https://fsprojects.github.io/FSharp.Control.TaskSeq/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
