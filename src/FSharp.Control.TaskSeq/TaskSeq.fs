@@ -258,6 +258,13 @@ type TaskSeq private () =
                 yield c
         }
 
+    static member withCancellation (cancellationToken: CancellationToken) (source: TaskSeq<'T>) =
+        Internal.checkNonNull (nameof source) source
+
+        { new IAsyncEnumerable<'T> with
+            member _.GetAsyncEnumerator(_ct) = source.GetAsyncEnumerator(cancellationToken)
+        }
+
     //
     // Utility functions
     //

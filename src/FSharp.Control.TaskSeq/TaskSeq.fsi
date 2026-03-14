@@ -1,6 +1,7 @@
 namespace FSharp.Control
 
 open System.Collections.Generic
+open System.Threading
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -601,6 +602,23 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     static member ofAsyncArray: source: Async<'T> array -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a task sequence that, when iterated, passes the given <paramref name="cancellationToken" /> to the
+    /// underlying <see cref="IAsyncEnumerable&lt;'T&gt;" />. This is the equivalent of calling
+    /// <c>.WithCancellation(cancellationToken)</c> on an <see cref="IAsyncEnumerable&lt;'T&gt;" />.
+    /// </summary>
+    /// <remarks>
+    /// The <paramref name="cancellationToken" /> supplied to this function overrides any token that would otherwise
+    /// be passed to the enumerator. This is useful when consuming sequences from libraries such as Entity Framework,
+    /// which accept a <see cref="CancellationToken" /> through <c>GetAsyncEnumerator</c>.
+    /// </remarks>
+    ///
+    /// <param name="cancellationToken">The cancellation token to pass to <c>GetAsyncEnumerator</c>.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence that uses the given <paramref name="cancellationToken" /> when iterated.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member withCancellation: cancellationToken: CancellationToken -> source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
     /// Views each item in the input task sequence as <see cref="obj" />, boxing value types.
