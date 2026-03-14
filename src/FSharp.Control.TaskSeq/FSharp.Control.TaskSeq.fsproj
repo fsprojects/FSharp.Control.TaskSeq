@@ -14,7 +14,7 @@ The 'taskSeq' computation expression adds support for awaitable asynchronous seq
 
 Generates optimized IL code through resumable state machines, and comes with a comprehensive set of functions in module 'TaskSeq'. See README for documentation and more info.</Description>
     <Copyright>Copyright 2022-2024</Copyright>
-    <PackageProjectUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</PackageProjectUrl>
+    <PackageProjectUrl>https://fsprojects.github.io/FSharp.Control.TaskSeq/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fsprojects/FSharp.Control.TaskSeq</RepositoryUrl>
     <PackageIcon>taskseq-icon.png</PackageIcon>
     <PackageOutputPath>..\..\packages</PackageOutputPath>
