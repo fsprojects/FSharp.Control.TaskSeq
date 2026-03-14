@@ -3,6 +3,7 @@ Release notes:
 
 1.0.0
     - adds TaskSeq.withCancellation, #167
+    - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
 
 0.7.0
     - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value

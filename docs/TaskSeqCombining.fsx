@@ -1,0 +1,263 @@
+(**
+---
+title: Combining Task Sequences
+category: Documentation
+categoryindex: 2
+index: 5
+description: How to combine, slice and reshape F# task sequences using append, zip, take, skip, chunkBySize, windowed and related combinators.
+keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, append, zip, zip3, take, skip, drop, truncate, takeWhile, skipWhile, chunkBySize, windowed, pairwise, concat
+---
+*)
+(*** condition: prepare ***)
+#nowarn "211"
+#I "../src/FSharp.Control.TaskSeq/bin/Release/netstandard2.1"
+#r "FSharp.Control.TaskSeq.dll"
+(*** condition: fsx ***)
+#if FSX
+#r "nuget: FSharp.Control.TaskSeq,{{fsdocs-package-version}}"
+#endif // FSX
+(*** condition: ipynb ***)
+#if IPYNB
+#r "nuget: FSharp.Control.TaskSeq,{{fsdocs-package-version}}"
+#endif // IPYNB
+
+(**
+
+# Combining Task Sequences
+
+This page covers operations that combine multiple sequences or reshape a single sequence: append,
+zip, concat, slicing with take/skip, chunking and windowing.
+
+*)
+
+open FSharp.Control
+
+(**
+
+---
+
+## Append
+
+`TaskSeq.append` produces all elements of the first sequence followed by all elements of the
+second. The second sequence does not start until the first is exhausted:
+
+*)
+
+let first = TaskSeq.ofList [ 1; 2; 3 ]
+let second = TaskSeq.ofList [ 4; 5; 6 ]
+
+let appended : TaskSeq<int> = TaskSeq.append first second // 1, 2, 3, 4, 5, 6
+
+(**
+
+Inside `taskSeq { ... }`, `yield!` is the natural way to concatenate:
+
+*)
+
+let combined = taskSeq {
+    yield! first
+    yield! second
+}
+
+(**
+
+`TaskSeq.appendSeq` appends a plain `seq<'T>` after a task sequence.
+`TaskSeq.prependSeq` prepends a plain `seq<'T>` before a task sequence:
+
+*)
+
+let withPrefix : TaskSeq<int> = TaskSeq.prependSeq [ 0 ] first // 0, 1, 2, 3
+let withSuffix : TaskSeq<int> = TaskSeq.appendSeq first [ 4; 5 ] // 1, 2, 3, 4, 5
+
+(**
+
+---
+
+## concat
+
+`TaskSeq.concat` flattens a task sequence of task sequences into a single flat sequence.
+Each inner sequence is consumed fully before the next one begins:
+
+*)
+
+let nested : TaskSeq<TaskSeq<int>> =
+    TaskSeq.ofList
+        [ TaskSeq.ofList [ 1; 2 ]
+          TaskSeq.ofList [ 3; 4 ]
+          TaskSeq.ofList [ 5; 6 ] ]
+
+let flat : TaskSeq<int> = TaskSeq.concat nested // 1, 2, 3, 4, 5, 6
+
+(**
+
+Overloads also exist for `TaskSeq<seq<'T>>`, `TaskSeq<'T list>`, `TaskSeq<'T[]>`, and
+`TaskSeq<ResizeArray<'T>>`.
+
+---
+
+## zip and zip3
+
+`TaskSeq.zip` pairs up elements from two sequences, stopping when the shorter sequence ends:
+
+*)
+
+let letters : TaskSeq<char> = TaskSeq.ofList [ 'a'; 'b'; 'c' ]
+let nums : TaskSeq<int> = TaskSeq.ofList [ 1; 2; 3; 4 ]
+
+let pairs : TaskSeq<char * int> = TaskSeq.zip letters nums
+// ('a',1), ('b',2), ('c',3)  — stops when letters runs out
+
+(**
+
+`TaskSeq.zip3` does the same for three sequences:
+
+*)
+
+let booleans : TaskSeq<bool> = TaskSeq.ofList [ true; false; true ]
+
+let triples : TaskSeq<char * int * bool> = TaskSeq.zip3 letters nums booleans
+
+(**
+
+---
+
+## pairwise
+
+`TaskSeq.pairwise` produces a sequence of consecutive pairs.  An input with fewer than two elements
+produces an empty result:
+
+*)
+
+let consecutive : TaskSeq<int> = TaskSeq.ofList [ 1; 2; 3; 4; 5 ]
+
+let pairs2 : TaskSeq<int * int> = consecutive |> TaskSeq.pairwise
+// (1,2), (2,3), (3,4), (4,5)
+
+(**
+
+---
+
+## take and truncate
+
+`TaskSeq.take count` yields exactly `count` elements and throws if the source is shorter:
+
+*)
+
+let first3 : TaskSeq<int> = consecutive |> TaskSeq.take 3 // 1, 2, 3
+
+(**
+
+`TaskSeq.truncate count` yields _at most_ `count` elements without throwing when the source is
+shorter:
+
+*)
+
+let atMost10 : TaskSeq<int> = consecutive |> TaskSeq.truncate 10 // 1, 2, 3, 4, 5
+
+(**
+
+---
+
+## skip and drop
+
+`TaskSeq.skip count` skips exactly `count` elements and throws if the source is shorter:
+
+*)
+
+let afterFirst2 : TaskSeq<int> = consecutive |> TaskSeq.skip 2 // 3, 4, 5
+
+(**
+
+`TaskSeq.drop count` drops _at most_ `count` elements without throwing:
+
+*)
+
+let safeAfter10 : TaskSeq<int> = consecutive |> TaskSeq.drop 10 // empty
+
+(**
+
+---
+
+## takeWhile and takeWhileInclusive
+
+`TaskSeq.takeWhile predicate` yields elements while the predicate is `true`, then stops (the
+element that caused the stop is **not** yielded):
+
+*)
+
+let lessThan4 : TaskSeq<int> = consecutive |> TaskSeq.takeWhile (fun n -> n < 4)
+// 1, 2, 3
+
+(**
+
+`TaskSeq.takeWhileInclusive` yields the first element for which the predicate is `false` and
+then stops — so at least one element is always yielded from a non-empty source:
+
+*)
+
+let upToFirstGe4 : TaskSeq<int> =
+    consecutive |> TaskSeq.takeWhileInclusive (fun n -> n < 4)
+// 1, 2, 3, 4
+
+(**
+
+Async variants: `TaskSeq.takeWhileAsync`, `TaskSeq.takeWhileInclusiveAsync`.
+
+---
+
+## skipWhile and skipWhileInclusive
+
+`TaskSeq.skipWhile predicate` skips elements while the predicate is `true`, then yields the
+rest (the first failing element **is** yielded):
+
+*)
+
+let from3 : TaskSeq<int> = consecutive |> TaskSeq.skipWhile (fun n -> n < 3)
+// 3, 4, 5
+
+(**
+
+`TaskSeq.skipWhileInclusive` also skips the first element for which the predicate is `false`:
+
+*)
+
+let afterFirst3 : TaskSeq<int> =
+    consecutive |> TaskSeq.skipWhileInclusive (fun n -> n < 3)
+// 4, 5
+
+(**
+
+Async variants: `TaskSeq.skipWhileAsync`, `TaskSeq.skipWhileInclusiveAsync`.
+
+---
+
+## chunkBySize
+
+`TaskSeq.chunkBySize chunkSize` divides the sequence into non-overlapping arrays of at most
+`chunkSize` elements.  The last chunk may be smaller if the sequence does not divide evenly:
+
+*)
+
+let chunks : TaskSeq<int[]> = consecutive |> TaskSeq.chunkBySize 2
+// [|1;2|], [|3;4|], [|5|]
+
+(**
+
+---
+
+## windowed
+
+`TaskSeq.windowed windowSize` produces a sliding window of exactly `windowSize` consecutive
+elements.  The result is empty if the source has fewer elements than the window size:
+
+*)
+
+let windows : TaskSeq<int[]> = consecutive |> TaskSeq.windowed 3
+// [|1;2;3|], [|2;3;4|], [|3;4;5|]
+
+(**
+
+`windowed` uses a ring buffer internally, so each window allocation is separate — safe to
+store the windows independently.
+
+*)
