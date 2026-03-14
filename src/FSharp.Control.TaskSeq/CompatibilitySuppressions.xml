@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:FSharp.Control.LowPriority.TaskSeqBuilder#Bind``5(FSharp.Control.TaskSeqBuilder,``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.CompilerServices.ResumableCode{FSharp.Control.TaskSeqStateMachineData{``2},Microsoft.FSharp.Core.Unit}})</Target>
+    <Left>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Left>
+    <Right>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:FSharp.Control.LowPriority.TaskSeqBuilder#Bind$W``5(Microsoft.FSharp.Core.FSharpFunc{``0,``3},Microsoft.FSharp.Core.FSharpFunc{``3,``1},Microsoft.FSharp.Core.FSharpFunc{``3,System.Boolean},FSharp.Control.TaskSeqBuilder,``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.CompilerServices.ResumableCode{FSharp.Control.TaskSeqStateMachineData{``2},Microsoft.FSharp.Core.Unit}})</Target>
+    <Left>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Left>
+    <Right>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:FSharp.Control.TaskExtensions.TaskBuilder#For``2(Microsoft.FSharp.Control.TaskBuilder,System.Collections.Generic.IAsyncEnumerable{``0},Microsoft.FSharp.Core.FSharpFunc{``0,Microsoft.FSharp.Core.CompilerServices.ResumableCode{Microsoft.FSharp.Control.TaskStateMachineData{``1},Microsoft.FSharp.Core.Unit}})</Target>
+    <Left>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Left>
+    <Right>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>
