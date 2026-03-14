@@ -253,7 +253,6 @@ This is what has been implemented so far, is planned or skipped:
 
 | Done             | `Seq`              | `TaskSeq`            | Variants                  | Remarks                                                                                                                                                                                                                                                                                                                |
 |------------------|--------------------|----------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| &#x2753;         | `allPairs`         | `allPairs`           |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705; [#81][] | `append`           | `append`             |                           | |
 | &#x2705; [#81][] |                    |                      | `appendSeq`               | |
 | &#x2705; [#81][] |                    |                      | `prependSeq`              | |
@@ -267,7 +266,6 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#258][] | `chunkBySize`      | `chunkBySize`        |                           | |
 | &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
-| &#x2705;           | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
 | &#x2705; [#69][] | `concat`           | `concat`             |                           | |
 | &#x2705; [#237][]| `concat` (list)    | `concat` (list)      |                           | |
 | &#x2705; [#237][]| `concat` (array)   | `concat` (array)     |                           | |
@@ -287,12 +285,8 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#70][] | `exists`           | `exists`             | `existsAsync`             | |
 | &#x2705; [#23][] | `filter`           | `filter`             | `filterAsync`             | |
 | &#x2705; [#23][] | `find`             | `find`               | `findAsync`               | |
-| &#x1f6ab;        | `findBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#68][] | `findIndex`        | `findIndex`          | `findIndexAsync`          | |
-| &#x1f6ab;        | `findIndexBack`    | n/a                  | n/a                       | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `fold`             | `fold`               | `foldAsync`               | |
-| &#x1f6ab;        | `foldBack`         |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
-| &#x1f6ab;        | `foldBack2`        |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#240][]| `forall`           | `forall`             | `forallAsync`             | |
 | &#x2705; [#307][] | `groupBy`          | `groupBy`            | `groupByAsync`            | |
 | &#x2705; [#23][] | `head`             | `head`               |                           | |
