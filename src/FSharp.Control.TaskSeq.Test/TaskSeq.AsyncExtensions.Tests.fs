@@ -1,5 +1,6 @@
 module TaskSeq.Tests.AsyncExtensions
 
+open System
 open Xunit
 open FsUnit.Xunit
 
@@ -114,6 +115,44 @@ module SideEffects =
 
         sum |> should equal 465 // eq to: List.sum [1..30]
     }
+
+module ExceptionPropagation =
+    [<Fact>]
+    let ``Async-for CE propagates exception without AggregateException wrapping`` () =
+        // Verifies fix for https://github.com/fsprojects/FSharp.Control.TaskSeq/issues/129
+        // Async.AwaitTask previously wrapped all task exceptions in AggregateException,
+        // breaking try/catch blocks in async {} expressions that expect the original type.
+        let run () = async {
+            let values = taskSeq { yield 1 }
+
+            try
+                for _ in values do
+                    raise (InvalidOperationException "test error")
+            with :? InvalidOperationException ->
+                ()
+        }
+
+        // Should complete without AggregateException escaping
+        run () |> Async.RunSynchronously
+
+    [<Fact>]
+    let ``Async-for CE try-catch catches original exception type, not AggregateException`` () =
+        // Verifies that the original exception type is visible in catch blocks,
+        // not wrapped in AggregateException as Async.AwaitTask used to do.
+        let mutable caughtType: Type option = None
+
+        let run () = async {
+            let values = taskSeq { yield 1 }
+
+            try
+                for _ in values do
+                    raise (ArgumentException "test")
+            with ex ->
+                caughtType <- Some(ex.GetType())
+        }
+
+        run () |> Async.RunSynchronously
+        caughtType |> should equal (Some typeof<ArgumentException>)
 
 module Other =
     [<Fact>]

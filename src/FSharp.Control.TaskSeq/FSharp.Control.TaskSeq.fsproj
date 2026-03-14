@@ -28,7 +28,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <!-- Validate package structure and (when PackageValidationBaselineVersion is set) binary compatibility -->
     <EnablePackageValidation>true</EnablePackageValidation>
     <!-- Set this to the last published version to enforce binary compatibility, e.g. 0.4.0 -->
-    <!-- <PackageValidationBaselineVersion>0.4.0</PackageValidationBaselineVersion> -->
+    <PackageValidationBaselineVersion>0.4.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

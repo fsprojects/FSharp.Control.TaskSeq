@@ -208,16 +208,16 @@ The `TaskSeq` project already has a wide array of functions and functionalities,
 - [ ] Add remaining relevant functions from `Seq`. **PLANNED FOR 0.4.x**
   - [x] `min` / `max` / `minBy` / `maxBy` & async variant (see [#221])
   - [x] `insertAt` / `updateAt` and related (see [#236])
-  - [ ] `average` / `averageBy`, `sum` and related
+  - [x] `average` / `averageBy`, `sum` and related (see [#304])
   - [x] `forall` / `forallAsync` (see [#240])
   - [x] `skip` / `drop` / `truncate` / `take` (see [#209])
   - [x] `chunkBySize` / `windowed` (see [#258])
-  - [ ] `compareWith`
-  - [ ] `distinct`
+  - [x] `compareWith` / `compareWithAsync`
+  - [x] `distinct`
   - [ ] `exists2` / `map2` / `fold2` / `iter2` and related '2'-functions
-  - [ ] `mapFold`
+  - [x] `mapFold` (see [#306])
   - [x] `pairwise` (see [#293])
-  - [ ] `allpairs` / `permute` / `distinct` / `distinctBy`
+  - [x] `groupBy` / `groupByAsync`, `countBy` / `countByAsync`, `partition` / `partitionAsync` (see [#307])
   - [x] `replicate`
   - [x] `reduce` / `scan` (see [#299], [#296])
   - [x] `unfold` (see [#300])
@@ -257,8 +257,8 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#81][] | `append`           | `append`             |                           | |
 | &#x2705; [#81][] |                    |                      | `appendSeq`               | |
 | &#x2705; [#81][] |                    |                      | `prependSeq`              | |
-|                  | `average`          | `average`            |                           | |
-|                  | `averageBy`        | `averageBy`          | `averageByAsync`          | |
+| &#x2705; [#304][] | `average`          | `average`            |                           | |
+| &#x2705; [#304][] | `averageBy`        | `averageBy`          | `averageByAsync`          | |
 | &#x2753;         | `cache`            | `cache`              |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2705; [#67][] | `cast`             | `cast`               |                           | |
 | &#x2705; [#67][] |                    |                      | `box`                     | |
@@ -267,16 +267,18 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#258][] | `chunkBySize`      | `chunkBySize`        |                           | |
 | &#x2705; [#11][] | `collect`          | `collect`            | `collectAsync`            | |
 | &#x2705; [#11][] |                    | `collectSeq`         | `collectSeqAsync`         | |
-|                  | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
+| &#x2705;           | `compareWith`      | `compareWith`        | `compareWithAsync`        | |
 | &#x2705; [#69][] | `concat`           | `concat`             |                           | |
 | &#x2705; [#237][]| `concat` (list)    | `concat` (list)      |                           | |
 | &#x2705; [#237][]| `concat` (array)   | `concat` (array)     |                           | |
 | &#x2705; [#237][]| `concat` (r-array) | `concat` (r-array)   |                           | |
 | &#x2705; [#237][]| `concat` (seq)     | `concat` (seq)       |                           | |
 | &#x2705; [#70][] | `contains`         | `contains`           |                           | |
+| &#x2705; [#307][] | `countBy`          | `countBy`            | `countByAsync`            | |
 | &#x2705; [#82][] | `delay`            | `delay`              |                           | |
-|                  | `distinct`         | `distinct`           |                           | |
-|                  | `distinctBy`       | `dictinctBy`         | `distinctByAsync`         | |
+| &#x2705; [#305][] | `distinct`         | `distinct`           |                           | |
+| &#x2705; [#305][] | `distinctBy`       | `distinctBy`         | `distinctByAsync`         | |
+| &#x2705; [#305][] |                    | `distinctUntilChanged` |                         | |
 | &#x2705; [#209][]|                    | `drop`               |                           | |
 | &#x2705; [#2][]  | `empty`            | `empty`              |                           | |
 | &#x2705; [#23][] | `exactlyOne`       | `exactlyOne`         |                           | |
@@ -295,7 +297,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x1f6ab;        | `foldBack2`        |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#240][]| `forall`           | `forall`             | `forallAsync`             | |
 |                  | `forall2`          | `forall2`            | `forall2Async`            | |
-| &#x2753;         | `groupBy`          | `groupBy`            | `groupByAsync`            | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
+| &#x2705; [#307][] | `groupBy`          | `groupBy`            | `groupByAsync`            | |
 | &#x2705; [#23][] | `head`             | `head`               |                           | |
 | &#x2705; [#68][] | `indexed`          | `indexed`            |                           | |
 | &#x2705; [#69][] | `init`             | `init`               | `initAsync`               | |
@@ -314,7 +316,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#2][]  | `map`              | `map`                | `mapAsync`                | |
 |                  | `map2`             | `map2`               | `map2Async`               | |
 |                  | `map3`             | `map3`               | `map3Async`               | |
-|                  | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
+| &#x2705; [#306][] | `mapFold`          | `mapFold`            | `mapFoldAsync`            | |
 | &#x1f6ab;        | `mapFoldBack`      |                      |                           | [note #2](#note2 "Because of the async nature of TaskSeq sequences, iterating from the back would be bad practice. Instead, materialize the sequence to a list or array and then apply the 'Back' iterators.") |
 | &#x2705; [#2][]  | `mapi`             | `mapi`               | `mapiAsync`               | |
 |                  | `mapi2`            | `mapi2`              | `mapi2Async`              | |
@@ -334,6 +336,7 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2705; [#2][]  |                    | `ofTaskList`         |                           | |
 | &#x2705; [#2][]  |                    | `ofTaskSeq`          |                           | |
 | &#x2705; [#293][] | `pairwise`         | `pairwise`           |                           | |
+| &#x2705; [#307][] | `partition`        | `partition`          | `partitionAsync`          | |
 |                  | `permute`          | `permute`            | `permuteAsync`            | |
 | &#x2705; [#23][] | `pick`             | `pick`               | `pickAsync`               | |
 | &#x1f6ab;        | `readOnly`         |                      |                           | [note #3](#note3 "The motivation for 'readOnly' in 'Seq' is that a cast from a mutable array or list to a 'seq<_>' is valid and can be cast back, leading to a mutable sequence. Since 'TaskSeq' doesn't implement 'IEnumerable<_>', such casts are not possible.") |
@@ -355,8 +358,8 @@ This is what has been implemented so far, is planned or skipped:
 | &#x2753;         | `sortByDescending` |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 | &#x2753;         | `sortWith`         |                      |                           | [note #1](#note1 "These functions require a form of pre-materializing through 'TaskSeq.cache', similar to the approach taken in the corresponding 'Seq' functions. It doesn't make much sense to have a cached async sequence. However, 'AsyncSeq' does implement these, so we'll probably do so eventually as well.") |
 |                  | `splitInto`        | `splitInto`          |                           | |
-|                  | `sum`              | `sum`                |                           | |
-|                  | `sumBy`            | `sumBy`              | `sumByAsync`              | |
+| &#x2705; [#304][] | `sum`              | `sum`                |                           | |
+| &#x2705; [#304][] | `sumBy`            | `sumBy`              | `sumByAsync`              | |
 | &#x2705; [#76][] | `tail`             | `tail`               |                           | |
 | &#x2705; [#209][]| `take`             | `take`               |                           | |
 | &#x2705; [#126][]| `takeWhile`        | `takeWhile`          | `takeWhileAsync`          | |
@@ -659,6 +662,10 @@ module TaskSeq =
 [#296]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/296
 [#299]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/299
 [#300]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/300
+[#304]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/304
+[#305]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/305
+[#306]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/306
+[#307]: https://github.com/fsprojects/FSharp.Control.TaskSeq/pull/307
 
 [issues]: https://github.com/fsprojects/FSharp.Control.TaskSeq/issues
 [nuget]: https://www.nuget.org/packages/FSharp.Control.TaskSeq/
