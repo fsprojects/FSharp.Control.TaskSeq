@@ -1700,7 +1700,10 @@ type TaskSeq =
             Task<'Result[] * 'State>
 
 
-    /// <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then computes
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element of the task sequence, threading
+    /// an accumulator argument through the computation. The first element is used as the initial state. If the input
+    /// function is <paramref name="f" /> and the elements are <paramref name="i0...iN" />, then computes
     /// <paramref name="f (... (f i0 i1)...) iN" />. Raises <see cref="T:System.ArgumentException" /> when the
     /// sequence is empty.
     /// If the accumulator function <paramref name="folder" /> is asynchronous, consider using <see cref="TaskSeq.reduceAsync" />.

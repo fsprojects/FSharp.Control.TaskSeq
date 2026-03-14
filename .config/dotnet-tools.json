@@ -7,6 +7,13 @@
       "commands": [
         "fantomas"
       ]
+    },
+    "fsdocs-tool": {
+      "version": "21.0.0",
+      "commands": [
+        "fsdocs"
+      ],
+      "rollForward": false
     }
   }
 }

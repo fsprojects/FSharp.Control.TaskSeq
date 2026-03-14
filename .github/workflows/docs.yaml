@@ -1,0 +1,46 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write   # needed for peaceiris/actions-gh-pages
+
+jobs:
+  docs:
+    name: Build and deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: setup-dotnet
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Install tools
+        run: dotnet tool restore
+
+      - name: Build library (Release)
+        run: dotnet build src/FSharp.Control.TaskSeq/FSharp.Control.TaskSeq.fsproj -c Release
+
+      - name: Build docs
+        run: dotnet fsdocs build --properties Configuration=Release --eval
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          publish_branch: gh-pages
+          force_orphan: true

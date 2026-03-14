@@ -1,0 +1,5 @@
+# Literate documentation scripts are not subject to Fantomas formatting
+docs/
+
+# Generated output from fsdocs
+output/
