@@ -2,6 +2,7 @@
 Release notes:
 
 1.0.0
+    - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.withCancellation, #167
     - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
 

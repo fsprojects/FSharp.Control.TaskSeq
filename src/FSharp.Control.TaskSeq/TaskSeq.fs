@@ -476,6 +476,8 @@ type TaskSeq private () =
     static member distinctByAsync projection source = Internal.distinctByAsync projection source
 
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
+    static member distinctUntilChangedWith comparer source = Internal.distinctUntilChangedWith comparer source
+    static member distinctUntilChangedWithAsync comparer source = Internal.distinctUntilChangedWithAsync comparer source
     static member pairwise source = Internal.pairwise source
     static member chunkBySize chunkSize source = Internal.chunkBySize chunkSize source
     static member windowed windowSize source = Internal.windowed windowSize source
