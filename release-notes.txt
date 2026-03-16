@@ -4,6 +4,7 @@ Release notes:
 1.0.0
     - adds TaskSeq.withCancellation, #167
     - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
+    - test: adds 70 new tests to TaskSeq.Fold.Tests.fs covering call-count assertions, folder-not-called-on-empty, ordering, null initial state, and fold/foldAsync equivalence
 
 0.7.0
     - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
