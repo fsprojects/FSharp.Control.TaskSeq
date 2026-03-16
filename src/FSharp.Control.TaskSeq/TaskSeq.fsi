@@ -102,6 +102,7 @@ type TaskSeq =
     /// </summary>
     ///
     /// <param name="value">The input item to use as the single item of the task sequence.</param>
+    /// <returns>A task sequence containing exactly one element.</returns>
     static member singleton: value: 'T -> TaskSeq<'T>
 
     /// <summary>
@@ -119,6 +120,7 @@ type TaskSeq =
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning <c>true</c> if the sequence contains no elements; <c>false</c> otherwise.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member isEmpty: source: TaskSeq<'T> -> Task<bool>
 
@@ -128,6 +130,7 @@ type TaskSeq =
     /// </summary>
     ///
     /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning the number of elements in the sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member length: source: TaskSeq<'T> -> Task<int>
 
@@ -139,6 +142,7 @@ type TaskSeq =
     ///
     /// <param name="max">Limit at which to stop evaluating source items for finding the length.</param>
     /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning the actual length of the sequence, or <paramref name="max" /> if the sequence is longer than <paramref name="max" />.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member lengthOrMax: max: int -> source: TaskSeq<'T> -> Task<int>
 
@@ -150,6 +154,7 @@ type TaskSeq =
     ///
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
     /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning the number of elements for which <paramref name="predicate" /> returns <c>true</c>.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member lengthBy: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int>
 
@@ -161,6 +166,7 @@ type TaskSeq =
     ///
     /// <param name="predicate">A function to test whether an item in the input sequence should be included in the count.</param>
     /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning the number of elements for which <paramref name="predicate" /> returns <c>true</c>.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member lengthByAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
 
