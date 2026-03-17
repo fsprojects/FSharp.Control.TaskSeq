@@ -152,6 +152,28 @@ module internal TaskSeqInternal =
                 yield value
         }
 
+    let replicateInfinite value = taskSeq {
+        while true do
+            yield value
+    }
+
+    let replicateInfiniteAsync (computation: unit -> #Task<'T>) = taskSeq {
+        while true do
+            let! value = computation ()
+            yield value
+    }
+
+    let replicateUntilNoneAsync (computation: unit -> #Task<'T option>) = taskSeq {
+        let mutable go = true
+
+        while go do
+            let! result = computation ()
+
+            match result with
+            | Some value -> yield value
+            | None -> go <- false
+    }
+
     /// Returns length unconditionally, or based on a predicate
     let lengthBy predicate (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
@@ -500,6 +522,30 @@ module internal TaskSeqInternal =
             return results.ToArray(), state
         }
 
+    let threadState (folder: 'State -> 'T -> 'U * 'State) initial (source: TaskSeq<'T>) : TaskSeq<'U> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable state = initial
+
+            for item in source do
+                let result, newState = folder state item
+                state <- newState
+                yield result
+        }
+
+    let threadStateAsync (folder: 'State -> 'T -> #Task<'U * 'State>) initial (source: TaskSeq<'T>) : TaskSeq<'U> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable state = initial
+
+            for item in source do
+                let! (result, newState) = folder state item
+                state <- newState
+                yield result
+        }
+
     let toResizeArrayAsync source =
         checkNonNull (nameof source) source
 
@@ -579,6 +625,92 @@ module internal TaskSeqInternal =
 
             while go do
                 yield e1.Current, e2.Current, e3.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                go <- step1 && step2 && step3
+        }
+
+    let zipWith (mapping: 'T -> 'U -> 'V) (source1: TaskSeq<'T>) (source2: TaskSeq<'U>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                yield mapping e1.Current e2.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                go <- step1 && step2
+        }
+
+    let zipWithAsync (mapping: 'T -> 'U -> #Task<'V>) (source1: TaskSeq<'T>) (source2: TaskSeq<'U>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            go <- step1 && step2
+
+            while go do
+                let! result = mapping e1.Current e2.Current
+                yield result
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                go <- step1 && step2
+        }
+
+    let zipWith3 (mapping: 'T1 -> 'T2 -> 'T3 -> 'V) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) (source3: TaskSeq<'T3>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            go <- step1 && step2 && step3
+
+            while go do
+                yield mapping e1.Current e2.Current e3.Current
+                let! step1 = e1.MoveNextAsync()
+                let! step2 = e2.MoveNextAsync()
+                let! step3 = e3.MoveNextAsync()
+                go <- step1 && step2 && step3
+        }
+
+    let zipWithAsync3 (mapping: 'T1 -> 'T2 -> 'T3 -> #Task<'V>) (source1: TaskSeq<'T1>) (source2: TaskSeq<'T2>) (source3: TaskSeq<'T3>) =
+        checkNonNull (nameof source1) source1
+        checkNonNull (nameof source2) source2
+        checkNonNull (nameof source3) source3
+
+        taskSeq {
+            use e1 = source1.GetAsyncEnumerator CancellationToken.None
+            use e2 = source2.GetAsyncEnumerator CancellationToken.None
+            use e3 = source3.GetAsyncEnumerator CancellationToken.None
+            let mutable go = true
+            let! step1 = e1.MoveNextAsync()
+            let! step2 = e2.MoveNextAsync()
+            let! step3 = e3.MoveNextAsync()
+            go <- step1 && step2 && step3
+
+            while go do
+                let! result = mapping e1.Current e2.Current e3.Current
+                yield result
                 let! step1 = e1.MoveNextAsync()
                 let! step2 = e2.MoveNextAsync()
                 let! step3 = e3.MoveNextAsync()
@@ -733,6 +865,52 @@ module internal TaskSeqInternal =
                             go <- step
                     }
                     |> Some
+        }
+
+    let firstOrDefault defaultValue source =
+        tryHead source
+        |> Task.map (Option.defaultValue defaultValue)
+
+    let lastOrDefault defaultValue source =
+        tryLast source
+        |> Task.map (Option.defaultValue defaultValue)
+
+    let splitAt count (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
+
+        if count < 0 then
+            invalidArg (nameof count) $"The value must be non-negative, but was {count}."
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let first = ResizeArray<'T>(count)
+            let mutable i = 0
+            let mutable go = true
+
+            while go && i < count do
+                let! step = e.MoveNextAsync()
+
+                if step then
+                    first.Add e.Current
+                    i <- i + 1
+                else
+                    go <- false
+
+            // 'rest' captures 'e' from the outer task block, following the same pattern as tryTail.
+            let rest = taskSeq {
+                let mutable go2 = go
+
+                if go2 then
+                    let! step = e.MoveNextAsync()
+                    go2 <- step
+
+                while go2 do
+                    yield e.Current
+                    let! step = e.MoveNextAsync()
+                    go2 <- step
+            }
+
+            return first.ToArray(), rest
         }
 
     let tryItem index (source: TaskSeq<_>) =
@@ -1560,6 +1738,62 @@ module internal TaskSeqInternal =
             if count > 0 then
                 // Last partial chunk: copy only the filled portion.
                 yield buffer.[0 .. count - 1]
+        }
+
+    let chunkBy (projection: 'T -> 'Key) (source: TaskSeq<'T>) : TaskSeq<'Key * 'T[]> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybeCurrentKey = ValueNone
+            let mutable currentChunk = ResizeArray<'T>()
+
+            for item in source do
+                let key = projection item
+
+                match maybeCurrentKey with
+                | ValueNone ->
+                    maybeCurrentKey <- ValueSome key
+                    currentChunk.Add item
+                | ValueSome prevKey ->
+                    if prevKey = key then
+                        currentChunk.Add item
+                    else
+                        yield prevKey, currentChunk.ToArray()
+                        currentChunk <- ResizeArray<'T>()
+                        currentChunk.Add item
+                        maybeCurrentKey <- ValueSome key
+
+            match maybeCurrentKey with
+            | ValueNone -> ()
+            | ValueSome lastKey -> yield lastKey, currentChunk.ToArray()
+        }
+
+    let chunkByAsync (projection: 'T -> #Task<'Key>) (source: TaskSeq<'T>) : TaskSeq<'Key * 'T[]> =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybeCurrentKey = ValueNone
+            let mutable currentChunk = ResizeArray<'T>()
+
+            for item in source do
+                let! key = projection item
+
+                match maybeCurrentKey with
+                | ValueNone ->
+                    maybeCurrentKey <- ValueSome key
+                    currentChunk.Add item
+                | ValueSome prevKey ->
+                    if prevKey = key then
+                        currentChunk.Add item
+                    else
+                        yield prevKey, currentChunk.ToArray()
+                        currentChunk <- ResizeArray<'T>()
+                        currentChunk.Add item
+                        maybeCurrentKey <- ValueSome key
+
+            match maybeCurrentKey with
+            | ValueNone -> ()
+            | ValueSome lastKey -> yield lastKey, currentChunk.ToArray()
         }
 
     let windowed windowSize (source: TaskSeq<_>) =
