@@ -2,9 +2,17 @@
 Release notes:
 
 1.0.0
+    - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.withCancellation, #167
+    - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345
+    - adds TaskSeq.firstOrDefault, lastOrDefault, #345
+    - adds TaskSeq.splitAt, #345
+    - adds TaskSeq.zipWith, zipWithAsync, zipWith3, zipWithAsync3, #345
+    - adds TaskSeq.chunkBy, chunkByAsync, #345
+    - adds TaskSeq.threadState, threadStateAsync, #345
     - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
     - docs: adds missing XML <returns> documentation tags to singleton, isEmpty, length, lengthOrMax, lengthBy, and lengthByAsync
+    - test: adds 70 new tests to TaskSeq.Fold.Tests.fs covering call-count assertions, folder-not-called-on-empty, ordering, null initial state, and fold/foldAsync equivalence
 
 0.7.0
     - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
