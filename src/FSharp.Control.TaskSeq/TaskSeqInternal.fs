@@ -546,12 +546,16 @@ module internal TaskSeqInternal =
                 yield result
         }
 
-    let toResizeArrayAsync source =
+    let toResizeArrayAsync (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         task {
             let res = ResizeArray()
-            do! source |> iter (SimpleAction(fun item -> res.Add item))
+            use e = source.GetAsyncEnumerator CancellationToken.None
+
+            while! e.MoveNextAsync() do
+                res.Add e.Current
+
             return res
         }
 
@@ -1804,24 +1808,31 @@ module internal TaskSeqInternal =
 
         taskSeq {
             // Ring buffer: arr holds elements in circular order.
-            // 'count' tracks total elements seen; count % windowSize is the next write position.
+            // 'writePos' tracks the next write position (= count % windowSize, but avoiding modulo in the hot loop).
+            // 'count' tracks total elements seen.
             let arr = Array.zeroCreate windowSize
             let mutable count = 0
+            let mutable writePos = 0
 
             for item in source do
-                arr.[count % windowSize] <- item
+                arr.[writePos] <- item
+                writePos <- writePos + 1
+
+                if writePos = windowSize then
+                    writePos <- 0
+
                 count <- count + 1
 
                 if count >= windowSize then
                     // Copy ring buffer in source order into a fresh array.
+                    // 'writePos' is now the oldest element's index (we just wrapped or are at the start).
                     let result = Array.zeroCreate windowSize
-                    let start = count % windowSize // index of oldest element in the ring
 
-                    if start = 0 then
+                    if writePos = 0 then
                         Array.blit arr 0 result 0 windowSize
                     else
-                        Array.blit arr start result 0 (windowSize - start)
-                        Array.blit arr 0 result (windowSize - start) start
+                        Array.blit arr writePos result 0 (windowSize - writePos)
+                        Array.blit arr 0 result (windowSize - writePos) writePos
 
                     yield result
         }
