@@ -1504,6 +1504,33 @@ type TaskSeq =
     static member distinctUntilChanged<'T when 'T: equality> : source: TaskSeq<'T> -> TaskSeq<'T>
 
     /// <summary>
+    /// Returns a new task sequence without consecutive duplicate elements, using the supplied <paramref name="comparer" />
+    /// to determine equality of consecutive elements. The comparer returns <see langword="true" /> if two elements are
+    /// considered equal (and thus the second should be skipped).
+    /// </summary>
+    ///
+    /// <param name="comparer">A function that returns <see langword="true" /> if two consecutive elements are equal.</param>
+    /// <param name="source">The input task sequence whose consecutive duplicates will be removed.</param>
+    /// <returns>A sequence without consecutive duplicate elements.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member distinctUntilChangedWith: comparer: ('T -> 'T -> bool) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Returns a new task sequence without consecutive duplicate elements, using the supplied async <paramref name="comparer" />
+    /// to determine equality of consecutive elements. The comparer returns <see langword="true" /> if two elements are
+    /// considered equal (and thus the second should be skipped).
+    /// </summary>
+    ///
+    /// <param name="comparer">An async function that returns <see langword="true" /> if two consecutive elements are equal.</param>
+    /// <param name="source">The input task sequence whose consecutive duplicates will be removed.</param>
+    /// <returns>A sequence without consecutive duplicate elements.</returns>
+    ///
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member distinctUntilChangedWithAsync:
+        comparer: ('T -> 'T -> #Task<bool>) -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
     /// Returns a task sequence of each element in the source paired with its successor.
     /// The sequence is empty if the source has fewer than two elements.
     /// </summary>

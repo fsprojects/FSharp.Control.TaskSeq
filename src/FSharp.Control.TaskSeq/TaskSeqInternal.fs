@@ -1367,6 +1367,46 @@ module internal TaskSeqInternal =
                         maybePrevious <- ValueSome current
         }
 
+    let distinctUntilChangedWith (comparer: 'T -> 'T -> bool) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone ->
+                    yield current
+                    maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    if comparer previous current then
+                        () // skip
+                    else
+                        yield current
+                        maybePrevious <- ValueSome current
+        }
+
+    let distinctUntilChangedWithAsync (comparer: 'T -> 'T -> #Task<bool>) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+            let mutable maybePrevious = ValueNone
+
+            for current in source do
+                match maybePrevious with
+                | ValueNone ->
+                    yield current
+                    maybePrevious <- ValueSome current
+                | ValueSome previous ->
+                    let! areEqual = comparer previous current
+
+                    if areEqual then
+                        () // skip
+                    else
+                        yield current
+                        maybePrevious <- ValueSome current
+        }
+
     let pairwise (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
