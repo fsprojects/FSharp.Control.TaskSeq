@@ -124,6 +124,9 @@ type TaskSeq private () =
 
     static member singleton(value: 'T) = Internal.singleton value
     static member replicate count value = Internal.replicate count value
+    static member replicateInfinite value = Internal.replicateInfinite value
+    static member replicateInfiniteAsync computation = Internal.replicateInfiniteAsync computation
+    static member replicateUntilNoneAsync computation = Internal.replicateUntilNoneAsync computation
 
     static member isEmpty source = Internal.isEmpty source
 
@@ -401,6 +404,10 @@ type TaskSeq private () =
         Internal.tryLast source
         |> Task.map (Option.defaultWith Internal.raiseEmptySeq)
 
+    static member firstOrDefault defaultValue source = Internal.firstOrDefault defaultValue source
+    static member lastOrDefault defaultValue source = Internal.lastOrDefault defaultValue source
+    static member splitAt count source = Internal.splitAt count source
+
     static member tryTail source = Internal.tryTail source
 
     static member tail source =
@@ -478,6 +485,8 @@ type TaskSeq private () =
     static member distinctUntilChanged source = Internal.distinctUntilChanged source
     static member pairwise source = Internal.pairwise source
     static member chunkBySize chunkSize source = Internal.chunkBySize chunkSize source
+    static member chunkBy projection source = Internal.chunkBy projection source
+    static member chunkByAsync projection source = Internal.chunkByAsync projection source
     static member windowed windowSize source = Internal.windowed windowSize source
 
     static member forall predicate source = Internal.forall (Predicate predicate) source
@@ -519,6 +528,10 @@ type TaskSeq private () =
 
     static member zip source1 source2 = Internal.zip source1 source2
     static member zip3 source1 source2 source3 = Internal.zip3 source1 source2 source3
+    static member zipWith mapping source1 source2 = Internal.zipWith mapping source1 source2
+    static member zipWithAsync mapping source1 source2 = Internal.zipWithAsync mapping source1 source2
+    static member zipWith3 mapping source1 source2 source3 = Internal.zipWith3 mapping source1 source2 source3
+    static member zipWithAsync3 mapping source1 source2 source3 = Internal.zipWithAsync3 mapping source1 source2 source3
     static member compareWith comparer source1 source2 = Internal.compareWith comparer source1 source2
     static member compareWithAsync comparer source1 source2 = Internal.compareWithAsync comparer source1 source2
     static member fold folder state source = Internal.fold (FolderAction folder) state source
@@ -540,3 +553,5 @@ type TaskSeq private () =
     static member partitionAsync predicate source = Internal.partition (PredicateAsync predicate) source
     static member mapFold mapping state source = Internal.mapFold (MapFolderAction mapping) state source
     static member mapFoldAsync mapping state source = Internal.mapFold (AsyncMapFolderAction mapping) state source
+    static member threadState folder state source = Internal.threadState folder state source
+    static member threadStateAsync folder state source = Internal.threadStateAsync folder state source
