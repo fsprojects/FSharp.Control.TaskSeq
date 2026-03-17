@@ -115,6 +115,39 @@ type TaskSeq =
     static member replicate: count: int -> value: 'T -> TaskSeq<'T>
 
     /// <summary>
+    /// Creates an infinite task sequence by repeating <paramref name="value" /> indefinitely.
+    /// The sequence never ends; use <see cref="TaskSeq.take" />, <see cref="TaskSeq.takeWhile" />,
+    /// or similar to bound consumption.
+    /// </summary>
+    ///
+    /// <param name="value">The value to repeat.</param>
+    /// <returns>An infinite task sequence of <paramref name="value" />.</returns>
+    static member replicateInfinite: value: 'T -> TaskSeq<'T>
+
+    /// <summary>
+    /// Creates an infinite task sequence by repeatedly executing <paramref name="computation" />,
+    /// yielding each produced value indefinitely.
+    /// The sequence never ends; use <see cref="TaskSeq.take" />, <see cref="TaskSeq.takeWhile" />,
+    /// or similar to bound consumption.
+    /// If the computation is synchronous, consider using <see cref="TaskSeq.replicateInfinite" />.
+    /// </summary>
+    ///
+    /// <param name="computation">A function that produces the next value on each invocation.</param>
+    /// <returns>An infinite task sequence of values produced by <paramref name="computation" />.</returns>
+    static member replicateInfiniteAsync: computation: (unit -> #Task<'T>) -> TaskSeq<'T>
+
+    /// <summary>
+    /// Creates a task sequence by repeatedly executing <paramref name="computation" /> until it returns
+    /// <see cref="None" />, yielding each <see cref="Some" /> value in order.
+    /// </summary>
+    ///
+    /// <param name="computation">
+    /// A function that returns <see cref="Some" /> value to emit, or <see cref="None" /> to end the sequence.
+    /// </param>
+    /// <returns>A task sequence of values produced by <paramref name="computation" /> until it returns <see cref="None" />.</returns>
+    static member replicateUntilNoneAsync: computation: (unit -> #Task<'T option>) -> TaskSeq<'T>
+
+    /// <summary>
     /// Returns <see cref="true" /> if the task sequence contains no elements, <see cref="false" /> otherwise.
     /// </summary>
     ///
@@ -894,6 +927,28 @@ type TaskSeq =
     static member last: source: TaskSeq<'T> -> Task<'T>
 
     /// <summary>
+    /// Returns the first element of the input task sequence given by <paramref name="source" />,
+    /// or <paramref name="defaultValue" /> if the sequence is empty.
+    /// </summary>
+    ///
+    /// <param name="defaultValue">The value to return when the source sequence is empty.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The first element of the task sequence, or <paramref name="defaultValue" /> if empty.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member firstOrDefault: defaultValue: 'T -> source: TaskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the last element of the input task sequence given by <paramref name="source" />,
+    /// or <paramref name="defaultValue" /> if the sequence is empty.
+    /// </summary>
+    ///
+    /// <param name="defaultValue">The value to return when the source sequence is empty.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element of the task sequence, or <paramref name="defaultValue" /> if empty.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member lastOrDefault: defaultValue: 'T -> source: TaskSeq<'T> -> Task<'T>
+
+    /// <summary>
     /// Returns the nth element of the input task sequence given by <paramref name="source" />,
     /// or <see cref="None" /> if the sequence does not contain enough elements.
     /// The index is zero-based, that is, using index 0 returns the first element.
@@ -1100,6 +1155,27 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is less than zero.</exception>
     static member truncate: count: int -> source: TaskSeq<'T> -> TaskSeq<'T>
+
+    /// <summary>
+    /// Splits the task sequence into a prefix array of at most <paramref name="count" /> elements and a task
+    /// sequence containing the remaining elements. The prefix is eagerly evaluated in a single pass; the
+    /// remaining sequence is lazy. If the source has fewer than <paramref name="count" /> elements, the prefix
+    /// array is shorter than <paramref name="count" /> and the remaining sequence is empty.
+    /// </summary>
+    ///
+    /// <remarks>
+    /// The prefix array and the remaining task sequence share a single enumerator over <paramref name="source" />.
+    /// For sequences backed by replayable data (arrays, lists, <c>taskSeq</c> builders, etc.) this is always safe.
+    /// For externally-managed resources (network streams, database cursors) the remaining sequence should be
+    /// consumed or disposed before any other operation on <paramref name="source" />.
+    /// </remarks>
+    ///
+    /// <param name="count">The maximum number of elements in the prefix. Must be non-negative.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task returning a tuple <c>(prefix, rest)</c> where <c>prefix</c> is an array of the first elements and <c>rest</c> is the remaining task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:ArgumentException">Thrown when <paramref name="count" /> is negative.</exception>
+    static member splitAt: count: int -> source: TaskSeq<'T> -> Task<'T[] * TaskSeq<'T>>
 
     /// <summary>
     /// Returns a task sequence that, when iterated, yields elements of the underlying sequence while the
@@ -1531,6 +1607,35 @@ type TaskSeq =
     static member chunkBySize: chunkSize: int -> source: TaskSeq<'T> -> TaskSeq<'T[]>
 
     /// <summary>
+    /// Groups consecutive elements of the task sequence by a key derived from each element using
+    /// <paramref name="projection" />, yielding <c>(key, elements[])</c> pairs. A new group is started
+    /// each time the key changes from one element to the next. Unlike <see cref="TaskSeq.groupBy" />,
+    /// only <em>consecutive</em> elements with the same key are merged.
+    /// If the <paramref name="projection" /> function is asynchronous, consider using <see cref="TaskSeq.chunkByAsync" />.
+    /// </summary>
+    ///
+    /// <param name="projection">A function that computes the key for each element.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of <c>(key, elements[])</c> pairs for each run of equal keys.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member chunkBy: projection: ('T -> 'Key) -> source: TaskSeq<'T> -> TaskSeq<'Key * 'T[]> when 'Key: equality
+
+    /// <summary>
+    /// Groups consecutive elements of the task sequence by a key derived from each element using the
+    /// asynchronous function <paramref name="projection" />, yielding <c>(key, elements[])</c> pairs.
+    /// A new group is started each time the key changes from one element to the next.
+    /// Unlike <see cref="TaskSeq.groupByAsync" />, only <em>consecutive</em> elements with the same key are merged.
+    /// If the <paramref name="projection" /> function is synchronous, consider using <see cref="TaskSeq.chunkBy" />.
+    /// </summary>
+    ///
+    /// <param name="projection">An asynchronous function that computes the key for each element.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of <c>(key, elements[])</c> pairs for each run of equal keys.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member chunkByAsync:
+        projection: ('T -> #Task<'Key>) -> source: TaskSeq<'T> -> TaskSeq<'Key * 'T[]> when 'Key: equality
+
+    /// <summary>
     /// Returns a task sequence of sliding windows of a given size over the source sequence.
     /// Each window is a fresh array of exactly <paramref name="windowSize" /> consecutive elements.
     /// The result is empty if the source has fewer than <paramref name="windowSize" /> elements.
@@ -1571,6 +1676,75 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when any of the three input task sequences is null.</exception>
     static member zip3:
         source1: TaskSeq<'T1> -> source2: TaskSeq<'T2> -> source3: TaskSeq<'T3> -> TaskSeq<'T1 * 'T2 * 'T3>
+
+    /// <summary>
+    /// Combines two task sequences and applies the given function <paramref name="mapping" /> to corresponding
+    /// element pairs. The sequences need not have equal lengths: when one is exhausted any remaining elements in
+    /// the other are ignored.
+    /// If the <paramref name="mapping" /> function is asynchronous, consider using <see cref="TaskSeq.zipWithAsync" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function to apply to each element pair.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The result task sequence of mapped values.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
+    static member zipWith: mapping: ('T -> 'U -> 'V) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'V>
+
+    /// <summary>
+    /// Combines two task sequences and applies the given asynchronous function <paramref name="mapping" /> to
+    /// corresponding element pairs. The sequences need not have equal lengths: when one is exhausted any remaining
+    /// elements in the other are ignored.
+    /// If the <paramref name="mapping" /> function is synchronous, consider using <see cref="TaskSeq.zipWith" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function to apply to each element pair.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <returns>The result task sequence of mapped values.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when either of the two input task sequences is null.</exception>
+    static member zipWithAsync:
+        mapping: ('T -> 'U -> #Task<'V>) -> source1: TaskSeq<'T> -> source2: TaskSeq<'U> -> TaskSeq<'V>
+
+    /// <summary>
+    /// Combines three task sequences and applies the given function <paramref name="mapping" /> to corresponding
+    /// element triples. The sequences need not have equal lengths: when one is exhausted any remaining elements in
+    /// the others are ignored.
+    /// If the <paramref name="mapping" /> function is asynchronous, consider using <see cref="TaskSeq.zipWithAsync3" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">A function to apply to each element triple.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <param name="source3">The third input task sequence.</param>
+    /// <returns>The result task sequence of mapped values.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when any of the three input task sequences is null.</exception>
+    static member zipWith3:
+        mapping: ('T1 -> 'T2 -> 'T3 -> 'V) ->
+        source1: TaskSeq<'T1> ->
+        source2: TaskSeq<'T2> ->
+        source3: TaskSeq<'T3> ->
+            TaskSeq<'V>
+
+    /// <summary>
+    /// Combines three task sequences and applies the given asynchronous function <paramref name="mapping" /> to
+    /// corresponding element triples. The sequences need not have equal lengths: when one is exhausted any remaining
+    /// elements in the others are ignored.
+    /// If the <paramref name="mapping" /> function is synchronous, consider using <see cref="TaskSeq.zipWith3" />.
+    /// </summary>
+    ///
+    /// <param name="mapping">An asynchronous function to apply to each element triple.</param>
+    /// <param name="source1">The first input task sequence.</param>
+    /// <param name="source2">The second input task sequence.</param>
+    /// <param name="source3">The third input task sequence.</param>
+    /// <returns>The result task sequence of mapped values.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when any of the three input task sequences is null.</exception>
+    static member zipWithAsync3:
+        mapping: ('T1 -> 'T2 -> 'T3 -> #Task<'V>) ->
+        source1: TaskSeq<'T1> ->
+        source2: TaskSeq<'T2> ->
+        source3: TaskSeq<'T3> ->
+            TaskSeq<'V>
 
     /// <summary>
     /// Applies a comparer function to corresponding elements of two task sequences, returning the result of the
@@ -1698,6 +1872,38 @@ type TaskSeq =
         state: 'State ->
         source: TaskSeq<'T> ->
             Task<'Result[] * 'State>
+
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element of the task sequence, threading a state
+    /// argument through the computation, and lazily yields each mapped result as a new task sequence. Unlike
+    /// <see cref="TaskSeq.mapFold" />, the results are streamed rather than collected into an array, and the
+    /// final state is not returned.
+    /// If the <paramref name="folder" /> function is asynchronous, consider using <see cref="TaskSeq.threadStateAsync" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that maps each element to a result while also updating the state.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of mapped results, produced lazily in source order.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member threadState:
+        folder: ('State -> 'T -> 'Result * 'State) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'Result>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to each element of the task sequence, threading
+    /// a state argument through the computation, and lazily yields each mapped result as a new task sequence. Unlike
+    /// <see cref="TaskSeq.mapFoldAsync" />, the results are streamed rather than collected into an array, and the
+    /// final state is not returned.
+    /// If the <paramref name="folder" /> function is synchronous, consider using <see cref="TaskSeq.threadState" />.
+    /// </summary>
+    ///
+    /// <param name="folder">An asynchronous function that maps each element to a result while also updating the state.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A task sequence of mapped results, produced lazily in source order.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member threadStateAsync:
+        folder: ('State -> 'T -> #Task<'Result * 'State>) -> state: 'State -> source: TaskSeq<'T> -> TaskSeq<'Result>
 
 
     /// <summary>
