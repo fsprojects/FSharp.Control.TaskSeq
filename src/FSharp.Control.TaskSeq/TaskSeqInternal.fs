@@ -179,36 +179,24 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         task {
-
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
             let mutable i = 0
-            let! step = e.MoveNextAsync()
-            go <- step
 
             match predicate with
             | None ->
-                while go do
-                    let! step = e.MoveNextAsync()
-                    i <- i + 1 // update before moving: we are counting, not indexing
-                    go <- step
+                while! e.MoveNextAsync() do
+                    i <- i + 1
 
             | Some(Predicate predicate) ->
-                while go do
+                while! e.MoveNextAsync() do
                     if predicate e.Current then
                         i <- i + 1
 
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
             | Some(PredicateAsync predicate) ->
-                while go do
+                while! e.MoveNextAsync() do
                     match! predicate e.Current with
                     | true -> i <- i + 1
                     | false -> ()
-
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return i
         }
@@ -219,15 +207,13 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
             let mutable i = 0
-            let! step = e.MoveNextAsync()
-            go <- step
+            let mutable go = true
 
             while go && i < max do
-                i <- i + 1 // update before moving: we are counting, not indexing
-                let! step = e.MoveNextAsync()
-                go <- step
+                let! hasMore = e.MoveNextAsync()
+
+                if hasMore then i <- i + 1 else go <- false
 
             return i
         }
