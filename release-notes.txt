@@ -11,6 +11,7 @@ Release notes:
     - adds TaskSeq.chunkBy, chunkByAsync, #345
     - adds TaskSeq.threadState, threadStateAsync, #345
     - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
+    - docs: adds missing XML <returns> documentation tags to singleton, isEmpty, length, lengthOrMax, lengthBy, and lengthByAsync
     - test: adds 70 new tests to TaskSeq.Fold.Tests.fs covering call-count assertions, folder-not-called-on-empty, ordering, null initial state, and fold/foldAsync equivalence
 
 0.7.0
