@@ -4,6 +4,7 @@ Release notes:
 1.0.0
     - perf: optimize TaskSeq.windowed to avoid integer modulo in hot loop, using explicit circular buffer pointer arithmetic
     - perf: optimize toResizeArrayAsync (internal) to use a direct loop instead of routing through iter, eliminating one closure allocation per call
+    - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.withCancellation, #167
     - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345
