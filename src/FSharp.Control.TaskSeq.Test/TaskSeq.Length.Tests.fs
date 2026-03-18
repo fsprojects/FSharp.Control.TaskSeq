@@ -300,8 +300,7 @@ module SideEffects =
 
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-lengthOrMax returns max and stops evaluation when sequence exceeds max`` variant = task {
-        // source has 10 items; max=5 → should stop early
-        // NOTE: the implementation reads one element ahead (N+1 total MoveNextAsync calls for result N)
+        // source has 10 items; max=5 → should stop early after exactly 5 elements
         let mutable evaluated = 0
 
         let ts = taskSeq {
@@ -312,14 +311,12 @@ module SideEffects =
 
         let! len = ts |> TaskSeq.lengthOrMax 5
         len |> should equal 5
-        // exactly max+1 elements are pulled from the source due to read-ahead
-        evaluated |> should equal 6
+        // exactly max elements are pulled from the source
+        evaluated |> should equal 5
     }
 
     [<Fact>]
-    let ``TaskSeq-lengthOrMax stops evaluating source after reaching max - read-ahead characteristic`` () = task {
-        // NOTE: the implementation calls MoveNextAsync once before the while loop,
-        // then once more per iteration. For max=N and a longer source, this means N+1 calls total.
+    let ``TaskSeq-lengthOrMax stops evaluating source after reaching max`` () = task {
         let mutable sideEffects = 0
 
         let ts = taskSeq {
@@ -330,14 +327,12 @@ module SideEffects =
 
         let! len = ts |> TaskSeq.lengthOrMax 7
         len |> should equal 7
-        // max+1 elements are evaluated due to the read-ahead implementation pattern
-        sideEffects |> should equal 8
+        // exactly max elements are evaluated
+        sideEffects |> should equal 7
     }
 
     [<Fact>]
-    let ``TaskSeq-lengthOrMax with max=0 still evaluates the first element due to read-ahead`` () = task {
-        // The implementation unconditionally calls MoveNextAsync once before entering
-        // the while loop, so even max=0 evaluates the first element of the source.
+    let ``TaskSeq-lengthOrMax with max=0 evaluates zero elements`` () = task {
         let mutable sideEffects = 0
 
         let ts = taskSeq {
@@ -349,6 +344,6 @@ module SideEffects =
 
         let! len = ts |> TaskSeq.lengthOrMax 0
         len |> should equal 0
-        // one element was evaluated despite max=0
-        sideEffects |> should equal 1
+        // no elements evaluated when max=0
+        sideEffects |> should equal 0
     }

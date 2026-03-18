@@ -2,6 +2,7 @@
 Release notes:
 
 1.0.0
+    - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.withCancellation, #167
     - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345
