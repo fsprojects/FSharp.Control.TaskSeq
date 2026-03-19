@@ -5,7 +5,7 @@ category: Documentation
 categoryindex: 2
 index: 2
 description: How to create F# task sequences using the taskSeq computation expression, init, unfold, and conversion functions.
-keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, taskSeq, computation expression, init, unfold, ofArray, ofSeq, singleton, replicate
+keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, taskSeq, computation expression, init, unfold, ofArray, ofSeq, singleton, replicate, replicateInfinite, replicateUntilNoneAsync
 ---
 *)
 (*** condition: prepare ***)
@@ -237,7 +237,7 @@ let countingAsync : TaskSeq<int> =
 
 ---
 
-## singleton, replicate and empty
+## singleton, replicate, replicateInfinite, and empty
 
 *)
 
@@ -246,6 +246,49 @@ let one : TaskSeq<string> = TaskSeq.singleton "hello"
 let fives : TaskSeq<int> = TaskSeq.replicate 3 5 // 5, 5, 5
 
 let nothing : TaskSeq<int> = TaskSeq.empty<int>
+
+(**
+
+`TaskSeq.replicateInfinite` yields a constant value indefinitely.  Always combine it with a
+bounding operation such as `take` or `takeWhile`:
+
+*)
+
+let infinitePings : TaskSeq<string> = TaskSeq.replicateInfinite "ping"
+
+let first10pings : TaskSeq<string> = infinitePings |> TaskSeq.take 10
+
+(**
+
+`TaskSeq.replicateInfiniteAsync` calls a function on every step, useful for polling or streaming
+side-effectful sources:
+
+*)
+
+let mutable counter = 0
+
+let pollingSeq : TaskSeq<int> =
+    TaskSeq.replicateInfiniteAsync (fun () ->
+        task {
+            counter <- counter + 1
+            return counter
+        })
+
+let first5counts : TaskSeq<int> = pollingSeq |> TaskSeq.take 5
+
+(**
+
+`TaskSeq.replicateUntilNoneAsync` stops when the function returns `None`, making it easy to
+wrap a pull-based source that signals end-of-stream with `None`:
+
+*)
+
+let readLine (reader: System.IO.TextReader) =
+    TaskSeq.replicateUntilNoneAsync (fun () ->
+        task {
+            let! line = reader.ReadLineAsync()
+            return if line = null then None else Some line
+        })
 
 (**
 

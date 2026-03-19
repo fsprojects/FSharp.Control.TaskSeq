@@ -4,8 +4,8 @@ title: Advanced Task Sequence Operations
 category: Documentation
 categoryindex: 2
 index: 6
-description: Advanced F# task sequence operations including groupBy, mapFold, distinct, partition, countBy, compareWith, withCancellation and in-place editing.
-keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, groupBy, mapFold, distinct, distinctUntilChanged, except, partition, countBy, compareWith, withCancellation, insertAt, removeAt, updateAt
+description: Advanced F# task sequence operations including groupBy, mapFold, threadState, distinct, partition, countBy, compareWith, withCancellation and in-place editing.
+keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, groupBy, mapFold, threadState, distinct, distinctUntilChanged, except, partition, countBy, compareWith, withCancellation, insertAt, removeAt, updateAt
 ---
 *)
 (*** condition: prepare ***)
@@ -26,7 +26,7 @@ keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, groupBy, mapFold, disti
 # Advanced Task Sequence Operations
 
 This page covers advanced `TaskSeq<'T>` operations: grouping, stateful transformation with
-`mapFold`, deduplication, set-difference, partitioning, counting by key, lexicographic
+`mapFold` and `threadState`, deduplication, set-difference, partitioning, counting by key, lexicographic
 comparison, cancellation, and positional editing.
 
 *)
@@ -113,14 +113,51 @@ let numbered : Task<string[] * int> =
 
 ---
 
-## scan and scanAsync
+## threadState and threadStateAsync
+
+`TaskSeq.threadState` is the lazy, streaming counterpart to `mapFold`.  It threads a state
+accumulator through the sequence while yielding each mapped result — but unlike `mapFold` it
+never materialises the results into an array, and it discards the final state.  This makes it
+suitable for infinite sequences and pipelines where intermediate results should be streamed rather
+than buffered:
+
+*)
+
+let numbers : TaskSeq<int> = TaskSeq.ofSeq (seq { 1..5 })
+
+// Produce a running total without collecting the whole sequence first
+let runningSum : TaskSeq<int> =
+    numbers
+    |> TaskSeq.threadState (fun acc x -> acc + x, acc + x) 0
+
+// yields lazily: 1, 3, 6, 10, 15
+
+(**
+
+Compare with `scan`, which also emits a running result but prepends the initial state:
+
+```fsharp
+let viaScan = numbers |> TaskSeq.scan (fun acc x -> acc + x) 0
+// yields: 0, 1, 3, 6, 10, 15  (one extra initial element)
+
+let viaThreadState = numbers |> TaskSeq.threadState (fun acc x -> acc + x, acc + x) 0
+// yields: 1, 3, 6, 10, 15  (no initial element; result == new state here)
+```
+
+`TaskSeq.threadStateAsync` accepts an asynchronous folder:
+
+*)
+
+let asyncRunningSum : TaskSeq<int> =
+    numbers
+    |> TaskSeq.threadStateAsync (fun acc x -> Task.fromResult (acc + x, acc + x)) 0
+
+(**
 
 `TaskSeq.scan` is the streaming sibling of `fold`: it emits each intermediate state as a new
 element, starting with the initial state:
 
 *)
-
-let numbers : TaskSeq<int> = TaskSeq.ofSeq (seq { 1..5 })
 
 let runningTotals : TaskSeq<int> =
     numbers |> TaskSeq.scan (fun acc n -> acc + n) 0
