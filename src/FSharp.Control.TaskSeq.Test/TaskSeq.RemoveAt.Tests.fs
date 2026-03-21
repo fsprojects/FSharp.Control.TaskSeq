@@ -16,6 +16,12 @@ open FSharp.Control
 exception SideEffectPastEnd of string
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.removeAt 0 null
+
+        assertNullArg <| fun () -> TaskSeq.removeManyAt 0 1 null
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-removeAt(0) on empty input raises`` variant =
         fun () ->
