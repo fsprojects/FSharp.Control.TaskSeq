@@ -22,6 +22,13 @@ jobs:
       # setup dotnet based on global.json
       - name: setup-dotnet
         uses: actions/setup-dotnet@v4
+      # cache NuGet packages to avoid re-downloading on every run
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
       # build it, test it, pack it, publish it
       - name: Run dotnet build (release, for nuget)
         # see issue #105 and #243
