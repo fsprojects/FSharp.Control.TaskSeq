@@ -1369,6 +1369,12 @@ module internal TaskSeqInternal =
 
     /// InsertAt or InsertManyAt
     let insertAt index valueOrValues (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        match valueOrValues with
+        | Many values -> checkNonNull "values" values
+        | One _ -> ()
+
         raiseCannotBeNegative (nameof index) index
 
         taskSeq {
@@ -1394,6 +1400,7 @@ module internal TaskSeqInternal =
         }
 
     let removeAt index (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
         raiseCannotBeNegative (nameof index) index
 
         taskSeq {
@@ -1411,6 +1418,7 @@ module internal TaskSeqInternal =
         }
 
     let removeManyAt index count (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
         raiseCannotBeNegative (nameof index) index
 
         taskSeq {
@@ -1429,6 +1437,7 @@ module internal TaskSeqInternal =
         }
 
     let updateAt index value (source: TaskSeq<'T>) =
+        checkNonNull (nameof source) source
         raiseCannotBeNegative (nameof index) index
 
         taskSeq {

@@ -16,6 +16,18 @@ open FSharp.Control
 exception SideEffectPastEnd of string
 
 module EmptySeq =
+    [<Fact>]
+    let ``Null source is invalid`` () =
+        assertNullArg <| fun () -> TaskSeq.insertAt 0 99 null
+
+        assertNullArg
+        <| fun () -> TaskSeq.insertManyAt 0 TaskSeq.empty null
+
+    [<Fact>]
+    let ``Null values argument is invalid for insertManyAt`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.insertManyAt 0 null (TaskSeq.ofList [ 1 ])
+
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-insertAt(0) on empty input returns singleton`` variant =
         Gen.getEmptyVariant variant
