@@ -5,7 +5,7 @@ category: Documentation
 categoryindex: 2
 index: 4
 description: How to consume F# task sequences using iteration, folding, searching, collecting and aggregation operations.
-keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, iter, fold, find, toArray, toList, sum, average, length, head, last, contains, exists, forall
+keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, iter, fold, find, toArray, toList, sum, average, length, head, last, firstOrDefault, lastOrDefault, contains, exists, forall
 ---
 *)
 (*** condition: prepare ***)
@@ -220,7 +220,7 @@ let countEvens : Task<int> = numbers |> TaskSeq.lengthBy (fun n -> n % 2 = 0)
 
 ---
 
-## Element access: head, last, item, exactlyOne
+## Element access: head, last, item, exactlyOne, firstOrDefault, lastOrDefault
 
 *)
 
@@ -234,6 +234,20 @@ let tryFirst : Task<int option> = numbers |> TaskSeq.tryHead
 let tryLast : Task<int option> = numbers |> TaskSeq.tryLast
 let tryThird : Task<int option> = numbers |> TaskSeq.tryItem 2
 let tryOnly : Task<int option> = TaskSeq.singleton 42 |> TaskSeq.tryExactlyOne
+
+(**
+
+`TaskSeq.firstOrDefault` and `TaskSeq.lastOrDefault` return a caller-supplied default when the
+sequence is empty — useful as a concise alternative to `tryHead`/`tryLast` when `None` would
+need to be immediately unwrapped:
+
+*)
+
+let firstOrZero : Task<int> = TaskSeq.empty<int> |> TaskSeq.firstOrDefault 0 // 0
+let lastOrZero : Task<int> = TaskSeq.empty<int> |> TaskSeq.lastOrDefault 0 // 0
+
+let firstOrMinus1 : Task<int> = numbers |> TaskSeq.firstOrDefault -1 // 1
+let lastOrMinus1 : Task<int> = numbers |> TaskSeq.lastOrDefault -1 // 5
 
 (**
 

@@ -4,8 +4,8 @@ title: Combining Task Sequences
 category: Documentation
 categoryindex: 2
 index: 5
-description: How to combine, slice and reshape F# task sequences using append, zip, take, skip, chunkBySize, windowed and related combinators.
-keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, append, zip, zip3, take, skip, drop, truncate, takeWhile, skipWhile, chunkBySize, windowed, pairwise, concat
+description: How to combine, slice and reshape F# task sequences using append, zip, zipWith, splitAt, take, skip, chunkBySize, chunkBy, windowed and related combinators.
+keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, append, zip, zip3, zipWith, zipWith3, splitAt, take, skip, drop, truncate, takeWhile, skipWhile, chunkBySize, chunkBy, windowed, pairwise, concat
 ---
 *)
 (*** condition: prepare ***)
@@ -26,7 +26,7 @@ keywords: F#, task sequences, TaskSeq, IAsyncEnumerable, append, zip, zip3, take
 # Combining Task Sequences
 
 This page covers operations that combine multiple sequences or reshape a single sequence: append,
-zip, concat, slicing with take/skip, chunking and windowing.
+zip, zipWith, concat, slicing with take/skip/splitAt, chunking and windowing.
 
 *)
 
@@ -121,6 +121,54 @@ let triples : TaskSeq<char * int * bool> = TaskSeq.zip3 letters nums booleans
 
 ---
 
+## zipWith and zipWithAsync
+
+`TaskSeq.zipWith` is like `zip` but applies a mapping function to produce a result instead of
+yielding a tuple.  The result sequence stops when the shorter source ends:
+
+*)
+
+let addPairs : TaskSeq<int> = TaskSeq.zipWith (+) nums nums
+// 2, 4, 6, 8
+
+(**
+
+`TaskSeq.zipWithAsync` accepts an asynchronous mapping function:
+
+*)
+
+let asyncProduct : TaskSeq<int> =
+    TaskSeq.zipWithAsync (fun a b -> Task.fromResult (a * b)) nums nums
+// 1, 4, 9, 16, ...
+
+(**
+
+---
+
+## zipWith3 and zipWithAsync3
+
+`TaskSeq.zipWith3` combines three sequences with a three-argument mapping function, stopping at
+the shortest:
+
+*)
+
+let sumThree : TaskSeq<int> =
+    TaskSeq.zipWith3 (fun a b c -> a + b + c) nums nums nums
+// 3, 6, 9, 12, ...
+
+(**
+
+`TaskSeq.zipWithAsync3` takes an asynchronous three-argument mapper:
+
+*)
+
+let asyncSumThree : TaskSeq<int> =
+    TaskSeq.zipWithAsync3 (fun a b c -> Task.fromResult (a + b + c)) nums nums nums
+
+(**
+
+---
+
 ## pairwise
 
 `TaskSeq.pairwise` produces a sequence of consecutive pairs.  An input with fewer than two elements
@@ -155,6 +203,26 @@ shorter:
 let atMost10 : TaskSeq<int> = consecutive |> TaskSeq.truncate 10 // 1, 2, 3, 4, 5
 
 (**
+
+---
+
+## splitAt
+
+`TaskSeq.splitAt count` splits a sequence into a prefix array and a lazy remainder sequence.  The
+prefix always contains _at most_ `count` elements — it never throws when the sequence is shorter.
+The remainder sequence is a lazy view over the unconsumed tail and can be iterated once:
+
+*)
+
+let splitData : TaskSeq<int> = TaskSeq.ofList [ 1..10 ]
+
+let splitExample : Task<int[] * TaskSeq<int>> = TaskSeq.splitAt 4 splitData
+// prefix = [|1;2;3;4|], rest = lazy 5,6,7,8,9,10
+
+(**
+
+Unlike `take`/`skip`, a single `splitAt` call evaluates elements only once — the prefix is
+materialised eagerly and the rest is yielded lazily without re-reading the source.
 
 ---
 
@@ -240,6 +308,33 @@ Async variants: `TaskSeq.skipWhileAsync`, `TaskSeq.skipWhileInclusiveAsync`.
 
 let chunks : TaskSeq<int[]> = consecutive |> TaskSeq.chunkBySize 2
 // [|1;2|], [|3;4|], [|5|]
+
+(**
+
+---
+
+## chunkBy and chunkByAsync
+
+`TaskSeq.chunkBy projection` groups _consecutive_ elements with the same key into `(key, elements[])` pairs.
+A new group starts each time the key changes.  Unlike `groupBy`, elements that are not adjacent are
+**not** merged, so the source order is preserved and the sequence can be infinite:
+
+*)
+
+let words : TaskSeq<string> = TaskSeq.ofList [ "apple"; "apricot"; "banana"; "blueberry"; "cherry" ]
+
+let byFirstLetter : TaskSeq<char * string[]> =
+    words |> TaskSeq.chunkBy (fun w -> w[0])
+// ('a', [|"apple";"apricot"|]), ('b', [|"banana";"blueberry"|]), ('c', [|"cherry"|])
+
+(**
+
+`TaskSeq.chunkByAsync` accepts an asynchronous projection:
+
+*)
+
+let byFirstLetterAsync : TaskSeq<char * string[]> =
+    words |> TaskSeq.chunkByAsync (fun w -> Task.fromResult w[0])
 
 (**
 
