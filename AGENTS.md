@@ -55,7 +55,7 @@ CI runs both debug and release test configurations on `windows-latest`. Test res
 
 ## Code Formatting
 
-Formatting is enforced by **Fantomas** (version 6.3.0-alpha-004, configured as a dotnet local tool).
+Formatting is enforced by **Fantomas** (version 7.0.5, configured as a dotnet local tool).
 
 Check formatting (CI runs this on every PR):
 

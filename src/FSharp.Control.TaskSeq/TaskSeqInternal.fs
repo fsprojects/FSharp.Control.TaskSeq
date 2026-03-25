@@ -1261,7 +1261,7 @@ module internal TaskSeqInternal =
                 taskSeq {
                     use e = source.GetAsyncEnumerator CancellationToken.None
 
-                    for _ in count .. - 1 .. 1 do
+                    for _ in count .. -1 .. 1 do
                         let! step = e.MoveNextAsync()
 
                         if not step then
