@@ -263,11 +263,7 @@ module TestUtils =
         /// properly, sequentially execute a chain of tasks in a non-blocking, non-overlapping way.
         let joinWithContinuation tasks =
             let simple (t: unit -> Task<_>) (source: unit -> Task<_>) : unit -> Task<_> =
-                fun () ->
-                    source()
-                        .ContinueWith((fun (_: Task) -> t ()), TaskContinuationOptions.OnlyOnRanToCompletion)
-                        .Unwrap()
-                    :?> Task<_>
+                fun () -> source().ContinueWith((fun (_: Task) -> t ()), TaskContinuationOptions.OnlyOnRanToCompletion).Unwrap() :?> Task<_>
 
             let rec combine acc (tasks: (unit -> Task<_>) list) =
                 match tasks with

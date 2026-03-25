@@ -544,10 +544,8 @@ module LowPriority =
             and ^Awaiter :> ICriticalNotifyCompletion
             and ^Awaiter: (member get_IsCompleted: unit -> bool)
             and ^Awaiter: (member GetResult: unit -> 'T)>
-            (
-                task: ^TaskLike,
-                continuation: ('T -> ResumableTSC<'U>)
-            ) =
+            (task: ^TaskLike, continuation: ('T -> ResumableTSC<'U>))
+            =
 
             ResumableTSC<'U>(fun sm ->
                 let mutable awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
@@ -656,10 +654,7 @@ module HighPriority =
 
         member inline _.Bind(computation: Async<'T>, continuation: ('T -> ResumableTSC<'U>)) =
             ResumableTSC<'U>(fun sm ->
-                let mutable awaiter =
-                    Async
-                        .StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken)
-                        .GetAwaiter()
+                let mutable awaiter = Async.StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken).GetAwaiter()
 
                 let mutable __stack_fin = true
 
