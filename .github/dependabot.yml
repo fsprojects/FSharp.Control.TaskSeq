@@ -6,6 +6,9 @@ updates:
     # ignore all patch and pre-release updates
     - dependency-name: "*"
       update-types: ["version-update:semver-patch"]
+    # ignore updates to gh-aw-actions, which only appears in auto-generated *.lock.yml
+    # files managed by 'gh aw compile' and should not be touched by dependabot
+    - dependency-name: "github/gh-aw-actions"
   schedule:
     interval: daily
   open-pull-requests-limit: 10
