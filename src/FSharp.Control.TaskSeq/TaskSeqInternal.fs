@@ -1754,7 +1754,7 @@ module internal TaskSeqInternal =
                         currentChunk.Add item
                     else
                         yield prevKey, currentChunk.ToArray()
-                        currentChunk <- ResizeArray<'T>()
+                        currentChunk.Clear() // reuse backing array; ToArray() already captured a snapshot
                         currentChunk.Add item
                         maybeCurrentKey <- ValueSome key
 
@@ -1782,7 +1782,7 @@ module internal TaskSeqInternal =
                         currentChunk.Add item
                     else
                         yield prevKey, currentChunk.ToArray()
-                        currentChunk <- ResizeArray<'T>()
+                        currentChunk.Clear() // reuse backing array; ToArray() already captured a snapshot
                         currentChunk.Add item
                         maybeCurrentKey <- ValueSome key
 
