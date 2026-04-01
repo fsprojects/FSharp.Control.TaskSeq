@@ -469,6 +469,11 @@ type TaskSeq private () =
     static member tryFindIndex predicate source = Internal.tryFindIndex (Predicate predicate) source
     static member tryFindIndexAsync predicate source = Internal.tryFindIndex (PredicateAsync predicate) source
 
+    static member tryFindBack predicate source = Internal.tryFindBack (Predicate predicate) source
+    static member tryFindBackAsync predicate source = Internal.tryFindBack (PredicateAsync predicate) source
+    static member tryFindIndexBack predicate source = Internal.tryFindIndexBack (Predicate predicate) source
+    static member tryFindIndexBackAsync predicate source = Internal.tryFindIndexBack (PredicateAsync predicate) source
+
     static member insertAt index value source = Internal.insertAt index (One value) source
     static member insertManyAt index values source = Internal.insertAt index (Many values) source
     static member removeAt index source = Internal.removeAt index source
@@ -522,6 +527,22 @@ type TaskSeq private () =
 
     static member findIndexAsync predicate source =
         Internal.tryFindIndex (PredicateAsync predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
+
+    static member findBack predicate source =
+        Internal.tryFindBack (Predicate predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
+
+    static member findBackAsync predicate source =
+        Internal.tryFindBack (PredicateAsync predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
+
+    static member findIndexBack predicate source =
+        Internal.tryFindIndexBack (Predicate predicate) source
+        |> Task.map (Option.defaultWith Internal.raiseNotFound)
+
+    static member findIndexBackAsync predicate source =
+        Internal.tryFindIndexBack (PredicateAsync predicate) source
         |> Task.map (Option.defaultWith Internal.raiseNotFound)
 
     //

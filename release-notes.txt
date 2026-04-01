@@ -2,6 +2,7 @@
 Release notes:
 
 1.0.0
+    - adds TaskSeq.findBack, findBackAsync, tryFindBack, tryFindBackAsync, findIndexBack, findIndexBackAsync, tryFindIndexBack, tryFindIndexBackAsync
     - fixes: TaskSeq.insertAt, insertManyAt, removeAt, removeManyAt, updateAt now raise ArgumentNullException (not NullReferenceException) when given a null source; insertManyAt also validates the values argument
     - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345

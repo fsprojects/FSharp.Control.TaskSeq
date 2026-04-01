@@ -1036,6 +1036,75 @@ module internal TaskSeqInternal =
             if isFound then return Some index else return None
         }
 
+    let tryFindBack predicate (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+
+            let mutable go = true
+            let mutable foundItem = None
+            let! step = e.MoveNextAsync()
+            go <- step
+
+            match predicate with
+            | Predicate predicate ->
+                while go do
+                    if predicate e.Current then
+                        foundItem <- Some e.Current
+
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | PredicateAsync predicate ->
+                while go do
+                    let! predicateResult = predicate e.Current
+
+                    if predicateResult then
+                        foundItem <- Some e.Current
+
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return foundItem
+        }
+
+    let tryFindIndexBack predicate (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+
+            let mutable go = true
+            let mutable foundIndex = None
+            let mutable index = 0
+            let! step = e.MoveNextAsync()
+            go <- step
+
+            match predicate with
+            | Predicate predicate ->
+                while go do
+                    if predicate e.Current then
+                        foundIndex <- Some index
+
+                    index <- index + 1
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            | PredicateAsync predicate ->
+                while go do
+                    let! predicateResult = predicate e.Current
+
+                    if predicateResult then
+                        foundIndex <- Some index
+
+                    index <- index + 1
+                    let! step = e.MoveNextAsync()
+                    go <- step
+
+            return foundIndex
+        }
+
     let choose chooser (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 

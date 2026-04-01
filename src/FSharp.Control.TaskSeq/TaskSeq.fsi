@@ -1366,6 +1366,58 @@ type TaskSeq =
     static member tryFindIndexAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int option>
 
     /// <summary>
+    /// Returns the last element for which the given function <paramref name="predicate" /> returns
+    /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// The entire sequence is consumed. If <paramref name="predicate" /> is asynchronous, consider
+    /// using <see cref="TaskSeq.tryFindBackAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element for which the predicate returns <see cref="true" />, or <see cref="None" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryFindBack: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the last element for which the given asynchronous function <paramref name="predicate" /> returns
+    /// <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// The entire sequence is consumed. If <paramref name="predicate" /> is synchronous, consider
+    /// using <see cref="TaskSeq.tryFindBack" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element for which the predicate returns <see cref="true" />, or <see cref="None" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryFindBackAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T option>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the last element for which the given function <paramref name="predicate" />
+    /// returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// The entire sequence is consumed. If <paramref name="predicate" /> is asynchronous, consider
+    /// using <see cref="TaskSeq.tryFindIndexBackAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last index for which the predicate returns <see cref="true" />, or <see cref="None" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryFindIndexBack: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int option>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the last element for which the given asynchronous function <paramref name="predicate" />
+    /// returns <see cref="true" />. Returns <see cref="None" /> if no such element exists.
+    /// The entire sequence is consumed. If <paramref name="predicate" /> is synchronous, consider
+    /// using <see cref="TaskSeq.tryFindIndexBack" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last index for which the predicate returns <see cref="true" />, or <see cref="None" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryFindIndexBackAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int option>
+
+    /// <summary>
     /// Applies the given function <paramref name="chooser" /> to successive elements, returning the first result where
     /// the function returns <see cref="Some(x)" />. Throws an exception if none is found.
     /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.pickAsync" />.
@@ -1442,6 +1494,58 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
     static member findIndexAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the last element for which the given function <paramref name="predicate" /> returns <see cref="true" />.
+    /// Throws an exception if none is found. The entire sequence is consumed.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findBackAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element for which the predicate returns <see cref="true" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
+    static member findBack: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the last element for which the given asynchronous function <paramref name="predicate" /> returns <see cref="true" />.
+    /// Throws an exception if none is found. The entire sequence is consumed.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.findBack" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last element for which the predicate returns <see cref="true" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
+    static member findBackAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<'T>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the last element for which the given function <paramref name="predicate" />
+    /// returns <see cref="true" />. Throws an exception if none is found. The entire sequence is consumed.
+    /// If <paramref name="predicate" /> is asynchronous, consider using <see cref="TaskSeq.findIndexBackAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last index for which the predicate returns <see cref="true" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
+    static member findIndexBack: predicate: ('T -> bool) -> source: TaskSeq<'T> -> Task<int>
+
+    /// <summary>
+    /// Returns the index, starting from zero, of the last element for which the given asynchronous function <paramref name="predicate" />
+    /// returns <see cref="true" />. Throws an exception if none is found. The entire sequence is consumed.
+    /// If <paramref name="predicate" /> is synchronous, consider using <see cref="TaskSeq.findIndexBack" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An asynchronous function that evaluates to a <see cref="bool" /> when given an item in the sequence.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The last index for which the predicate returns <see cref="true" />.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    /// <exception cref="T:KeyNotFoundException">Thrown if no element returns <see cref="true" /> when evaluated by the <paramref name="predicate" /> function.</exception>
+    static member findIndexBackAsync: predicate: ('T -> #Task<bool>) -> source: TaskSeq<'T> -> Task<int>
 
     /// <summary>
     /// Tests if the sequence contains the specified element. Returns <see cref="true" />
