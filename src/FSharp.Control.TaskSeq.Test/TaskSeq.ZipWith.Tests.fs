@@ -172,3 +172,86 @@ module Immutable =
 
         viaZipWith |> should equal viaZipMap
     }
+
+module SideEffects =
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-zipWith on two side-effect seqs combines elements correctly`` variant = task {
+        let s1 = Gen.getSeqWithSideEffect variant
+        let s2 = Gen.getSeqWithSideEffect variant
+
+        // Both sequences yield 1..10 on first iteration; side effects increment independently
+        let! result = TaskSeq.zipWith (+) s1 s2 |> TaskSeq.toArrayAsync
+
+        result
+        |> should equal (Array.init 10 (fun i -> (i + 1) + (i + 1)))
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-zipWithAsync on two side-effect seqs combines elements correctly`` variant = task {
+        let s1 = Gen.getSeqWithSideEffect variant
+        let s2 = Gen.getSeqWithSideEffect variant
+
+        let! result =
+            TaskSeq.zipWithAsync (fun a b -> Task.fromResult (a * b)) s1 s2
+            |> TaskSeq.toArrayAsync
+
+        result
+        |> should equal (Array.init 10 (fun i -> (i + 1) * (i + 1)))
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zipWith consumes both sequences one element at a time`` () = task {
+        let mutable count1 = 0
+        let mutable count2 = 0
+
+        let s1 = taskSeq {
+            for i in 1..5 do
+                count1 <- count1 + 1
+                yield i
+        }
+
+        let s2 = taskSeq {
+            for i in 10..14 do
+                count2 <- count2 + 1
+                yield i
+        }
+
+        let! result = TaskSeq.zipWith (+) s1 s2 |> TaskSeq.toArrayAsync
+        result |> should equal [| 11; 13; 15; 17; 19 |]
+        count1 |> should equal 5
+        count2 |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-zipWith truncates at shorter side-effect seq, output is correct`` () = task {
+        let mutable longCount = 0
+
+        let short = taskSeq { yield! [ 1; 2 ] }
+
+        let long = taskSeq {
+            for i in 10..20 do
+                longCount <- longCount + 1
+                yield i
+        }
+
+        let! result = TaskSeq.zipWith (+) short long |> TaskSeq.toArrayAsync
+        result |> should equal [| 11; 13 |]
+        // The implementation reads one element from each sequence to check for stop condition,
+        // so the longer sequence is advanced one step beyond the last paired element.
+        longCount |> should be (greaterThanOrEqualTo 2)
+        longCount |> should be (lessThanOrEqualTo 3)
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-zipWith3 on three side-effect seqs combines elements correctly`` variant = task {
+        let s1 = Gen.getSeqWithSideEffect variant
+        let s2 = Gen.getSeqWithSideEffect variant
+        let s3 = Gen.getSeqWithSideEffect variant
+
+        let! result =
+            TaskSeq.zipWith3 (fun a b c -> a + b + c) s1 s2 s3
+            |> TaskSeq.toArrayAsync
+
+        result
+        |> should equal (Array.init 10 (fun i -> 3 * (i + 1)))
+    }
