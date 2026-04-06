@@ -1,1 +1,33 @@
-{"r":"23967813083","m":375,"cur":375,"rej":["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],"n":"PR #373 (perf chunkBy) MERGED by dsyme on 2026-04-01. PR #374 (findBack) CLOSED without merge on 2026-04-01. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #246: dsyme asked (2026-03-14) for dynamic resumable code impl - HIGH PRIORITY for next run. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. PR #351 (windowed perf) was closed without merge. New PR (test): SideEffects modules for splitAt+zipWith tests - submitted this run (branch: repo-assist/test-splitAt-zipWith-sideeffects-2026-04-04).","prs":{"test-side-effects":{"branch":"repo-assist/test-splitAt-zipWith-sideeffects-2026-04-04","desc":"test: add SideEffects modules to SplitAt and ZipWith tests (+52 tests)","status":"submitted"}}}
+{
+  "r": "23967813083",
+  "m": 375,
+  "cur": 375,
+  "rej": [
+    "rev-sort",
+    "zip4",
+    "map3",
+    "allPairs",
+    "iteri2",
+    "splitInto",
+    "exists2",
+    "map2",
+    "findBack"
+  ],
+  "n": "PR #373 (perf chunkBy) MERGED by dsyme on 2026-04-01. PR #374 (findBack) CLOSED without merge on 2026-04-01. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #246: dsyme asked (2026-03-14) for dynamic resumable code impl - HIGH PRIORITY for next run. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. PR #351 (windowed perf) was closed without merge. New PR (test): SideEffects modules for splitAt+zipWith tests - submitted this run (branch: repo-assist/test-splitAt-zipWith-sideeffects-2026-04-04).",
+  "prs": {
+    "test-side-effects": {
+      "branch": "repo-assist/test-splitAt-zipWith-sideeffects-2026-04-04",
+      "desc": "test: add SideEffects modules to SplitAt and ZipWith tests (+52 tests)",
+      "status": "submitted"
+    }
+  },
+  "notes": "Run 24014588386 COMPLETED IMPLEMENTATION but safeoutputs session expired before PR creation.\nBranch repo-assist/feat-dynamic-246-2026-04-06 is committed LOCALLY but not pushed.\nLOCAL commits will be lost after run ends (fresh container).\n\nNEXT RUN PRIORITY: Re-implement and create PR for issue #246.\nKey solution found:\n- TaskSeqDynamic should be FSI-ONLY (ResumptionDynamicInfo), NOT try to store compiler-generated machine struct in base type field\n- TaskSeqDynamicBuilder should just inherit TaskSeqBuilder with NO Run override\n- In compiled code taskSeqDynamic = taskSeq; in FSI takes else branch\n- Implementation is ~50 lines for TaskSeqDynamic + 40 test cases\n- Build: 0 warn/err, 4826+40 tests pass, fantomas clean\n\nTest file location: src/FSharp.Control.TaskSeq.Test/TaskSeq.Dynamic.Tests.CE.fs (need to recreate)",
+  "pr_attempts": [
+    {
+      "issue": 246,
+      "branch": "repo-assist/feat-dynamic-246-2026-04-06",
+      "status": "committed-pending-push",
+      "run": "24014588386"
+    }
+  ]
+}
