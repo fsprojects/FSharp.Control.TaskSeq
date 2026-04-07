@@ -48,6 +48,8 @@ and ResumableTSC<'T> = ResumableCode<TaskSeqStateMachineData<'T>, unit>
 /// For use in this library only. Required by the <see cref="TaskSeqBuilder.Run" /> method.
 /// </summary>
 and TaskSeqStateMachine<'T> = ResumableStateMachine<TaskSeqStateMachineData<'T>>
+and TaskSeqResumptionFunc<'T> = ResumptionFunc<TaskSeqStateMachineData<'T>>
+and TaskSeqResumptionDynamicInfo<'T> = ResumptionDynamicInfo<TaskSeqStateMachineData<'T>>
 
 /// <summary>
 /// Contains the state data for the <see cref="taskSeq" /> computation expression builder.
@@ -134,6 +136,40 @@ and [<NoComparison; NoEquality>] TaskSeq<'Machine, 'T
     override MoveNextAsyncResult: unit -> ValueTask<bool>
 
 /// <summary>
+/// Concrete implementation of <see cref="TaskSeqResumptionDynamicInfo&lt;'T&gt;" /> for <c>taskSeq</c> computation
+/// expressions, used in the dynamic (FSI) path. Handles state-machine transitions when the F# compiler
+/// cannot generate static resumable code.
+/// For use by this library only.
+/// </summary>
+and [<NoComparison; NoEquality>] TaskSeqDynamicInfo<'T> =
+    inherit TaskSeqResumptionDynamicInfo<'T>
+    new: initialResumptionFunc: TaskSeqResumptionFunc<'T> -> TaskSeqDynamicInfo<'T>
+
+/// <summary>
+/// Dynamic (FSI-compatible) implementation of <see cref="IAsyncEnumerable&lt;'T&gt;" /> for <c>taskSeq</c>
+/// computation expressions. Used when the F# compiler cannot generate static resumable code (e.g., in FSI).
+/// For use by this library only.
+/// </summary>
+and [<NoComparison; NoEquality>] TaskSeqDynamic<'T> =
+    inherit TaskSeqBase<'T>
+    interface IAsyncEnumerator<'T>
+    interface IAsyncEnumerable<'T>
+    interface IAsyncStateMachine
+    interface IValueTaskSource<bool>
+    interface IValueTaskSource
+
+    new: unit -> TaskSeqDynamic<'T>
+
+    [<DefaultValue(false)>]
+    val mutable _machine: TaskSeqStateMachine<'T>
+
+    [<DefaultValue(false)>]
+    val mutable _initialResumptionFunc: TaskSeqResumptionFunc<'T>
+
+    member InitDynamicMachineData: ct: CancellationToken -> unit
+    override MoveNextAsyncResult: unit -> ValueTask<bool>
+
+/// <summary>
 /// Main builder class for the <see cref="taskSeq" /> computation expression.
 /// </summary>
 [<Class>]
@@ -209,3 +245,22 @@ module HighPriority =
 
         member inline Bind: task: Task<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
         member inline Bind: computation: Async<'T> * continuation: ('T -> ResumableTSC<'U>) -> ResumableTSC<'U>
+
+/// <summary>
+/// Builder class for the <see cref="taskSeqDynamic" /> computation expression. Inherits all members
+/// from <see cref="TaskSeqBuilder" />, using the dynamic resumable code path as fallback when the
+/// F# compiler cannot generate static resumable code (e.g., in F# Interactive / FSI).
+/// </summary>
+[<Class>]
+type TaskSeqDynamicBuilder =
+    inherit TaskSeqBuilder
+    new: unit -> TaskSeqDynamicBuilder
+
+[<AutoOpen>]
+module TaskSeqDynamicBuilder =
+
+    /// <summary>
+    /// Builds an asynchronous task sequence, with a dynamic resumable code fallback for scenarios
+    /// where the F# compiler cannot generate static resumable code (e.g., in F# Interactive / FSI).
+    /// </summary>
+    val taskSeqDynamic: TaskSeqDynamicBuilder
