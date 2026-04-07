@@ -1,51 +1,38 @@
-# Dynamic TaskSeq Implementation Guide (issue #246)
+# Dynamic TaskSeq Implementation Guide (issue #246) - COMPLETED
 
-## Solution Summary
+## Status: PR submitted in run 24059016414 (2026-04-07)
+## Branch: repo-assist/feat-dynamic-246-2026-04-07
 
-The fix requires two key changes:
+## Implementation Summary
 
-### 1. TaskSeqDynamic - FSI-ONLY, ResumptionDynamicInfo-based
+### TaskSeqDynamicInfo<'T>
+- Inherits ResumptionDynamicInfo<TaskSeqStateMachineData<'T>>
+- Overrides MoveNext(sm: byref<TaskSeqStateMachine<'T>>):
+  - Calls this.ResumptionFunc.Invoke(&sm)
+  - If returns true: SetResult(false), builder.Complete(), completed=true
+  - If current.IsSome: SetResult(true)
+  - Else: schedule via awaiter.UnsafeOnCompleted
+  - try/catch for exceptions -> promiseOfValueOrEnd.SetException
+- Overrides SetStateMachine as no-op
 
-**Remove** static-machine fields/methods: `_initialMachine`, `InitMachineData`, `InitFromStaticMachine`.
-**Keep only**: `_machine`, `_initialResumptionFunc`, `InitDynamicMachineData`, `SetResumptionFuncFromCode`.
+### TaskSeqDynamic<'T>
+- Inherits TaskSeqBase<'T>
+- Fields: _machine: TaskSeqStateMachine<'T>, _initialResumptionFunc: TaskSeqResumptionFunc<'T>
+- InitDynamicMachineData(ct): creates Data, sets boxedSelf, cancellationToken, builder, ResumptionDynamicInfo
+- GetAsyncEnumerator: same pattern as TaskSeq (first-call optimization, clone otherwise)
+- IAsyncStateMachine.MoveNext: moveNextRef &this._machine (calls ResumptionDynamicInfo.MoveNext)
+- All other interfaces identical to TaskSeq<'Machine,'T>
 
-`GetAsyncEnumerator` simplified to only handle FSI path:
-- if Data is null and same thread: InitDynamicMachineData(ct); return this
-- else: clone with same _initialResumptionFunc, InitDynamicMachineData, return clone
+### TaskSeqBuilder.Run else-branch
+- Creates TaskSeqDynamic, sets _initialResumptionFunc from code.Invoke
+- Added #nowarn "3513" to suppress FS3513 for the delegate call
 
-`IAsyncStateMachine.MoveNext` = `moveNextRef &this._machine` (routes via ResumptionDynamicInfo)
+### TaskSeqDynamicBuilder
+- Inherits TaskSeqBuilder, no overrides
+- taskSeqDynamic = TaskSeqDynamicBuilder()
 
-### 2. TaskSeqDynamicBuilder - Just inherits, no Run override
-
-```fsharp
-type TaskSeqDynamicBuilder() =
-    inherit TaskSeqBuilder()
-```
-
-No Run override. In compiled code = identical to taskSeq.
-In FSI the inherited else-branch creates TaskSeqDynamic.
-
-## Key Insight (Root Cause of Failures)
-
-Storing compiler-generated machine struct in TaskSeqStateMachine (base type) field
-LOSES the specialized IAsyncStateMachine.MoveNext. The specialized MoveNext is baked
-into the compiler-generated subtype. Storing in base type = library default MoveNext =
-calls ResumptionDynamicInfo.MoveNext = null -> NullReferenceException.
-
-TaskSeq avoids this by using generic 'Machine type parameter.
-TaskSeqDynamic avoids this by not using __stateMachine at all (FSI-only).
-
-## Test File
-
-Add to: src/FSharp.Control.TaskSeq.Test/TaskSeq.Dynamic.Tests.CE.fs
-Module: TaskSeq.Tests.CE.DynamicBuilder
-~40 tests covering: empty, single/multi yield, for loop, async bind,
-yield!, tryWith, tryFinally, use, cancellation, re-enumeration.
-
-Add to .fsproj: Compile Include="TaskSeq.Dynamic.Tests.CE.fs"
-
-## Branch Status
-
-Branch repo-assist/feat-dynamic-246-2026-04-06 was committed locally in run 24014588386
-but safeoutputs session expired before PR creation. LOCAL COMMITS LOST after run.
-Next run must re-implement from scratch using this guide.
+## Key Insight
+ResumableStateMachine.IAsyncStateMachine.MoveNext() calls
+ResumptionDynamicInfo.MoveNext(ref this) when ResumptionDynamicInfo is set.
+The ResumptionFunc in ResumptionDynamicInfo is mutable and updated by the
+compiler-generated FSI code on each yield point.
