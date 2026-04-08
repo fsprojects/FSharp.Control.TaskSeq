@@ -1,5 +1,5 @@
 {
-  "r": "24059016414",
+  "r": "24112065710",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,20 +13,20 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. PR #374 (findBack) CLOSED. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. Run 24059016414: SUBMITTED PR for issue #246 (dynamic resumable code) - branch repo-assist/feat-dynamic-246-2026-04-07, commented on #246.",
+  "n": "PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. PR #374 (findBack) CLOSED. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. Run 24112065710: SUBMITTED perf PR (branch repo-assist/perf-toResizeArray-direct-loop-20260408) - direct loop in toResizeArrayAsync + simplify tryItem loop.",
   "prs": {
-    "dynamic-246": {
-      "branch": "repo-assist/feat-dynamic-246-2026-04-07",
-      "desc": "feat: implement dynamic resumable code for taskSeq/taskSeqDynamic, fixes #246",
+    "perf-toResizeArray": {
+      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408",
+      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
       "status": "submitted"
     }
   },
   "pr_attempts": [
     {
-      "issue": 246,
-      "branch": "repo-assist/feat-dynamic-246-2026-04-07",
+      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408",
+      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
       "status": "submitted",
-      "run": "24059016414"
+      "run": "24112065710"
     }
   ]
 }
