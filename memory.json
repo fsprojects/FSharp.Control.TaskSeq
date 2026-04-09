@@ -1,6 +1,6 @@
 {
-  "r": "24112065710",
-  "m": 375,
+  "r": "24166680310",
+  "m": 382,
   "cur": 375,
   "rej": [
     "rev-sort",
@@ -13,17 +13,29 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. PR #374 (findBack) CLOSED. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. Run 24112065710: SUBMITTED perf PR (branch repo-assist/perf-toResizeArray-direct-loop-20260408) - direct loop in toResizeArrayAsync + simplify tryItem loop.",
+  "n": "PR #382 (perf: while! cleanup) SUBMITTED 2026-04-09. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) PENDING. PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. All issues (#62,#139,#140,#141,#142,#143) have been commented on; no new human activity as of 2026-04-09. #140 has active T-Gro+bartelink discussion - do not re-engage.",
   "prs": {
-    "perf-toResizeArray": {
-      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408",
-      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
+    "perf-while-bang": {
+      "branch": "repo-assist/perf-while-bang-cleanup-20260409",
+      "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
       "status": "submitted"
+    },
+    "perf-toResizeArray": {
+      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408-116ad7cb53aa926e",
+      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
+      "status": "submitted",
+      "pr": 381
     }
   },
   "pr_attempts": [
     {
-      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408",
+      "branch": "repo-assist/perf-while-bang-cleanup-20260409",
+      "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
+      "status": "submitted",
+      "run": "24166680310"
+    },
+    {
+      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408-116ad7cb53aa926e",
       "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
       "status": "submitted",
       "run": "24112065710"
