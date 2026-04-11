@@ -1,5 +1,5 @@
 {
-  "r": "24221093263",
+  "r": "24270932600",
   "m": 382,
   "cur": 375,
   "rej": [
@@ -13,7 +13,7 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #382 (perf: while! cleanup iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) OPEN. PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. April monthly summary is issue #375. bartelink feedback on #139: drop sycophancy, no Task.ignore in FSharp.Core yet - do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. All issues (#62,#139,#140,#141,#142,#143) have been commented on; no new human activity as of 2026-04-10. #140 has active T-Gro+bartelink discussion - do not re-engage. RUN 24221093263: safeoutputs MCP server was BLOCKED BY POLICY - could not push code or create PR. Pending diff saved to pending-perf-while-bang-part2.txt in memory - apply and create PR in next run if safeoutputs available. Changes: perf: use while! in groupBy, countBy, partition, except, exceptOfSeq. All tests passed (5093/5095).",
+  "n": "PR #382 (perf: while! cleanup iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) OPEN. PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. All issues commented; no new human activity as of 2026-04-11. INFRASTRUCTURE: safeoutputs MCP server unavailable in runs 24221093263 and 24270932600. Issue #383 filed for run 24221093263. Pending diff for groupBy/countBy/partition/except/exceptOfSeq in pending-perf-while-bang-part2.txt - apply and PR when safeoutputs available. Monthly #375 needs update for run 24270932600.",
   "prs": {
     "perf-while-bang": {
       "branch": "repo-assist/perf-while-bang-cleanup-20260409",
@@ -30,7 +30,7 @@
       "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260410",
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
       "status": "pending-push",
-      "note": "diff saved to pending-perf-while-bang-part2.txt"
+      "note": "diff saved to pending-perf-while-bang-part2.txt - blocked 2 consecutive runs (24221093263, 24270932600)"
     }
   },
   "pr_attempts": [
@@ -51,7 +51,7 @@
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
       "status": "pending-push",
       "run": "24221093263",
-      "note": "could not push - safeoutputs blocked by policy"
+      "note": "safeoutputs blocked - tried runs 24221093263 and 24270932600"
     }
   ]
 }
