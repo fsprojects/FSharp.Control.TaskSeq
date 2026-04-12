@@ -40,6 +40,11 @@ type internal ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U opti
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
 
 [<Struct>]
+type internal ChooserVAction<'T, 'U, 'TaskValueOption when 'TaskValueOption :> Task<'U voption>> =
+    | TryPickV of try_pickv: ('T -> 'U voption)
+    | TryPickVAsync of async_try_pickv: ('T -> 'TaskValueOption)
+
+[<Struct>]
 type internal PredicateAction<'T, 'TaskBool when 'TaskBool :> Task<bool>> =
     | Predicate of try_filter: ('T -> bool)
     | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
@@ -1053,6 +1058,25 @@ module internal TaskSeqInternal =
                     match! picker item with
                     | Some value -> yield value
                     | None -> ()
+        }
+
+    let chooseV chooser (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+
+            match chooser with
+            | TryPickV picker ->
+                for item in source do
+                    match picker item with
+                    | ValueSome value -> yield value
+                    | ValueNone -> ()
+
+            | TryPickVAsync picker ->
+                for item in source do
+                    match! picker item with
+                    | ValueSome value -> yield value
+                    | ValueNone -> ()
         }
 
     let filter predicate (source: TaskSeq<_>) =

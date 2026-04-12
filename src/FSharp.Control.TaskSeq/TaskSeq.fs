@@ -441,7 +441,9 @@ type TaskSeq private () =
         }
 
     static member choose chooser source = Internal.choose (TryPick chooser) source
+    static member chooseV chooser source = Internal.chooseV (TryPickV chooser) source
     static member chooseAsync chooser source = Internal.choose (TryPickAsync chooser) source
+    static member chooseVAsync chooser source = Internal.chooseV (TryPickVAsync chooser) source
 
     static member filter predicate source = Internal.filter (Predicate predicate) source
     static member filterAsync predicate source = Internal.filter (PredicateAsync predicate) source

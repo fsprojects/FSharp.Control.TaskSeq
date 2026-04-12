@@ -1012,6 +1012,18 @@ type TaskSeq =
     static member choose: chooser: ('T -> 'U option) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
+    /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
+    /// a sequence comprised of the results where the function returns <see cref="ValueSome(x)" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseAsync" />.
+    /// </summary>
+    ///
+    /// <param name="chooser">A function to transform items of type <paramref name="'T" /> into value options of type <paramref name="'U" />.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member chooseV: chooser: ('T -> 'U voption) -> source: TaskSeq<'T> -> TaskSeq<'U>
+
+    /// <summary>
     /// Applies the given asynchronous function <paramref name="chooser" /> to each element of the task sequence.
     /// Returns a sequence comprised of the results where the function returns a <see cref="task" /> result
     /// of <see cref="Some(x)" />.
@@ -1023,6 +1035,19 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member chooseAsync: chooser: ('T -> #Task<'U option>) -> source: TaskSeq<'T> -> TaskSeq<'U>
+
+    /// <summary>
+    /// Applies the given asynchronous function <paramref name="chooser" /> to each element of the task sequence.
+    /// Returns a sequence comprised of the results where the function returns a <see cref="task" /> result
+    /// of <see cref="ValueSome(x)" />.
+    /// If <paramref name="chooser" /> is synchronous, consider using <see cref="TaskSeq.chooseV" />.
+    /// </summary>
+    ///
+    /// <param name="chooser">An asynchronous function to transform items of type <paramref name="'T" /> into value options of type <paramref name="'U" />.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The resulting task sequence.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member chooseVAsync: chooser: ('T -> #Task<'U voption>) -> source: TaskSeq<'T> -> TaskSeq<'U>
 
     /// <summary>
     /// Returns a new task sequence containing only the elements of the collection
