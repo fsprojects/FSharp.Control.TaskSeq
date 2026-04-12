@@ -1014,7 +1014,7 @@ type TaskSeq =
     /// <summary>
     /// Applies the given function <paramref name="chooser" /> to each element of the task sequence. Returns
     /// a sequence comprised of the results where the function returns <see cref="ValueSome(x)" />.
-    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseAsync" />.
+    /// If <paramref name="chooser" /> is asynchronous, consider using <see cref="TaskSeq.chooseVAsync" />.
     /// </summary>
     ///
     /// <param name="chooser">A function to transform items of type <paramref name="'T" /> into value options of type <paramref name="'U" />.</param>
