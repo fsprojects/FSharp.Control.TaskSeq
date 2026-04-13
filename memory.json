@@ -1,6 +1,6 @@
 {
-  "r": "24295554342",
-  "m": 382,
+  "r": "24321034243",
+  "m": 386,
   "cur": 375,
   "rej": [
     "rev-sort",
@@ -13,12 +13,13 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #382 (perf: while! cleanup iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) OPEN. PR #380 (feat: dynamic resumable code) MERGED 2026-04-07. PR #378 (test: SplitAt+ZipWith SideEffects) MERGED 2026-04-04. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. Do NOT re-attempt rejected features. All issues commented; no new human activity as of 2026-04-11. INFRASTRUCTURE: safeoutputs MCP server unavailable in runs 24221093263, 24270932600, AND 24295554342 (3 consecutive blocked runs). Issue #383 filed for run 24221093263. Pending diff for groupBy/countBy/partition/except/exceptOfSeq in pending-perf-while-bang-part2.txt - apply and PR when safeoutputs available. Monthly #375 needs update for runs 24270932600 and 24295554342.",
+  "n": "PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) OPEN. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN - commented on it. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity as of 2026-04-13. safeoutputs MCP now working again (was blocked 3 consecutive runs 24221093263, 24270932600, 24295554342).",
   "prs": {
     "perf-while-bang": {
-      "branch": "repo-assist/perf-while-bang-cleanup-20260409",
+      "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
       "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
-      "status": "submitted"
+      "status": "submitted",
+      "pr": 382
     },
     "perf-toResizeArray": {
       "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408-116ad7cb53aa926e",
@@ -27,15 +28,21 @@
       "pr": 381
     },
     "perf-while-bang-part2": {
-      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260412",
+      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
-      "status": "pending-push",
-      "note": "diff saved to pending-perf-while-bang-part2.txt - blocked 3 consecutive runs (24221093263, 24270932600, 24295554342). Tested: 5093 tests pass, build OK, formatting OK."
+      "status": "submitted",
+      "pr": 386
     }
   },
   "pr_attempts": [
     {
-      "branch": "repo-assist/perf-while-bang-cleanup-20260409",
+      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
+      "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
+      "status": "submitted",
+      "run": "24321034243"
+    },
+    {
+      "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
       "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
       "status": "submitted",
       "run": "24166680310"
@@ -45,13 +52,14 @@
       "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
       "status": "submitted",
       "run": "24112065710"
-    },
-    {
-      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260412",
-      "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
-      "status": "pending-push",
-      "run": "24295554342",
-      "note": "safeoutputs blocked - tried runs 24221093263, 24270932600, 24295554342"
     }
-  ]
+  ],
+  "comments_made": {
+    "62": "2026-04-01",
+    "140": "2026-03-27",
+    "141": "2026-03-27",
+    "142": "2026-03-27",
+    "143": "2026-03-27",
+    "pr385": "2026-04-13"
+  }
 }
