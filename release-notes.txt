@@ -1,6 +1,9 @@
 
 Release notes:
 
+1.1.0
+    - adds TaskSeq.chooseV, TaskSeq.chooseVAsync, #167
+
 1.0.0
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: TaskSeq.chunkBy and chunkByAsync reuse the ResizeArray buffer between chunks, reducing allocations on sequences with many chunk boundaries
