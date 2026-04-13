@@ -500,12 +500,16 @@ module internal TaskSeqInternal =
                 yield result
         }
 
-    let toResizeArrayAsync source =
+    let toResizeArrayAsync (source: TaskSeq<'T>) =
         checkNonNull (nameof source) source
 
         task {
-            let res = ResizeArray()
-            do! source |> iter (SimpleAction(fun item -> res.Add item))
+            let res = ResizeArray<'T>()
+            use e = source.GetAsyncEnumerator CancellationToken.None
+
+            while! e.MoveNextAsync() do
+                res.Add e.Current
+
             return res
         }
 
@@ -878,14 +882,14 @@ module internal TaskSeqInternal =
                 let! step = e.MoveNextAsync()
                 go <- step
 
-                while go && idx <= index do
-                    if idx = index then
-                        foundItem <- Some e.Current
-                        go <- false
-                    else
-                        let! step = e.MoveNextAsync()
-                        go <- step
-                        idx <- idx + 1
+                // advance past the first `index` elements, then capture the current element
+                while go && idx < index do
+                    let! step = e.MoveNextAsync()
+                    go <- step
+                    idx <- idx + 1
+
+                if go then
+                    foundItem <- Some e.Current
 
                 return foundItem
         }
