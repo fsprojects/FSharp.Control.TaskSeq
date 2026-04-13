@@ -1,7 +1,7 @@
 
 Release notes:
 
-1.0.1
+Unreleased
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: simplify iter, fold, reduce, mapFold, tryLast, skipOrTake (Drop/Truncate) to use while! and remove manual go-flag and initial MoveNextAsync pre-advance, matching the pattern already used by sum/sumBy/average
     - perf: toResizeArrayAsync (and therefore toArrayAsync, toListAsync, toResizeArrayAsync, toIListAsync) uses a direct loop instead of going through iter, avoiding a lambda and DU allocation per call
