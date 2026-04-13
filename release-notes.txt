@@ -1,7 +1,7 @@
 
 Release notes:
 
-1.0.0
+1.0.1
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: simplify iter, fold, reduce, mapFold, tryLast, skipOrTake (Drop/Truncate) to use while! and remove manual go-flag and initial MoveNextAsync pre-advance, matching the pattern already used by sum/sumBy/average
     - perf: toResizeArrayAsync (and therefore toArrayAsync, toListAsync, toResizeArrayAsync, toIListAsync) uses a direct loop instead of going through iter, avoiding a lambda and DU allocation per call
@@ -10,7 +10,6 @@ Release notes:
     - fixes: TaskSeq.insertAt, insertManyAt, removeAt, removeManyAt, updateAt now raise ArgumentNullException (not NullReferenceException) when given a null source; insertManyAt also validates the values argument
     - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
-    - adds TaskSeq.withCancellation, #167
     - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345
     - adds TaskSeq.firstOrDefault, lastOrDefault, #345
     - adds TaskSeq.splitAt, #345
@@ -20,6 +19,9 @@ Release notes:
     - adds docs/ with fsdocs-based documentation site covering generating, transforming, consuming, combining and advanced operations
     - docs: adds missing XML <returns> documentation tags to singleton, isEmpty, length, lengthOrMax, lengthBy, and lengthByAsync
     - test: adds 70 new tests to TaskSeq.Fold.Tests.fs covering call-count assertions, folder-not-called-on-empty, ordering, null initial state, and fold/foldAsync equivalence
+
+1.0.0
+    - adds TaskSeq.withCancellation, #167
 
 0.7.0
     - performance: TaskSeq.exists, existsAsync, contains no longer allocate an intermediate Option value
