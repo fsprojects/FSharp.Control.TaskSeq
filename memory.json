@@ -1,6 +1,6 @@
 {
-  "r": "24321034243",
-  "m": 386,
+  "r": "24431014310",
+  "m": 375,
   "cur": 375,
   "rej": [
     "rev-sort",
@@ -13,7 +13,7 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) OPEN. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN - commented on it. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity as of 2026-04-13. safeoutputs MCP now working again (was blocked 3 consecutive runs 24221093263, 24270932600, 24295554342).",
+  "n": "PR #387 (perf: while! tryTail) OPEN. PR #388 (eng: Linux CI + AGENTS.md fix) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) MERGED 2026-04-13. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN - commented on it. Issue #383 CLOSED by dsyme 2026-04-13. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity as of 2026-04-13.",
   "prs": {
     "perf-while-bang": {
       "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
@@ -21,20 +21,38 @@
       "status": "submitted",
       "pr": 382
     },
-    "perf-toResizeArray": {
-      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408-116ad7cb53aa926e",
-      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
-      "status": "submitted",
-      "pr": 381
-    },
     "perf-while-bang-part2": {
       "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
       "status": "submitted",
       "pr": 386
+    },
+    "perf-while-bang-tryTail": {
+      "branch": "repo-assist/perf-while-bang-tryTail-20260415",
+      "desc": "perf: use while! in tryTail inner loop",
+      "status": "submitted",
+      "pr": 387
+    },
+    "eng-linux-ci": {
+      "branch": "repo-assist/eng-linux-ci-20260415",
+      "desc": "eng: add Linux CI test job; fix AGENTS.md net9.0->net10.0",
+      "status": "submitted",
+      "pr": 388
     }
   },
   "pr_attempts": [
+    {
+      "branch": "repo-assist/eng-linux-ci-20260415",
+      "desc": "eng: add Linux CI test job; fix AGENTS.md net9.0->net10.0",
+      "status": "submitted",
+      "run": "24431014310"
+    },
+    {
+      "branch": "repo-assist/perf-while-bang-tryTail-20260415",
+      "desc": "perf: use while! in tryTail inner loop",
+      "status": "submitted",
+      "run": "24431014310"
+    },
     {
       "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
@@ -46,12 +64,6 @@
       "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
       "status": "submitted",
       "run": "24166680310"
-    },
-    {
-      "branch": "repo-assist/perf-toResizeArray-direct-loop-20260408-116ad7cb53aa926e",
-      "desc": "perf: direct loop in toResizeArrayAsync; simplify tryItem loop",
-      "status": "submitted",
-      "run": "24112065710"
     }
   ],
   "comments_made": {
