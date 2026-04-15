@@ -8,6 +8,7 @@ Release notes:
     - perf: TaskSeq.chunkBy and chunkByAsync reuse the ResizeArray buffer between chunks, reducing allocations on sequences with many chunk boundaries
     - fixes: TaskSeq.insertAt, insertManyAt, removeAt, removeManyAt, updateAt now raise ArgumentNullException (not NullReferenceException) when given a null source; insertManyAt also validates the values argument
     - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
+    - refactor: simplify tryTail inner loop to use while!, removing redundant mutable 'go' flag and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.withCancellation, #167
     - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345

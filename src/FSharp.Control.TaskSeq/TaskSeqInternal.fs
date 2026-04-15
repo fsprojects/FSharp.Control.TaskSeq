@@ -845,14 +845,8 @@ module internal TaskSeqInternal =
             | true ->
                 return
                     taskSeq {
-                        let mutable go = true
-                        let! step = e.MoveNextAsync()
-                        go <- step
-
-                        while go do
+                        while! e.MoveNextAsync() do
                             yield e.Current
-                            let! step = e.MoveNextAsync()
-                            go <- step
                     }
                     |> Some
         }
