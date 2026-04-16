@@ -1,5 +1,5 @@
 {
-  "r": "24431014310",
+  "r": "24486554052",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,7 +13,7 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #387 (perf: while! tryTail) OPEN. PR #388 (eng: Linux CI + AGENTS.md fix) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) MERGED 2026-04-13. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN - commented on it. Issue #383 CLOSED by dsyme 2026-04-13. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity as of 2026-04-13.",
+  "n": "PR #388 (perf: while! tryTail) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) MERGED 2026-04-13. Issue #389 = Linux CI PR blocked (protected files). Issue #387 = bot failure notice. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; last new human activity: #141 bartelink 2026-03-18 (responded this run). Test dep bump PR submitted this run (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4).",
   "prs": {
     "perf-while-bang": {
       "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
@@ -31,21 +31,21 @@
       "branch": "repo-assist/perf-while-bang-tryTail-20260415",
       "desc": "perf: use while! in tryTail inner loop",
       "status": "submitted",
-      "pr": 387
-    },
-    "eng-linux-ci": {
-      "branch": "repo-assist/eng-linux-ci-20260415",
-      "desc": "eng: add Linux CI test job; fix AGENTS.md net9.0->net10.0",
-      "status": "submitted",
       "pr": 388
+    },
+    "eng-test-deps": {
+      "branch": "repo-assist/eng-test-dep-updates-20260416",
+      "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
+      "status": "submitted",
+      "pr": null
     }
   },
   "pr_attempts": [
     {
-      "branch": "repo-assist/eng-linux-ci-20260415",
-      "desc": "eng: add Linux CI test job; fix AGENTS.md net9.0->net10.0",
+      "branch": "repo-assist/eng-test-dep-updates-20260416",
+      "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
       "status": "submitted",
-      "run": "24431014310"
+      "run": "24486554052"
     },
     {
       "branch": "repo-assist/perf-while-bang-tryTail-20260415",
@@ -68,8 +68,8 @@
   ],
   "comments_made": {
     "62": "2026-04-01",
-    "140": "2026-03-27",
-    "141": "2026-03-27",
+    "140": "2026-03-18",
+    "141": "2026-04-16",
     "142": "2026-03-27",
     "143": "2026-03-27",
     "pr385": "2026-04-13"
