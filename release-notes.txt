@@ -5,6 +5,7 @@ Release notes:
     - adds TaskSeq.chooseV, TaskSeq.chooseVAsync, #385
 
 1.0.0
+    - perf: use while! in groupBy, countBy, partition, except, exceptOfSeq to eliminate redundant mutable 'go' variables and initial MoveNextAsync calls
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: toResizeArrayAsync (and therefore toArrayAsync, toListAsync, toResizeArrayAsync, toIListAsync) uses a direct loop instead of going through iter, avoiding a lambda and DU allocation per call
     - perf: tryItem uses a simpler loop that skips the redundant inner index check on every iteration
