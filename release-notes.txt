@@ -1,6 +1,9 @@
 
 Release notes:
 
+1.1.0
+    - adds TaskSeq.chooseV, TaskSeq.chooseVAsync, #385
+
 1.0.0
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: toResizeArrayAsync (and therefore toArrayAsync, toListAsync, toResizeArrayAsync, toIListAsync) uses a direct loop instead of going through iter, avoiding a lambda and DU allocation per call

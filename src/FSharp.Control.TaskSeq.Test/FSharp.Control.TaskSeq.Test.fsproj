@@ -12,6 +12,7 @@
     <Compile Include="TaskSeq.Append.Tests.fs" />
     <Compile Include="TaskSeq.Cast.Tests.fs" />
     <Compile Include="TaskSeq.Choose.Tests.fs" />
+    <Compile Include="TaskSeq.ChooseV.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
     <Compile Include="TaskSeq.Concat.Tests.fs" />
     <Compile Include="TaskSeq.Contains.Tests.fs" />
