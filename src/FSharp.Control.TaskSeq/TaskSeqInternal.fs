@@ -40,6 +40,11 @@ type internal ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U opti
     | TryPickAsync of async_try_pick: ('T -> 'TaskOption)
 
 [<Struct>]
+type internal ChooserVAction<'T, 'U, 'TaskValueOption when 'TaskValueOption :> Task<'U voption>> =
+    | TryPickV of try_pickv: ('T -> 'U voption)
+    | TryPickVAsync of async_try_pickv: ('T -> 'TaskValueOption)
+
+[<Struct>]
 type internal PredicateAction<'T, 'TaskBool when 'TaskBool :> Task<bool>> =
     | Predicate of try_filter: ('T -> bool)
     | PredicateAsync of async_try_filter: ('T -> 'TaskBool)
@@ -808,14 +813,8 @@ module internal TaskSeqInternal =
             | true ->
                 return
                     taskSeq {
-                        let mutable go = true
-                        let! step = e.MoveNextAsync()
-                        go <- step
-
-                        while go do
+                        while! e.MoveNextAsync() do
                             yield e.Current
-                            let! step = e.MoveNextAsync()
-                            go <- step
                     }
                     |> Some
         }
@@ -1020,6 +1019,25 @@ module internal TaskSeqInternal =
                     match! picker item with
                     | Some value -> yield value
                     | None -> ()
+        }
+
+    let chooseV chooser (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        taskSeq {
+
+            match chooser with
+            | TryPickV picker ->
+                for item in source do
+                    match picker item with
+                    | ValueSome value -> yield value
+                    | ValueNone -> ()
+
+            | TryPickVAsync picker ->
+                for item in source do
+                    match! picker item with
+                    | ValueSome value -> yield value
+                    | ValueNone -> ()
         }
 
     let filter predicate (source: TaskSeq<_>) =
@@ -1421,34 +1439,28 @@ module internal TaskSeqInternal =
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
-            let! step = e.MoveNextAsync()
-            go <- step
+            let! hasFirst = e.MoveNextAsync()
 
-            if step then
+            if hasFirst then
                 // only create hashset by the time we actually start iterating;
                 // taskSeq enumerates sequentially, so a plain HashSet suffices — no locking needed.
                 let hashSet = HashSet<_>(HashIdentity.Structural)
 
                 use excl = itemsToExclude.GetAsyncEnumerator CancellationToken.None
-                let! exclStep = excl.MoveNextAsync()
-                let mutable exclGo = exclStep
 
-                while exclGo do
+                while! excl.MoveNextAsync() do
                     hashSet.Add excl.Current |> ignore
-                    let! exclStep = excl.MoveNextAsync()
-                    exclGo <- exclStep
 
-                while go do
+                // if true, it was added, and therefore unique, so we return it
+                // if false, it existed, and therefore a duplicate, and we skip
+                if hashSet.Add e.Current then
+                    yield e.Current
+
+                while! e.MoveNextAsync() do
                     let current = e.Current
 
-                    // if true, it was added, and therefore unique, so we return it
-                    // if false, it existed, and therefore a duplicate, and we skip
                     if hashSet.Add current then
                         yield current
-
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
         }
 
@@ -1458,25 +1470,23 @@ module internal TaskSeqInternal =
 
         taskSeq {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
-            let! step = e.MoveNextAsync()
-            go <- step
+            let! hasFirst = e.MoveNextAsync()
 
-            if step then
+            if hasFirst then
                 // only create hashset by the time we actually start iterating;
                 // initialize directly from the seq — taskSeq is sequential so no locking needed.
                 let hashSet = HashSet<_>(itemsToExclude, HashIdentity.Structural)
 
-                while go do
+                // if true, it was added, and therefore unique, so we return it
+                // if false, it existed, and therefore a duplicate, and we skip
+                if hashSet.Add e.Current then
+                    yield e.Current
+
+                while! e.MoveNextAsync() do
                     let current = e.Current
 
-                    // if true, it was added, and therefore unique, so we return it
-                    // if false, it existed, and therefore a duplicate, and we skip
                     if hashSet.Add current then
                         yield current
-
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
         }
 
@@ -1560,12 +1570,10 @@ module internal TaskSeqInternal =
             use e = source.GetAsyncEnumerator CancellationToken.None
             let groups = Dictionary<'Key, ResizeArray<'T>>(HashIdentity.Structural)
             let order = ResizeArray<'Key>()
-            let! step = e.MoveNextAsync()
-            let mutable go = step
 
             match projector with
             | ProjectorAction proj ->
-                while go do
+                while! e.MoveNextAsync() do
                     let key = proj e.Current
                     let mutable ra = Unchecked.defaultof<_>
 
@@ -1575,11 +1583,9 @@ module internal TaskSeqInternal =
                         order.Add key
 
                     ra.Add e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             | AsyncProjectorAction proj ->
-                while go do
+                while! e.MoveNextAsync() do
                     let! key = proj e.Current
                     let mutable ra = Unchecked.defaultof<_>
 
@@ -1589,8 +1595,6 @@ module internal TaskSeqInternal =
                         order.Add key
 
                     ra.Add e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return
                 Array.init order.Count (fun i ->
@@ -1605,12 +1609,10 @@ module internal TaskSeqInternal =
             use e = source.GetAsyncEnumerator CancellationToken.None
             let counts = Dictionary<'Key, int>(HashIdentity.Structural)
             let order = ResizeArray<'Key>()
-            let! step = e.MoveNextAsync()
-            let mutable go = step
 
             match projector with
             | ProjectorAction proj ->
-                while go do
+                while! e.MoveNextAsync() do
                     let key = proj e.Current
                     let mutable count = 0
 
@@ -1618,11 +1620,9 @@ module internal TaskSeqInternal =
                         order.Add key
 
                     counts[key] <- count + 1
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             | AsyncProjectorAction proj ->
-                while go do
+                while! e.MoveNextAsync() do
                     let! key = proj e.Current
                     let mutable count = 0
 
@@ -1630,8 +1630,6 @@ module internal TaskSeqInternal =
                         order.Add key
 
                     counts[key] <- count + 1
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return Array.init order.Count (fun i -> let k = order[i] in k, counts[k])
         }
@@ -1643,12 +1641,10 @@ module internal TaskSeqInternal =
             use e = source.GetAsyncEnumerator CancellationToken.None
             let trueItems = ResizeArray<'T>()
             let falseItems = ResizeArray<'T>()
-            let! step = e.MoveNextAsync()
-            let mutable go = step
 
             match predicate with
             | Predicate pred ->
-                while go do
+                while! e.MoveNextAsync() do
                     let item = e.Current
 
                     if pred item then
@@ -1656,16 +1652,11 @@ module internal TaskSeqInternal =
                     else
                         falseItems.Add item
 
-                    let! step = e.MoveNextAsync()
-                    go <- step
-
             | PredicateAsync pred ->
-                while go do
+                while! e.MoveNextAsync() do
                     let item = e.Current
                     let! result = pred item
                     if result then trueItems.Add item else falseItems.Add item
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return trueItems.ToArray(), falseItems.ToArray()
         }

@@ -3,7 +3,13 @@ Release notes:
 
 Unreleased
 
+1.1.1
+    - perf: use while! in groupBy, countBy, partition, except, exceptOfSeq to eliminate redundant mutable 'go' variables and initial MoveNextAsync calls
+
 1.1.0
+    - adds TaskSeq.chooseV, TaskSeq.chooseVAsync, #385
+
+1.0.0
     - adds taskSeqDynamic computation expression and TaskSeqDynamic/TaskSeqDynamicInfo types for dynamic (FSI-compatible) resumable code, fixing issue where taskSeq would raise NotImplementedException in F# Interactive, #246
     - perf: simplify iter, fold, reduce, mapFold, tryLast, skipOrTake (Drop/Truncate) to use while! and remove manual go-flag and initial MoveNextAsync pre-advance, matching the pattern already used by sum/sumBy/average
     - perf: toResizeArrayAsync (and therefore toArrayAsync, toListAsync, toResizeArrayAsync, toIListAsync) uses a direct loop instead of going through iter, avoiding a lambda and DU allocation per call
@@ -11,6 +17,7 @@ Unreleased
     - perf: TaskSeq.chunkBy and chunkByAsync reuse the ResizeArray buffer between chunks, reducing allocations on sequences with many chunk boundaries
     - fixes: TaskSeq.insertAt, insertManyAt, removeAt, removeManyAt, updateAt now raise ArgumentNullException (not NullReferenceException) when given a null source; insertManyAt also validates the values argument
     - refactor: simplify lengthBy and lengthBeforeMax to use while! and remove the redundant mutable 'go' and initial MoveNextAsync
+    - refactor: simplify tryTail inner loop to use while!, removing redundant mutable 'go' flag and initial MoveNextAsync
     - adds TaskSeq.distinctUntilChangedWith and TaskSeq.distinctUntilChangedWithAsync, #345
     - adds TaskSeq.replicateInfinite, replicateInfiniteAsync, replicateUntilNoneAsync, #345
     - adds TaskSeq.firstOrDefault, lastOrDefault, #345

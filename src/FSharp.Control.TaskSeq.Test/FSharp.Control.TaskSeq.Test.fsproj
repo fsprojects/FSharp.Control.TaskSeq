@@ -12,6 +12,7 @@
     <Compile Include="TaskSeq.Append.Tests.fs" />
     <Compile Include="TaskSeq.Cast.Tests.fs" />
     <Compile Include="TaskSeq.Choose.Tests.fs" />
+    <Compile Include="TaskSeq.ChooseV.Tests.fs" />
     <Compile Include="TaskSeq.Collect.Tests.fs" />
     <Compile Include="TaskSeq.Concat.Tests.fs" />
     <Compile Include="TaskSeq.Contains.Tests.fs" />
@@ -88,14 +89,14 @@
       still compatible version of the TaskSeq library.
     -->
     <PackageReference Update="FSharp.Core" Version="6.0.1" />
-    <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="FsUnit.xUnit" Version="6.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

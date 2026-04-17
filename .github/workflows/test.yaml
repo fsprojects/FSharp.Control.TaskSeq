@@ -77,3 +77,34 @@ jobs:
           name: test-results-debug
           # this path glob pattern requires forward slashes!
           path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-debug.trx
+
+
+  test-release-linux:
+    name: Test Release Build (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout-code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: setup-dotnet
+        uses: actions/setup-dotnet@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # run tests directly (build.cmd is Windows-only)
+      - name: Run dotnet test - release (Linux)
+        run: dotnet test src/FSharp.Control.TaskSeq.Test/FSharp.Control.TaskSeq.Test.fsproj -c Release --blame-hang-timeout 60000ms --logger "console;verbosity=detailed" --logger "trx;LogFileName=test-results-release-linux.trx"
+
+      - uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: test-results-release-linux
+          # this path glob pattern requires forward slashes!
+          path: ./src/FSharp.Control.TaskSeq.Test/TestResults/test-results-release-linux.trx

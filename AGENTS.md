@@ -7,7 +7,7 @@ FSharp.Control.TaskSeq is an F# library providing a `taskSeq` computation expres
 ## Repository Layout
 
 - `src/FSharp.Control.TaskSeq/` — Main library (netstandard2.1)
-- `src/FSharp.Control.TaskSeq.Test/` — xUnit test project (net9.0)
+- `src/FSharp.Control.TaskSeq.Test/` — xUnit test project (net10.0)
 - `src/FSharp.Control.TaskSeq.SmokeTests/` — Smoke/integration tests
 - `src/FSharp.Control.TaskSeq.sln` — Solution file
 - `Version.props` — Package version (derived automatically from `release-notes.txt`)
