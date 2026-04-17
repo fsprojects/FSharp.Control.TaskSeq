@@ -1,5 +1,5 @@
 {
-  "r": "24486554052",
+  "r": "24542395572",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,7 +13,7 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #388 (perf: while! tryTail) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR #385 (feat: chooseV/chooseVAsync by njlr) OPEN. PR #381 (perf: toResizeArrayAsync direct loop + tryItem) MERGED 2026-04-13. Issue #389 = Linux CI PR blocked (protected files). Issue #387 = bot failure notice. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; last new human activity: #141 bartelink 2026-03-18 (responded this run). Test dep bump PR submitted this run (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4).",
+  "n": "PR #390 (eng: test deps) OPEN. PR #388 (perf: while! tryTail) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR (pending) smoke-tests-deps-20260417 submitted this run. Issue #389 = Linux CI PR blocked (protected files). Issue #387 = bot failure notice. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity this run.",
   "prs": {
     "perf-while-bang": {
       "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
@@ -37,10 +37,22 @@
       "branch": "repo-assist/eng-test-dep-updates-20260416",
       "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
       "status": "submitted",
+      "pr": 390
+    },
+    "eng-smoke-tests-deps": {
+      "branch": "repo-assist/eng-smoke-tests-deps-20260417",
+      "desc": "eng: update SmokeTests tooling to match main test project (net10.0, TestSdk 18.4.0, xunit 2.9.3, etc.)",
+      "status": "submitted",
       "pr": null
     }
   },
   "pr_attempts": [
+    {
+      "branch": "repo-assist/eng-smoke-tests-deps-20260417",
+      "desc": "eng: update SmokeTests tooling to match main test project",
+      "status": "submitted",
+      "run": "24542395572"
+    },
     {
       "branch": "repo-assist/eng-test-dep-updates-20260416",
       "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
