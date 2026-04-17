@@ -10,7 +10,7 @@ FSharp.Control.TaskSeq is an F# library providing a `taskSeq` computation expres
 - `src/FSharp.Control.TaskSeq.Test/` — xUnit test project (net10.0)
 - `src/FSharp.Control.TaskSeq.SmokeTests/` — Smoke/integration tests
 - `src/FSharp.Control.TaskSeq.sln` — Solution file
-- `Version.props` — Single source of truth for the package version
+- `Version.props` — Package version (derived automatically from `release-notes.txt`)
 - `build.cmd` — Windows build/test script used by CI
 
 ## Build
@@ -102,12 +102,28 @@ All workflows are in `.github/workflows/`:
 
 ## Release Notes
 
-**Required**: Every PR that adds features, fixes bugs, or makes user-visible changes **must** include an update to `release-notes.txt`. Add a bullet under the appropriate version heading (currently `0.5.0`). The format is:
+`release-notes.txt` is the **single source of truth** for the package version. `Version.props` extracts the version automatically by finding the first line that matches a `X.Y.Z` semver pattern. The `Unreleased` section at the top of the file is skipped because it does not match this pattern.
+
+**Format requirements:**
+
+- The file **must** always begin with a heading line `Unreleased` (after the optional `Release notes:` header). This section holds in-progress changes before they are assigned a version number. It must always be present, even if empty.
+- Below `Unreleased`, versioned sections are listed in descending order (`1.0.0`, `0.7.0`, …). The topmost versioned section determines the package version.
+- To bump the version, add a new version heading between `Unreleased` and the previous version.
+
+Example:
 
 ```
-0.5.0
+Release notes:
+
+Unreleased
+    - upcoming change description
+
+1.1.0
     - adds TaskSeq.myFunction and TaskSeq.myFunctionAsync, #<issue>
     - fixes <description>, #<issue>
+
+1.0.0
+    - adds TaskSeq.withCancellation, #167
 ```
 
-If you are bumping to a new version, also update `Version.props`. PRs that touch library source (`src/FSharp.Control.TaskSeq/`) without updating `release-notes.txt` are incomplete.
+**Required**: Every PR that adds features, fixes bugs, or makes user-visible changes **must** add a bullet under the `Unreleased` heading in `release-notes.txt`. PRs that touch library source (`src/FSharp.Control.TaskSeq/`) without updating `release-notes.txt` are incomplete.

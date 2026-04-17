@@ -362,43 +362,31 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
-            let! step = e.MoveNextAsync()
-            go <- step
 
-            // this ensures that the inner loop is optimized for the closure
-            // though perhaps we need to split into individual functions after all to use
-            // InlineIfLambda?
+            // Each branch keeps its own while! loop so the match dispatch is hoisted out and
+            // the JIT sees a tight, single-case loop (same pattern as sum/sumBy etc.).
             match action with
             | CountableAction action ->
                 let mutable i = 0
 
-                while go do
-                    do action i e.Current
-                    let! step = e.MoveNextAsync()
+                while! e.MoveNextAsync() do
+                    action i e.Current
                     i <- i + 1
-                    go <- step
 
             | SimpleAction action ->
-                while go do
-                    do action e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
+                while! e.MoveNextAsync() do
+                    action e.Current
 
             | AsyncCountableAction action ->
                 let mutable i = 0
 
-                while go do
+                while! e.MoveNextAsync() do
                     do! action i e.Current
-                    let! step = e.MoveNextAsync()
                     i <- i + 1
-                    go <- step
 
             | AsyncSimpleAction action ->
-                while go do
+                while! e.MoveNextAsync() do
                     do! action e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
         }
 
     let fold folder initial (source: TaskSeq<_>) =
@@ -406,24 +394,17 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
             let mutable result = initial
-            let! step = e.MoveNextAsync()
-            go <- step
 
             match folder with
             | FolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     result <- folder result e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             | AsyncFolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     let! tempResult = folder result e.Current
                     result <- tempResult
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return result
         }
@@ -462,22 +443,16 @@ module internal TaskSeqInternal =
                 raiseEmptySeq ()
 
             let mutable result = e.Current
-            let! step = e.MoveNextAsync()
-            let mutable go = step
 
             match folder with
             | FolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     result <- folder result e.Current
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             | AsyncFolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     let! tempResult = folder result e.Current
                     result <- tempResult
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return result
         }
@@ -487,28 +462,21 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
             let mutable state = initial
             let results = ResizeArray()
-            let! step = e.MoveNextAsync()
-            go <- step
 
             match folder with
             | MapFolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     let result, newState = folder state e.Current
                     results.Add result
                     state <- newState
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             | AsyncMapFolderAction folder ->
-                while go do
+                while! e.MoveNextAsync() do
                     let! (result, newState) = folder state e.Current
                     results.Add result
                     state <- newState
-                    let! step = e.MoveNextAsync()
-                    go <- step
 
             return results.ToArray(), state
         }
@@ -813,15 +781,10 @@ module internal TaskSeqInternal =
 
         task {
             use e = source.GetAsyncEnumerator CancellationToken.None
-            let mutable go = true
             let mutable last = ValueNone
-            let! step = e.MoveNextAsync()
-            go <- step
 
-            while go do
+            while! e.MoveNextAsync() do
                 last <- ValueSome e.Current
-                let! step = e.MoveNextAsync()
-                go <- step
 
             match last with
             | ValueSome value -> return Some value
@@ -1255,24 +1218,19 @@ module internal TaskSeqInternal =
             else
                 taskSeq {
                     use e = source.GetAsyncEnumerator CancellationToken.None
+                    let mutable i = 0
+                    let mutable cont = true
 
-                    let! step = e.MoveNextAsync()
-                    let mutable cont = step
-                    let mutable pos = 0
+                    // advance past 'count' elements; stop early if the source is shorter
+                    while cont && i < count do
+                        let! hasMore = e.MoveNextAsync()
+                        if hasMore then i <- i + 1 else cont <- false
 
-                    // skip, or stop looping if we reached the end
-                    while cont do
-                        pos <- pos + 1
-
-                        if pos < count then
-                            let! moveNext = e.MoveNextAsync()
-                            cont <- moveNext
-                        else
-                            cont <- false
-
-                    // return the rest
-                    while! e.MoveNextAsync() do
-                        yield e.Current
+                    // return remaining elements; enumerator is at element (count-1) so one
+                    // more MoveNext is needed to reach element (count)
+                    if cont then
+                        while! e.MoveNextAsync() do
+                            yield e.Current
 
                 }
         | Take ->
@@ -1299,19 +1257,16 @@ module internal TaskSeqInternal =
             else
                 taskSeq {
                     use e = source.GetAsyncEnumerator CancellationToken.None
+                    let mutable yielded = 0
+                    let mutable cont = true
 
-                    let! step = e.MoveNextAsync()
-                    let mutable cont = step
-                    let mutable pos = 0
+                    // yield up to 'count' elements; stop when exhausted or limit reached
+                    while cont && yielded < count do
+                        let! hasMore = e.MoveNextAsync()
 
-                    // return items until we've exhausted the seq
-                    while cont do
-                        yield e.Current
-                        pos <- pos + 1
-
-                        if pos < count then
-                            let! moveNext = e.MoveNextAsync()
-                            cont <- moveNext
+                        if hasMore then
+                            yield e.Current
+                            yielded <- yielded + 1
                         else
                             cont <- false
 
