@@ -1,5 +1,5 @@
 {
-  "r": "24542395572",
+  "r": "24593211165",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,68 +13,50 @@
     "map2",
     "findBack"
   ],
-  "n": "PR #390 (eng: test deps) OPEN. PR #388 (perf: while! tryTail) OPEN. PR #386 (perf: while! groupBy/countBy/partition/except/exceptOfSeq) OPEN. PR #382 (perf: while! iter/fold/reduce/mapFold/tryLast/Drop/Truncate) OPEN. PR (pending) smoke-tests-deps-20260417 submitted this run. Issue #389 = Linux CI PR blocked (protected files). Issue #387 = bot failure notice. April monthly summary is issue #375. Do NOT re-engage #139. Issue #62 blocked on dotnet/fsharp#19402. All issues commented; no new human activity this run.",
+  "n": "PR (pending) splitAt-rest-while-bang-20260418 submitted this run. All previous PRs (#382, #386, #388, #390, #391, #392) merged 2026-04-17. njlr PR #385 (chooseV) also merged. Remaining go-flag patterns: zip/zip3/zipWith family (multi-enumerator), forall/exists/contains/tryPick/tryFind (early-exit). Issue #62 blocked on dotnet/fsharp#19402. Issue #141 = placeholder for Async.ofTask AggregateException fix. Do NOT re-engage #139. April monthly summary is issue #375.",
   "prs": {
-    "perf-while-bang": {
-      "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
-      "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
-      "status": "submitted",
-      "pr": 382
-    },
-    "perf-while-bang-part2": {
-      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
-      "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
-      "status": "submitted",
-      "pr": 386
-    },
-    "perf-while-bang-tryTail": {
-      "branch": "repo-assist/perf-while-bang-tryTail-20260415",
-      "desc": "perf: use while! in tryTail inner loop",
-      "status": "submitted",
-      "pr": 388
-    },
-    "eng-test-deps": {
-      "branch": "repo-assist/eng-test-dep-updates-20260416",
-      "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
-      "status": "submitted",
-      "pr": 390
-    },
-    "eng-smoke-tests-deps": {
-      "branch": "repo-assist/eng-smoke-tests-deps-20260417",
-      "desc": "eng: update SmokeTests tooling to match main test project (net10.0, TestSdk 18.4.0, xunit 2.9.3, etc.)",
+    "refactor-splitAt-rest": {
+      "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
+      "desc": "refactor: simplify splitAt rest taskSeq to use while!",
       "status": "submitted",
       "pr": null
     }
   },
   "pr_attempts": [
     {
+      "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
+      "desc": "refactor: simplify splitAt rest taskSeq to use while!",
+      "status": "submitted",
+      "run": "24593211165"
+    },
+    {
       "branch": "repo-assist/eng-smoke-tests-deps-20260417",
       "desc": "eng: update SmokeTests tooling to match main test project",
-      "status": "submitted",
+      "status": "merged",
       "run": "24542395572"
     },
     {
       "branch": "repo-assist/eng-test-dep-updates-20260416",
-      "desc": "eng: bump test deps (FsUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
-      "status": "submitted",
+      "desc": "eng: bump test deps (FsUnit.xUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
+      "status": "merged",
       "run": "24486554052"
     },
     {
       "branch": "repo-assist/perf-while-bang-tryTail-20260415",
       "desc": "perf: use while! in tryTail inner loop",
-      "status": "submitted",
+      "status": "merged",
       "run": "24431014310"
     },
     {
       "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
       "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
-      "status": "submitted",
+      "status": "merged",
       "run": "24321034243"
     },
     {
       "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
       "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
-      "status": "submitted",
+      "status": "merged",
       "run": "24166680310"
     }
   ],
