@@ -1,5 +1,5 @@
 {
-  "r": "24593211165",
+  "r": "24617865783",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,16 +13,40 @@
     "map2",
     "findBack"
   ],
-  "n": "PR (pending) splitAt-rest-while-bang-20260418 submitted this run. All previous PRs (#382, #386, #388, #390, #391, #392) merged 2026-04-17. njlr PR #385 (chooseV) also merged. Remaining go-flag patterns: zip/zip3/zipWith family (multi-enumerator), forall/exists/contains/tryPick/tryFind (early-exit). Issue #62 blocked on dotnet/fsharp#19402. Issue #141 = placeholder for Async.ofTask AggregateException fix. Do NOT re-engage #139. April monthly summary is issue #375.",
+  "n": "PRs submitted this run: fix-async-bind-20260419 (Async.bind bug fix, +Utils.Tests.fs, 10 new tests), eng-sdk-10.0.105-20260419 (global.json SDK bump). PR #393 (splitAt rest while-bang) still open. All prev PRs merged 2026-04-17. Do NOT re-engage #139. April monthly summary is issue #375.",
   "prs": {
+    "fix-async-bind-20260419": {
+      "branch": "repo-assist/fix-async-bind-20260419",
+      "desc": "fix: correct Async.bind signature and implementation",
+      "status": "submitted",
+      "pr": null
+    },
+    "eng-sdk-10.0.105-20260419": {
+      "branch": "repo-assist/eng-sdk-10.0.105-20260419",
+      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105",
+      "status": "submitted",
+      "pr": null
+    },
     "refactor-splitAt-rest": {
       "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
       "desc": "refactor: simplify splitAt rest taskSeq to use while!",
       "status": "submitted",
-      "pr": null
+      "pr": 393
     }
   },
   "pr_attempts": [
+    {
+      "branch": "repo-assist/fix-async-bind-20260419",
+      "desc": "fix: correct Async.bind signature and implementation",
+      "status": "submitted",
+      "run": "24617865783"
+    },
+    {
+      "branch": "repo-assist/eng-sdk-10.0.105-20260419",
+      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105",
+      "status": "submitted",
+      "run": "24617865783"
+    },
     {
       "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
       "desc": "refactor: simplify splitAt rest taskSeq to use while!",
