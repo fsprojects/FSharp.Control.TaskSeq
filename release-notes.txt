@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - refactor: simplify splitAt 'rest' taskSeq to use while!, removing redundant go2 mutable and manual MoveNextAsync pre-advance
 
 1.1.1
     - perf: use while! in groupBy, countBy, partition, except, exceptOfSeq to eliminate redundant mutable 'go' variables and initial MoveNextAsync calls
