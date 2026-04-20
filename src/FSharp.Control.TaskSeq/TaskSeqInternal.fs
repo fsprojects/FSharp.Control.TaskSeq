@@ -848,18 +848,12 @@ module internal TaskSeqInternal =
                 else
                     go <- false
 
-            // 'rest' captures 'e' from the outer task block, following the same pattern as tryTail.
+            // 'rest' captures 'e' from the outer task block; if the source was not exhausted,
+            // advance once past the last element added to 'first', then yield the remainder.
             let rest = taskSeq {
-                let mutable go2 = go
-
-                if go2 then
-                    let! step = e.MoveNextAsync()
-                    go2 <- step
-
-                while go2 do
-                    yield e.Current
-                    let! step = e.MoveNextAsync()
-                    go2 <- step
+                if go then
+                    while! e.MoveNextAsync() do
+                        yield e.Current
             }
 
             return first.ToArray(), rest

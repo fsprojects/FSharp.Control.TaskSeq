@@ -103,4 +103,4 @@ module Async =
     val inline map: mapper: ('T -> 'U) -> async: Async<'T> -> Async<'U>
 
     /// Bind an Async<'T>
-    val inline bind: binder: (Async<'T> -> Async<'U>) -> async: Async<'T> -> Async<'U>
+    val inline bind: binder: ('T -> Async<'U>) -> async: Async<'T> -> Async<'U>

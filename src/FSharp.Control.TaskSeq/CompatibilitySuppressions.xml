@@ -3,6 +3,13 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:FSharp.Control.Async.bind``2(Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Control.FSharpAsync{``0},Microsoft.FSharp.Control.FSharpAsync{``1}},Microsoft.FSharp.Control.FSharpAsync{``0})</Target>
+    <Left>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Left>
+    <Right>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:FSharp.Control.LowPriority.TaskSeqBuilder#Bind``5(FSharp.Control.TaskSeqBuilder,``0,Microsoft.FSharp.Core.FSharpFunc{``1,Microsoft.FSharp.Core.CompilerServices.ResumableCode{FSharp.Control.TaskSeqStateMachineData{``2},Microsoft.FSharp.Core.Unit}})</Target>
     <Left>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Left>
     <Right>lib/netstandard2.1/FSharp.Control.TaskSeq.dll</Right>
