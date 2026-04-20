@@ -133,3 +133,124 @@ module Functionality =
         let _, arr = result[0]
         arr |> should haveLength 10
     }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-chunkBy each element its own chunk as variants`` variant = task {
+        let ts = Gen.getSeqImmutable variant
+        let! result = TaskSeq.chunkBy id ts |> TaskSeq.toArrayAsync
+        result |> should haveLength 10
+
+        result
+        |> Array.iteri (fun i (k, arr) ->
+            k |> should equal (i + 1)
+            arr |> should haveLength 1
+            arr[0] |> should equal (i + 1))
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-chunkByAsync all elements same key as variants`` variant = task {
+        let ts = Gen.getSeqImmutable variant
+
+        let! result =
+            TaskSeq.chunkByAsync (fun _ -> Task.fromResult 0) ts
+            |> TaskSeq.toArrayAsync
+
+        result |> should haveLength 1
+        let _, arr = result[0]
+        arr |> should haveLength 10
+    }
+
+
+module SideEffects =
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-chunkBy on side-effect seq groups all elements under one key`` variant = task {
+        let! result =
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.chunkBy (fun _ -> 0)
+            |> TaskSeq.toArrayAsync
+
+        result |> should haveLength 1
+        let _, arr = result[0]
+        arr |> should equal [| 1..10 |]
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-chunkByAsync on side-effect seq groups all elements under one key`` variant = task {
+        let! result =
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.chunkByAsync (fun _ -> Task.fromResult 0)
+            |> TaskSeq.toArrayAsync
+
+        result |> should haveLength 1
+        let _, arr = result[0]
+        arr |> should equal [| 1..10 |]
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-chunkBy on side-effect seq produces correct singleton chunks`` variant = task {
+        let! result =
+            Gen.getSeqWithSideEffect variant
+            |> TaskSeq.chunkBy id
+            |> TaskSeq.toArrayAsync
+
+        result |> should haveLength 10
+
+        result
+        |> Array.iteri (fun i (k, arr) ->
+            k |> should equal (i + 1)
+            arr |> should equal [| i + 1 |])
+    }
+
+    [<Fact>]
+    let ``TaskSeq-chunkBy projection is called exactly once per element`` () = task {
+        let mutable callCount = 0
+
+        let ts = taskSeq { yield! [ 1; 1; 2; 3; 3 ] }
+
+        let! result =
+            ts
+            |> TaskSeq.chunkBy (fun x ->
+                callCount <- callCount + 1
+                x % 2)
+            |> TaskSeq.toArrayAsync
+
+        callCount |> should equal 5
+        result |> should haveLength 3
+    }
+
+    [<Fact>]
+    let ``TaskSeq-chunkByAsync projection is called exactly once per element`` () = task {
+        let mutable callCount = 0
+
+        let ts = taskSeq { yield! [ 1; 1; 2; 3; 3 ] }
+
+        let! result =
+            ts
+            |> TaskSeq.chunkByAsync (fun x -> task {
+                callCount <- callCount + 1
+                return x % 2
+            })
+            |> TaskSeq.toArrayAsync
+
+        callCount |> should equal 5
+        result |> should haveLength 3
+    }
+
+    [<Fact>]
+    let ``TaskSeq-chunkBy does not evaluate elements before enumeration`` () = task {
+        let mutable sourceCount = 0
+
+        let ts = taskSeq {
+            for i in 1..5 do
+                sourceCount <- sourceCount + 1
+                yield i
+        }
+
+        let chunked = TaskSeq.chunkBy (fun x -> x % 2 = 0) ts
+        // Building the pipeline does not consume the source
+        sourceCount |> should equal 0
+
+        let! _ = TaskSeq.toArrayAsync chunked
+        // Only after consuming does the source get evaluated
+        sourceCount |> should equal 5
+    }

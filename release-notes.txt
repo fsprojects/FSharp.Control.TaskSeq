@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - test: add SideEffects module and ImmTaskSeq variant tests to TaskSeq.ChunkBy.Tests.fs, improving coverage for chunkBy and chunkByAsync
 
 1.1.1
     - perf: use while! in groupBy, countBy, partition, except, exceptOfSeq to eliminate redundant mutable 'go' variables and initial MoveNextAsync calls
