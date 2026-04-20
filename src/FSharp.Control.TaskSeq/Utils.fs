@@ -72,4 +72,7 @@ module Async =
         return mapper result
     }
 
-    let inline bind binder (async: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async { return! binder async }
+    let inline bind binder (async: Async<'T>) : Async<'U> = ExtraTopLevelOperators.async {
+        let! result = async
+        return! binder result
+    }

@@ -80,6 +80,7 @@
     <Compile Include="TaskSeq.Using.Tests.fs" />
     <Compile Include="TaskSeq.CancellationToken.Tests.fs" />
     <Compile Include="TaskSeq.WithCancellation.Tests.fs" />
+    <Compile Include="Utils.Tests.fs" />
   </ItemGroup>
 
   <ItemGroup>
