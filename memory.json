@@ -1,5 +1,5 @@
 {
-  "r": "24617865783",
+  "r": "24643779772",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,19 +13,19 @@
     "map2",
     "findBack"
   ],
-  "n": "PRs submitted this run: fix-async-bind-20260419 (Async.bind bug fix, +Utils.Tests.fs, 10 new tests), eng-sdk-10.0.105-20260419 (global.json SDK bump). PR #393 (splitAt rest while-bang) still open. All prev PRs merged 2026-04-17. Do NOT re-engage #139. April monthly summary is issue #375.",
+  "n": "PRs: #393 (splitAt rest while-bang), #394 (Async.bind fix), #396 (test: chunkBy SideEffects) all open. Issue #395 is SDK bump review-issue (protected file). Monthly summary is issue #375. Do NOT re-engage #139. All prev PRs merged 2026-04-17.",
   "prs": {
+    "test-chunkby-sideeffects-20260420": {
+      "branch": "repo-assist/test-chunkby-sideeffects-20260420",
+      "desc": "test: add SideEffects and ImmTaskSeq variant tests for chunkBy/chunkByAsync",
+      "status": "submitted",
+      "pr": 396
+    },
     "fix-async-bind-20260419": {
       "branch": "repo-assist/fix-async-bind-20260419",
       "desc": "fix: correct Async.bind signature and implementation",
       "status": "submitted",
-      "pr": null
-    },
-    "eng-sdk-10.0.105-20260419": {
-      "branch": "repo-assist/eng-sdk-10.0.105-20260419",
-      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105",
-      "status": "submitted",
-      "pr": null
+      "pr": 394
     },
     "refactor-splitAt-rest": {
       "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
@@ -36,6 +36,12 @@
   },
   "pr_attempts": [
     {
+      "branch": "repo-assist/test-chunkby-sideeffects-20260420",
+      "desc": "test: add SideEffects and ImmTaskSeq variant tests for chunkBy/chunkByAsync",
+      "status": "submitted",
+      "run": "24643779772"
+    },
+    {
       "branch": "repo-assist/fix-async-bind-20260419",
       "desc": "fix: correct Async.bind signature and implementation",
       "status": "submitted",
@@ -43,8 +49,8 @@
     },
     {
       "branch": "repo-assist/eng-sdk-10.0.105-20260419",
-      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105",
-      "status": "submitted",
+      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105 (issue #395 - protected file)",
+      "status": "review-issue",
       "run": "24617865783"
     },
     {
@@ -58,30 +64,6 @@
       "desc": "eng: update SmokeTests tooling to match main test project",
       "status": "merged",
       "run": "24542395572"
-    },
-    {
-      "branch": "repo-assist/eng-test-dep-updates-20260416",
-      "desc": "eng: bump test deps (FsUnit.xUnit 6.0.1, TestSdk 18.4.0, coverlet 6.0.4)",
-      "status": "merged",
-      "run": "24486554052"
-    },
-    {
-      "branch": "repo-assist/perf-while-bang-tryTail-20260415",
-      "desc": "perf: use while! in tryTail inner loop",
-      "status": "merged",
-      "run": "24431014310"
-    },
-    {
-      "branch": "repo-assist/perf-while-bang-groupby-countby-partition-20260413",
-      "desc": "perf: use while! in groupBy, countBy, partition, except, exceptOfSeq",
-      "status": "merged",
-      "run": "24321034243"
-    },
-    {
-      "branch": "repo-assist/perf-while-bang-cleanup-20260409-5ddbcb4cb509276b",
-      "desc": "perf: use while! in iter/fold/reduce/mapFold/tryLast/Drop/Truncate",
-      "status": "merged",
-      "run": "24166680310"
     }
   ],
   "comments_made": {
