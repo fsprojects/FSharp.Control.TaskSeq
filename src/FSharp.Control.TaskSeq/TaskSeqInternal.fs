@@ -444,6 +444,7 @@ module internal TaskSeqInternal =
 
                 if hasNext then
                     let! keepGoing = predicate result e.Current
+
                     if keepGoing then
                         let! newState = folder result e.Current
                         result <- newState

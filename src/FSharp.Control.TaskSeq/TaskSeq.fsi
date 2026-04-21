@@ -1883,7 +1883,9 @@ type TaskSeq =
     static member foldWhile:
         predicate: ('State -> 'T -> bool) ->
         folder: ('State -> 'T -> 'State) ->
-            state: 'State -> source: TaskSeq<'T> -> Task<'State>
+        state: 'State ->
+        source: TaskSeq<'T> ->
+            Task<'State>
 
     /// <summary>
     /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence,
@@ -1904,7 +1906,9 @@ type TaskSeq =
     static member foldWhileAsync:
         predicate: ('State -> 'T -> #Task<bool>) ->
         folder: ('State -> 'T -> #Task<'State>) ->
-            state: 'State -> source: TaskSeq<'T> -> Task<'State>
+        state: 'State ->
+        source: TaskSeq<'T> ->
+            Task<'State>
 
     /// <summary>
     /// Like <see cref="TaskSeq.fold" />, but returns the sequence of intermediate results and the final result.

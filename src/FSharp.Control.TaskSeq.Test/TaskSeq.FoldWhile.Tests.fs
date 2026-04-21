@@ -21,12 +21,7 @@ module EmptySeq =
         <| fun () -> TaskSeq.foldWhile (fun _ _ -> true) (fun _ item -> item + 1) 0 null
 
         assertNullArg
-        <| fun () ->
-            TaskSeq.foldWhileAsync
-                (fun _ _ -> Task.fromResult true)
-                (fun _ item -> Task.fromResult (item + 1))
-                0
-                null
+        <| fun () -> TaskSeq.foldWhileAsync (fun _ _ -> Task.fromResult true) (fun _ item -> Task.fromResult (item + 1)) 0 null
 
     [<Theory; ClassData(typeof<TestEmptyVariants>)>]
     let ``TaskSeq-foldWhile returns initial state when empty`` variant = task {
@@ -41,10 +36,7 @@ module EmptySeq =
     let ``TaskSeq-foldWhileAsync returns initial state when empty`` variant = task {
         let! result =
             Gen.getEmptyVariant variant
-            |> TaskSeq.foldWhileAsync
-                (fun _ _ -> Task.fromResult true)
-                (fun _ item -> Task.fromResult (item + 1))
-                -1
+            |> TaskSeq.foldWhileAsync (fun _ _ -> Task.fromResult true) (fun _ item -> Task.fromResult (item + 1)) -1
 
         result |> should equal -1
     }
@@ -105,10 +97,7 @@ module Functionality =
     let ``TaskSeq-foldWhileAsync with always-true predicate behaves like foldAsync`` () = task {
         let! result =
             TaskSeq.ofList [ 1; 2; 3; 4; 5 ]
-            |> TaskSeq.foldWhileAsync
-                (fun _ _ -> Task.fromResult true)
-                (fun acc item -> Task.fromResult (acc + item))
-                0
+            |> TaskSeq.foldWhileAsync (fun _ _ -> Task.fromResult true) (fun acc item -> Task.fromResult (acc + item)) 0
 
         result |> should equal 15
     }
@@ -126,10 +115,7 @@ module Functionality =
     let ``TaskSeq-foldWhileAsync is left-associative like foldAsync`` () = task {
         let! result =
             TaskSeq.ofList [ "b"; "c"; "d" ]
-            |> TaskSeq.foldWhileAsync
-                (fun _ _ -> Task.fromResult true)
-                (fun acc item -> Task.fromResult (acc + item))
-                "a"
+            |> TaskSeq.foldWhileAsync (fun _ _ -> Task.fromResult true) (fun acc item -> Task.fromResult (acc + item)) "a"
 
         result |> should equal "abcd"
     }
@@ -257,10 +243,7 @@ module Halt =
 
         let! _ =
             source
-            |> TaskSeq.foldWhileAsync
-                (fun _ item -> Task.fromResult (item < 3))
-                (fun acc item -> Task.fromResult (acc + item))
-                0
+            |> TaskSeq.foldWhileAsync (fun _ item -> Task.fromResult (item < 3)) (fun acc item -> Task.fromResult (acc + item)) 0
 
         pulled |> should equal 3
     }
