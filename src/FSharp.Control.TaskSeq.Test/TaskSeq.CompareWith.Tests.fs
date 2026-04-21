@@ -241,3 +241,70 @@ module Immutable =
         let! result = TaskSeq.compareWithAsync (fun a b -> Task.fromResult (compare a b)) src1 src2
         result |> should equal 0
     }
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-compareWith consumes both sequences exactly once when equal`` () = task {
+        let mutable count1 = 0
+        let mutable count2 = 0
+
+        let src1 = taskSeq {
+            for i in 1..5 do
+                count1 <- count1 + 1
+                yield i
+        }
+
+        let src2 = taskSeq {
+            for i in 1..5 do
+                count2 <- count2 + 1
+                yield i
+        }
+
+        let! result = TaskSeq.compareWith compare src1 src2
+        result |> should equal 0
+        count1 |> should equal 5
+        count2 |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-compareWith stops consuming sources after first non-zero comparison`` () = task {
+        let mutable count1 = 0
+        let mutable count2 = 0
+
+        let src1 = taskSeq {
+            for i in [ 1; 99; 99; 99; 99 ] do
+                count1 <- count1 + 1
+                yield i
+        }
+
+        let src2 = taskSeq {
+            for i in [ 2; 99; 99; 99; 99 ] do
+                count2 <- count2 + 1
+                yield i
+        }
+
+        let! result = TaskSeq.compareWith compare src1 src2
+        sign result |> should equal -1
+        // compareWith calls MoveNextAsync for the first element of each source before entering the loop;
+        // when the first comparison is non-zero the loop exits immediately without advancing further.
+        count1 |> should equal 1
+        count2 |> should equal 1
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-compareWith two fresh side-effect sequences compare as equal`` variant = task {
+        // Each call to getSeqWithSideEffect creates an independent counter starting at 0,
+        // so both sequences yield 1..10 and should compare as equal.
+        let src1 = Gen.getSeqWithSideEffect variant
+        let src2 = Gen.getSeqWithSideEffect variant
+        let! result = TaskSeq.compareWith compare src1 src2
+        result |> should equal 0
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-compareWithAsync two fresh side-effect sequences compare as equal`` variant = task {
+        let src1 = Gen.getSeqWithSideEffect variant
+        let src2 = Gen.getSeqWithSideEffect variant
+        let! result = TaskSeq.compareWithAsync (fun a b -> Task.fromResult (compare a b)) src1 src2
+        result |> should equal 0
+    }
