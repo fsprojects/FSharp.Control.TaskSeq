@@ -1,5 +1,5 @@
 {
-  "r": "24643779772",
+  "r": "24698651691",
   "m": 375,
   "cur": 375,
   "rej": [
@@ -13,57 +13,49 @@
     "map2",
     "findBack"
   ],
-  "n": "PRs: #393 (splitAt rest while-bang), #394 (Async.bind fix), #396 (test: chunkBy SideEffects) all open. Issue #395 is SDK bump review-issue (protected file). Monthly summary is issue #375. Do NOT re-engage #139. All prev PRs merged 2026-04-17.",
+  "n": "PRs created this run: CompareWith SideEffects tests (branch: repo-assist/test-comparewith-sideeffects-20260421) and Linux main.yaml CI job (branch: repo-assist/eng-linux-main-ci-20260421). PRs #393/#394/#396 merged 2026-04-20. Issue #395 closed 2026-04-20. Dependabot PR #398 open (actions/github-script, repo-assist infra). Do NOT re-engage #139. Monthly summary is issue #375. All prev PRs merged 2026-04-20.",
   "prs": {
-    "test-chunkby-sideeffects-20260420": {
-      "branch": "repo-assist/test-chunkby-sideeffects-20260420",
-      "desc": "test: add SideEffects and ImmTaskSeq variant tests for chunkBy/chunkByAsync",
-      "status": "submitted",
-      "pr": 396
+    "test-comparewith-sideeffects-20260421": {
+      "branch": "repo-assist/test-comparewith-sideeffects-20260421",
+      "desc": "test: add SideEffects module to TaskSeq.CompareWith.Tests.fs",
+      "status": "submitted"
     },
-    "fix-async-bind-20260419": {
-      "branch": "repo-assist/fix-async-bind-20260419",
-      "desc": "fix: correct Async.bind signature and implementation",
-      "status": "submitted",
-      "pr": 394
-    },
-    "refactor-splitAt-rest": {
-      "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
-      "desc": "refactor: simplify splitAt rest taskSeq to use while!",
-      "status": "submitted",
-      "pr": 393
+    "eng-linux-main-ci-20260421": {
+      "branch": "repo-assist/eng-linux-main-ci-20260421",
+      "desc": "eng: add Linux release test job to main.yaml CI",
+      "status": "submitted"
     }
   },
   "pr_attempts": [
     {
+      "branch": "repo-assist/test-comparewith-sideeffects-20260421",
+      "desc": "test: add SideEffects module to TaskSeq.CompareWith.Tests.fs",
+      "status": "submitted",
+      "run": "24698651691"
+    },
+    {
+      "branch": "repo-assist/eng-linux-main-ci-20260421",
+      "desc": "eng: add Linux release test job to main.yaml CI",
+      "status": "submitted",
+      "run": "24698651691"
+    },
+    {
       "branch": "repo-assist/test-chunkby-sideeffects-20260420",
       "desc": "test: add SideEffects and ImmTaskSeq variant tests for chunkBy/chunkByAsync",
-      "status": "submitted",
+      "status": "merged",
       "run": "24643779772"
     },
     {
       "branch": "repo-assist/fix-async-bind-20260419",
       "desc": "fix: correct Async.bind signature and implementation",
-      "status": "submitted",
-      "run": "24617865783"
-    },
-    {
-      "branch": "repo-assist/eng-sdk-10.0.105-20260419",
-      "desc": "eng: bump SDK pin in global.json from 10.0.102 to 10.0.105 (issue #395 - protected file)",
-      "status": "review-issue",
+      "status": "merged",
       "run": "24617865783"
     },
     {
       "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
       "desc": "refactor: simplify splitAt rest taskSeq to use while!",
-      "status": "submitted",
-      "run": "24593211165"
-    },
-    {
-      "branch": "repo-assist/eng-smoke-tests-deps-20260417",
-      "desc": "eng: update SmokeTests tooling to match main test project",
       "status": "merged",
-      "run": "24542395572"
+      "run": "24593211165"
     }
   ],
   "comments_made": {
