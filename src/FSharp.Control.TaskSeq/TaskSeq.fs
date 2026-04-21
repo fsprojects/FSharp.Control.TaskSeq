@@ -540,6 +540,10 @@ type TaskSeq private () =
     static member compareWithAsync comparer source1 source2 = Internal.compareWithAsync comparer source1 source2
     static member fold folder state source = Internal.fold (FolderAction folder) state source
     static member foldAsync folder state source = Internal.fold (AsyncFolderAction folder) state source
+    static member foldUntil folder state source = Internal.foldUntil (FoldUntilAction folder) state source
+
+    static member foldUntilAsync folder state source = Internal.foldUntil (AsyncFoldUntilAction folder) state source
+
     static member scan folder state source = Internal.scan (FolderAction folder) state source
     static member scanAsync folder state source = Internal.scan (AsyncFolderAction folder) state source
     static member reduce folder source = Internal.reduce (FolderAction folder) source

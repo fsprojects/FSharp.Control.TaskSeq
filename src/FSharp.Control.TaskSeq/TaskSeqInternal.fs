@@ -34,6 +34,19 @@ type internal FolderAction<'T, 'State, 'TaskState when 'TaskState :> Task<'State
     | FolderAction of state_action: ('State -> 'T -> 'State)
     | AsyncFolderAction of async_state_action: ('State -> 'T -> 'TaskState)
 
+/// The result of a single folder step in <see cref="TaskSeq.foldUntil" /> or
+/// <see cref="TaskSeq.foldUntilAsync" />: <c>Continue</c> threads the new state and
+/// keeps consuming, <c>Halt</c> records the final state and stops iteration.
+[<Struct>]
+type FoldStep<'State> =
+    | Continue of continue_state: 'State
+    | Halt of halt_state: 'State
+
+[<Struct>]
+type internal FoldUntilAction<'T, 'State, 'TaskStep when 'TaskStep :> Task<FoldStep<'State>>> =
+    | FoldUntilAction of fold_until_action: ('State -> 'T -> FoldStep<'State>)
+    | AsyncFoldUntilAction of async_fold_until_action: ('State -> 'T -> 'TaskStep)
+
 [<Struct>]
 type internal ChooserAction<'T, 'U, 'TaskOption when 'TaskOption :> Task<'U option>> =
     | TryPick of try_pick: ('T -> 'U option)
@@ -405,6 +418,44 @@ module internal TaskSeqInternal =
                 while! e.MoveNextAsync() do
                     let! tempResult = folder result e.Current
                     result <- tempResult
+
+            return result
+        }
+
+    let foldUntil folder initial (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable result = initial
+            let mutable running = true
+
+            match folder with
+            | FoldUntilAction folder ->
+                while running do
+                    let! hasNext = e.MoveNextAsync()
+
+                    if hasNext then
+                        match folder result e.Current with
+                        | Continue s -> result <- s
+                        | Halt s ->
+                            result <- s
+                            running <- false
+                    else
+                        running <- false
+
+            | AsyncFoldUntilAction folder ->
+                while running do
+                    let! hasNext = e.MoveNextAsync()
+
+                    if hasNext then
+                        match! folder result e.Current with
+                        | Continue s -> result <- s
+                        | Halt s ->
+                            result <- s
+                            running <- false
+                    else
+                        running <- false
 
             return result
         }

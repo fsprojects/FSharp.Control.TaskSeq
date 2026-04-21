@@ -1866,6 +1866,42 @@ type TaskSeq =
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
 
     /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an
+    /// accumulator of type <paramref name="'State" /> through the computation, with the ability to stop
+    /// early. The folder returns <c>Continue newState</c> to keep consuming or <c>Halt newState</c> to
+    /// stop iteration immediately; in either case the state is updated. When the folder halts, no further
+    /// elements of the input are enumerated.
+    /// If the folder function <paramref name="folder" /> is asynchronous, consider using
+    /// <see cref="TaskSeq.foldUntilAsync" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state and decides whether to continue or halt.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The state object, either after the folder halts or after the whole sequence has been consumed.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member foldUntil:
+        folder: ('State -> 'T -> FoldStep<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence,
+    /// threading an accumulator of type <paramref name="'State" /> through the computation, with the ability
+    /// to stop early. The folder returns <c>Continue newState</c> to keep consuming or <c>Halt newState</c>
+    /// to stop iteration immediately; in either case the state is updated. When the folder halts, no further
+    /// elements of the input are enumerated.
+    /// If the folder function <paramref name="folder" /> is synchronous, consider using
+    /// <see cref="TaskSeq.foldUntil" />.
+    /// </summary>
+    ///
+    /// <param name="folder">A function that updates the state and decides whether to continue or halt.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The state object, either after the folder halts or after the whole sequence has been consumed.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member foldUntilAsync:
+        folder: ('State -> 'T -> #Task<FoldStep<'State>>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
     /// Like <see cref="TaskSeq.fold" />, but returns the sequence of intermediate results and the final result.
     /// The first element of the output sequence is always the initial state. If the input task sequence
     /// has <c>N</c> elements, the output task sequence has <c>N + 1</c> elements.
