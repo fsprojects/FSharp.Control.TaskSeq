@@ -1,69 +1,20 @@
 {
-  "r": "24698651691",
+  "r": "24754687823",
   "m": 375,
   "cur": 375,
-  "rej": [
-    "rev-sort",
-    "zip4",
-    "map3",
-    "allPairs",
-    "iteri2",
-    "splitInto",
-    "exists2",
-    "map2",
-    "findBack"
-  ],
-  "n": "PRs created this run: CompareWith SideEffects tests (branch: repo-assist/test-comparewith-sideeffects-20260421) and Linux main.yaml CI job (branch: repo-assist/eng-linux-main-ci-20260421). PRs #393/#394/#396 merged 2026-04-20. Issue #395 closed 2026-04-20. Dependabot PR #398 open (actions/github-script, repo-assist infra). Do NOT re-engage #139. Monthly summary is issue #375. All prev PRs merged 2026-04-20.",
+  "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
+  "n": "PRs this run: FirstLastDefault SideEffects (→ est. #403) and Linux debug CI matrix (→ est. #404). PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Do NOT re-engage #139. Monthly summary is #375. TaskSeq.Item has SideEffect module. TaskSeq.Concat has SideEffect (singular). Still missing: Windowed, Unfold SideEffects.",
   "prs": {
-    "test-comparewith-sideeffects-20260421": {
-      "branch": "repo-assist/test-comparewith-sideeffects-20260421",
-      "desc": "test: add SideEffects module to TaskSeq.CompareWith.Tests.fs",
-      "status": "submitted"
-    },
-    "eng-linux-main-ci-20260421": {
-      "branch": "repo-assist/eng-linux-main-ci-20260421",
-      "desc": "eng: add Linux release test job to main.yaml CI",
-      "status": "submitted"
-    }
+    "test-firstlastdefault-sideeffects-20260422": {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: add SideEffects to FirstLastDefault.Tests.fs","status": "submitted"},
+    "eng-linux-debug-ci-20260422": {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: add Linux debug CI job","status": "submitted"},
+    "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
-    {
-      "branch": "repo-assist/test-comparewith-sideeffects-20260421",
-      "desc": "test: add SideEffects module to TaskSeq.CompareWith.Tests.fs",
-      "status": "submitted",
-      "run": "24698651691"
-    },
-    {
-      "branch": "repo-assist/eng-linux-main-ci-20260421",
-      "desc": "eng: add Linux release test job to main.yaml CI",
-      "status": "submitted",
-      "run": "24698651691"
-    },
-    {
-      "branch": "repo-assist/test-chunkby-sideeffects-20260420",
-      "desc": "test: add SideEffects and ImmTaskSeq variant tests for chunkBy/chunkByAsync",
-      "status": "merged",
-      "run": "24643779772"
-    },
-    {
-      "branch": "repo-assist/fix-async-bind-20260419",
-      "desc": "fix: correct Async.bind signature and implementation",
-      "status": "merged",
-      "run": "24617865783"
-    },
-    {
-      "branch": "repo-assist/refactor-splitAt-rest-while-bang-20260418",
-      "desc": "refactor: simplify splitAt rest taskSeq to use while!",
-      "status": "merged",
-      "run": "24593211165"
-    }
+    {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: SideEffects for FirstLastDefault","status": "submitted","run": "24754687823"},
+    {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: Linux debug CI","status": "submitted","run": "24754687823"},
+    {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: Linux main CI","status": "submitted","run": "24698651691"},
+    {"branch": "repo-assist/test-comparewith-sideeffects-20260421","desc": "test: SideEffects CompareWith","status": "merged","run": "24698651691"},
+    {"branch": "repo-assist/fix-async-bind-20260419","desc": "fix: Async.bind","status": "merged","run": "24617865783"}
   ],
-  "comments_made": {
-    "62": "2026-04-01",
-    "140": "2026-03-18",
-    "141": "2026-04-16",
-    "142": "2026-03-27",
-    "143": "2026-03-27",
-    "pr385": "2026-04-13"
-  }
+  "comments_made": {"62": "2026-04-01","140": "2026-03-18","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","pr385": "2026-04-13"}
 }
