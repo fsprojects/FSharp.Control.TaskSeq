@@ -158,3 +158,114 @@ module Functionality =
         first |> should equal second
         first |> should equal [| 0..4 |]
     }
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-unfold generator side-effects accumulate across re-iterations`` () = task {
+        // The generator closes over mutable external state. Each re-iteration starts fresh from
+        // the initial seed (0), but the external counter keeps climbing — demonstrating that
+        // the IAsyncEnumerable itself is stateless but the captured state is shared.
+        let mutable totalCalls = 0
+
+        let ts =
+            TaskSeq.unfold
+                (fun n ->
+                    totalCalls <- totalCalls + 1
+                    if n < 3 then Some(n, n + 1) else None)
+                0
+
+        let! first = ts |> TaskSeq.toArrayAsync
+        first |> should equal [| 0; 1; 2 |]
+        totalCalls |> should equal 4 // 3 Some + 1 None
+
+        let! second = ts |> TaskSeq.toArrayAsync
+        second |> should equal [| 0; 1; 2 |]
+        totalCalls |> should equal 8 // called 4 more times for the second iteration
+    }
+
+    [<Fact>]
+    let ``TaskSeq-unfoldAsync generator side-effects accumulate across re-iterations`` () = task {
+        let mutable totalCalls = 0
+
+        let ts =
+            TaskSeq.unfoldAsync
+                (fun n -> task {
+                    totalCalls <- totalCalls + 1
+                    return if n < 3 then Some(n, n + 1) else None
+                })
+                0
+
+        let! first = ts |> TaskSeq.toArrayAsync
+        first |> should equal [| 0; 1; 2 |]
+        totalCalls |> should equal 4
+
+        let! second = ts |> TaskSeq.toArrayAsync
+        second |> should equal [| 0; 1; 2 |]
+        totalCalls |> should equal 8
+    }
+
+    [<Fact>]
+    let ``TaskSeq-unfold with take stops generator calls at the limit`` () = task {
+        let mutable callCount = 0
+
+        // Infinite generator: always returns Some
+        let ts =
+            TaskSeq.unfold
+                (fun n ->
+                    callCount <- callCount + 1
+                    Some(n, n + 1))
+                0
+
+        let! result = ts |> TaskSeq.take 5 |> TaskSeq.toArrayAsync
+        result |> should equal [| 0; 1; 2; 3; 4 |]
+
+        // take 5 pulls exactly 5 elements; with an always-Some generator no
+        // extra sentinel call is needed, so callCount should be exactly 5.
+        callCount |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-unfoldAsync with take stops generator calls at the limit`` () = task {
+        let mutable callCount = 0
+
+        let ts =
+            TaskSeq.unfoldAsync
+                (fun n -> task {
+                    callCount <- callCount + 1
+                    return Some(n, n + 1)
+                })
+                0
+
+        let! result = ts |> TaskSeq.take 5 |> TaskSeq.toArrayAsync
+        result |> should equal [| 0; 1; 2; 3; 4 |]
+        callCount |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-unfold propagates exception thrown inside the generator`` () =
+        let ts =
+            TaskSeq.unfold
+                (fun n ->
+                    if n = 3 then
+                        failwith "generator-boom"
+
+                    Some(n, n + 1))
+                0
+
+        fun () -> ts |> consumeTaskSeq
+        |> should throwAsyncExact typeof<System.Exception>
+
+    [<Fact>]
+    let ``TaskSeq-unfoldAsync propagates exception thrown inside the async generator`` () =
+        let ts =
+            TaskSeq.unfoldAsync
+                (fun n -> task {
+                    if n = 3 then
+                        failwith "async-generator-boom"
+
+                    return Some(n, n + 1)
+                })
+                0
+
+        fun () -> ts |> consumeTaskSeq
+        |> should throwAsyncExact typeof<System.Exception>
