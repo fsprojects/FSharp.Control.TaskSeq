@@ -1,17 +1,20 @@
 {
-  "r": "24754687823",
+  "r": "24811082291",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PRs this run: FirstLastDefault SideEffects (→ est. #403) and Linux debug CI matrix (→ est. #404). PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Do NOT re-engage #139. Monthly summary is #375. TaskSeq.Item has SideEffect module. TaskSeq.Concat has SideEffect (singular). Still missing: Windowed, Unfold SideEffects.",
+  "n": "PRs this run: Unfold SideEffects (→ est. #405) and SmokeTests deps update (→ est. #406). PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #404: Linux debug CI blocked by workflow permissions (patch attached for manual application). Do NOT re-engage #139. Monthly summary is #375. TaskSeq.Concat has SideEffect (singular) not SideEffects. Windowed already has SideEffects module.",
   "prs": {
+    "test-unfold-sideeffects-20260423": {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: add SideEffects module to TaskSeq.Unfold.Tests.fs","status": "submitted"},
+    "eng-smoketests-deps-20260423": {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: update SmokeTests to FSharp.Control.TaskSeq 1.1.1 and FsToolkit 4.18.0","status": "submitted"},
     "test-firstlastdefault-sideeffects-20260422": {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: add SideEffects to FirstLastDefault.Tests.fs","status": "submitted"},
-    "eng-linux-debug-ci-20260422": {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: add Linux debug CI job","status": "submitted"},
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: SideEffects for Unfold","status": "submitted","run": "24811082291"},
+    {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: SmokeTests deps update","status": "submitted","run": "24811082291"},
     {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: SideEffects for FirstLastDefault","status": "submitted","run": "24754687823"},
-    {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: Linux debug CI","status": "submitted","run": "24754687823"},
+    {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: Linux debug CI (blocked)","status": "blocked-workflow-perms","run": "24754687823"},
     {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: Linux main CI","status": "submitted","run": "24698651691"},
     {"branch": "repo-assist/test-comparewith-sideeffects-20260421","desc": "test: SideEffects CompareWith","status": "merged","run": "24698651691"},
     {"branch": "repo-assist/fix-async-bind-20260419","desc": "fix: Async.bind","status": "merged","run": "24617865783"}
