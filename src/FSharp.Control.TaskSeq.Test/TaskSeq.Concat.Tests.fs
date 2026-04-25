@@ -181,7 +181,7 @@ module Immutable =
             |> consumeTaskSeq
         |> should throwAsyncExact typeof<NullReferenceException>
 
-module SideEffect =
+module SideEffects =
     [<Fact>]
     let ``TaskSeq-concat executes side effects of nested (taskseq)`` () =
         let mutable i = 0
