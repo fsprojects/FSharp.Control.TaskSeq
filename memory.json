@@ -1,10 +1,11 @@
 {
-  "r": "24867008695",
+  "r": "24918782808",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PR submitted this run: OfXXX SideEffects (branch: repo-assist/test-ofxxx-sideeffects-20260424). PR #405 (Unfold SideEffects) open. PR #406 (SmokeTests deps) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. TaskSeq.Concat has SideEffect (singular) not SideEffects. Windowed already has SideEffects module. Issue #140: new human activity 2026-04-21/22 - T-Gro/bartelink discussing FSharp.Core upstreaming of Task helpers; commented in run 24867008695. Do NOT re-engage #139.",
+  "n": "PR submitted this run: rename SideEffect->SideEffects (branch: repo-assist/improve-sideeffects-naming-20260425). PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139.",
   "prs": {
+    "improve-sideeffects-naming-20260425": {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect -> SideEffects in Concat, Delay, and Item tests","status": "submitted"},
     "test-ofxxx-sideeffects-20260424": {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: add SideEffects module to TaskSeq.OfXXX.Tests.fs","status": "submitted"},
     "test-unfold-sideeffects-20260423": {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: add SideEffects module to TaskSeq.Unfold.Tests.fs","status": "submitted"},
     "eng-smoketests-deps-20260423": {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: update SmokeTests to FSharp.Control.TaskSeq 1.1.1 and FsToolkit 4.18.0","status": "submitted"},
@@ -12,6 +13,7 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "submitted","run": "24918782808"},
     {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: SideEffects for OfXXX (re-iteration semantics)","status": "submitted","run": "24867008695"},
     {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: SideEffects for Unfold","status": "submitted","run": "24811082291"},
     {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: SmokeTests deps update","status": "submitted","run": "24811082291"},
