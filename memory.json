@@ -1,11 +1,13 @@
 {
-  "r": "24918782808",
+  "r": "24944958058",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PR submitted this run: rename SideEffect->SideEffects (branch: repo-assist/improve-sideeffects-naming-20260425). PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139.",
+  "n": "PRs submitted this run: eng-coverlet-10 (#409 approx) and test-withcancellation-sideeffects (#410 approx). PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139. WithCancellation SideEffects added.",
   "prs": {
-    "improve-sideeffects-naming-20260425": {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect -> SideEffects in Concat, Delay, and Item tests","status": "submitted"},
+    "eng-coverlet-10-20260426": {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: update coverlet.collector 6.0.4 -> 10.0.0 in test project","status": "submitted"},
+    "test-withcancellation-sideeffects-20260426": {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: add SideEffects module to TaskSeq.WithCancellation.Tests.fs","status": "submitted"},
+    "improve-sideeffects-naming-20260425": {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect -> SideEffects in Concat, Delay, Item tests","status": "submitted"},
     "test-ofxxx-sideeffects-20260424": {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: add SideEffects module to TaskSeq.OfXXX.Tests.fs","status": "submitted"},
     "test-unfold-sideeffects-20260423": {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: add SideEffects module to TaskSeq.Unfold.Tests.fs","status": "submitted"},
     "eng-smoketests-deps-20260423": {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: update SmokeTests to FSharp.Control.TaskSeq 1.1.1 and FsToolkit 4.18.0","status": "submitted"},
@@ -13,6 +15,8 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: coverlet 6.0.4->10.0.0","status": "submitted","run": "24944958058"},
+    {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: SideEffects for WithCancellation","status": "submitted","run": "24944958058"},
     {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "submitted","run": "24918782808"},
     {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: SideEffects for OfXXX (re-iteration semantics)","status": "submitted","run": "24867008695"},
     {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: SideEffects for Unfold","status": "submitted","run": "24811082291"},
