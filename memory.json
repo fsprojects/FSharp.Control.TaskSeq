@@ -1,10 +1,11 @@
 {
-  "r": "24944958058",
+  "r": "24971927223",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PRs submitted this run: eng-coverlet-10 (#409 approx) and test-withcancellation-sideeffects (#410 approx). PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139. WithCancellation SideEffects added.",
+  "n": "PRs submitted this run: perf-pairwise-distinct-until-changed (#411 approx). PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139. Perf while! pattern complete: early-exit (forall/exists/contains/tryFind/tryPick) and multi-enum (zip/zip3/zipWith) confirmed not convertible.",
   "prs": {
+    "perf-pairwise-distinct-until-changed-20260427": {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: replace ValueOption tracking with while! in pairwise and distinctUntilChanged family","status": "submitted"},
     "eng-coverlet-10-20260426": {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: update coverlet.collector 6.0.4 -> 10.0.0 in test project","status": "submitted"},
     "test-withcancellation-sideeffects-20260426": {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: add SideEffects module to TaskSeq.WithCancellation.Tests.fs","status": "submitted"},
     "improve-sideeffects-naming-20260425": {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect -> SideEffects in Concat, Delay, Item tests","status": "submitted"},
@@ -15,6 +16,7 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "submitted","run": "24971927223"},
     {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: coverlet 6.0.4->10.0.0","status": "submitted","run": "24944958058"},
     {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: SideEffects for WithCancellation","status": "submitted","run": "24944958058"},
     {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "submitted","run": "24918782808"},
@@ -27,5 +29,5 @@
     {"branch": "repo-assist/test-comparewith-sideeffects-20260421","desc": "test: SideEffects CompareWith","status": "merged","run": "24698651691"},
     {"branch": "repo-assist/fix-async-bind-20260419","desc": "fix: Async.bind","status": "merged","run": "24617865783"}
   ],
-  "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","pr385": "2026-04-13"}
+  "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","pr385": "2026-04-13","pr401": "2026-04-27"}
 }
