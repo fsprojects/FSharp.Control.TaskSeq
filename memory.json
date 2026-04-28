@@ -1,10 +1,12 @@
 {
-  "r": "24971927223",
+  "r": "25028420674",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PRs submitted this run: perf-pairwise-distinct-until-changed (#411 approx). PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139. Perf while! pattern complete: early-exit (forall/exists/contains/tryFind/tryPick) and multi-enum (zip/zip3/zipWith) confirmed not convertible.",
+  "n": "PRs submitted this run: #413 (NuGet/login v1.2.0), #414 (Using SideEffects). PR #412 Dependabot superseded by #413. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #375: Monthly summary. Do NOT re-engage #139.",
   "prs": {
+    "test-using-sideeffects-20260428": {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: add SideEffects module to TaskSeq.Using.Tests.fs","status": "submitted"},
+    "eng-nuget-login-v1.2.0-20260428": {"branch": "repo-assist/eng-nuget-login-v1.2.0-20260428","desc": "eng: update NuGet/login from v1.1.0 to v1.2.0 in publish.yaml","status": "submitted"},
     "perf-pairwise-distinct-until-changed-20260427": {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: replace ValueOption tracking with while! in pairwise and distinctUntilChanged family","status": "submitted"},
     "eng-coverlet-10-20260426": {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: update coverlet.collector 6.0.4 -> 10.0.0 in test project","status": "submitted"},
     "test-withcancellation-sideeffects-20260426": {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: add SideEffects module to TaskSeq.WithCancellation.Tests.fs","status": "submitted"},
@@ -16,6 +18,8 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using (use/use! CE keywords)","status": "submitted","run": "25028420674"},
+    {"branch": "repo-assist/eng-nuget-login-v1.2.0-20260428","desc": "eng: NuGet/login v1.1->v1.2, bundles Dependabot #412","status": "submitted","run": "25028420674"},
     {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "submitted","run": "24971927223"},
     {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: coverlet 6.0.4->10.0.0","status": "submitted","run": "24944958058"},
     {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: SideEffects for WithCancellation","status": "submitted","run": "24944958058"},
