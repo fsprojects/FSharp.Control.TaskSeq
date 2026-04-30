@@ -1,10 +1,11 @@
 {
-  "r": "25086050418",
+  "r": "25142275329",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PR #413 was actually an ISSUE (blocked workflow perms, manual patch). PR #414 (Using SideEffects) open. PR #412 Dependabot open. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #415 commented. Issue #375: Monthly summary. Do NOT re-engage #139.",
+  "n": "PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep) submitted. PR #414 (Using SideEffects) open. PR #412 Dependabot open. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #415 commented. Issue #375: Monthly summary. Do NOT re-engage #139.",
   "prs": {
+    "feat-channel-integration-20260430": {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: add TaskSeq.toChannelAsync and TaskSeq.ofChannel for Channel integration","status": "submitted"},
     "test-using-sideeffects-20260428": {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: add SideEffects module to TaskSeq.Using.Tests.fs","status": "submitted"},
     "perf-pairwise-distinct-until-changed-20260427": {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: replace ValueOption tracking with while! in pairwise and distinctUntilChanged family","status": "submitted"},
     "eng-coverlet-10-20260426": {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: update coverlet.collector 6.0.4 -> 10.0.0 in test project","status": "submitted"},
@@ -17,6 +18,7 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel, System.Threading.Channels 8.0.0 dep","status": "submitted","run": "25142275329"},
     {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using (use/use! CE keywords)","status": "submitted","run": "25028420674"},
     {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "submitted","run": "24971927223"},
     {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: coverlet 6.0.4->10.0.0","status": "submitted","run": "24944958058"},
@@ -31,5 +33,5 @@
     {"branch": "repo-assist/test-comparewith-sideeffects-20260421","desc": "test: SideEffects CompareWith","status": "merged","run": "24698651691"},
     {"branch": "repo-assist/fix-async-bind-20260419","desc": "fix: Async.bind","status": "merged","run": "24617865783"}
   ],
-  "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-29","pr385": "2026-04-13","pr401": "2026-04-27"}
+  "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-30","pr385": "2026-04-13","pr401": "2026-04-27"}
 }
