@@ -409,6 +409,53 @@ module internal TaskSeqInternal =
             return result
         }
 
+    let foldWhile predicate folder initial (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable result = initial
+            let mutable running = true
+
+            while running do
+                let! hasNext = e.MoveNextAsync()
+
+                if hasNext then
+                    if predicate result e.Current then
+                        result <- folder result e.Current
+                    else
+                        running <- false
+                else
+                    running <- false
+
+            return result
+        }
+
+    let foldWhileAsync predicate folder initial (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let mutable result = initial
+            let mutable running = true
+
+            while running do
+                let! hasNext = e.MoveNextAsync()
+
+                if hasNext then
+                    let! keepGoing = predicate result e.Current
+
+                    if keepGoing then
+                        let! newState = folder result e.Current
+                        result <- newState
+                    else
+                        running <- false
+                else
+                    running <- false
+
+            return result
+        }
+
     let scan folder initial (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
