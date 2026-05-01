@@ -1,10 +1,11 @@
 {
-  "r": "25142275329",
+  "r": "25197641079",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep) submitted. PR #414 (Using SideEffects) open. PR #412 Dependabot open. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Issue #415 commented. Issue #375: Monthly summary. Do NOT re-engage #139.",
+  "n": "Monthly summary #375 (Apr 2026) closed; new May 2026 summary created. PR #417 (PackageValidationBaselineVersion 0.4.0->1.1.1) submitted this run. All 11 open Repo Assist PRs CI-passing. PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep) open. PR #414 (Using SideEffects) open. PR #412 Dependabot open. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Do NOT re-engage #139.",
   "prs": {
+    "eng-package-validation-baseline-20260501": {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: update PackageValidationBaselineVersion 0.4.0->1.1.1; regenerate CompatibilitySuppressions.xml","status": "submitted"},
     "feat-channel-integration-20260430": {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: add TaskSeq.toChannelAsync and TaskSeq.ofChannel for Channel integration","status": "submitted"},
     "test-using-sideeffects-20260428": {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: add SideEffects module to TaskSeq.Using.Tests.fs","status": "submitted"},
     "perf-pairwise-distinct-until-changed-20260427": {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: replace ValueOption tracking with while! in pairwise and distinctUntilChanged family","status": "submitted"},
@@ -18,6 +19,7 @@
     "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
   },
   "pr_attempts": [
+    {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1","status": "submitted","run": "25197641079"},
     {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel, System.Threading.Channels 8.0.0 dep","status": "submitted","run": "25142275329"},
     {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using (use/use! CE keywords)","status": "submitted","run": "25028420674"},
     {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "submitted","run": "24971927223"},
