@@ -91,3 +91,81 @@ module Immutable =
         let! result = TaskSeq.singleton 42 |> TaskSeq.lastOrDefault 0
         result |> should equal 42
     }
+
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-firstOrDefault __special-case__ prove it does not read beyond first yield`` () = task {
+        let mutable x = 42
+
+        let ts = taskSeq {
+            yield x
+            x <- x + 1 // we never get here
+        }
+
+        let! fortyTwo = ts |> TaskSeq.firstOrDefault 0
+        let! stillFortyTwo = ts |> TaskSeq.firstOrDefault 0 // the statement after 'yield' will never be reached
+
+        fortyTwo |> should equal 42
+        stillFortyTwo |> should equal 42
+    }
+
+    [<Fact>]
+    let ``TaskSeq-firstOrDefault __special-case__ prove early side effect is executed`` () = task {
+        let mutable x = 42
+
+        let ts = taskSeq {
+            x <- x + 1
+            x <- x + 1
+            yield 42
+            x <- x + 200 // we won't get here!
+        }
+
+        let! result = ts |> TaskSeq.firstOrDefault 0
+        result |> should equal 42
+        x |> should equal 44
+
+        let! result = ts |> TaskSeq.firstOrDefault 0
+        result |> should equal 42
+        x |> should equal 46
+    }
+
+    [<Fact>]
+    let ``TaskSeq-lastOrDefault __special-case__ prove it reads the entire sequence`` () = task {
+        let mutable x = 42
+
+        let ts = taskSeq {
+            yield x
+            x <- x + 1 // will be executed
+            yield x
+            x <- x + 1 // will be executed
+        }
+
+        let! result = ts |> TaskSeq.lastOrDefault -1
+        result |> should equal 43
+        x |> should equal 44
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-firstOrDefault returns first item in a side-effect sequence`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+
+        let! first = ts |> TaskSeq.firstOrDefault 0
+        first |> should equal 1
+
+        // side effect: re-enumerating changes the first item
+        let! secondFirst = ts |> TaskSeq.firstOrDefault 0
+        secondFirst |> should not' (equal 1)
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-lastOrDefault returns last item and exhausts the sequence`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+
+        let! last = ts |> TaskSeq.lastOrDefault 0
+        last |> should equal 10
+
+        // side effect: re-enumerating continues from mutated state
+        let! secondLast = ts |> TaskSeq.lastOrDefault 0
+        secondLast |> should equal 20
+    }
