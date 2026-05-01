@@ -105,7 +105,7 @@ module Immutable =
         tail |> should equal (Some 10)
     }
 
-module SideEffect =
+module SideEffects =
     [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
     let ``TaskSeq-item prove it searches the whole sequence`` variant = task {
         let ts = Gen.getSeqWithSideEffect variant

@@ -30,7 +30,7 @@ module Immutable =
         |> TaskSeq.delay
         |> validateSequence
 
-module SideEffect =
+module SideEffects =
     [<Fact>]
     let ``TaskSeq-delay executes side effects`` () = task {
         let mutable i = 0
