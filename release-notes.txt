@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - feat: add `TaskSeq.toChannelAsync` and `TaskSeq.ofChannel` for bidirectional `System.Threading.Channels` integration, closing #415
     - eng: update PackageValidationBaselineVersion from 0.4.0 to 1.1.1 to enforce binary compatibility checks against the current stable release
     - test: add SideEffects module and ImmTaskSeq variant tests to TaskSeq.ChunkBy.Tests.fs, improving coverage for chunkBy and chunkByAsync
     - fixes: `Async.bind` signature corrected from `(Async<'T> -> Async<'U>)` to `('T -> Async<'U>)` to match standard monadic bind semantics (same as `Task.bind`); the previous signature made the function effectively equivalent to direct application

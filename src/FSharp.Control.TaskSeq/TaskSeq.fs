@@ -2,6 +2,7 @@ namespace FSharp.Control
 
 open System.Collections.Generic
 open System.Threading
+open System.Threading.Channels
 open System.Threading.Tasks
 
 // Just for convenience
@@ -180,6 +181,23 @@ type TaskSeq private () =
 
     static member toIListAsync source = Internal.toResizeArrayAndMapAsync (fun x -> x :> IList<_>) source
 
+    static member toChannelAsync (writer: ChannelWriter<'T>) (source: TaskSeq<'T>) : Task =
+        Internal.checkNonNull (nameof writer) writer
+        Internal.checkNonNull (nameof source) source
+
+        task {
+            try
+                use e = source.GetAsyncEnumerator CancellationToken.None
+
+                while! e.MoveNextAsync() do
+                    do! writer.WriteAsync e.Current
+
+                writer.TryComplete() |> ignore
+            with exn ->
+                writer.TryComplete exn |> ignore
+        }
+        :> Task
+
     //
     // Convert 'OfXXX' functions
     //
@@ -259,6 +277,17 @@ type TaskSeq private () =
             for c in source do
                 let! c = Async.toTask c
                 yield c
+        }
+
+    static member ofChannel(reader: ChannelReader<'T>) : TaskSeq<'T> =
+        Internal.checkNonNull (nameof reader) reader
+
+        taskSeq {
+            while! reader.WaitToReadAsync() do
+                let mutable item = Unchecked.defaultof<_>
+
+                while reader.TryRead &item do
+                    yield item
         }
 
     static member withCancellation (cancellationToken: CancellationToken) (source: TaskSeq<'T>) =
