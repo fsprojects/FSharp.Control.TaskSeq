@@ -3,9 +3,11 @@ Release notes:
 
 Unreleased
     - test: rename `SideEffect` module to `SideEffects` in TaskSeq.Concat.Tests.fs, TaskSeq.Delay.Tests.fs, and TaskSeq.Item.Tests.fs for consistency with the rest of the test suite (50+ files already use the plural form)
+    - adds TaskSeq.foldWhile and TaskSeq.foldWhileAsync: fold with early termination via a (state, element) -> bool predicate (takeWhile-style, exclusive). When the predicate returns false, iteration halts without folding that element; no further elements are enumerated.
     - feat: add `TaskSeq.toChannelAsync` and `TaskSeq.ofChannel` for bidirectional `System.Threading.Channels` integration, closing #415
     - eng: update PackageValidationBaselineVersion from 0.4.0 to 1.1.1 to enforce binary compatibility checks against the current stable release
     - test: add SideEffects module and ImmTaskSeq variant tests to TaskSeq.ChunkBy.Tests.fs, improving coverage for chunkBy and chunkByAsync
+    - test: add SideEffects module to TaskSeq.WithCancellation.Tests.fs, verifying re-iteration semantics are preserved when wrapping with a CancellationToken
     - fixes: `Async.bind` signature corrected from `(Async<'T> -> Async<'U>)` to `('T -> Async<'U>)` to match standard monadic bind semantics (same as `Task.bind`); the previous signature made the function effectively equivalent to direct application
     - refactor: simplify splitAt 'rest' taskSeq to use while!, removing redundant go2 mutable and manual MoveNextAsync pre-advance
 
