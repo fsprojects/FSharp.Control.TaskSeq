@@ -170,3 +170,57 @@ module ``Sequence contents`` =
 
         collected |> Seq.toArray |> should equal [| 1..5 |]
     }
+
+module SideEffects =
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-withCancellation applied multiple times`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let wrapped = TaskSeq.withCancellation CancellationToken.None ts
+
+        let! first = wrapped |> TaskSeq.toArrayAsync
+        let! second = wrapped |> TaskSeq.toArrayAsync
+        let! third = wrapped |> TaskSeq.toArrayAsync
+
+        first |> should equal [| 1..10 |]
+        second |> should equal [| 11..20 |]
+        third |> should equal [| 21..30 |]
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-withCancellation with active CancellationToken applied multiple times`` variant = task {
+        use cts = new CancellationTokenSource()
+        let ts = Gen.getSeqWithSideEffect variant
+        let wrapped = TaskSeq.withCancellation cts.Token ts
+
+        let! first = wrapped |> TaskSeq.toArrayAsync
+        let! second = wrapped |> TaskSeq.toArrayAsync
+
+        first |> should equal [| 1..10 |]
+        second |> should equal [| 11..20 |]
+    }
+
+    [<Fact>]
+    let ``TaskSeq-withCancellation evaluates each source element exactly once per iteration`` () = task {
+        let mutable count = 0
+
+        let ts = taskSeq {
+            for i in 1..5 do
+                count <- count + 1
+                yield i
+        }
+
+        let! _ =
+            ts
+            |> TaskSeq.withCancellation CancellationToken.None
+            |> TaskSeq.toArrayAsync
+
+        count |> should equal 5
+
+        let! _ =
+            ts
+            |> TaskSeq.withCancellation CancellationToken.None
+            |> TaskSeq.toArrayAsync
+
+        count |> should equal 10
+    }
