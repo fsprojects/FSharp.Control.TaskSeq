@@ -74,5 +74,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
       <!-- if using "remove unused references", this prevents FSharp.Core from being shown in that list -->
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
+    <!-- Provides System.Threading.Channels for netstandard2.1 consumers; built into net5.0+ -->
+    <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
   </ItemGroup>
 </Project>

@@ -2,6 +2,7 @@ namespace FSharp.Control
 
 open System.Collections.Generic
 open System.Threading
+open System.Threading.Channels
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -530,6 +531,20 @@ type TaskSeq =
     static member toIListAsync: source: TaskSeq<'T> -> Task<IList<'T>>
 
     /// <summary>
+    /// Writes all elements of the input task sequence <paramref name="source" /> to a
+    /// <see cref="ChannelWriter&lt;'T>" /> and marks the writer as complete when the sequence
+    /// is exhausted. If an exception is raised during iteration, the writer is completed with
+    /// that exception so that downstream readers observe it.
+    /// This function is non-blocking while it writes to the channel.
+    /// </summary>
+    ///
+    /// <param name="writer">The channel writer to write elements into.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A <see cref="Task" /> that completes when all elements have been written.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when <paramref name="writer" /> or <paramref name="source" /> is null.</exception>
+    static member toChannelAsync: writer: ChannelWriter<'T> -> source: TaskSeq<'T> -> Task
+
+    /// <summary>
     /// Views the given <see cref="array" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
     /// </summary>
     ///
@@ -641,6 +656,17 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     static member ofAsyncArray: source: Async<'T> array -> TaskSeq<'T>
+
+    /// <summary>
+    /// Views a <see cref="ChannelReader&lt;'T>" /> as a task sequence. Elements are yielded as they
+    /// become available; the sequence ends when the channel is completed and all buffered elements
+    /// have been consumed.
+    /// </summary>
+    ///
+    /// <param name="reader">The channel reader to read elements from.</param>
+    /// <returns>A task sequence that yields elements from the channel.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when <paramref name="reader" /> is null.</exception>
+    static member ofChannel: reader: ChannelReader<'T> -> TaskSeq<'T>
 
     /// <summary>
     /// Returns a task sequence that, when iterated, passes the given <paramref name="cancellationToken" /> to the
@@ -1864,6 +1890,51 @@ type TaskSeq =
     /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
     static member foldAsync:
         folder: ('State -> 'T -> #Task<'State>) -> state: 'State -> source: TaskSeq<'T> -> Task<'State>
+
+    /// <summary>
+    /// Applies the function <paramref name="folder" /> to each element in the task sequence, threading an
+    /// accumulator of type <paramref name="'State" /> through the computation, for as long as
+    /// <paramref name="predicate" /> returns <c>true</c>. The predicate is evaluated against the current
+    /// state and next element before that element is folded in; once it returns <c>false</c> the element
+    /// is not folded, iteration stops, and no further elements of the input are enumerated.
+    /// If either function is asynchronous, consider using <see cref="TaskSeq.foldWhileAsync" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">A function that, given the current state and next element, returns <c>true</c> to keep folding or <c>false</c> to stop.</param>
+    /// <param name="folder">A function that updates the state with each element from the sequence.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The state object after iteration halted, or after the whole sequence was consumed.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member foldWhile:
+        predicate: ('State -> 'T -> bool) ->
+        folder: ('State -> 'T -> 'State) ->
+        state: 'State ->
+        source: TaskSeq<'T> ->
+            Task<'State>
+
+    /// <summary>
+    /// Applies the asynchronous function <paramref name="folder" /> to each element in the task sequence,
+    /// threading an accumulator of type <paramref name="'State" /> through the computation, for as long as
+    /// the asynchronous <paramref name="predicate" /> returns <c>true</c>. The predicate is evaluated
+    /// against the current state and next element before that element is folded in; once it returns
+    /// <c>false</c> the element is not folded, iteration stops, and no further elements of the input are
+    /// enumerated.
+    /// If both functions are synchronous, consider using <see cref="TaskSeq.foldWhile" />.
+    /// </summary>
+    ///
+    /// <param name="predicate">An async function that, given the current state and next element, returns <c>true</c> to keep folding or <c>false</c> to stop.</param>
+    /// <param name="folder">An async function that updates the state with each element from the sequence.</param>
+    /// <param name="state">The initial state.</param>
+    /// <param name="source">The input sequence.</param>
+    /// <returns>The state object after iteration halted, or after the whole sequence was consumed.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member foldWhileAsync:
+        predicate: ('State -> 'T -> #Task<bool>) ->
+        folder: ('State -> 'T -> #Task<'State>) ->
+        state: 'State ->
+        source: TaskSeq<'T> ->
+            Task<'State>
 
     /// <summary>
     /// Like <see cref="TaskSeq.fold" />, but returns the sequence of intermediate results and the final result.

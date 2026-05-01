@@ -1,6 +1,7 @@
 module TaskSeq.Tests.``Conversion-To``
 
 open System.Collections.Generic
+open System.Threading.Channels
 
 open Xunit
 open FsUnit.Xunit
@@ -186,3 +187,72 @@ module SideEffects =
         let (results2: seq<_>) = tq |> TaskSeq.toSeq
         results1 |> Seq.toArray |> should equal [| 1..10 |]
         results2 |> Seq.toArray |> should equal [| 11..20 |]
+
+module Channel =
+
+    [<Fact>]
+    let ``TaskSeq-toChannelAsync with null writer raises`` () =
+        assertNullArg
+        <| fun () ->
+            TaskSeq.toChannelAsync null (TaskSeq.ofArray [| 1 |])
+            |> ignore
+
+    [<Fact>]
+    let ``TaskSeq-toChannelAsync with null source raises`` () =
+        let ch = Channel.CreateUnbounded<int>()
+
+        assertNullArg
+        <| fun () -> TaskSeq.toChannelAsync ch.Writer null |> ignore
+
+    [<Fact>]
+    let ``TaskSeq-ofChannel with null reader raises`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.ofChannel<int> null |> ignore
+
+    [<Fact>]
+    let ``TaskSeq-toChannelAsync with empty source completes the channel`` () = task {
+        let ch = Channel.CreateUnbounded<int>()
+        do! TaskSeq.toChannelAsync ch.Writer TaskSeq.empty
+        ch.Reader.Completion.IsCompleted |> should be True
+        let! results = TaskSeq.ofChannel ch.Reader |> TaskSeq.toArrayAsync
+        results |> should be Empty
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-toChannelAsync writes all elements and completes the channel`` variant = task {
+        let tq = Gen.getSeqImmutable variant
+        let ch = Channel.CreateUnbounded<int>()
+        do! TaskSeq.toChannelAsync ch.Writer tq
+        let! results = TaskSeq.ofChannel ch.Reader |> TaskSeq.toArrayAsync
+        results |> should equal [| 1..10 |]
+        // Completion resolves once the channel is marked done and the buffer is drained
+        do! ch.Reader.Completion
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-ofChannel yields all elements written to the channel`` variant = task {
+        let tq = Gen.getSeqImmutable variant
+        let ch = Channel.CreateUnbounded<int>()
+        do! TaskSeq.toChannelAsync ch.Writer tq
+        let! results = TaskSeq.ofChannel ch.Reader |> TaskSeq.toArrayAsync
+        results |> should equal [| 1..10 |]
+    }
+
+    [<Fact>]
+    let ``TaskSeq-ofChannel ends when channel is completed and drained`` () = task {
+        let ch = Channel.CreateUnbounded<int>()
+        do! ch.Writer.WriteAsync 42
+        do! ch.Writer.WriteAsync 99
+        ch.Writer.Complete()
+        let! results = TaskSeq.ofChannel ch.Reader |> TaskSeq.toArrayAsync
+        results |> should equal [| 42; 99 |]
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-toChannelAsync executes side effects`` variant = task {
+        let tq = Gen.getSeqWithSideEffect variant
+        let ch = Channel.CreateUnbounded<int>()
+        do! TaskSeq.toChannelAsync ch.Writer tq
+        let! results = TaskSeq.ofChannel ch.Reader |> TaskSeq.toArrayAsync
+        results |> should equal [| 1..10 |]
+    }
