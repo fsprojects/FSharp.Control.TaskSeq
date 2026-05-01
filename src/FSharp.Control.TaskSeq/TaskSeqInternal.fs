@@ -1535,73 +1535,74 @@ module internal TaskSeqInternal =
         checkNonNull (nameof source) source
 
         taskSeq {
-            let mutable maybePrevious = ValueNone
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
 
-            for current in source do
-                match maybePrevious with
-                | ValueNone ->
-                    yield current
-                    maybePrevious <- ValueSome current
-                | ValueSome previous ->
-                    if previous = current then
-                        () // skip
-                    else
+            if hasFirst then
+                let mutable previous = e.Current
+                yield previous
+
+                while! e.MoveNextAsync() do
+                    let current = e.Current
+
+                    if current <> previous then
                         yield current
-                        maybePrevious <- ValueSome current
+                        previous <- current
         }
 
     let distinctUntilChangedWith (comparer: 'T -> 'T -> bool) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
-            let mutable maybePrevious = ValueNone
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
 
-            for current in source do
-                match maybePrevious with
-                | ValueNone ->
-                    yield current
-                    maybePrevious <- ValueSome current
-                | ValueSome previous ->
-                    if comparer previous current then
-                        () // skip
-                    else
+            if hasFirst then
+                let mutable previous = e.Current
+                yield previous
+
+                while! e.MoveNextAsync() do
+                    let current = e.Current
+
+                    if not (comparer previous current) then
                         yield current
-                        maybePrevious <- ValueSome current
+                        previous <- current
         }
 
     let distinctUntilChangedWithAsync (comparer: 'T -> 'T -> #Task<bool>) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
-            let mutable maybePrevious = ValueNone
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
 
-            for current in source do
-                match maybePrevious with
-                | ValueNone ->
-                    yield current
-                    maybePrevious <- ValueSome current
-                | ValueSome previous ->
+            if hasFirst then
+                let mutable previous = e.Current
+                yield previous
+
+                while! e.MoveNextAsync() do
+                    let current = e.Current
                     let! areEqual = comparer previous current
 
-                    if areEqual then
-                        () // skip
-                    else
+                    if not areEqual then
                         yield current
-                        maybePrevious <- ValueSome current
+                        previous <- current
         }
 
     let pairwise (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
 
         taskSeq {
-            let mutable maybePrevious = ValueNone
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
 
-            for current in source do
-                match maybePrevious with
-                | ValueNone -> maybePrevious <- ValueSome current
-                | ValueSome previous ->
+            if hasFirst then
+                let mutable previous = e.Current
+
+                while! e.MoveNextAsync() do
+                    let current = e.Current
                     yield previous, current
-                    maybePrevious <- ValueSome current
+                    previous <- current
         }
 
     let groupBy (projector: ProjectorAction<'T, 'Key, _>) (source: TaskSeq<_>) =
