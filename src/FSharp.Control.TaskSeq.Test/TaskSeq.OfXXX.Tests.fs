@@ -121,3 +121,76 @@ module Immutable =
 
     [<Fact>]
     let ``TaskSeq-ofSeq should succeed`` () = Seq.init 10 id |> TaskSeq.ofSeq |> validateSequence
+
+module SideEffects =
+    [<Fact>]
+    let ``ofSeq re-evaluates the underlying source seq on each re-enumeration`` () = task {
+        let mutable count = 0
+
+        // a lazy IEnumerable — each GetEnumerator() call re-executes the body
+        let lazySeq = seq {
+            for i in 1..3 do
+                count <- count + 1
+                yield i
+        }
+
+        let ts = TaskSeq.ofSeq lazySeq
+        let! arr1 = ts |> TaskSeq.toArrayAsync
+        // each item triggered the side effect once
+        count |> should equal 3
+
+        let! arr2 = ts |> TaskSeq.toArrayAsync
+        // the underlying seq is re-traversed on the second GetAsyncEnumerator call
+        count |> should equal 6
+        arr1 |> should equal arr2
+    }
+
+    [<Fact>]
+    let ``ofTaskSeq with lazy seq of tasks re-creates tasks on each re-enumeration`` () = task {
+        let mutable count = 0
+
+        // a lazy IEnumerable of Task objects — each seq iteration creates fresh Task objects
+        let lazyTaskSeq = seq {
+            for i in 1..3 do
+                yield task {
+                    count <- count + 1
+                    return i
+                }
+        }
+
+        let ts = TaskSeq.ofTaskSeq lazyTaskSeq
+        let! arr1 = ts |> TaskSeq.toArrayAsync
+        count |> should equal 3
+
+        let! arr2 = ts |> TaskSeq.toArrayAsync
+        // the underlying seq is re-iterated; new Task objects are created and run
+        count |> should equal 6
+        arr1 |> should equal arr2
+    }
+
+    [<Fact>]
+    let ``ofTaskArray does not re-run tasks on re-enumeration; task results are cached`` () = task {
+        let mutable count = 0
+
+        // tasks are created upfront; they run synchronously to completion when constructed
+        let tasks =
+            Array.init 3 (fun i -> task {
+                count <- count + 1
+                return i + 1
+            })
+
+        // all three tasks have already completed synchronously
+        count |> should equal 3
+
+        let ts = TaskSeq.ofTaskArray tasks
+        let! arr1 = ts |> TaskSeq.toArrayAsync
+
+        // awaiting already-completed tasks does not re-run them
+        count |> should equal 3
+        arr1 |> should equal [| 1; 2; 3 |]
+
+        let! arr2 = ts |> TaskSeq.toArrayAsync
+        // the second enumeration re-awaits the same cached task results
+        count |> should equal 3
+        arr2 |> should equal arr1
+    }
