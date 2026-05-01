@@ -3,6 +3,7 @@ Release notes:
 
 Unreleased
     - test: add SideEffects module to TaskSeq.Using.Tests.fs; 7 new tests verify Dispose/DisposeAsync call counts, re-iteration semantics, and early-termination disposal for use and use! CE bindings
+    - test: add SideEffects module to TaskSeq.Unfold.Tests.fs, verifying generator call counts, re-iteration behaviour, early-termination via take, and exception propagation
     - test: add SideEffects module to TaskSeq.OfXXX.Tests.fs documenting re-iteration semantics (ofSeq re-evaluates source, ofTaskArray re-awaits cached tasks)
     - adds TaskSeq.foldWhile and TaskSeq.foldWhileAsync: fold with early termination via a (state, element) -> bool predicate (takeWhile-style, exclusive). When the predicate returns false, iteration halts without folding that element; no further elements are enumerated.
     - feat: add `TaskSeq.toChannelAsync` and `TaskSeq.ofChannel` for bidirectional `System.Threading.Channels` integration, closing #415
