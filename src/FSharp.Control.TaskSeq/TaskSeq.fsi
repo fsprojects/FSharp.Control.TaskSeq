@@ -2,6 +2,7 @@ namespace FSharp.Control
 
 open System.Collections.Generic
 open System.Threading
+open System.Threading.Channels
 open System.Threading.Tasks
 
 [<AutoOpen>]
@@ -530,6 +531,20 @@ type TaskSeq =
     static member toIListAsync: source: TaskSeq<'T> -> Task<IList<'T>>
 
     /// <summary>
+    /// Writes all elements of the input task sequence <paramref name="source" /> to a
+    /// <see cref="ChannelWriter&lt;'T>" /> and marks the writer as complete when the sequence
+    /// is exhausted. If an exception is raised during iteration, the writer is completed with
+    /// that exception so that downstream readers observe it.
+    /// This function is non-blocking while it writes to the channel.
+    /// </summary>
+    ///
+    /// <param name="writer">The channel writer to write elements into.</param>
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>A <see cref="Task" /> that completes when all elements have been written.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when <paramref name="writer" /> or <paramref name="source" /> is null.</exception>
+    static member toChannelAsync: writer: ChannelWriter<'T> -> source: TaskSeq<'T> -> Task
+
+    /// <summary>
     /// Views the given <see cref="array" /> as a task sequence, that is, as an <see cref="IAsyncEnumerable&lt;'T>" />.
     /// </summary>
     ///
@@ -641,6 +656,17 @@ type TaskSeq =
     /// <returns>The resulting task sequence.</returns>
     /// <exception cref="T:ArgumentNullException">Thrown when the input sequence is null.</exception>
     static member ofAsyncArray: source: Async<'T> array -> TaskSeq<'T>
+
+    /// <summary>
+    /// Views a <see cref="ChannelReader&lt;'T>" /> as a task sequence. Elements are yielded as they
+    /// become available; the sequence ends when the channel is completed and all buffered elements
+    /// have been consumed.
+    /// </summary>
+    ///
+    /// <param name="reader">The channel reader to read elements from.</param>
+    /// <returns>A task sequence that yields elements from the channel.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when <paramref name="reader" /> is null.</exception>
+    static member ofChannel: reader: ChannelReader<'T> -> TaskSeq<'T>
 
     /// <summary>
     /// Returns a task sequence that, when iterated, passes the given <paramref name="cancellationToken" /> to the

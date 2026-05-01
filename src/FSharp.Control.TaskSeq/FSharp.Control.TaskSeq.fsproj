@@ -30,8 +30,8 @@ Generates optimized IL code through resumable state machines, and comes with a c
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- Validate package structure and (when PackageValidationBaselineVersion is set) binary compatibility -->
     <EnablePackageValidation>true</EnablePackageValidation>
-    <!-- Set this to the last published version to enforce binary compatibility, e.g. 0.4.0 -->
-    <PackageValidationBaselineVersion>0.4.0</PackageValidationBaselineVersion>
+    <!-- Set this to the last published version to enforce binary compatibility -->
+    <PackageValidationBaselineVersion>1.1.1</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -74,5 +74,7 @@ Generates optimized IL code through resumable state machines, and comes with a c
       <!-- if using "remove unused references", this prevents FSharp.Core from being shown in that list -->
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
+    <!-- Provides System.Threading.Channels for netstandard2.1 consumers; built into net5.0+ -->
+    <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
   </ItemGroup>
 </Project>
