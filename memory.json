@@ -1,9 +1,9 @@
 {
-  "r": "25197641079",
+  "r": "25212830674",
   "m": 375,
   "cur": 375,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "Monthly summary #375 (Apr 2026) closed; new May 2026 summary created. PR #417 (PackageValidationBaselineVersion 0.4.0->1.1.1) submitted this run. All 11 open Repo Assist PRs CI-passing. PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep) open. PR #414 (Using SideEffects) open. PR #412 Dependabot open. PR #411 (pairwise perf) open. PR #410 (WithCancellation SideEffects) open. PR #409 (coverlet) open. PR #408 (SideEffect->SideEffects rename) open. PR #407 (OfXXX SideEffects) open. PR #406 (SmokeTests deps) open. PR #405 (Unfold SideEffects) open. PR #403 (FirstLastDefault SideEffects) open. PR #402 (Linux main CI) open. PR #401 (foldWhile community) open. Do NOT re-engage #139.",
+  "n": "Monthly summary #418 (May 2026) active. All 12 open Repo Assist PRs CI-passing. PR #417 (PackageValidationBaselineVersion 0.4.0->1.1.1). PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep). PR #414 (Using SideEffects). PR #412 Dependabot open. PR #411 (pairwise perf). PR #410 (WithCancellation SideEffects). PR #409 (coverlet). PR #408 (SideEffect->SideEffects rename). PR #407 (OfXXX SideEffects). PR #406 (SmokeTests deps). PR #405 (Unfold SideEffects). PR #403 (FirstLastDefault SideEffects). PR #402 (Linux main CI). PR #401 (foldWhile community). Do NOT re-engage #139. Pause new PRs until backlog is cleared.",
   "prs": {
     "eng-package-validation-baseline-20260501": {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: update PackageValidationBaselineVersion 0.4.0->1.1.1; regenerate CompatibilitySuppressions.xml","status": "submitted"},
     "feat-channel-integration-20260430": {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: add TaskSeq.toChannelAsync and TaskSeq.ofChannel for Channel integration","status": "submitted"},
