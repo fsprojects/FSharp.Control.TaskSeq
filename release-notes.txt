@@ -3,6 +3,7 @@ Release notes:
 
 Unreleased
     - test: rename `SideEffect` module to `SideEffects` in TaskSeq.Concat.Tests.fs, TaskSeq.Delay.Tests.fs, and TaskSeq.Item.Tests.fs for consistency with the rest of the test suite (50+ files already use the plural form)
+    - perf: pairwise, distinctUntilChanged, distinctUntilChangedWith, distinctUntilChangedWithAsync now use explicit enumerator + while! instead of ValueOption tracking + for-in loop, eliminating per-element struct match overhead
     - test: add SideEffects module to TaskSeq.Unfold.Tests.fs, verifying generator call counts, re-iteration behaviour, early-termination via take, and exception propagation
     - test: add SideEffects module to TaskSeq.OfXXX.Tests.fs documenting re-iteration semantics (ofSeq re-evaluates source, ofTaskArray re-awaits cached tasks)
     - adds TaskSeq.foldWhile and TaskSeq.foldWhileAsync: fold with early termination via a (state, element) -> bool predicate (takeWhile-style, exclusive). When the predicate returns false, iteration halts without folding that element; no further elements are enumerated.
