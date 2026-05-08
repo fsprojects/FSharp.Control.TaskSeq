@@ -225,6 +225,26 @@ type TaskSeq =
     static member min: source: TaskSeq<'T> -> Task<'T> when 'T: comparison
 
     /// <summary>
+    /// Returns <c>Some</c> with the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />,
+    /// or <c>None</c> if the sequence is empty. For sequences that should never be empty, prefer <see cref="TaskSeq.max" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The largest element of the sequence wrapped in <c>Some</c>, or <c>None</c> if the sequence is empty.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryMax: source: TaskSeq<'T> -> Task<'T option> when 'T: comparison
+
+    /// <summary>
+    /// Returns <c>Some</c> with the smallest of all elements of the task sequence, compared via <see cref="Operators.min" />,
+    /// or <c>None</c> if the sequence is empty. For sequences that should never be empty, prefer <see cref="TaskSeq.min" />.
+    /// </summary>
+    ///
+    /// <param name="source">The input task sequence.</param>
+    /// <returns>The smallest element of the sequence wrapped in <c>Some</c>, or <c>None</c> if the sequence is empty.</returns>
+    /// <exception cref="T:ArgumentNullException">Thrown when the input task sequence is null.</exception>
+    static member tryMin: source: TaskSeq<'T> -> Task<'T option> when 'T: comparison
+
+    /// <summary>
     /// Returns the greatest of all elements of the task sequence, compared via <see cref="Operators.max" />
     /// on the result of applying the function <paramref name="projection" /> to each element.
     ///

@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - adds TaskSeq.tryMax and TaskSeq.tryMin: safe variants of TaskSeq.max and TaskSeq.min that return None instead of raising ArgumentException when the input sequence is empty
     - test: rename `SideEffect` module to `SideEffects` in TaskSeq.Concat.Tests.fs, TaskSeq.Delay.Tests.fs, and TaskSeq.Item.Tests.fs for consistency with the rest of the test suite (50+ files already use the plural form)
     - test: add SideEffects module to TaskSeq.Using.Tests.fs; 7 new tests verify Dispose/DisposeAsync call counts, re-iteration semantics, and early-termination disposal for use and use! CE bindings
     - perf: pairwise, distinctUntilChanged, distinctUntilChangedWith, distinctUntilChangedWithAsync now use explicit enumerator + while! instead of ValueOption tracking + for-in loop, eliminating per-element struct match overhead
