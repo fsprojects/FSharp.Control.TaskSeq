@@ -1,39 +1,19 @@
 {
-  "r": "25212830674",
-  "m": 375,
-  "cur": 375,
+  "r": "25560716566",
+  "m": 418,
+  "cur": 418,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "Monthly summary #418 (May 2026) active. All 12 open Repo Assist PRs CI-passing. PR #417 (PackageValidationBaselineVersion 0.4.0->1.1.1). PR #416 (toChannelAsync/ofChannel, System.Threading.Channels 8.0.0 dep). PR #414 (Using SideEffects). PR #412 Dependabot open. PR #411 (pairwise perf). PR #410 (WithCancellation SideEffects). PR #409 (coverlet). PR #408 (SideEffect->SideEffects rename). PR #407 (OfXXX SideEffects). PR #406 (SmokeTests deps). PR #405 (Unfold SideEffects). PR #403 (FirstLastDefault SideEffects). PR #402 (Linux main CI). PR #401 (foldWhile community). Do NOT re-engage #139. Pause new PRs until backlog is cleared.",
+  "n": "Monthly summary #418 (May 2026) active. Backlog of 12 open Repo Assist PRs cleared by maintainer. New PR submitted: feat tryMax/tryMin. Test files still missing SideEffects: Do, Empty, CancellationToken, Let, ReplicateInfinite, ThreadState, FoldWhile. Do NOT re-engage #139.",
   "prs": {
-    "eng-package-validation-baseline-20260501": {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: update PackageValidationBaselineVersion 0.4.0->1.1.1; regenerate CompatibilitySuppressions.xml","status": "submitted"},
-    "feat-channel-integration-20260430": {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: add TaskSeq.toChannelAsync and TaskSeq.ofChannel for Channel integration","status": "submitted"},
-    "test-using-sideeffects-20260428": {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: add SideEffects module to TaskSeq.Using.Tests.fs","status": "submitted"},
-    "perf-pairwise-distinct-until-changed-20260427": {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: replace ValueOption tracking with while! in pairwise and distinctUntilChanged family","status": "submitted"},
-    "eng-coverlet-10-20260426": {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: update coverlet.collector 6.0.4 -> 10.0.0 in test project","status": "submitted"},
-    "test-withcancellation-sideeffects-20260426": {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: add SideEffects module to TaskSeq.WithCancellation.Tests.fs","status": "submitted"},
-    "improve-sideeffects-naming-20260425": {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect -> SideEffects in Concat, Delay, Item tests","status": "submitted"},
-    "test-ofxxx-sideeffects-20260424": {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: add SideEffects module to TaskSeq.OfXXX.Tests.fs","status": "submitted"},
-    "test-unfold-sideeffects-20260423": {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: add SideEffects module to TaskSeq.Unfold.Tests.fs","status": "submitted"},
-    "eng-smoketests-deps-20260423": {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: update SmokeTests to FSharp.Control.TaskSeq 1.1.1 and FsToolkit 4.18.0","status": "submitted"},
-    "test-firstlastdefault-sideeffects-20260422": {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: add SideEffects to FirstLastDefault.Tests.fs","status": "submitted"},
-    "eng-linux-main-ci-20260421": {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: add Linux release test job to main.yaml","status": "submitted"}
+    "improve-trymax-trymin-20260508": {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: add TaskSeq.tryMax and TaskSeq.tryMin","status": "submitted"}
   },
   "pr_attempts": [
-    {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1","status": "submitted","run": "25197641079"},
-    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel, System.Threading.Channels 8.0.0 dep","status": "submitted","run": "25142275329"},
-    {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using (use/use! CE keywords)","status": "submitted","run": "25028420674"},
-    {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "submitted","run": "24971927223"},
-    {"branch": "repo-assist/eng-coverlet-10-20260426","desc": "eng: coverlet 6.0.4->10.0.0","status": "submitted","run": "24944958058"},
-    {"branch": "repo-assist/test-withcancellation-sideeffects-20260426","desc": "test: SideEffects for WithCancellation","status": "submitted","run": "24944958058"},
-    {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "submitted","run": "24918782808"},
-    {"branch": "repo-assist/test-ofxxx-sideeffects-20260424","desc": "test: SideEffects for OfXXX (re-iteration semantics)","status": "submitted","run": "24867008695"},
-    {"branch": "repo-assist/test-unfold-sideeffects-20260423","desc": "test: SideEffects for Unfold","status": "submitted","run": "24811082291"},
-    {"branch": "repo-assist/eng-smoketests-deps-20260423","desc": "eng: SmokeTests deps update","status": "submitted","run": "24811082291"},
-    {"branch": "repo-assist/test-firstlastdefault-sideeffects-20260422","desc": "test: SideEffects for FirstLastDefault","status": "submitted","run": "24754687823"},
-    {"branch": "repo-assist/eng-linux-debug-ci-20260422","desc": "eng: Linux debug CI (blocked)","status": "blocked-workflow-perms","run": "24754687823"},
-    {"branch": "repo-assist/eng-linux-main-ci-20260421","desc": "eng: Linux main CI","status": "submitted","run": "24698651691"},
-    {"branch": "repo-assist/test-comparewith-sideeffects-20260421","desc": "test: SideEffects CompareWith","status": "merged","run": "24698651691"},
-    {"branch": "repo-assist/fix-async-bind-20260419","desc": "fix: Async.bind","status": "merged","run": "24617865783"}
+    {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: tryMax + tryMin","status": "submitted","run": "25560716566"},
+    {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1","status": "merged","run": "25197641079"},
+    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel","status": "merged","run": "25142275329"},
+    {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using","status": "merged","run": "25028420674"},
+    {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "merged","run": "24971927223"},
+    {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "merged","run": "24918782808"}
   ],
   "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-30","pr385": "2026-04-13","pr401": "2026-04-27"}
 }
