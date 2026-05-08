@@ -10,6 +10,8 @@ open FSharp.Control
 //
 // TaskSeq.max
 // TaskSeq.min
+// TaskSeq.tryMax
+// TaskSeq.tryMin
 // TaskSeq.maxBy
 // TaskSeq.minBy
 // TaskSeq.maxByAsync
@@ -316,3 +318,87 @@ module SideEffects =
             do! test (MinMax.getByFunction minMax) 20
             do! test (MinMax.getByFunction minMax) 30
         }
+
+
+module TryMaxMin =
+    [<Fact>]
+    let ``TaskSeq-tryMax returns None for null source`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.tryMax (null: TaskSeq<int>)
+
+    [<Fact>]
+    let ``TaskSeq-tryMin returns None for null source`` () =
+        assertNullArg
+        <| fun () -> TaskSeq.tryMin (null: TaskSeq<int>)
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-tryMax returns None on empty`` variant = task {
+        let! result = Gen.getEmptyVariant variant |> TaskSeq.tryMax
+        result |> should equal None
+    }
+
+    [<Theory; ClassData(typeof<TestEmptyVariants>)>]
+    let ``TaskSeq-tryMin returns None on empty`` variant = task {
+        let! result = Gen.getEmptyVariant variant |> TaskSeq.tryMin
+        result |> should equal None
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryMax returns Some for singleton`` () = task {
+        let! result = TaskSeq.singleton 42 |> TaskSeq.tryMax
+        result |> should equal (Some 42)
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryMin returns Some for singleton`` () = task {
+        let! result = TaskSeq.singleton 42 |> TaskSeq.tryMin
+        result |> should equal (Some 42)
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-tryMax returns Some max of sequence`` variant = task {
+        let! result = Gen.getSeqImmutable variant |> TaskSeq.tryMax
+        result |> should equal (Some 10)
+    }
+
+    [<Theory; ClassData(typeof<TestImmTaskSeq>)>]
+    let ``TaskSeq-tryMin returns Some min of sequence`` variant = task {
+        let! result = Gen.getSeqImmutable variant |> TaskSeq.tryMin
+        result |> should equal (Some 1)
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryMax and max agree on non-empty sequence`` () = task {
+        let ts = TaskSeq.ofList [ 3; 1; 4; 1; 5; 9; 2; 6 ]
+        let! viaMax = ts |> TaskSeq.max
+        let ts2 = TaskSeq.ofList [ 3; 1; 4; 1; 5; 9; 2; 6 ]
+        let! viaTryMax = ts2 |> TaskSeq.tryMax
+        viaTryMax |> should equal (Some viaMax)
+    }
+
+    [<Fact>]
+    let ``TaskSeq-tryMin and min agree on non-empty sequence`` () = task {
+        let ts = TaskSeq.ofList [ 3; 1; 4; 1; 5; 9; 2; 6 ]
+        let! viaMin = ts |> TaskSeq.min
+        let ts2 = TaskSeq.ofList [ 3; 1; 4; 1; 5; 9; 2; 6 ]
+        let! viaTryMin = ts2 |> TaskSeq.tryMin
+        viaTryMin |> should equal (Some viaMin)
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-tryMax re-iteration reflects side effects`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! first = ts |> TaskSeq.tryMax
+        let! second = ts |> TaskSeq.tryMax
+        first |> should equal (Some 10)
+        second |> should equal (Some 20)
+    }
+
+    [<Theory; ClassData(typeof<TestSideEffectTaskSeq>)>]
+    let ``TaskSeq-tryMin re-iteration reflects side effects`` variant = task {
+        let ts = Gen.getSeqWithSideEffect variant
+        let! first = ts |> TaskSeq.tryMin
+        let! second = ts |> TaskSeq.tryMin
+        first |> should equal (Some 1)
+        second |> should equal (Some 11)
+    }

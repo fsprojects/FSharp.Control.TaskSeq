@@ -303,6 +303,8 @@ type TaskSeq private () =
 
     static member max source = Internal.maxMin max source
     static member min source = Internal.maxMin min source
+    static member tryMax source = Internal.tryMaxMin max source
+    static member tryMin source = Internal.tryMaxMin min source
     static member maxBy projection source = Internal.maxMinBy (<) projection source // looks like 'less than', is 'greater than'
     static member minBy projection source = Internal.maxMinBy (>) projection source
     static member maxByAsync projection source = Internal.maxMinByAsync (<) projection source // looks like 'less than', is 'greater than'

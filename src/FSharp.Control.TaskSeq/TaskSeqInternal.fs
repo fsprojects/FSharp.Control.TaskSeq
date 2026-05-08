@@ -238,6 +238,24 @@ module internal TaskSeqInternal =
             return acc
         }
 
+    let inline tryMaxMin ([<InlineIfLambda>] maxOrMin) (source: TaskSeq<_>) =
+        checkNonNull (nameof source) source
+
+        task {
+            use e = source.GetAsyncEnumerator CancellationToken.None
+            let! hasFirst = e.MoveNextAsync()
+
+            if not hasFirst then
+                return None
+            else
+                let mutable acc = e.Current
+
+                while! e.MoveNextAsync() do
+                    acc <- maxOrMin e.Current acc
+
+                return Some acc
+        }
+
     // 'compare' is either `<` or `>` (i.e, less-than, greater-than resp.)
     let inline maxMinBy ([<InlineIfLambda>] compare) ([<InlineIfLambda>] projection) (source: TaskSeq<_>) =
         checkNonNull (nameof source) source
