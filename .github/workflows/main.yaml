@@ -12,7 +12,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # setup dotnet based on global.json
@@ -38,7 +38,7 @@ jobs:
     steps:
       # checkout the code
       - name: checkout-code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # setup dotnet based on global.json
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout-code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
