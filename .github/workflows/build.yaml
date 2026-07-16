@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
 
       - name: Cache NuGet packages
         uses: actions/cache@v5
@@ -41,7 +41,7 @@ jobs:
 
       # setup dotnet based on global.json
       - name: setup-dotnet
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
 
       # cache NuGet packages to avoid re-downloading on every run
       - name: Cache NuGet packages
