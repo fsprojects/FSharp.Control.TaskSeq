@@ -1,19 +1,18 @@
 {
-  "r": "25560716566",
+  "r": "30638716950",
   "m": 418,
-  "cur": 418,
+  "cur": 62,
   "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "Monthly summary #418 (May 2026) active. Backlog of 12 open Repo Assist PRs cleared by maintainer. New PR submitted: feat tryMax/tryMin. Test files still missing SideEffects: Do, Empty, CancellationToken, Let, ReplicateInfinite, ThreadState, FoldWhile. Do NOT re-engage #139.",
+  "n": "Monthly summary #aw_jul2026 (July 2026) active. May 2026 summary #418 now stale - needs closing. Active PR: #aw_pr20260731 = bundle deps update (checkout v7, cache v6, setup-dotnet v6, gh-aw-actions v0.84.0) + SideEffects tests for Do/FoldWhile. Dependabot PRs #420, #421, #433, #441 superseded by bundled PR. Do NOT re-engage #139. Issue #62 tail recursion: upstream YieldFromFinal fix landed in F#10; commented on #62 with jberzy; need maintainer direction before creating YieldFromFinal stub PR.",
   "prs": {
-    "improve-trymax-trymin-20260508": {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: add TaskSeq.tryMax and TaskSeq.tryMin","status": "submitted"}
+    "eng-bundle-deps-20260731": {"branch": "repo-assist/eng-bundle-deps-20260731","desc": "eng: bundle Dependabot updates + SideEffects tests for Do/FoldWhile","status": "submitted"}
   },
   "pr_attempts": [
-    {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: tryMax + tryMin","status": "submitted","run": "25560716566"},
+    {"branch": "repo-assist/eng-bundle-deps-20260731","desc": "eng: bundle deps + SideEffects tests","status": "submitted","run": "30638716950"},
+    {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: tryMax + tryMin","status": "merged","run": "25560716566"},
     {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1","status": "merged","run": "25197641079"},
-    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel","status": "merged","run": "25142275329"},
-    {"branch": "repo-assist/test-using-sideeffects-20260428","desc": "test: SideEffects for Using","status": "merged","run": "25028420674"},
-    {"branch": "repo-assist/perf-pairwise-distinct-until-changed-20260427","desc": "perf: pairwise + distinctUntilChanged while! opt","status": "merged","run": "24971927223"},
-    {"branch": "repo-assist/improve-sideeffects-naming-20260425","desc": "test: rename SideEffect->SideEffects in Concat, Delay, Item","status": "merged","run": "24918782808"}
+    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel","status": "merged","run": "25142275329"}
   ],
-  "comments_made": {"62": "2026-04-01","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-30","pr385": "2026-04-13","pr401": "2026-04-27"}
+  "monthly_issue_pending_close": "418",
+  "comments_made": {"62": "2026-07-31","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-30","pr385": "2026-04-13","pr401": "2026-04-27"}
 }
