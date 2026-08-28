@@ -1,6 +1,7 @@
 module TaskSeq.Tests.CancellationToken
 
 open System
+open System.Collections.Generic
 open System.Threading
 open System.Threading.Tasks
 
@@ -151,4 +152,83 @@ module Cancellation =
         let! hasNext = enum2.MoveNextAsync()
         hasNext |> should be True
         enum2.Current |> should equal 1
+    }
+
+module SideEffects =
+
+    [<Fact>]
+    let ``Cancelling one enumerator does not affect side effects of a fresh enumerator over the same taskSeq`` () = task {
+        let mutable itemsProduced = 0
+
+        let source = taskSeq {
+            for i in 1..5 do
+                itemsProduced <- itemsProduced + 1
+                yield i
+        }
+
+        // fully consume with a first, never-cancelled enumerator
+        use cts1 = new CancellationTokenSource()
+        use enum1 = source.GetAsyncEnumerator(cts1.Token)
+        let mutable canContinue = true
+
+        while canContinue do
+            let! hasNext = enum1.MoveNextAsync()
+
+            if not hasNext then
+                canContinue <- false
+
+        itemsProduced |> should equal 5
+
+        // cancel and dispose that first enumerator explicitly, then re-enumerate the same
+        // taskSeq from scratch with a fresh, non-cancelled token
+        cts1.Cancel()
+        do! enum1.DisposeAsync()
+
+        use cts2 = new CancellationTokenSource()
+        use enum2 = source.GetAsyncEnumerator(cts2.Token)
+        let! hasNext = enum2.MoveNextAsync()
+
+        // re-enumeration re-runs the body from scratch: side effects accumulate further,
+        // and the previous enumerator's cancellation has no bearing on this fresh one
+        hasNext |> should be True
+        enum2.Current |> should equal 1
+        itemsProduced |> should equal 6
+    }
+
+    [<Fact>]
+    let ``A CancellationToken passed to GetAsyncEnumerator does not prevent re-iteration with a different token`` () = task {
+        let mutable totalCalls = 0
+
+        let source = taskSeq {
+            for i in 1..3 do
+                totalCalls <- totalCalls + 1
+                yield i
+        }
+
+        let drain (enum: IAsyncEnumerator<int>) = task {
+            let items = ResizeArray()
+            let mutable canContinue = true
+
+            while canContinue do
+                let! hasNext = enum.MoveNextAsync()
+
+                if hasNext then
+                    items.Add enum.Current
+                else
+                    canContinue <- false
+
+            return List.ofSeq items
+        }
+
+        use cts = new CancellationTokenSource()
+        use enum1 = source.GetAsyncEnumerator(cts.Token)
+        let! first = drain enum1
+        first |> should equal [ 1; 2; 3 ]
+        totalCalls |> should equal 3
+
+        // re-iterate using CancellationToken.None: side effects re-run independently
+        use enum2 = source.GetAsyncEnumerator(CancellationToken.None)
+        let! second = drain enum2
+        second |> should equal [ 1; 2; 3 ]
+        totalCalls |> should equal 6
     }

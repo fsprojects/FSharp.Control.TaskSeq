@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - tests: add coverage for side-effect re-execution semantics when re-enumerating a `taskSeq` with independent `CancellationToken`s
     - test: add TaskSeq.Issue452.Tests.fs, regression tests wrapping an externally-produced IAsyncEnumerable<'T> (TaskSeq.map and `taskSeq { for .. in .. do yield .. }`) while running on a custom, single-threaded TaskScheduler; investigates #452's reported duplicated-final-item bug, which could not be reproduced outside of Orleans, see #452
     - adds TaskSeq.tryMax and TaskSeq.tryMin: safe variants of TaskSeq.max and TaskSeq.min that return None instead of raising ArgumentException when the input sequence is empty
     - test: rename `SideEffect` module to `SideEffects` in TaskSeq.Concat.Tests.fs, TaskSeq.Delay.Tests.fs, and TaskSeq.Item.Tests.fs for consistency with the rest of the test suite (50+ files already use the plural form)
