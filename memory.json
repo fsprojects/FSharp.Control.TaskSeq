@@ -1,18 +1,84 @@
 {
-  "r": "30638716950",
-  "m": 418,
+  "r": "33195807335",
+  "m": 443,
   "cur": 62,
-  "rej": ["rev-sort","zip4","map3","allPairs","iteri2","splitInto","exists2","map2","findBack"],
-  "n": "Monthly summary #aw_jul2026 (July 2026) active. May 2026 summary #418 now stale - needs closing. Active PR: #aw_pr20260731 = bundle deps update (checkout v7, cache v6, setup-dotnet v6, gh-aw-actions v0.84.0) + SideEffects tests for Do/FoldWhile. Dependabot PRs #420, #421, #433, #441 superseded by bundled PR. Do NOT re-engage #139. Issue #62 tail recursion: upstream YieldFromFinal fix landed in F#10; commented on #62 with jberzy; need maintainer direction before creating YieldFromFinal stub PR.",
+  "rej": [
+    "rev-sort",
+    "zip4",
+    "map3",
+    "allPairs",
+    "iteri2",
+    "splitInto",
+    "exists2",
+    "map2",
+    "findBack"
+  ],
+  "n": "Monthly summary Aug 2026 active (443 closed, new Aug issue created). PR #462 (Dependabot gh-aw-actions/setup bump) still open, unrelated to Actions version bump PR from this run. Created PR eng-bump-actions-20260828 (Actions version bumps: checkout v7, setup-dotnet v6, cache v6, upload-artifact v7, dorny/test-reporter v3) - build/tests pass. Created PR improve-cancellation-test-coverage (SideEffects tests for TaskSeq.CancellationToken.Tests.fs) - 19/19 pass. Commented on #452 summarizing shared-CE-machinery root cause (map and for..yield share same taskSeq CE desugaring) per reporter's standalone Orleans repro; not safe to fix blind without real Orleans env - flagged for maintainer/contributor with Orleans access. Do NOT re-engage #139. Issue #62 tail recursion: still awaiting maintainer direction, no new activity since 2026-07-31 comment - skip unless new activity. Test files still without SideEffects module: TaskSeq.Empty.Tests.fs, TaskSeq.Let.Tests.fs, TaskSeq.ReplicateInfinite.Tests.fs, TaskSeq.ThreadState.Tests.fs (CancellationToken.Tests.fs done this run). Rejected features unchanged - do not re-attempt.",
   "prs": {
-    "eng-bundle-deps-20260731": {"branch": "repo-assist/eng-bundle-deps-20260731","desc": "eng: bundle Dependabot updates + SideEffects tests for Do/FoldWhile","status": "submitted"}
+    "eng-bundle-deps-20260731": {
+      "branch": "repo-assist/eng-bundle-deps-20260731",
+      "desc": "eng: bundle Dependabot updates + SideEffects tests for Do/FoldWhile",
+      "status": "submitted"
+    },
+    "eng-bump-actions-20260828": {
+      "branch": "repo-assist/eng-bump-actions-20260828",
+      "desc": "eng: bump GitHub Actions versions across all workflows",
+      "status": "submitted"
+    },
+    "improve-cancellation-test-coverage": {
+      "branch": "repo-assist/improve-cancellation-test-coverage",
+      "desc": "tests: SideEffects module for CancellationToken.Tests.fs",
+      "status": "submitted"
+    }
   },
   "pr_attempts": [
-    {"branch": "repo-assist/eng-bundle-deps-20260731","desc": "eng: bundle deps + SideEffects tests","status": "submitted","run": "30638716950"},
-    {"branch": "repo-assist/improve-trymax-trymin-20260508","desc": "feat: tryMax + tryMin","status": "merged","run": "25560716566"},
-    {"branch": "repo-assist/eng-package-validation-baseline-20260501","desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1","status": "merged","run": "25197641079"},
-    {"branch": "repo-assist/feat-channel-integration-20260430","desc": "feat: toChannelAsync + ofChannel","status": "merged","run": "25142275329"}
+    {
+      "branch": "repo-assist/eng-bump-actions-20260828",
+      "desc": "eng: bump GitHub Actions versions",
+      "status": "submitted",
+      "run": "33195807335"
+    },
+    {
+      "branch": "repo-assist/improve-cancellation-test-coverage",
+      "desc": "tests: SideEffects coverage for cancellation re-enumeration",
+      "status": "submitted",
+      "run": "33195807335"
+    },
+    {
+      "branch": "repo-assist/eng-bundle-deps-20260731",
+      "desc": "eng: bundle deps + SideEffects tests",
+      "status": "submitted",
+      "run": "30638716950"
+    },
+    {
+      "branch": "repo-assist/improve-trymax-trymin-20260508",
+      "desc": "feat: tryMax + tryMin",
+      "status": "merged",
+      "run": "25560716566"
+    },
+    {
+      "branch": "repo-assist/eng-package-validation-baseline-20260501",
+      "desc": "eng: PackageValidationBaselineVersion 0.4.0->1.1.1",
+      "status": "merged",
+      "run": "25197641079"
+    },
+    {
+      "branch": "repo-assist/feat-channel-integration-20260430",
+      "desc": "feat: toChannelAsync + ofChannel",
+      "status": "merged",
+      "run": "25142275329"
+    }
   ],
-  "monthly_issue_pending_close": "418",
-  "comments_made": {"62": "2026-07-31","140": "2026-04-24","141": "2026-04-16","142": "2026-03-27","143": "2026-03-27","415": "2026-04-30","pr385": "2026-04-13","pr401": "2026-04-27"}
+  "monthly_issue_pending_close": null,
+  "comments_made": {
+    "62": "2026-07-31",
+    "140": "2026-04-24",
+    "141": "2026-04-16",
+    "142": "2026-03-27",
+    "143": "2026-03-27",
+    "415": "2026-04-30",
+    "pr385": "2026-04-13",
+    "pr401": "2026-04-27",
+    "452": "2026-08-28"
+  }
 }
