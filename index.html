@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-root="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Abel Braaksma; Don Syme" name="author">
+    <!-- Opengraph properties (https://ogp.me/) -->
+    <meta property="og:site_name" content="FSharp.Control.TaskSeq">
+    <meta property="og:title" content="FSharp.Control.TaskSeq
+" />
+    <meta property="og:url" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/index.html">
+    <meta property="og:type" content="website" />
+    <!-- Twitter cards (https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/summary-card-with-large-image) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+    <meta name="twitter:title" content="FSharp.Control.TaskSeq
+">
+    
+    <title>FSharp.Control.TaskSeq
+ | FSharp.Control.TaskSeq</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/favicon.ico" rel="icon" sizes="32x32" type="image/png"/>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-set-dark.js"></script>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-set-expanded.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-default.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.css" rel="stylesheet" type="text/css"/>
+    
+    
+</head>
+<body class="content">
+<header>
+    <div class="start">
+        <div id="menu-toggle">
+            <iconify-icon class="icon closed" height="22" icon="eva:menu-fill" width="22"></iconify-icon>
+            <iconify-icon class="icon open" height="22" icon="mi:close" width="22"></iconify-icon>
+            <input type="checkbox" name="mobile-menu" />
+            <ul class="menu">
+                <li class="nav-header">Links</li>
+                <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+                </li>
+                <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                        href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+                    Notes</a></li>
+                <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+                    Repository</a></li>
+                <li class="nav-header ">
+  Documentation
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+                <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+            </ul>
+        </div>
+        <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+            <img alt="Header menu logo" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/logo.png">
+            <strong>FSharp.Control.TaskSeq</strong>
+        </a>
+    </div>
+    <div class="end">
+        <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/" target="_blank">
+            <iconify-icon icon="uil:github" width="26" height="26"></iconify-icon>
+        </a>
+        <iconify-icon id="search-btn" icon="carbon:search" class="search" width="24" height="24"></iconify-icon>
+        <fsdocs-theme-toggle></fsdocs-theme-toggle>
+    </div>
+</header>
+<aside id="fsdocs-main-menu">
+    <ul class="menu">
+        <li class="nav-header">Links</li>
+        <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+        </li>
+        <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+            Notes</a></li>
+        <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+            Repository</a></li>
+        <li class="nav-header ">
+  Documentation
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+        <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+    </ul>
+</aside>
+<main>
+    <div id="content">
+        <h1><a name="FSharp-Control-TaskSeq" class="anchor" href="#FSharp-Control-TaskSeq">FSharp.Control.TaskSeq</a></h1>
+<p>FSharp.Control.TaskSeq provides a <code>taskSeq</code> computation expression for <code>IAsyncEnumerable&lt;'T&gt;</code>,
+along with <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseq.html">a comprehensive <code>TaskSeq</code> module</a>.</p>
+<p>An <strong>task sequence</strong> is an asynchronous sequence in which individual elements are <em>awaited</em>:
+the next element is not necessarily available immediately.
+Under the hood each <code>taskSeq { ... }</code> is an <code>IAsyncEnumerable&lt;'T&gt;</code> — the .NET standard
+interface used by C# <code>await foreach</code>, Entity Framework Core, gRPC streaming, and many other
+libraries in the ecosystem.</p>
+<h2><a name="Quick-Start" class="anchor" href="#Quick-Start">Quick Start</a></h2>
+<p>Add the <a href="https://www.nuget.org/packages/FSharp.Control.TaskSeq">NuGet package <code>FSharp.Control.TaskSeq</code></a>
+to your project and open the namespace:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// #r &quot;nuget: FSharp.Control.TaskSeq&quot;</span>
+
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="id">FSharp</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="id">Control</span>
+</code></pre>
+<p>A <code>TaskSeq&lt;'T&gt;</code> can be created with the <code>taskSeq { ... }</code> computation expression:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="id">oneThenTwo</span> <span class="o">=</span> <span class="id">taskSeq</span> <span class="pn">{</span>
+    <span class="k">yield</span> <span class="n">1</span>
+    <span class="k">do!</span> <span class="id">Task</span><span class="pn">.</span><span class="id">Delay</span> <span class="n">1000</span>   <span class="c">// non-blocking sleep</span>
+    <span class="k">yield</span> <span class="n">2</span>
+<span class="pn">}</span>
+</code></pre>
+<p>When iterated, the sequence above yields <code>1</code> immediately and <code>2</code> after one second. Consumers
+must <em>await</em> each step.</p>
+<p>Use <code>await foreach</code> in C#, or any <code>TaskSeq</code> consumer in F#:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// Iterate with a for loop inside a task { ... }</span>
+<span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="k">task</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="fn">item</span> <span class="k">in</span> <span onmouseout="hideTip(event, 'fs3', 6)" onmouseover="showTip(event, 'fs3', 6)" class="id">oneThenTwo</span> <span class="k">do</span>
+        <span onmouseout="hideTip(event, 'fs6', 7)" onmouseover="showTip(event, 'fs6', 7)" class="fn">printfn</span> <span class="s">&quot;Got </span><span class="pf">%d</span><span class="s">&quot;</span> <span onmouseout="hideTip(event, 'fs5', 8)" onmouseover="showTip(event, 'fs5', 8)" class="fn">item</span>
+<span class="pn">}</span> <span class="o">|&gt;</span> <span class="id">Task</span><span class="pn">.</span><span class="id">Run</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs7', 9)" onmouseover="showTip(event, 'fs7', 9)" class="fn">ignore</span>
+
+<span class="c">// Or use TaskSeq.iter</span>
+<span class="k">do!</span> <span onmouseout="hideTip(event, 'fs3', 10)" onmouseover="showTip(event, 'fs3', 10)" class="id">oneThenTwo</span> <span class="o">|&gt;</span> <span class="id">TaskSeq</span><span class="pn">.</span><span class="id">iter</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs6', 11)" onmouseover="showTip(event, 'fs6', 11)" class="id">printfn</span> <span class="s">&quot;Got %d&quot;</span><span class="pn">)</span>
+</code></pre>
+<h2><a name="Topics" class="anchor" href="#Topics">Topics</a></h2>
+<ul>
+<li><a href="TaskSeqGenerating.html">Generating sequences</a> — <code>taskSeq { }</code>, <code>init</code>, <code>unfold</code>, <code>ofArray</code>, …</li>
+<li><a href="TaskSeqTransforming.html">Transforming sequences</a> — <code>map</code>, <code>filter</code>, <code>choose</code>, <code>collect</code>, …</li>
+<li><a href="TaskSeqConsuming.html">Consuming sequences</a> — <code>iter</code>, <code>fold</code>, <code>find</code>, <code>toArray</code>, <code>sum</code>, …</li>
+<li><a href="TaskSeqCombining.html">Combining sequences</a> — <code>append</code>, <code>zip</code>, <code>take</code>, <code>skip</code>, <code>chunkBySize</code>, …</li>
+<li><a href="TaskSeqAdvanced.html">Advanced operations</a> — <code>groupBy</code>, <code>mapFold</code>, <code>distinct</code>, <code>partition</code>, …</li>
+</ul>
+<h2><a name="Comparison-with-FSharp-Control-AsyncSeq" class="anchor" href="#Comparison-with-FSharp-Control-AsyncSeq">Comparison with FSharp.Control.AsyncSeq</a></h2>
+<p><a href="https://github.com/fsprojects/FSharp.Control.AsyncSeq/">FSharp.Control.AsyncSeq</a> is the
+predecessor library, oriented towards <code>Async&lt;'T&gt;</code>.
+Both libraries implement <code>IAsyncEnumerable&lt;'T&gt;</code> so they are interoperable.
+The main differences are:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th><p><code>TaskSeq</code></p></th>
+<th><p><code>AsyncSeq</code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p>Async model</p></td>
+<td><p><code>Task</code> / <code>ValueTask</code></p></td>
+<td><p><code>Async</code></p></td>
+</tr>
+<tr class="even">
+<td><p>Performance</p></td>
+<td><p>Higher (resumable state machines)</p></td>
+<td><p>Good</p></td>
+</tr>
+<tr class="odd">
+<td><p>.NET interop</p></td>
+<td><p>Native <code>IAsyncEnumerable&lt;'T&gt;</code></p></td>
+<td><p>Native <code>IAsyncEnumerable&lt;'T&gt;</code></p></td>
+</tr>
+<tr class="even">
+<td><p>Cancellation</p></td>
+<td><p><code>CancellationToken</code> via <code>withCancellation</code></p></td>
+<td><p>Built in to <code>Async</code></p></td>
+</tr>
+</tbody>
+</table>
+
+<h2><a name="Related-links" class="anchor" href="#Related-links">Related links</a></h2>
+<ul>
+<li><a href="https://www.nuget.org/packages/FSharp.Control.TaskSeq">NuGet package</a></li>
+<li><a href="https://github.com/fsprojects/FSharp.Control.TaskSeq">GitHub repository</a></li>
+<li><a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release notes</a></li>
+<li><a href="reference/index.html">API reference</a></li>
+</ul>
+
+        <div class="fsdocs-tip" id="fs1">Multiple items<br />namespace Microsoft.FSharp<br /><br />--------------------<br />namespace FSharp</div>
+<div class="fsdocs-tip" id="fs2">namespace Microsoft.FSharp.Control</div>
+<div class="fsdocs-tip" id="fs3">val oneThenTwo: int seq</div>
+<div class="fsdocs-tip" id="fs4">val task: TaskBuilder</div>
+<div class="fsdocs-tip" id="fs5">val item: int</div>
+<div class="fsdocs-tip" id="fs6">val printfn: format: Printf.TextWriterFormat&lt;&#39;T&gt; -&gt; &#39;T</div>
+<div class="fsdocs-tip" id="fs7">val ignore: value: &#39;T -&gt; unit</div>
+
+    </div>
+</main>
+<aside id="fsdocs-page-menu">
+    <p id="on-this-page">On this page</p>
+    <ul>
+  <li class="level-1">
+    <a href="#FSharp-Control-TaskSeq">
+      FSharp.Control.TaskSeq
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Quick-Start">
+      Quick Start
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Topics">
+      Topics
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Comparison-with-FSharp-Control-AsyncSeq">
+      Comparison with FSharp.Control.AsyncSeq
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Related-links">
+      Related links
+    </a>
+  </li>
+</ul>
+</aside>
+<dialog>
+    <input type="search" placeholder="Search docs" />
+    <div class="results">
+        <ul></ul>
+        <p class="empty">Type something to start searching.</p>
+    </div>
+</dialog>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-tips.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-search.js"></script>
+
+</body>
+</html>

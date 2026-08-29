@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en" data-root="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Abel Braaksma; Don Syme" name="author">
+    <!-- Opengraph properties (https://ogp.me/) -->
+    <meta property="og:site_name" content="FSharp.Control.TaskSeq">
+    <meta property="og:title" content="FSharp.Control" />
+    <meta property="og:url" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/{{fsdocs-source-basename}}.html">
+    <meta property="og:type" content="website" />
+    <!-- Twitter cards (https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/summary-card-with-large-image) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+    <meta name="twitter:title" content="FSharp.Control">
+    
+    <title>FSharp.Control | FSharp.Control.TaskSeq</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/favicon.ico" rel="icon" sizes="32x32" type="image/png"/>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-set-dark.js"></script>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-set-expanded.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-default.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.css" rel="stylesheet" type="text/css"/>
+    
+    
+</head>
+<body class="api-docs">
+<header>
+    <div class="start">
+        <div id="menu-toggle">
+            <iconify-icon class="icon closed" height="22" icon="eva:menu-fill" width="22"></iconify-icon>
+            <iconify-icon class="icon open" height="22" icon="mi:close" width="22"></iconify-icon>
+            <input type="checkbox" name="mobile-menu" />
+            <ul class="menu">
+                <li class="nav-header">Links</li>
+                <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+                </li>
+                <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                        href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+                    Notes</a></li>
+                <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+                    Repository</a></li>
+                <li class="nav-header ">
+  Documentation
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+                <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+            </ul>
+        </div>
+        <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+            <img alt="Header menu logo" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/logo.png">
+            <strong>FSharp.Control.TaskSeq</strong>
+        </a>
+    </div>
+    <div class="end">
+        <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/" target="_blank">
+            <iconify-icon icon="uil:github" width="26" height="26"></iconify-icon>
+        </a>
+        <iconify-icon id="search-btn" icon="carbon:search" class="search" width="24" height="24"></iconify-icon>
+        <fsdocs-theme-toggle></fsdocs-theme-toggle>
+    </div>
+</header>
+<aside id="fsdocs-main-menu">
+    <ul class="menu">
+        <li class="nav-header">Links</li>
+        <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+        </li>
+        <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+            Notes</a></li>
+        <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+            Repository</a></li>
+        <li class="nav-header ">
+  Documentation
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+        <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+    </ul>
+</aside>
+<main>
+    <div id="content">
+        <div>
+  <h2 id="fsharp-control">
+    FSharp.Control Namespace
+  </h2>
+  <div class="fsdocs-xmldoc"></div>
+  <table class="table outer-list fsdocs-entity-list">
+    <thead>
+      <tr>
+        <td>
+          Type/Module
+        </td>
+        <td>
+          Description
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="Async">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-async.html">
+                Async
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/Utils.fsi#L88-88" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.Async\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.Async`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="AsyncExtensions">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-asyncextensions.html">
+                AsyncExtensions
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/AsyncExtensions.fsi#L4-4" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.AsyncExtensions\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.AsyncExtensions`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="Debug">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-debug.html">
+                Debug
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/DebugUtils.fs#L8-8" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.Debug\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.Debug`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="HighPriority">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-highpriority.html">
+                HighPriority
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Contains low priority extension methods for the main builder class for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ The <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-lowpriority.html">LowPriority</a>, <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-mediumpriority.html">MediumPriority</a> and <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-highpriority.html">HighPriority</a> modules are not meant to be
+ accessed directly from user code. They solely serve to disambiguate overload resolution inside the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L243-243" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.HighPriority\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.HighPriority`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="Internal">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-internal.html">
+                Internal
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L13-13" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.Internal\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.Internal`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="LowPriority">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-lowpriority.html">
+                LowPriority
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Contains low priority extension methods for the main builder class for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ The <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-lowpriority.html">LowPriority</a>, <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-mediumpriority.html">MediumPriority</a> and <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-highpriority.html">HighPriority</a> modules are not meant to be
+ accessed directly from user code. They solely serve to disambiguate overload resolution inside the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L208-208" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.LowPriority\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.LowPriority`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="MediumPriority">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-mediumpriority.html">
+                MediumPriority
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Contains low priority extension methods for the main builder class for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ The <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-lowpriority.html">LowPriority</a>, <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-mediumpriority.html">MediumPriority</a> and <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-highpriority.html">HighPriority</a> modules are not meant to be
+ accessed directly from user code. They solely serve to disambiguate overload resolution inside the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L225-225" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.MediumPriority\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.MediumPriority`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="ResumableTSC<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-resumabletsc-1.html">
+                ResumableTSC<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                 TaskSeqCode type alias of ResumableCode delegate type, specially recognized by the F# compiler
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L44-44" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.ResumableTSC`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.ResumableTSC`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="Task">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-task.html">
+                Task
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/Utils.fsi#L53-53" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.Task\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.Task`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskExtensions">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskextensions.html">
+                TaskExtensions
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskExtensions.fsi#L6-6" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskExtensions\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskExtensions`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeq">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseq.html">
+                TaskSeq
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeq.fsi#L99-99" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeq\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeq`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeq<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseq-1-0.html">
+                TaskSeq<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Represents a task sequence and is the output of using the <span class="fsdocs-param-name">taskSeq{...}</span>
+ computation expression from this library. It is an alias for <a href="https://learn.microsoft.com/dotnet/api/system.iasyncenumerable<_>">IAsyncEnumerable<_></a>.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L41-41" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeq`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeq`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeq<'Machine, 'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseq-2.html">
+                TaskSeq<'Machine, 'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Main implementation of generic <a href="https://learn.microsoft.com/dotnet/api/system.iasyncenumerable<'t>">IAsyncEnumerable<'T></a> and related interfaces,
+ which forms the meat of the logic behind <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expresssions.
+ For use by this library only, should not be used directly in user code. Its operation depends highly on resumable state.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L116-116" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeq`2\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeq`2``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqBase<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqbase-1.html">
+                TaskSeqBase<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Abstract base class for <a href="https://learn.microsoft.com/dotnet/api/taskseq<'machine, 't>">TaskSeq<'Machine, 'T></a>.
+ For use by this library only, should not be used directly in user code. Its operation depends highly on resumable state.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L100-100" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqBase`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqBase`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqBuilder">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqbuildermodule.html">
+                TaskSeqBuilder (Module)
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L195-195" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqBuilderModule\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeqBuilderModule`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqBuilder">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqbuilder.html">
+                TaskSeqBuilder (Type)
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Main builder class for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L176-176" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqBuilder\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeqBuilder`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqDynamic<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqdynamic-1.html">
+                TaskSeqDynamic<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Dynamic (FSI-compatible) implementation of <a href="https://learn.microsoft.com/dotnet/api/iasyncenumerable<'t>">IAsyncEnumerable<'T></a> for <code>taskSeq</code>
+ computation expressions. Used when the F# compiler cannot generate static resumable code (e.g., in FSI).
+ For use by this library only.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L153-153" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqDynamic`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqDynamic`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqDynamicBuilder">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqdynamicbuildermodule.html">
+                TaskSeqDynamicBuilder (Module)
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L260-260" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqDynamicBuilderModule\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeqDynamicBuilderModule`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqDynamicBuilder">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqdynamicbuilder.html">
+                TaskSeqDynamicBuilder (Type)
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Builder class for the <a href="https://learn.microsoft.com/dotnet/api/taskseqdynamic">taskSeqDynamic</a> computation expression. Inherits all members
+ from <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqbuilder.html">TaskSeqBuilder</a>, using the dynamic resumable code path as fallback when the
+ F# compiler cannot generate static resumable code (e.g., in F# Interactive / FSI).
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L255-255" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqDynamicBuilder\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeqDynamicBuilder`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqDynamicInfo<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqdynamicinfo-1.html">
+                TaskSeqDynamicInfo<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Concrete implementation of <a href="https://learn.microsoft.com/dotnet/api/taskseqresumptiondynamicinfo<'t>">TaskSeqResumptionDynamicInfo<'T></a> for <code>taskSeq</code> computation
+ expressions, used in the dynamic (FSI) path. Handles state-machine transitions when the F# compiler
+ cannot generate static resumable code.
+ For use by this library only.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L144-144" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqDynamicInfo`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqDynamicInfo`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqExtensions">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqextensions.html">
+                TaskSeqExtensions
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeq.fsi#L9-9" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqExtensions\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.TaskSeqExtensions`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqResumptionDynamicInfo<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqresumptiondynamicinfo-1.html">
+                TaskSeqResumptionDynamicInfo<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L52-52" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqResumptionDynamicInfo`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqResumptionDynamicInfo`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqResumptionFunc<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqresumptionfunc-1.html">
+                TaskSeqResumptionFunc<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L51-51" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqResumptionFunc`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqResumptionFunc`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqStateMachine<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqstatemachine-1.html">
+                TaskSeqStateMachine<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Contains the state data for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression builder.
+ For use in this library only. Required by the <a href="https://learn.microsoft.com/dotnet/api/taskseqbuilder.run">Run</a> method.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L50-50" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqStateMachine`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqStateMachine`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="TaskSeqStateMachineData<'T>">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-taskseqstatemachinedata-1.html">
+                TaskSeqStateMachineData<'T>
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+ Contains the state data for the <a href="https://learn.microsoft.com/dotnet/api/taskseq">taskSeq</a> computation expression builder.
+ For use in this library only. Required by the <a href="https://learn.microsoft.com/dotnet/api/taskseqbuilder.run">Run</a> method.
+ 
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/TaskSeqBuilder.fsi#L58-58" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.TaskSeqStateMachineData`1\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('``cref:T:FSharp.Control.TaskSeqStateMachineData`1``')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="ValueTask">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-valuetask.html">
+                ValueTask
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/Utils.fsi#L16-16" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.ValueTask\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.ValueTask`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="fsdocs-entity-name">
+          <p>
+            <a name="ValueTaskExtensions">
+              <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/fsharp-control-valuetaskextensions.html">
+                ValueTaskExtensions
+              </a>
+            </a>
+          </p>
+        </td>
+        <td class="fsdocs-entity-xmldoc">
+          <div>
+            <div class="fsdocs-summary-contents">
+              <p class="fsdocs-summary">
+                
+              </p>
+            </div>
+            <div class="icon-button-row">
+              <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/tree/master/src/FSharp.Control.TaskSeq/Utils.fsi#L8-8" class="fsdocs-source-link" title="Source on GitHub">
+                <iconify-icon icon="ri:github-fill" height="24" width="24"></iconify-icon>
+              </a>
+              <div class="fsdocs-source-link" title="Copy signature (XML)" onclick="Clipboard_CopyTo('<see cref=\'T:FSharp.Control.ValueTaskExtensions\'/>')">
+                <iconify-icon icon="bi:filetype-xml" height="24" width="24"></iconify-icon>
+              </div>
+              <div class="fsdocs-source-link" title="Copy signature (Markdown)" onclick="Clipboard_CopyTo('`cref:T:FSharp.Control.ValueTaskExtensions`')">
+                <iconify-icon icon="bi:filetype-md" height="24" width="24"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+        
+    </div>
+</main>
+<aside id="fsdocs-page-menu">
+    <p id="on-this-page">On this page</p>
+    <div class="empty"></div>
+</aside>
+<dialog>
+    <input type="search" placeholder="Search docs" />
+    <div class="results">
+        <ul></ul>
+        <p class="empty">Type something to start searching.</p>
+    </div>
+</dialog>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-tips.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-search.js"></script>
+
+</body>
+</html>
