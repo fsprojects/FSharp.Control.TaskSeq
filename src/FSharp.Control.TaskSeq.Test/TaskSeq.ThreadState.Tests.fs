@@ -147,3 +147,71 @@ module Functionality =
 
         viaThread |> should equal viaScan
     }
+
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-threadState folder is invoked exactly once per source item`` () = task {
+        let mutable folderCalls = 0
+
+        let source = taskSeq {
+            for i in 1..5 do
+                yield i
+        }
+
+        let folder state x =
+            folderCalls <- folderCalls + 1
+            x + state, state + 1
+
+        let! result = TaskSeq.threadState folder 0 source |> TaskSeq.toArrayAsync
+        result |> should haveLength 5
+        folderCalls |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-threadState re-enumerating the result re-runs source side effects and folder calls`` () = task {
+        let mutable itemsProduced = 0
+        let mutable folderCalls = 0
+
+        let source = taskSeq {
+            for i in 1..3 do
+                itemsProduced <- itemsProduced + 1
+                yield i
+        }
+
+        let folder state x =
+            folderCalls <- folderCalls + 1
+            x + state, state + 1
+
+        let ts = TaskSeq.threadState folder 0 source
+
+        let! result1 = ts |> TaskSeq.toArrayAsync
+        result1 |> should equal [| 1; 3; 5 |]
+        itemsProduced |> should equal 3
+        folderCalls |> should equal 3
+
+        // threadState produces a fresh taskSeq that re-drives the source and the
+        // folder from scratch on each independent enumeration
+        let! result2 = ts |> TaskSeq.toArrayAsync
+        result2 |> should equal result1
+        itemsProduced |> should equal 6
+        folderCalls |> should equal 6
+    }
+
+    [<Fact>]
+    let ``TaskSeq-threadStateAsync folder is invoked exactly once per source item`` () = task {
+        let mutable folderCalls = 0
+        let source = taskSeq { yield! [ 1..4 ] }
+
+        let folder state x = task {
+            folderCalls <- folderCalls + 1
+            return x + state, state + 1
+        }
+
+        let! result =
+            TaskSeq.threadStateAsync folder 0 source
+            |> TaskSeq.toArrayAsync
+
+        result |> should haveLength 4
+        folderCalls |> should equal 4
+    }
