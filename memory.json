@@ -1,5 +1,5 @@
 {
-  "r": "33879602645",
+  "r": "34605897835",
   "m": 443,
   "cur": 62,
   "rej": [
@@ -13,7 +13,7 @@
     "map2",
     "findBack"
   ],
-  "n": "Run 33879602645 (2026-09-04): Tasks selected 3/8/10 (+11). No fixable bug/help-wanted/good-first-issue issues found (Task3 N/A). Verified remaining go-flag patterns (lengthBeforeMax, unfold, unfoldAsync, tryPick, tryFind, tryFindIndex) are genuinely early-exit and NOT convertible to while! (no break in task/taskSeq CEs) - Task8 N/A, substituted Task9 (Testing). Created PR repo-assist/perf-while-tryfind-20260904: added SideEffects module to TaskSeq.ReplicateInfinite.Tests.fs and TaskSeq.ThreadState.Tests.fs (closes last 2 of the 4 flagged test-gap files; Empty.Tests.fs and Let.Tests.fs left - Empty already has an inline side-effect test, Let.Tests.fs is binding-focused and may not need one). Confirmed issues #463 and #442 remain stranded protected-workflow-file PR-issues awaiting human patch application (unchanged). Issue #452 (Orleans) and #62 (tail recursion) unchanged, no new activity, not re-engaged this run. Issue #466 (ValueTaskSeq feature request) still unlabelled/uncommented - candidate for next run's Task1/Task2. Closed #465 (Aug monthly), created new Sept 2026 monthly activity issue.",
+  "n": "Run 34605897835 (2026-09-11): Tasks selected 2/5/1 (+11). Task1 labelled 3 previously-unlabelled issues: #473 (bug/compatibility/blocked: awaiting-fsharp-feature), #466 (enhancement/feature request/needs triage), #452 (bug/needs investigation/compatibility). Task2 commented on #473: reproduced the reported taskSeq Debug-mode truncation locally against both released 1.1.1 and current main source (SDK 10.0.400) - root-caused to upstream F# compiler regression dotnet/fsharp#20466 'Incorrect state machine compilation in debug', fix already in progress at dotnet/fsharp#20469 (composed ResumableCode builders like TaskSeq's Bind/WhileAsync/For lose correct lowering in Debug). NOT a library bug; documented Release-build workaround. Task5 (substituted): created PR repo-assist/improve-doc-debug-compiler-bug-473 adding a 'Known issues' section to README.md plus release-notes entry documenting this compiler bug and workaround - docs-only change, no build/test needed. Updated Sept monthly activity issue #471 with new suggested actions (review 2 pending repo-assist PRs #470 and new doc PR, track dotnet/fsharp#20469 for eventual #473 closure, apply-manually items #463/#442 unchanged, #452/#62/#466 unchanged). Issues #463 and #442 remain stranded protected-workflow-file PR-issues awaiting human patch application. PR #468 (dependabot) still open, unreviewed.",
   "prs": {
     "eng-bundle-deps-20260731": {
       "branch": "repo-assist/eng-bundle-deps-20260731",
@@ -34,9 +34,20 @@
       "branch": "repo-assist/perf-while-tryfind-20260904",
       "desc": "test: SideEffects module for ReplicateInfinite + ThreadState",
       "status": "submitted"
+    },
+    "improve-doc-debug-compiler-bug-473": {
+      "branch": "repo-assist/improve-doc-debug-compiler-bug-473",
+      "desc": "docs: README Known Issues section for dotnet/fsharp#20466 Debug-mode taskSeq truncation bug (#473)",
+      "status": "submitted"
     }
   },
   "pr_attempts": [
+    {
+      "branch": "repo-assist/improve-doc-debug-compiler-bug-473",
+      "desc": "docs: Known Issues section for compiler bug #473 (dotnet/fsharp#20466/#20469)",
+      "status": "submitted",
+      "run": "34605897835"
+    },
     {
       "branch": "repo-assist/perf-while-tryfind-20260904",
       "desc": "test: SideEffects for ReplicateInfinite/ThreadState",
@@ -90,6 +101,7 @@
     "415": "2026-04-30",
     "pr385": "2026-04-13",
     "pr401": "2026-04-27",
-    "452": "2026-08-28"
+    "452": "2026-08-28",
+    "473": "2026-09-11"
   }
 }
