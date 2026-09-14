@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" data-root="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="Abel Braaksma; Don Syme" name="author">
+    <!-- Opengraph properties (https://ogp.me/) -->
+    <meta property="og:site_name" content="FSharp.Control.TaskSeq">
+    <meta property="og:title" content="Generating Task Sequences" />
+    <meta property="og:url" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    <meta property="og:type" content="website" />
+    <!-- Twitter cards (https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/summary-card-with-large-image) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+    <meta name="twitter:title" content="Generating Task Sequences">
+    <meta name="description" content="How to create F# task sequences using the taskSeq computation expression, init, unfold, and conversion functions.">
+<meta name="twitter:site" content="How to create F# task sequences using the taskSeq computation expression, init, unfold, and conversion functions.">
+<meta name="og:description" content="How to create F# task sequences using the taskSeq computation expression, init, unfold, and conversion functions.">
+<meta name="keywords" content="F#, task sequences, TaskSeq, IAsyncEnumerable, taskSeq, computation expression, init, unfold, ofArray, ofSeq, singleton, replicate, replicateInfinite, replicateUntilNoneAsync">
+    <title>Generating Task Sequences | FSharp.Control.TaskSeq</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/favicon.ico" rel="icon" sizes="32x32" type="image/png"/>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-set-dark.js"></script>
+    <script type="application/javascript" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-set-expanded.js"></script>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-default.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.css" rel="stylesheet" type="text/css"/>
+    
+    
+</head>
+<body class="content">
+<header>
+    <div class="start">
+        <div id="menu-toggle">
+            <iconify-icon class="icon closed" height="22" icon="eva:menu-fill" width="22"></iconify-icon>
+            <iconify-icon class="icon open" height="22" icon="mi:close" width="22"></iconify-icon>
+            <input type="checkbox" name="mobile-menu" />
+            <ul class="menu">
+                <li class="nav-header">Links</li>
+                <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+                </li>
+                <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                        href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+                    Notes</a></li>
+                <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+                    Repository</a></li>
+                <li class="nav-header active">
+  Documentation
+</li>             
+<li class="nav-item active">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+                <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+            </ul>
+        </div>
+        <a href="https://fsprojects.github.io/FSharp.Control.TaskSeq/">
+            <img alt="Header menu logo" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/img/logo.png">
+            <strong>FSharp.Control.TaskSeq</strong>
+        </a>
+    </div>
+    <div class="end">
+        <a href="https://github.com/fsprojects/FSharp.Control.TaskSeq/" target="_blank">
+            <iconify-icon icon="uil:github" width="26" height="26"></iconify-icon>
+        </a>
+        <iconify-icon id="search-btn" icon="carbon:search" class="search" width="24" height="24"></iconify-icon>
+        <fsdocs-theme-toggle></fsdocs-theme-toggle>
+    </div>
+</header>
+<aside id="fsdocs-main-menu">
+    <ul class="menu">
+        <li class="nav-header">Links</li>
+        <li class="license-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/LICENSE">License</a>
+        </li>
+        <li class="release-notes-menu-item builtin-menu-item nav-item"><a class="nav-link"
+                                href="https://github.com/fsprojects/FSharp.Control.TaskSeq/blob/main/release-notes.txt">Release
+            Notes</a></li>
+        <li class="repository-menu-item builtin-menu-item nav-item"><a class="nav-link" href="https://github.com/fsprojects/FSharp.Control.TaskSeq/">Source
+            Repository</a></li>
+        <li class="nav-header active">
+  Documentation
+</li>             
+<li class="nav-item active">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqGenerating.html">
+    Generating Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqTransforming.html">
+    Transforming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqConsuming.html">
+    Consuming Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqCombining.html">
+    Combining Task Sequences
+  </a>
+</li>             
+<li class="nav-item ">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/TaskSeqAdvanced.html">
+    Advanced Task Sequence Operations
+  </a>
+</li>
+        <li class="nav-header">
+  API Reference
+</li>             
+<li class="nav-item">
+  <a class="nav-link" href="https://fsprojects.github.io/FSharp.Control.TaskSeq/reference/index.html">
+    All Namespaces
+  </a>
+</li>
+    </ul>
+</aside>
+<main>
+    <div id="content">
+        
+<h1><a name="Generating-Task-Sequences" class="anchor" href="#Generating-Task-Sequences">Generating Task Sequences</a></h1>
+<p>This page covers the main ways to create <code>TaskSeq&lt;'T&gt;</code> values: the <code>taskSeq</code> computation
+expression, factory functions such as <code>TaskSeq.init</code> and <code>TaskSeq.unfold</code>, and conversion
+functions that wrap existing collections.</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">open</span> <span onmouseout="hideTip(event, 'fs1', 1)" onmouseover="showTip(event, 'fs1', 1)" class="id">System</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs2', 2)" onmouseover="showTip(event, 'fs2', 2)" class="id">Threading</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs3', 3)" onmouseover="showTip(event, 'fs3', 3)" class="id">Tasks</span>
+<span class="k">open</span> <span onmouseout="hideTip(event, 'fs4', 4)" onmouseover="showTip(event, 'fs4', 4)" class="id">FSharp</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs5', 5)" onmouseover="showTip(event, 'fs5', 5)" class="id">Control</span>
+</code></pre>
+<h2><a name="Computation-Expression-Syntax" class="anchor" href="#Computation-Expression-Syntax">Computation Expression Syntax</a></h2>
+<p><code>taskSeq { ... }</code> is a computation expression that lets you write asynchronous sequences
+using familiar F# constructs.  Under the hood it compiles to a resumable state machine, so
+there is no allocation per element.</p>
+<h3><a name="Yielding-values" class="anchor" href="#Yielding-values">Yielding values</a></h3>
+<p>Use <code>yield</code> to emit a single value and <code>yield!</code> to splice in another sequence:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs6', 6)" onmouseover="showTip(event, 'fs6', 6)" class="id">helloWorld</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 7)" onmouseover="showTip(event, 'fs7', 7)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">yield</span> <span class="s">&quot;hello&quot;</span>
+    <span class="k">yield</span> <span class="s">&quot;world&quot;</span>
+<span class="pn">}</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs8', 8)" onmouseover="showTip(event, 'fs8', 8)" class="id">combined</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 9)" onmouseover="showTip(event, 'fs7', 9)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">yield!</span> <span onmouseout="hideTip(event, 'fs6', 10)" onmouseover="showTip(event, 'fs6', 10)" class="id">helloWorld</span>
+    <span class="k">yield</span> <span class="s">&quot;!&quot;</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="Conditionals" class="anchor" href="#Conditionals">Conditionals</a></h3>
+<p><code>if</code>/<code>then</code>/<code>else</code> works just like in ordinary F#:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs9', 11)" onmouseover="showTip(event, 'fs9', 11)" class="id">evenNumbers</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 12)" onmouseover="showTip(event, 'fs7', 12)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs10', 13)" onmouseover="showTip(event, 'fs10', 13)" class="fn">i</span> <span class="k">in</span> <span class="n">1..</span><span class="n">10</span> <span class="k">do</span>
+        <span class="k">if</span> <span onmouseout="hideTip(event, 'fs10', 14)" onmouseover="showTip(event, 'fs10', 14)" class="fn">i</span> <span class="o">%</span> <span class="n">2</span> <span class="o">=</span> <span class="n">0</span> <span class="k">then</span>
+            <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs10', 15)" onmouseover="showTip(event, 'fs10', 15)" class="fn">i</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="Match-expressions" class="anchor" href="#Match-expressions">Match expressions</a></h3>
+<p><code>match</code> expressions are fully supported:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">type</span> <span onmouseout="hideTip(event, 'fs11', 16)" onmouseover="showTip(event, 'fs11', 16)" class="rt">Shape</span> <span class="o">=</span>
+    <span class="pn">|</span> <span class="uc">Circle</span> <span class="k">of</span> <span class="prop">radius</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs12', 17)" onmouseover="showTip(event, 'fs12', 17)" class="vt">float</span>
+    <span class="pn">|</span> <span class="uc">Rectangle</span> <span class="k">of</span> <span class="prop">width</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs12', 18)" onmouseover="showTip(event, 'fs12', 18)" class="vt">float</span> <span class="pn">*</span> <span class="prop">height</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs12', 19)" onmouseover="showTip(event, 'fs12', 19)" class="vt">float</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs13', 20)" onmouseover="showTip(event, 'fs13', 20)" class="id">areas</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 21)" onmouseover="showTip(event, 'fs7', 21)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs14', 22)" onmouseover="showTip(event, 'fs14', 22)" class="fn">shape</span> <span class="k">in</span> <span class="pn">[</span> <span onmouseout="hideTip(event, 'fs15', 23)" onmouseover="showTip(event, 'fs15', 23)" class="uc">Circle</span> <span class="n">3.0</span><span class="pn">;</span> <span onmouseout="hideTip(event, 'fs16', 24)" onmouseover="showTip(event, 'fs16', 24)" class="uc">Rectangle</span><span class="pn">(</span><span class="n">4.0</span><span class="pn">,</span> <span class="n">5.0</span><span class="pn">)</span><span class="pn">;</span> <span onmouseout="hideTip(event, 'fs15', 25)" onmouseover="showTip(event, 'fs15', 25)" class="uc">Circle</span> <span class="n">1.5</span> <span class="pn">]</span> <span class="k">do</span>
+        <span class="k">match</span> <span onmouseout="hideTip(event, 'fs14', 26)" onmouseover="showTip(event, 'fs14', 26)" class="fn">shape</span> <span class="k">with</span>
+        <span class="pn">|</span> <span onmouseout="hideTip(event, 'fs15', 27)" onmouseover="showTip(event, 'fs15', 27)" class="uc">Circle</span> <span onmouseout="hideTip(event, 'fs17', 28)" onmouseover="showTip(event, 'fs17', 28)" class="fn">r</span> <span class="k">-&gt;</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs1', 29)" onmouseover="showTip(event, 'fs1', 29)" class="id">System</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs18', 30)" onmouseover="showTip(event, 'fs18', 30)" class="rt">Math</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs19', 31)" onmouseover="showTip(event, 'fs19', 31)" class="id">PI</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs17', 32)" onmouseover="showTip(event, 'fs17', 32)" class="fn">r</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs17', 33)" onmouseover="showTip(event, 'fs17', 33)" class="fn">r</span>
+        <span class="pn">|</span> <span onmouseout="hideTip(event, 'fs16', 34)" onmouseover="showTip(event, 'fs16', 34)" class="uc">Rectangle</span><span class="pn">(</span><span onmouseout="hideTip(event, 'fs20', 35)" onmouseover="showTip(event, 'fs20', 35)" class="fn">w</span><span class="pn">,</span> <span onmouseout="hideTip(event, 'fs21', 36)" onmouseover="showTip(event, 'fs21', 36)" class="fn">h</span><span class="pn">)</span> <span class="k">-&gt;</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs20', 37)" onmouseover="showTip(event, 'fs20', 37)" class="fn">w</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs21', 38)" onmouseover="showTip(event, 'fs21', 38)" class="fn">h</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="For-loops" class="anchor" href="#For-loops">For loops</a></h3>
+<p><code>for</code> iterates over any <code>seq&lt;'T&gt;</code>/<code>IEnumerable&lt;'T&gt;</code> synchronously, or over another
+<code>TaskSeq&lt;'T&gt;</code> asynchronously:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs22', 39)" onmouseover="showTip(event, 'fs22', 39)" class="id">squaresOfList</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 40)" onmouseover="showTip(event, 'fs7', 40)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs23', 41)" onmouseover="showTip(event, 'fs23', 41)" class="fn">n</span> <span class="k">in</span> <span class="pn">[</span> <span class="n">1</span><span class="pn">;</span> <span class="n">2</span><span class="pn">;</span> <span class="n">3</span><span class="pn">;</span> <span class="n">4</span><span class="pn">;</span> <span class="n">5</span> <span class="pn">]</span> <span class="k">do</span>
+        <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs23', 42)" onmouseover="showTip(event, 'fs23', 42)" class="fn">n</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs23', 43)" onmouseover="showTip(event, 'fs23', 43)" class="fn">n</span>
+<span class="pn">}</span>
+
+<span class="c">// Iterate another TaskSeq</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs24', 44)" onmouseover="showTip(event, 'fs24', 44)" class="id">doubled</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 45)" onmouseover="showTip(event, 'fs7', 45)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs23', 46)" onmouseover="showTip(event, 'fs23', 46)" class="fn">n</span> <span class="k">in</span> <span onmouseout="hideTip(event, 'fs22', 47)" onmouseover="showTip(event, 'fs22', 47)" class="id">squaresOfList</span> <span class="k">do</span>
+        <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs23', 48)" onmouseover="showTip(event, 'fs23', 48)" class="fn">n</span> <span class="o">*</span> <span class="n">2</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="While-loops" class="anchor" href="#While-loops">While loops</a></h3>
+<p><code>while</code> emits elements until a condition becomes false.  Async operations can appear in the
+loop body:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs25', 49)" onmouseover="showTip(event, 'fs25', 49)" class="id">countdown</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 50)" onmouseover="showTip(event, 'fs7', 50)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">let</span> <span class="k">mutable</span> <span onmouseout="hideTip(event, 'fs26', 51)" onmouseover="showTip(event, 'fs26', 51)" class="mv">i</span> <span class="o">=</span> <span class="n">5</span>
+
+    <span class="k">while</span> <span onmouseout="hideTip(event, 'fs26', 52)" onmouseover="showTip(event, 'fs26', 52)" class="mv">i</span> <span class="o">&gt;</span> <span class="n">0</span> <span class="k">do</span>
+        <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs26', 53)" onmouseover="showTip(event, 'fs26', 53)" class="mv">i</span>
+        <span class="k">do!</span> <span onmouseout="hideTip(event, 'fs27', 54)" onmouseover="showTip(event, 'fs27', 54)" class="d">Task</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs28', 55)" onmouseover="showTip(event, 'fs28', 55)" class="id">Delay</span> <span class="n">100</span>
+        <span onmouseout="hideTip(event, 'fs26', 56)" onmouseover="showTip(event, 'fs26', 56)" class="mv">i</span> <span class="k">&lt;-</span> <span onmouseout="hideTip(event, 'fs26', 57)" onmouseover="showTip(event, 'fs26', 57)" class="mv">i</span> <span class="o">-</span> <span class="n">1</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="Awaiting-tasks-with-and" class="anchor" href="#Awaiting-tasks-with-and">Awaiting tasks with <code>let!</code> and <code>do!</code></a></h3>
+<p>Inside <code>taskSeq { ... }</code> you can await any <code>Task&lt;'T&gt;</code> with <code>let!</code> and any <code>Task&lt;unit&gt;</code> with
+<code>do!</code>:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs29', 58)" onmouseover="showTip(event, 'fs29', 58)" class="fn">fetchData</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs30', 59)" onmouseover="showTip(event, 'fs30', 59)" class="fn">url</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs31', 60)" onmouseover="showTip(event, 'fs31', 60)" class="rt">string</span><span class="pn">)</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs27', 61)" onmouseover="showTip(event, 'fs27', 61)" class="d">Task</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs31', 62)" onmouseover="showTip(event, 'fs31', 62)" class="rt">string</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs32', 63)" onmouseover="showTip(event, 'fs32', 63)" class="k">task</span> <span class="pn">{</span> <span class="k">return</span> <span class="s">$&quot;data from {</span><span onmouseout="hideTip(event, 'fs30', 64)" onmouseover="showTip(event, 'fs30', 64)" class="fn">url</span><span class="s">}&quot;</span> <span class="pn">}</span> <span class="c">// placeholder</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs33', 65)" onmouseover="showTip(event, 'fs33', 65)" class="id">results</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 66)" onmouseover="showTip(event, 'fs7', 66)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">for</span> <span onmouseout="hideTip(event, 'fs30', 67)" onmouseover="showTip(event, 'fs30', 67)" class="fn">url</span> <span class="k">in</span> <span class="pn">[</span> <span class="s">&quot;https://example.com/a&quot;</span><span class="pn">;</span> <span class="s">&quot;https://example.com/b&quot;</span> <span class="pn">]</span> <span class="k">do</span>
+        <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs34', 68)" onmouseover="showTip(event, 'fs34', 68)" class="fn">data</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs29', 69)" onmouseover="showTip(event, 'fs29', 69)" class="fn">fetchData</span> <span onmouseout="hideTip(event, 'fs30', 70)" onmouseover="showTip(event, 'fs30', 70)" class="fn">url</span>
+        <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs34', 71)" onmouseover="showTip(event, 'fs34', 71)" class="fn">data</span>
+<span class="pn">}</span>
+</code></pre>
+<h3><a name="Use-bindings-and-try-with" class="anchor" href="#Use-bindings-and-try-with">Use bindings and try / with</a></h3>
+<p><code>use</code> and <code>use!</code> dispose the resource when the sequence finishes or is abandoned. <code>try/with</code>
+and <code>try/finally</code> work as expected:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs35', 72)" onmouseover="showTip(event, 'fs35', 72)" class="id">withResource</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 73)" onmouseover="showTip(event, 'fs7', 73)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">use</span> <span onmouseout="hideTip(event, 'fs36', 74)" onmouseover="showTip(event, 'fs36', 74)" class="d">resource</span> <span class="o">=</span> <span class="pn">{</span> <span class="k">new</span> <span onmouseout="hideTip(event, 'fs1', 75)" onmouseover="showTip(event, 'fs1', 75)" class="id">System</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs37', 76)" onmouseover="showTip(event, 'fs37', 76)" class="id">IDisposable</span> <span class="k">with</span> <span class="k">member</span> <span class="id">_</span><span class="pn">.</span><span class="fn">Dispose</span><span class="pn">(</span><span class="pn">)</span> <span class="o">=</span> <span class="pn">(</span><span class="pn">)</span> <span class="pn">}</span> <span class="c">// placeholder</span>
+    <span class="k">yield</span> <span class="n">1</span>
+    <span class="k">yield</span> <span class="n">2</span>
+<span class="pn">}</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs38', 77)" onmouseover="showTip(event, 'fs38', 77)" class="id">withErrorHandling</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs7', 78)" onmouseover="showTip(event, 'fs7', 78)" class="k">taskSeq</span> <span class="pn">{</span>
+    <span class="k">try</span>
+        <span class="k">yield</span> <span class="n">1</span>
+        <span onmouseout="hideTip(event, 'fs39', 79)" onmouseover="showTip(event, 'fs39', 79)" class="fn">failwith</span> <span class="s">&quot;oops&quot;</span>
+        <span class="k">yield</span> <span class="n">2</span>
+    <span class="k">with</span> <span onmouseout="hideTip(event, 'fs40', 80)" onmouseover="showTip(event, 'fs40', 80)" class="fn">ex</span> <span class="k">-&gt;</span>
+        <span class="k">yield</span> <span class="o">-</span><span class="n">1</span>
+<span class="pn">}</span>
+</code></pre>
+<hr />
+<h2><a name="init-and-initInfinite" class="anchor" href="#init-and-initInfinite">init and initInfinite</a></h2>
+<p><code>TaskSeq.init count initializer</code> generates <code>count</code> elements by calling <code>initializer</code> with the
+zero-based index:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// [| 0; 1; 4; 9; 16 |]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs41', 81)" onmouseover="showTip(event, 'fs41', 81)" class="id">squares</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 82)" onmouseover="showTip(event, 'fs42', 82)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 83)" onmouseover="showTip(event, 'fs43', 83)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 84)" onmouseover="showTip(event, 'fs42', 84)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs44', 85)" onmouseover="showTip(event, 'fs44', 85)" class="id">init</span> <span class="n">5</span> <span class="pn">(</span><span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 86)" onmouseover="showTip(event, 'fs10', 86)" class="fn">i</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs10', 87)" onmouseover="showTip(event, 'fs10', 87)" class="fn">i</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs10', 88)" onmouseover="showTip(event, 'fs10', 88)" class="fn">i</span><span class="pn">)</span>
+
+<span class="c">// With an async initializer</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs45', 89)" onmouseover="showTip(event, 'fs45', 89)" class="id">asyncSquares</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 90)" onmouseover="showTip(event, 'fs42', 90)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 91)" onmouseover="showTip(event, 'fs43', 91)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 92)" onmouseover="showTip(event, 'fs42', 92)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs46', 93)" onmouseover="showTip(event, 'fs46', 93)" class="id">initAsync</span> <span class="n">5</span> <span class="pn">(</span><span class="k">fun</span> <span onmouseout="hideTip(event, 'fs10', 94)" onmouseover="showTip(event, 'fs10', 94)" class="fn">i</span> <span class="k">-&gt;</span> <span onmouseout="hideTip(event, 'fs32', 95)" onmouseover="showTip(event, 'fs32', 95)" class="k">task</span> <span class="pn">{</span> <span class="k">return</span> <span onmouseout="hideTip(event, 'fs10', 96)" onmouseover="showTip(event, 'fs10', 96)" class="fn">i</span> <span class="o">*</span> <span onmouseout="hideTip(event, 'fs10', 97)" onmouseover="showTip(event, 'fs10', 97)" class="fn">i</span> <span class="pn">}</span><span class="pn">)</span>
+</code></pre>
+<p><code>TaskSeq.initInfinite</code> generates an unbounded sequence — use <code>TaskSeq.take</code> or
+<code>TaskSeq.takeWhile</code> to limit consumption:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs47', 98)" onmouseover="showTip(event, 'fs47', 98)" class="id">naturals</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 99)" onmouseover="showTip(event, 'fs42', 99)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 100)" onmouseover="showTip(event, 'fs43', 100)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 101)" onmouseover="showTip(event, 'fs42', 101)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs48', 102)" onmouseover="showTip(event, 'fs48', 102)" class="id">initInfinite</span> <span onmouseout="hideTip(event, 'fs49', 103)" onmouseover="showTip(event, 'fs49', 103)" class="fn">id</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs50', 104)" onmouseover="showTip(event, 'fs50', 104)" class="id">first10</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 105)" onmouseover="showTip(event, 'fs42', 105)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 106)" onmouseover="showTip(event, 'fs43', 106)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs47', 107)" onmouseover="showTip(event, 'fs47', 107)" class="id">naturals</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs42', 108)" onmouseover="showTip(event, 'fs42', 108)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs51', 109)" onmouseover="showTip(event, 'fs51', 109)" class="id">take</span> <span class="n">10</span> <span class="c">// 0 .. 9</span>
+</code></pre>
+<hr />
+<h2><a name="unfold" class="anchor" href="#unfold">unfold</a></h2>
+<p><code>TaskSeq.unfold</code> derives a sequence from a state value.  Each call to the generator returns
+either <code>None</code> (end) or <code>Some (element, nextState)</code>:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// 0, 1, 2, ... up to but not including 5</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs52', 110)" onmouseover="showTip(event, 'fs52', 110)" class="id">counting</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 111)" onmouseover="showTip(event, 'fs42', 111)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 112)" onmouseover="showTip(event, 'fs43', 112)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 113)" onmouseover="showTip(event, 'fs42', 113)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs53', 114)" onmouseover="showTip(event, 'fs53', 114)" class="id">unfold</span>
+        <span class="pn">(</span><span class="k">fun</span> <span onmouseout="hideTip(event, 'fs54', 115)" onmouseover="showTip(event, 'fs54', 115)" class="fn">state</span> <span class="k">-&gt;</span>
+            <span class="k">if</span> <span onmouseout="hideTip(event, 'fs54', 116)" onmouseover="showTip(event, 'fs54', 116)" class="fn">state</span> <span class="o">&lt;</span> <span class="n">5</span> <span class="k">then</span>
+                <span onmouseout="hideTip(event, 'fs55', 117)" onmouseover="showTip(event, 'fs55', 117)" class="uc">Some</span><span class="pn">(</span><span onmouseout="hideTip(event, 'fs54', 118)" onmouseover="showTip(event, 'fs54', 118)" class="fn">state</span><span class="pn">,</span> <span onmouseout="hideTip(event, 'fs54', 119)" onmouseover="showTip(event, 'fs54', 119)" class="fn">state</span> <span class="o">+</span> <span class="n">1</span><span class="pn">)</span>
+            <span class="k">else</span>
+                <span onmouseout="hideTip(event, 'fs56', 120)" onmouseover="showTip(event, 'fs56', 120)" class="uc">None</span><span class="pn">)</span>
+        <span class="n">0</span>
+
+<span class="c">// Same with an async generator</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs57', 121)" onmouseover="showTip(event, 'fs57', 121)" class="id">countingAsync</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 122)" onmouseover="showTip(event, 'fs42', 122)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 123)" onmouseover="showTip(event, 'fs43', 123)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 124)" onmouseover="showTip(event, 'fs42', 124)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs58', 125)" onmouseover="showTip(event, 'fs58', 125)" class="id">unfoldAsync</span>
+        <span class="pn">(</span><span class="k">fun</span> <span onmouseout="hideTip(event, 'fs54', 126)" onmouseover="showTip(event, 'fs54', 126)" class="fn">state</span> <span class="k">-&gt;</span>
+            <span onmouseout="hideTip(event, 'fs32', 127)" onmouseover="showTip(event, 'fs32', 127)" class="k">task</span> <span class="pn">{</span>
+                <span class="k">if</span> <span onmouseout="hideTip(event, 'fs54', 128)" onmouseover="showTip(event, 'fs54', 128)" class="fn">state</span> <span class="o">&lt;</span> <span class="n">5</span> <span class="k">then</span>
+                    <span class="k">return</span> <span onmouseout="hideTip(event, 'fs55', 129)" onmouseover="showTip(event, 'fs55', 129)" class="uc">Some</span><span class="pn">(</span><span onmouseout="hideTip(event, 'fs54', 130)" onmouseover="showTip(event, 'fs54', 130)" class="fn">state</span><span class="pn">,</span> <span onmouseout="hideTip(event, 'fs54', 131)" onmouseover="showTip(event, 'fs54', 131)" class="fn">state</span> <span class="o">+</span> <span class="n">1</span><span class="pn">)</span>
+                <span class="k">else</span>
+                    <span class="k">return</span> <span onmouseout="hideTip(event, 'fs56', 132)" onmouseover="showTip(event, 'fs56', 132)" class="uc">None</span>
+            <span class="pn">}</span><span class="pn">)</span>
+        <span class="n">0</span>
+</code></pre>
+<hr />
+<h2><a name="singleton-replicate-replicateInfinite-and-empty" class="anchor" href="#singleton-replicate-replicateInfinite-and-empty">singleton, replicate, replicateInfinite, and empty</a></h2>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs59', 133)" onmouseover="showTip(event, 'fs59', 133)" class="id">one</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 134)" onmouseover="showTip(event, 'fs42', 134)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs31', 135)" onmouseover="showTip(event, 'fs31', 135)" class="rt">string</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 136)" onmouseover="showTip(event, 'fs42', 136)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs60', 137)" onmouseover="showTip(event, 'fs60', 137)" class="id">singleton</span> <span class="s">&quot;hello&quot;</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs61', 138)" onmouseover="showTip(event, 'fs61', 138)" class="id">fives</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 139)" onmouseover="showTip(event, 'fs42', 139)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 140)" onmouseover="showTip(event, 'fs43', 140)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 141)" onmouseover="showTip(event, 'fs42', 141)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs62', 142)" onmouseover="showTip(event, 'fs62', 142)" class="id">replicate</span> <span class="n">3</span> <span class="n">5</span> <span class="c">// 5, 5, 5</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs63', 143)" onmouseover="showTip(event, 'fs63', 143)" class="id">nothing</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 144)" onmouseover="showTip(event, 'fs42', 144)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 145)" onmouseover="showTip(event, 'fs43', 145)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 146)" onmouseover="showTip(event, 'fs42', 146)" class="m">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs64', 147)" onmouseover="showTip(event, 'fs64', 147)" class="id">empty</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 148)" onmouseover="showTip(event, 'fs43', 148)" class="vt">int</span><span class="pn">&gt;</span>
+</code></pre>
+<p><code>TaskSeq.replicateInfinite</code> yields a constant value indefinitely.  Always combine it with a
+bounding operation such as <code>take</code> or <code>takeWhile</code>:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs65', 149)" onmouseover="showTip(event, 'fs65', 149)" class="id">infinitePings</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 150)" onmouseover="showTip(event, 'fs42', 150)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs31', 151)" onmouseover="showTip(event, 'fs31', 151)" class="rt">string</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 152)" onmouseover="showTip(event, 'fs42', 152)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs66', 153)" onmouseover="showTip(event, 'fs66', 153)" class="id">replicateInfinite</span> <span class="s">&quot;ping&quot;</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs67', 154)" onmouseover="showTip(event, 'fs67', 154)" class="id">first10pings</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 155)" onmouseover="showTip(event, 'fs42', 155)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs31', 156)" onmouseover="showTip(event, 'fs31', 156)" class="rt">string</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs65', 157)" onmouseover="showTip(event, 'fs65', 157)" class="id">infinitePings</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs42', 158)" onmouseover="showTip(event, 'fs42', 158)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs51', 159)" onmouseover="showTip(event, 'fs51', 159)" class="id">take</span> <span class="n">10</span>
+</code></pre>
+<p><code>TaskSeq.replicateInfiniteAsync</code> calls a function on every step, useful for polling or streaming
+side-effectful sources:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span class="k">mutable</span> <span onmouseout="hideTip(event, 'fs68', 160)" onmouseover="showTip(event, 'fs68', 160)" class="mv">counter</span> <span class="o">=</span> <span class="n">0</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs69', 161)" onmouseover="showTip(event, 'fs69', 161)" class="id">pollingSeq</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 162)" onmouseover="showTip(event, 'fs42', 162)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 163)" onmouseover="showTip(event, 'fs43', 163)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 164)" onmouseover="showTip(event, 'fs42', 164)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs70', 165)" onmouseover="showTip(event, 'fs70', 165)" class="id">replicateInfiniteAsync</span> <span class="pn">(</span><span class="k">fun</span> <span class="pn">(</span><span class="pn">)</span> <span class="k">-&gt;</span>
+        <span onmouseout="hideTip(event, 'fs32', 166)" onmouseover="showTip(event, 'fs32', 166)" class="k">task</span> <span class="pn">{</span>
+            <span onmouseout="hideTip(event, 'fs68', 167)" onmouseover="showTip(event, 'fs68', 167)" class="mv">counter</span> <span class="k">&lt;-</span> <span onmouseout="hideTip(event, 'fs68', 168)" onmouseover="showTip(event, 'fs68', 168)" class="mv">counter</span> <span class="o">+</span> <span class="n">1</span>
+            <span class="k">return</span> <span onmouseout="hideTip(event, 'fs68', 169)" onmouseover="showTip(event, 'fs68', 169)" class="mv">counter</span>
+        <span class="pn">}</span><span class="pn">)</span>
+
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs71', 170)" onmouseover="showTip(event, 'fs71', 170)" class="id">first5counts</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 171)" onmouseover="showTip(event, 'fs42', 171)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 172)" onmouseover="showTip(event, 'fs43', 172)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs69', 173)" onmouseover="showTip(event, 'fs69', 173)" class="id">pollingSeq</span> <span class="o">|&gt;</span> <span onmouseout="hideTip(event, 'fs42', 174)" onmouseover="showTip(event, 'fs42', 174)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs51', 175)" onmouseover="showTip(event, 'fs51', 175)" class="id">take</span> <span class="n">5</span>
+</code></pre>
+<p><code>TaskSeq.replicateUntilNoneAsync</code> stops when the function returns <code>None</code>, making it easy to
+wrap a pull-based source that signals end-of-stream with <code>None</code>:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs72', 176)" onmouseover="showTip(event, 'fs72', 176)" class="fn">readLine</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs73', 177)" onmouseover="showTip(event, 'fs73', 177)" class="d">reader</span><span class="pn">:</span> <span onmouseout="hideTip(event, 'fs1', 178)" onmouseover="showTip(event, 'fs1', 178)" class="id">System</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs74', 179)" onmouseover="showTip(event, 'fs74', 179)" class="id">IO</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs75', 180)" onmouseover="showTip(event, 'fs75', 180)" class="id">TextReader</span><span class="pn">)</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 181)" onmouseover="showTip(event, 'fs42', 181)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs76', 182)" onmouseover="showTip(event, 'fs76', 182)" class="id">replicateUntilNoneAsync</span> <span class="pn">(</span><span class="k">fun</span> <span class="pn">(</span><span class="pn">)</span> <span class="k">-&gt;</span>
+        <span onmouseout="hideTip(event, 'fs32', 183)" onmouseover="showTip(event, 'fs32', 183)" class="k">task</span> <span class="pn">{</span>
+            <span class="k">let!</span> <span onmouseout="hideTip(event, 'fs77', 184)" onmouseover="showTip(event, 'fs77', 184)" class="fn">line</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs73', 185)" onmouseover="showTip(event, 'fs73', 185)" class="d">reader</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs78', 186)" onmouseover="showTip(event, 'fs78', 186)" class="id">ReadLineAsync</span><span class="pn">(</span><span class="pn">)</span>
+            <span class="k">return</span> <span class="k">if</span> <span onmouseout="hideTip(event, 'fs77', 187)" onmouseover="showTip(event, 'fs77', 187)" class="fn">line</span> <span class="o">=</span> <span class="k">null</span> <span class="k">then</span> <span onmouseout="hideTip(event, 'fs56', 188)" onmouseover="showTip(event, 'fs56', 188)" class="uc">None</span> <span class="k">else</span> <span onmouseout="hideTip(event, 'fs55', 189)" onmouseover="showTip(event, 'fs55', 189)" class="uc">Some</span> <span onmouseout="hideTip(event, 'fs77', 190)" onmouseover="showTip(event, 'fs77', 190)" class="fn">line</span>
+        <span class="pn">}</span><span class="pn">)</span>
+</code></pre>
+<hr />
+<h2><a name="delay" class="anchor" href="#delay">delay</a></h2>
+<p><code>TaskSeq.delay</code> creates a sequence whose body is not evaluated until iteration starts.  This
+is useful when the sequence depends on side-effectful initialisation:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs79', 191)" onmouseover="showTip(event, 'fs79', 191)" class="id">deferred</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 192)" onmouseover="showTip(event, 'fs42', 192)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs80', 193)" onmouseover="showTip(event, 'fs80', 193)" class="id">delay</span> <span class="pn">(</span><span class="k">fun</span> <span class="pn">(</span><span class="pn">)</span> <span class="k">-&gt;</span>
+        <span onmouseout="hideTip(event, 'fs7', 194)" onmouseover="showTip(event, 'fs7', 194)" class="k">taskSeq</span> <span class="pn">{</span>
+            <span onmouseout="hideTip(event, 'fs81', 195)" onmouseover="showTip(event, 'fs81', 195)" class="fn">printfn</span> <span class="s">&quot;sequence started&quot;</span>
+            <span class="k">yield!</span> <span class="pn">[</span> <span class="n">1</span><span class="pn">;</span> <span class="n">2</span><span class="pn">;</span> <span class="n">3</span> <span class="pn">]</span>
+        <span class="pn">}</span><span class="pn">)</span>
+</code></pre>
+<hr />
+<h2><a name="Converting-from-existing-collections" class="anchor" href="#Converting-from-existing-collections">Converting from existing collections</a></h2>
+<p>All of these produce a <code>TaskSeq&lt;'T&gt;</code> that replays the source on each iteration:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="k">let</span> <span onmouseout="hideTip(event, 'fs82', 196)" onmouseover="showTip(event, 'fs82', 196)" class="id">fromArray</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 197)" onmouseover="showTip(event, 'fs42', 197)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 198)" onmouseover="showTip(event, 'fs43', 198)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 199)" onmouseover="showTip(event, 'fs42', 199)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs83', 200)" onmouseover="showTip(event, 'fs83', 200)" class="id">ofArray</span> <span class="pn">[|</span> <span class="n">1</span><span class="pn">;</span> <span class="n">2</span><span class="pn">;</span> <span class="n">3</span> <span class="pn">|]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs84', 201)" onmouseover="showTip(event, 'fs84', 201)" class="id">fromList</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 202)" onmouseover="showTip(event, 'fs42', 202)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 203)" onmouseover="showTip(event, 'fs43', 203)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 204)" onmouseover="showTip(event, 'fs42', 204)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs85', 205)" onmouseover="showTip(event, 'fs85', 205)" class="id">ofList</span> <span class="pn">[</span> <span class="n">1</span><span class="pn">;</span> <span class="n">2</span><span class="pn">;</span> <span class="n">3</span> <span class="pn">]</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs86', 206)" onmouseover="showTip(event, 'fs86', 206)" class="id">fromSeq</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 207)" onmouseover="showTip(event, 'fs42', 207)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 208)" onmouseover="showTip(event, 'fs43', 208)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 209)" onmouseover="showTip(event, 'fs42', 209)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs87', 210)" onmouseover="showTip(event, 'fs87', 210)" class="id">ofSeq</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs88', 211)" onmouseover="showTip(event, 'fs88', 211)" class="fn">seq</span> <span class="pn">{</span> <span class="n">1..</span><span class="n">3</span> <span class="pn">}</span><span class="pn">)</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs89', 212)" onmouseover="showTip(event, 'fs89', 212)" class="id">fromResizeArray</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 213)" onmouseover="showTip(event, 'fs42', 213)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 214)" onmouseover="showTip(event, 'fs43', 214)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span> <span onmouseout="hideTip(event, 'fs42', 215)" onmouseover="showTip(event, 'fs42', 215)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs90', 216)" onmouseover="showTip(event, 'fs90', 216)" class="id">ofResizeArray</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs1', 217)" onmouseover="showTip(event, 'fs1', 217)" class="id">System</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs91', 218)" onmouseover="showTip(event, 'fs91', 218)" class="id">Collections</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs92', 219)" onmouseover="showTip(event, 'fs92', 219)" class="id">Generic</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs93', 220)" onmouseover="showTip(event, 'fs93', 220)" class="id">List</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 221)" onmouseover="showTip(event, 'fs43', 221)" class="vt">int</span><span class="pn">&gt;</span><span class="pn">(</span><span class="pn">[</span> <span class="n">1</span><span class="pn">;</span> <span class="n">2</span><span class="pn">;</span> <span class="n">3</span> <span class="pn">]</span><span class="pn">)</span><span class="pn">)</span>
+</code></pre>
+<p>You can also wrap existing task or async collections.  Note that wrapping a list of already
+started <code>Task</code>s does <strong>not</strong> guarantee sequential execution—the tasks are already running:</p>
+<pre class="fssnip highlighted"><code lang="fsharp"><span class="c">// Sequence of not-yet-started task factories (safe)</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs94', 222)" onmouseover="showTip(event, 'fs94', 222)" class="id">fromTaskSeq</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 223)" onmouseover="showTip(event, 'fs42', 223)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 224)" onmouseover="showTip(event, 'fs43', 224)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 225)" onmouseover="showTip(event, 'fs42', 225)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs95', 226)" onmouseover="showTip(event, 'fs95', 226)" class="id">ofTaskSeq</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs88', 227)" onmouseover="showTip(event, 'fs88', 227)" class="fn">seq</span> <span class="pn">{</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs32', 228)" onmouseover="showTip(event, 'fs32', 228)" class="k">task</span> <span class="pn">{</span> <span class="k">return</span> <span class="n">1</span> <span class="pn">}</span><span class="pn">;</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs32', 229)" onmouseover="showTip(event, 'fs32', 229)" class="k">task</span> <span class="pn">{</span> <span class="k">return</span> <span class="n">2</span> <span class="pn">}</span> <span class="pn">}</span><span class="pn">)</span>
+
+<span class="c">// Sequence of asyncs (each started on demand as the sequence is consumed)</span>
+<span class="k">let</span> <span onmouseout="hideTip(event, 'fs96', 230)" onmouseover="showTip(event, 'fs96', 230)" class="id">fromAsyncSeq</span> <span class="pn">:</span> <span onmouseout="hideTip(event, 'fs42', 231)" onmouseover="showTip(event, 'fs42', 231)" class="if">TaskSeq</span><span class="pn">&lt;</span><span onmouseout="hideTip(event, 'fs43', 232)" onmouseover="showTip(event, 'fs43', 232)" class="vt">int</span><span class="pn">&gt;</span> <span class="o">=</span>
+    <span onmouseout="hideTip(event, 'fs42', 233)" onmouseover="showTip(event, 'fs42', 233)" class="rt">TaskSeq</span><span class="pn">.</span><span onmouseout="hideTip(event, 'fs97', 234)" onmouseover="showTip(event, 'fs97', 234)" class="id">ofAsyncSeq</span> <span class="pn">(</span><span onmouseout="hideTip(event, 'fs88', 235)" onmouseover="showTip(event, 'fs88', 235)" class="fn">seq</span> <span class="pn">{</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs98', 236)" onmouseover="showTip(event, 'fs98', 236)" class="k">async</span> <span class="pn">{</span> <span class="k">return</span> <span class="n">1</span> <span class="pn">}</span><span class="pn">;</span> <span class="k">yield</span> <span onmouseout="hideTip(event, 'fs98', 237)" onmouseover="showTip(event, 'fs98', 237)" class="k">async</span> <span class="pn">{</span> <span class="k">return</span> <span class="n">2</span> <span class="pn">}</span> <span class="pn">}</span><span class="pn">)</span>
+</code></pre>
+
+        <div class="fsdocs-tip" id="fs1">namespace System</div>
+<div class="fsdocs-tip" id="fs2">namespace System.Threading</div>
+<div class="fsdocs-tip" id="fs3">namespace System.Threading.Tasks</div>
+<div class="fsdocs-tip" id="fs4">Multiple items<br />namespace FSharp<br /><br />--------------------<br />namespace Microsoft.FSharp</div>
+<div class="fsdocs-tip" id="fs5">Multiple items<br />namespace FSharp.Control<br /><br />--------------------<br />namespace Microsoft.FSharp.Control</div>
+<div class="fsdocs-tip" id="fs6">val helloWorld: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs7">val taskSeq: TaskSeqBuilder<br /><em>&lt;summary&gt;
+ Builds an asynchronous task sequence based on &lt;see cref=&quot;IAsyncEnumerable&amp;lt;&#39;T&amp;gt;&quot; /&gt; using computation expression syntax.
+ &lt;/summary&gt;</em></div>
+<div class="fsdocs-tip" id="fs8">val combined: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs9">val evenNumbers: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs10">val i: int</div>
+<div class="fsdocs-tip" id="fs11">type Shape =
+  | Circle of radius: float
+  | Rectangle of width: float * height: float</div>
+<div class="fsdocs-tip" id="fs12">Multiple items<br />val float: value: &#39;T -&gt; float (requires member op_Explicit)<br /><br />--------------------<br />type float = System.Double<br /><br />--------------------<br />type float&lt;&#39;Measure&gt; =
+  float</div>
+<div class="fsdocs-tip" id="fs13">val areas: TaskSeq&lt;float&gt;</div>
+<div class="fsdocs-tip" id="fs14">val shape: Shape</div>
+<div class="fsdocs-tip" id="fs15">union case Shape.Circle: radius: float -&gt; Shape</div>
+<div class="fsdocs-tip" id="fs16">union case Shape.Rectangle: width: float * height: float -&gt; Shape</div>
+<div class="fsdocs-tip" id="fs17">val r: float</div>
+<div class="fsdocs-tip" id="fs18">type Math =
+  static member Abs: value: decimal -&gt; decimal + 7 overloads
+  static member Acos: d: float -&gt; float
+  static member Acosh: d: float -&gt; float
+  static member Asin: d: float -&gt; float
+  static member Asinh: d: float -&gt; float
+  static member Atan: d: float -&gt; float
+  static member Atan2: y: float * x: float -&gt; float
+  static member Atanh: d: float -&gt; float
+  static member BigMul: a: int * b: int -&gt; int64 + 5 overloads
+  static member BitDecrement: x: float -&gt; float
+  ...<br /><em>&lt;summary&gt;Provides constants and static methods for trigonometric, logarithmic, and other common mathematical functions.&lt;/summary&gt;</em></div>
+<div class="fsdocs-tip" id="fs19">field System.Math.PI: float = 3.14159265359</div>
+<div class="fsdocs-tip" id="fs20">val w: float</div>
+<div class="fsdocs-tip" id="fs21">val h: float</div>
+<div class="fsdocs-tip" id="fs22">val squaresOfList: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs23">val n: int</div>
+<div class="fsdocs-tip" id="fs24">val doubled: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs25">val countdown: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs26">val mutable i: int</div>
+<div class="fsdocs-tip" id="fs27">Multiple items<br />type Task =
+  interface IAsyncResult
+  interface IDisposable
+  new: action: Action -&gt; unit + 7 overloads
+  member ConfigureAwait: continueOnCapturedContext: bool -&gt; ConfiguredTaskAwaitable + 1 overload
+  member ContinueWith: continuationAction: Action&lt;Task,obj&gt; * state: obj -&gt; Task + 19 overloads
+  member Dispose: unit -&gt; unit
+  member GetAwaiter: unit -&gt; TaskAwaiter
+  member RunSynchronously: unit -&gt; unit + 1 overload
+  member Start: unit -&gt; unit + 1 overload
+  member Wait: unit -&gt; unit + 5 overloads
+  ...<br /><em>&lt;summary&gt;Represents an asynchronous operation.&lt;/summary&gt;</em><br /><br />--------------------<br />type Task&lt;&#39;TResult&gt; =
+  inherit Task
+  new: ``function`` : Func&lt;obj,&#39;TResult&gt; * state: obj -&gt; unit + 7 overloads
+  member ConfigureAwait: continueOnCapturedContext: bool -&gt; ConfiguredTaskAwaitable&lt;&#39;TResult&gt; + 1 overload
+  member ContinueWith: continuationAction: Action&lt;Task&lt;&#39;TResult&gt;,obj&gt; * state: obj -&gt; Task + 19 overloads
+  member GetAwaiter: unit -&gt; TaskAwaiter&lt;&#39;TResult&gt;
+  member WaitAsync: cancellationToken: CancellationToken -&gt; Task&lt;&#39;TResult&gt; + 4 overloads
+  member Result: &#39;TResult
+  static member Factory: TaskFactory&lt;&#39;TResult&gt;<br /><em>&lt;summary&gt;Represents an asynchronous operation that can return a value.&lt;/summary&gt;<br />&lt;typeparam name=&quot;TResult&quot;&gt;The type of the result produced by this &lt;see cref=&quot;T:System.Threading.Tasks.Task`1&quot; /&gt;.&lt;/typeparam&gt;</em><br /><br />--------------------<br />Task(action: System.Action) : Task<br />Task(action: System.Action, cancellationToken: System.Threading.CancellationToken) : Task<br />Task(action: System.Action, creationOptions: TaskCreationOptions) : Task<br />Task(action: System.Action&lt;obj&gt;, state: obj) : Task<br />Task(action: System.Action, cancellationToken: System.Threading.CancellationToken, creationOptions: TaskCreationOptions) : Task<br />Task(action: System.Action&lt;obj&gt;, state: obj, cancellationToken: System.Threading.CancellationToken) : Task<br />Task(action: System.Action&lt;obj&gt;, state: obj, creationOptions: TaskCreationOptions) : Task<br />Task(action: System.Action&lt;obj&gt;, state: obj, cancellationToken: System.Threading.CancellationToken, creationOptions: TaskCreationOptions) : Task<br /><br />--------------------<br />Task(``function`` : System.Func&lt;&#39;TResult&gt;) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;obj,&#39;TResult&gt;, state: obj) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;&#39;TResult&gt;, cancellationToken: System.Threading.CancellationToken) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;&#39;TResult&gt;, creationOptions: TaskCreationOptions) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;obj,&#39;TResult&gt;, state: obj, cancellationToken: System.Threading.CancellationToken) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;obj,&#39;TResult&gt;, state: obj, creationOptions: TaskCreationOptions) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;&#39;TResult&gt;, cancellationToken: System.Threading.CancellationToken, creationOptions: TaskCreationOptions) : Task&lt;&#39;TResult&gt;<br />Task(``function`` : System.Func&lt;obj,&#39;TResult&gt;, state: obj, cancellationToken: System.Threading.CancellationToken, creationOptions: TaskCreationOptions) : Task&lt;&#39;TResult&gt;</div>
+<div class="fsdocs-tip" id="fs28">Task.Delay(delay: System.TimeSpan) : Task<br />Task.Delay(millisecondsDelay: int) : Task<br />Task.Delay(delay: System.TimeSpan, timeProvider: System.TimeProvider) : Task<br />Task.Delay(delay: System.TimeSpan, cancellationToken: System.Threading.CancellationToken) : Task<br />Task.Delay(millisecondsDelay: int, cancellationToken: System.Threading.CancellationToken) : Task<br />Task.Delay(delay: System.TimeSpan, timeProvider: System.TimeProvider, cancellationToken: System.Threading.CancellationToken) : Task</div>
+<div class="fsdocs-tip" id="fs29">val fetchData: url: string -&gt; Task&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs30">val url: string</div>
+<div class="fsdocs-tip" id="fs31">Multiple items<br />val string: value: &#39;T -&gt; string<br /><br />--------------------<br />type string = System.String</div>
+<div class="fsdocs-tip" id="fs32">val task: TaskBuilder</div>
+<div class="fsdocs-tip" id="fs33">val results: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs34">val data: string</div>
+<div class="fsdocs-tip" id="fs35">val withResource: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs36">val resource: System.IDisposable</div>
+<div class="fsdocs-tip" id="fs37">type IDisposable =
+  override Dispose: unit -&gt; unit<br /><em>&lt;summary&gt;Provides a mechanism for releasing unmanaged resources.&lt;/summary&gt;</em></div>
+<div class="fsdocs-tip" id="fs38">val withErrorHandling: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs39">val failwith: message: string -&gt; &#39;T</div>
+<div class="fsdocs-tip" id="fs40">val ex: exn</div>
+<div class="fsdocs-tip" id="fs41">val squares: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs42">Multiple items<br />module TaskSeq
+
+from FSharp.Control.TaskSeqExtensions<br /><br />--------------------<br />type TaskSeq =
+  static member append: source1: TaskSeq&lt;&#39;T&gt; -&gt; source2: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;T&gt;
+  static member appendSeq: source1: TaskSeq&lt;&#39;T&gt; -&gt; source2: &#39;T seq -&gt; TaskSeq&lt;&#39;T&gt;
+  static member box: source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;obj&gt;
+  static member cast: source: TaskSeq&lt;obj&gt; -&gt; TaskSeq&lt;&#39;U&gt;
+  static member choose: chooser: (&#39;T -&gt; &#39;U option) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;U&gt;
+  static member chooseAsync: chooser: (&#39;T -&gt; #Task&lt;&#39;U option&gt;) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;U&gt;
+  static member chooseV: chooser: (&#39;T -&gt; &#39;U voption) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;U&gt;
+  static member chooseVAsync: chooser: (&#39;T -&gt; #Task&lt;&#39;U voption&gt;) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;U&gt;
+  static member chunkBy: projection: (&#39;T -&gt; &#39;Key) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;Key * &#39;T array&gt; (requires equality)
+  static member chunkByAsync: projection: (&#39;T -&gt; #Task&lt;&#39;Key&gt;) -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;Key * &#39;T array&gt; (requires equality)
+  ...<br /><br />--------------------<br />type TaskSeq&lt;&#39;T&gt; = System.Collections.Generic.IAsyncEnumerable&lt;&#39;T&gt;<br /><em>&lt;summary&gt;
+ Represents a task sequence and is the output of using the &lt;paramref name=&quot;taskSeq{...}&quot; /&gt;
+ computation expression from this library. It is an alias for &lt;see cref=&quot;T:System.IAsyncEnumerable&amp;lt;_&amp;gt;&quot; /&gt;.
+ &lt;/summary&gt;</em><br /><br />--------------------<br />type TaskSeq&lt;&#39;Machine,&#39;T (requires &#39;Machine :&gt; IAsyncStateMachine and &#39;Machine :&gt; IResumableStateMachine&lt;TaskSeqStateMachineData&lt;&#39;T&gt;&gt;)&gt; =
+  inherit TaskSeqBase&lt;&#39;T&gt;
+  interface IValueTaskSource
+  interface IValueTaskSource&lt;bool&gt;
+  interface IAsyncStateMachine
+  interface IAsyncEnumerable&lt;&#39;T&gt;
+  interface IAsyncEnumerator&lt;&#39;T&gt;
+  new: unit -&gt; TaskSeq&lt;&#39;Machine,&#39;T&gt;
+  member InitMachineData: ct: CancellationToken * machine: byref&lt;&#39;Machine&gt; -&gt; unit
+  override MoveNextAsyncResult: unit -&gt; ValueTask&lt;bool&gt;<br /><em>&lt;summary&gt;
+ Main implementation of generic &lt;see cref=&quot;T:System.IAsyncEnumerable&amp;lt;&#39;T&amp;gt;&quot; /&gt; and related interfaces,
+ which forms the meat of the logic behind &lt;see cref=&quot;taskSeq&quot; /&gt; computation expresssions.
+ For use by this library only, should not be used directly in user code. Its operation depends highly on resumable state.
+ &lt;/summary&gt;</em><br /><br />--------------------<br />new: unit -&gt; TaskSeq&lt;&#39;Machine,&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs43">Multiple items<br />val int: value: &#39;T -&gt; int (requires member op_Explicit)<br /><br />--------------------<br />type int = int32<br /><br />--------------------<br />type int&lt;&#39;Measure&gt; =
+  int</div>
+<div class="fsdocs-tip" id="fs44">static member TaskSeq.init: count: int -&gt; initializer: (int -&gt; &#39;T) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs45">val asyncSquares: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs46">static member TaskSeq.initAsync: count: int -&gt; initializer: (int -&gt; #Task&lt;&#39;T&gt;) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs47">val naturals: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs48">static member TaskSeq.initInfinite: initializer: (int -&gt; &#39;T) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs49">val id: x: &#39;T -&gt; &#39;T</div>
+<div class="fsdocs-tip" id="fs50">val first10: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs51">static member TaskSeq.take: count: int -&gt; source: TaskSeq&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs52">val counting: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs53">static member TaskSeq.unfold: generator: (&#39;State -&gt; (&#39;T * &#39;State) option) -&gt; state: &#39;State -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs54">val state: int</div>
+<div class="fsdocs-tip" id="fs55">union case Option.Some: Value: &#39;T -&gt; Option&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs56">union case Option.None: Option&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs57">val countingAsync: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs58">static member TaskSeq.unfoldAsync: generator: (&#39;State -&gt; Task&lt;(&#39;T * &#39;State) option&gt;) -&gt; state: &#39;State -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs59">val one: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs60">static member TaskSeq.singleton: value: &#39;T -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs61">val fives: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs62">static member TaskSeq.replicate: count: int -&gt; value: &#39;T -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs63">val nothing: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs64">val empty&lt;&#39;T&gt; : TaskSeq&lt;&#39;T&gt;<br /><em>&lt;summary&gt;
+ Initialize an empty task sequence.
+&lt;/summary&gt;</em></div>
+<div class="fsdocs-tip" id="fs65">val infinitePings: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs66">static member TaskSeq.replicateInfinite: value: &#39;T -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs67">val first10pings: TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs68">val mutable counter: int</div>
+<div class="fsdocs-tip" id="fs69">val pollingSeq: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs70">static member TaskSeq.replicateInfiniteAsync: computation: (unit -&gt; #Task&lt;&#39;T&gt;) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs71">val first5counts: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs72">val readLine: reader: System.IO.TextReader -&gt; TaskSeq&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs73">val reader: System.IO.TextReader</div>
+<div class="fsdocs-tip" id="fs74">namespace System.IO</div>
+<div class="fsdocs-tip" id="fs75">type TextReader =
+  inherit MarshalByRefObject
+  interface IDisposable
+  member Close: unit -&gt; unit
+  member Dispose: unit -&gt; unit
+  member Peek: unit -&gt; int
+  member Read: unit -&gt; int + 2 overloads
+  member ReadAsync: buffer: char array * index: int * count: int -&gt; Task&lt;int&gt; + 1 overload
+  member ReadBlock: buffer: char array * index: int * count: int -&gt; int + 1 overload
+  member ReadBlockAsync: buffer: char array * index: int * count: int -&gt; Task&lt;int&gt; + 1 overload
+  member ReadLine: unit -&gt; string
+  ...<br /><em>&lt;summary&gt;Represents a reader that can read a sequential series of characters.&lt;/summary&gt;</em></div>
+<div class="fsdocs-tip" id="fs76">static member TaskSeq.replicateUntilNoneAsync: computation: (unit -&gt; #Task&lt;&#39;T option&gt;) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs77">val line: string</div>
+<div class="fsdocs-tip" id="fs78">System.IO.TextReader.ReadLineAsync() : Task&lt;string&gt;<br />System.IO.TextReader.ReadLineAsync(cancellationToken: System.Threading.CancellationToken) : ValueTask&lt;string&gt;</div>
+<div class="fsdocs-tip" id="fs79">val deferred: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs80">static member TaskSeq.delay: generator: (unit -&gt; TaskSeq&lt;&#39;T&gt;) -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs81">val printfn: format: Printf.TextWriterFormat&lt;&#39;T&gt; -&gt; &#39;T</div>
+<div class="fsdocs-tip" id="fs82">val fromArray: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs83">static member TaskSeq.ofArray: source: &#39;T array -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs84">val fromList: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs85">static member TaskSeq.ofList: source: &#39;T list -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs86">val fromSeq: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs87">static member TaskSeq.ofSeq: source: &#39;T seq -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs88">Multiple items<br />val seq: sequence: &#39;T seq -&gt; &#39;T seq<br /><br />--------------------<br />type &#39;T seq = System.Collections.Generic.IEnumerable&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs89">val fromResizeArray: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs90">static member TaskSeq.ofResizeArray: source: ResizeArray&lt;&#39;T&gt; -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs91">namespace System.Collections</div>
+<div class="fsdocs-tip" id="fs92">namespace System.Collections.Generic</div>
+<div class="fsdocs-tip" id="fs93">Multiple items<br />type List&lt;&#39;T&gt; =
+  interface ICollection&lt;&#39;T&gt;
+  interface IEnumerable&lt;&#39;T&gt;
+  interface IEnumerable
+  interface IList&lt;&#39;T&gt;
+  interface IReadOnlyCollection&lt;&#39;T&gt;
+  interface IReadOnlyList&lt;&#39;T&gt;
+  interface ICollection
+  interface IList
+  new: unit -&gt; unit + 2 overloads
+  member Add: item: &#39;T -&gt; unit
+  ...<br /><em>&lt;summary&gt;Represents a strongly typed list of objects that can be accessed by index. Provides methods to search, sort, and manipulate lists.&lt;/summary&gt;<br />&lt;typeparam name=&quot;T&quot;&gt;The type of elements in the list.&lt;/typeparam&gt;</em><br /><br />--------------------<br />System.Collections.Generic.List() : System.Collections.Generic.List&lt;&#39;T&gt;<br />System.Collections.Generic.List(collection: System.Collections.Generic.IEnumerable&lt;&#39;T&gt;) : System.Collections.Generic.List&lt;&#39;T&gt;<br />System.Collections.Generic.List(capacity: int) : System.Collections.Generic.List&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs94">val fromTaskSeq: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs95">static member TaskSeq.ofTaskSeq: source: #Task&lt;&#39;T&gt; seq -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs96">val fromAsyncSeq: TaskSeq&lt;int&gt;</div>
+<div class="fsdocs-tip" id="fs97">static member TaskSeq.ofAsyncSeq: source: Async&lt;&#39;T&gt; seq -&gt; TaskSeq&lt;&#39;T&gt;</div>
+<div class="fsdocs-tip" id="fs98">val async: AsyncBuilder</div>
+
+    </div>
+</main>
+<aside id="fsdocs-page-menu">
+    <p id="on-this-page">On this page</p>
+    <ul>
+  <li class="level-1">
+    <a href="#Generating-Task-Sequences">
+      Generating Task Sequences
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Computation-Expression-Syntax">
+      Computation Expression Syntax
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#Yielding-values">
+      Yielding values
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#Conditionals">
+      Conditionals
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#Match-expressions">
+      Match expressions
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#For-loops">
+      For loops
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#While-loops">
+      While loops
+    </a>
+  </li>
+  <li class="level-3">
+    <a href="#Use-bindings-and-try-with">
+      Use bindings and try / with
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#init-and-initInfinite">
+      init and initInfinite
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#unfold">
+      unfold
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#singleton-replicate-replicateInfinite-and-empty">
+      singleton, replicate, replicateInfinite, and empty
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#delay">
+      delay
+    </a>
+  </li>
+  <li class="level-2">
+    <a href="#Converting-from-existing-collections">
+      Converting from existing collections
+    </a>
+  </li>
+</ul>
+</aside>
+<dialog>
+    <input type="search" placeholder="Search docs" />
+    <div class="results">
+        <ul></ul>
+        <p class="empty">Type something to start searching.</p>
+    </div>
+</dialog>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-tips.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-details-toggle.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-theme.js"></script>
+<script type="module" src="https://fsprojects.github.io/FSharp.Control.TaskSeq/content/fsdocs-search.js"></script>
+
+</body>
+</html>
