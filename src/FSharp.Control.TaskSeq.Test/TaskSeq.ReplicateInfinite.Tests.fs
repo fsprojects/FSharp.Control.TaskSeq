@@ -156,3 +156,71 @@ module ReplicateUntilNoneAsync =
         arr[0] |> should equal 1
         arr[count - 1] |> should equal count
     }
+
+
+module SideEffects =
+    [<Fact>]
+    let ``TaskSeq-replicateInfiniteAsync re-runs the computation on each fresh enumeration`` () = task {
+        let mutable calls = 0
+
+        let comp () = task {
+            calls <- calls + 1
+            return calls
+        }
+
+        let ts = TaskSeq.replicateInfiniteAsync comp
+
+        let! arr1 = ts |> TaskSeq.take 3 |> TaskSeq.toArrayAsync
+        arr1 |> should equal [| 1; 2; 3 |]
+        calls |> should equal 3
+
+        // a fresh enumeration starts the computation from scratch; side effects
+        // (here, the call counter) keep accumulating across enumerations
+        let! arr2 = ts |> TaskSeq.take 2 |> TaskSeq.toArrayAsync
+        arr2 |> should equal [| 4; 5 |]
+        calls |> should equal 5
+    }
+
+    [<Fact>]
+    let ``TaskSeq-replicateUntilNoneAsync re-runs the computation from its initial state on each fresh enumeration`` () = task {
+        let mutable totalCalls = 0
+
+        let comp () = task {
+            let mutable n = 0
+            totalCalls <- totalCalls + 1
+
+            if n <= 1 then
+                n <- n + 1
+                return Some n
+            else
+                return None
+        }
+
+        let ts = TaskSeq.replicateUntilNoneAsync comp
+
+        let! arr1 = ts |> TaskSeq.toArrayAsync
+        arr1 |> should equal [| 1 |]
+        totalCalls |> should equal 2
+
+        // re-enumerating re-invokes the generator function itself (state is local
+        // to each call), so side effects on shared state accumulate further
+        let! arr2 = ts |> TaskSeq.toArrayAsync
+        arr2 |> should equal [| 1 |]
+        totalCalls |> should equal 4
+    }
+
+    [<Fact>]
+    let ``TaskSeq-replicateInfinite abandoning enumeration early does not affect a later fresh enumeration`` () = task {
+        let ts = TaskSeq.replicateInfinite 3
+
+        // partially enumerate and abandon (dispose) without reaching a natural end
+        use enum1 = ts.GetAsyncEnumerator System.Threading.CancellationToken.None
+        let! hasNext = enum1.MoveNextAsync()
+        hasNext |> should be True
+        enum1.Current |> should equal 3
+        do! enum1.DisposeAsync()
+
+        // a fresh enumerator over the same taskSeq starts cleanly from the beginning
+        let! arr = ts |> TaskSeq.take 3 |> TaskSeq.toArrayAsync
+        arr |> should equal [| 3; 3; 3 |]
+    }
