@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "cursors": {
+    "labelling_after": null,
+    "investigation_after": 466
+  },
+  "issues": [
+    {
+      "number": 473,
+      "state": "resolution_recommended",
+      "updated_at": "2026-09-18",
+      "note": "Root-caused to upstream compiler bug dotnet/fsharp#20466 (fix in dotnet/fsharp#20469). Documented in README Known Issues + release-notes via new PR (branch repo-assist/docs-known-issues-debug-compiler-bug-473). Close once upstream fix ships in an SDK."
+    },
+    {
+      "number": 476,
+      "state": "resolution_recommended",
+      "updated_at": "2026-09-18",
+      "note": "Repo-assist tracking issue for the #473 doc PR that was blocked by a false-positive protected-files check on README.md. New PR created successfully this run (README.md is not actually protected); commented linking to it. Close once that PR merges."
+    },
+    {
+      "number": 452,
+      "state": "commented",
+      "updated_at": "2026-09-18",
+      "note": "Confirmed majocha's Debug-mode test failures are the SAME upstream bug as #473 (SDK 10.0.400 Debug fails, Release passes). Orleans final-item-duplication remains separately unconfirmed; needs maintainer/Orleans env."
+    },
+    {
+      "number": 466,
+      "state": "deferred",
+      "updated_at": "2026-09-11",
+      "note": "ValueTaskSeq (ValueOption/ValueTask) feature request from xperiandri. Labelled enhancement/needs triage. Needs maintainer feasibility/design decision before implementation (breaking-change-adjacent scope question)."
+    },
+    {
+      "number": 62,
+      "state": "deferred",
+      "updated_at": "2026-07-31",
+      "note": "Tail recursion via YieldFromFinal. Upstream compiler support landed but a reliable way to distinguish true-final vs within-loop tail calls is still unresolved. Offered to add stub overloads on request; no maintainer response yet."
+    }
+  ],
+  "fixes": [],
+  "checks": [
+    {
+      "area": "tests",
+      "checked_at": "2026-09-18",
+      "result": "Confirmed TaskSeq.Issue452.Tests.fs regression tests fail in Debug with SDK 10.0.400 (same root cause as #473); pass in Release. Repo-pinned SDK 10.0.111 passes both configs. No source fix possible/needed.",
+      "follow_up": "Re-check once dotnet/fsharp#20469 ships in an SDK; then confirm tests pass in Debug too."
+    },
+    {
+      "area": "docs",
+      "checked_at": "2026-09-18",
+      "result": "Added README Known Issues section + release-notes bullet for the Debug-mode compiler bug (#473). Docs-only change, no build/test needed.",
+      "follow_up": "Remove the Known Issues note once the compiler fix is broadly available in shipped SDKs."
+    }
+  ],
+  "completed_actions": [],
+  "priorities": [
+    {
+      "task": 2,
+      "item": "issue-452-orleans-duplication",
+      "note": "Original Orleans final-item-duplication remains unconfirmed outside real Orleans grain scheduling; needs a maintainer/contributor with Orleans dev access, not further offline approximation attempts."
+    },
+    {
+      "task": 4,
+      "item": "issue-463-442-manual-patches",
+      "note": "Two stranded repo-assist issues (#463, #442) contain ready patches for protected .github/workflows/*.yaml files that the bot cannot push; awaiting maintainer manual application."
+    },
+    {
+      "task": 10,
+      "item": "track-dotnet-fsharp-20469",
+      "note": "Watch dotnet/fsharp#20469 merge/release; once shipped, close #473, update #452 comment, and remove README Known Issues note."
+    }
+  ]
+}
