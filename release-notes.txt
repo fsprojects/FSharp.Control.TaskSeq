@@ -2,6 +2,7 @@
 Release notes:
 
 Unreleased
+    - docs: add README "Known issues" section documenting an upstream F# compiler Debug-mode state machine lowering regression (dotnet/fsharp#20466, fix in progress at dotnet/fsharp#20469) that can silently truncate `taskSeq` sequences with awaits between yields in Debug builds; see #473
     - tests: add coverage for side-effect re-execution semantics when re-enumerating a `taskSeq` with independent `CancellationToken`s
     - test: add TaskSeq.Issue452.Tests.fs, regression tests wrapping an externally-produced IAsyncEnumerable<'T> (TaskSeq.map and `taskSeq { for .. in .. do yield .. }`) while running on a custom, single-threaded TaskScheduler; investigates #452's reported duplicated-final-item bug, which could not be reproduced outside of Orleans, see #452
     - adds TaskSeq.tryMax and TaskSeq.tryMin: safe variants of TaskSeq.max and TaskSeq.min that return None instead of raising ArgumentException when the input sequence is empty
