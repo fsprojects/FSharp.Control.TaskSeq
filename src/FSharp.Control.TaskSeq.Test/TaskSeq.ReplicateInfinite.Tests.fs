@@ -184,29 +184,31 @@ module SideEffects =
     [<Fact>]
     let ``TaskSeq-replicateUntilNoneAsync re-runs the computation from its initial state on each fresh enumeration`` () = task {
         let mutable totalCalls = 0
+        let mutable n = 0
 
         let comp () = task {
-            let mutable n = 0
             totalCalls <- totalCalls + 1
 
             if n <= 1 then
                 n <- n + 1
                 return Some n
             else
+                n <- 0
                 return None
         }
 
         let ts = TaskSeq.replicateUntilNoneAsync comp
 
         let! arr1 = ts |> TaskSeq.toArrayAsync
-        arr1 |> should equal [| 1 |]
-        totalCalls |> should equal 2
+        arr1 |> should equal [| 1; 2 |]
+        totalCalls |> should equal 3
 
-        // re-enumerating re-invokes the generator function itself (state is local
-        // to each call), so side effects on shared state accumulate further
+        // re-enumerating re-invokes the generator function (its enclosing `n`
+        // state was reset to 0 by the prior enumeration), so side effects on
+        // shared state (the call counter) keep accumulating across enumerations
         let! arr2 = ts |> TaskSeq.toArrayAsync
-        arr2 |> should equal [| 1 |]
-        totalCalls |> should equal 4
+        arr2 |> should equal [| 1; 2 |]
+        totalCalls |> should equal 6
     }
 
     [<Fact>]
