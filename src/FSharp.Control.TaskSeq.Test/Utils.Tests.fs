@@ -1,11 +1,154 @@
 module TaskSeq.Tests.Utils
 
+#nowarn "44" // deprecated aliases (ValueTask.FromResult / ofIValueTaskSource) intentionally under test
+
 open System
 open System.Threading.Tasks
+open System.Threading.Tasks.Sources
 open Xunit
 open FsUnit.Xunit
 
 open FSharp.Control
+
+
+module ValueTaskExtensions =
+    [<Fact>]
+    let ``ValueTask.CompletedTask is already completed successfully`` () =
+        let vt = ValueTask.CompletedTask
+        vt.IsCompletedSuccessfully |> should equal true
+
+
+module ValueTaskConstants =
+    [<Fact>]
+    let ``ValueTask.True is a completed ValueTask with value true`` () = task {
+        ValueTask.True.IsCompletedSuccessfully |> should equal true
+        let! result = ValueTask.True
+        result |> should equal true
+    }
+
+    [<Fact>]
+    let ``ValueTask.False is a completed ValueTask with value false`` () = task {
+        ValueTask.False.IsCompletedSuccessfully |> should equal true
+        let! result = ValueTask.False
+        result |> should equal false
+    }
+
+
+module ValueTaskFromResult =
+    [<Fact>]
+    let ``ValueTask.fromResult creates an already-completed ValueTask with the given value`` () = task {
+        let vt = ValueTask.fromResult 42
+        vt.IsCompletedSuccessfully |> should equal true
+        let! result = vt
+        result |> should equal 42
+    }
+
+    [<Fact>]
+    let ``ValueTask.FromResult (deprecated alias) behaves the same as fromResult`` () = task {
+        let vt = ValueTask.FromResult "hello"
+        let! result = vt
+        result |> should equal "hello"
+    }
+
+
+module ValueTaskOfTask =
+    [<Fact>]
+    let ``ValueTask.ofTask wraps an already-completed Task<'T>`` () = task {
+        let source = Task.FromResult 7
+        let vt = ValueTask.ofTask source
+        let! result = vt
+        result |> should equal 7
+    }
+
+    [<Fact>]
+    let ``ValueTask.ofTask wraps a not-yet-completed Task<'T>`` () = task {
+        let source = task {
+            do! Task.Delay 1
+            return 99
+        }
+
+        let vt = ValueTask.ofTask source
+        let! result = vt
+        result |> should equal 99
+    }
+
+
+module ValueTaskIgnore =
+    [<Fact>]
+    let ``ValueTask.ignore on an already-completed ValueTask discards the result`` () =
+        let vt = ValueTask.fromResult 123
+        let ignored: ValueTask = ValueTask.ignore vt
+        ignored.IsCompletedSuccessfully |> should equal true
+
+    [<Fact>]
+    let ``ValueTask.ignore still awaits and surfaces exceptions from a non-completed ValueTask`` () = task {
+        let source =
+            ValueTask<int>(
+                task {
+                    do! Task.Delay 1
+                    return raise (InvalidOperationException "boom")
+                }
+            )
+
+        let ignored: ValueTask = ValueTask.ignore source
+
+        let run () = task { do! ignored }
+
+        let! ex = Assert.ThrowsAsync<InvalidOperationException>(fun () -> run () :> Task)
+        ex.Message |> should equal "boom"
+    }
+
+    [<Fact>]
+    let ``ValueTask.ignore on a not-yet-completed ValueTask still awaits to completion`` () = task {
+        let mutable sideEffect = 0
+
+        let source =
+            ValueTask<int>(
+                task {
+                    do! Task.Delay 1
+                    sideEffect <- 1
+                    return 5
+                }
+            )
+
+        let ignored: ValueTask = ValueTask.ignore source
+        do! ignored
+        sideEffect |> should equal 1
+    }
+
+
+/// Minimal IValueTaskSource<bool> used to exercise ValueTask.ofSource / ofIValueTaskSource.
+type private ManualBoolSource() =
+    let mutable core = ManualResetValueTaskSourceCore<bool>()
+
+    member _.Version = core.Version
+    member _.SetResult value = core.SetResult value
+
+    interface IValueTaskSource<bool> with
+        member _.GetResult version = core.GetResult version
+        member _.GetStatus version = core.GetStatus version
+
+        member _.OnCompleted(continuation, state, version, flags) = core.OnCompleted(continuation, state, version, flags)
+
+
+module ValueTaskOfSource =
+    [<Fact>]
+    let ``ValueTask.ofSource creates a ValueTask backed by an IValueTaskSource<bool>`` () = task {
+        let source = ManualBoolSource()
+        source.SetResult true
+        let vt = ValueTask.ofSource source source.Version
+        let! result = vt
+        result |> should equal true
+    }
+
+    [<Fact>]
+    let ``ValueTask.ofIValueTaskSource (deprecated alias) behaves the same as ofSource`` () = task {
+        let source = ManualBoolSource()
+        source.SetResult false
+        let vt = ValueTask.ofIValueTaskSource source source.Version
+        let! result = vt
+        result |> should equal false
+    }
 
 
 module AsyncBind =
