@@ -71,6 +71,7 @@
     <Compile Include="TaskSeq.ThreadState.Tests.fs" />
     <Compile Include="TaskSeq.Tests.CE.fs" />
     <Compile Include="TaskSeq.Dynamic.Tests.CE.fs" />
+    <Compile Include="TaskSeq.Dynamic.Forced.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug.Tests.CE.fs" />
     <Compile Include="TaskSeq.StateTransitionBug-delayed.Tests.CE.fs" />
     <Compile Include="TaskSeq.Realworld.fs" />
