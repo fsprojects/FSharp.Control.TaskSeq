@@ -597,8 +597,9 @@ type TaskSeqBuilder() =
                     else
                         Debug.logInfo "at WhileAsync: awaiting non-completed task"
 
-                        let task = __stack_vtask.AsTask()
-                        let mutable awaiter = task.GetAwaiter()
+                        // Await the ValueTask through its own awaiter. AsTask() would allocate a Task when the
+                        // ValueTask is backed by an IValueTaskSource, like the MoveNextAsync of a taskSeq.
+                        let mutable awaiter = __stack_vtask.GetAwaiter()
 
                         // This will yield with __stack_fin = false
                         // This will resume with __stack_fin = true
@@ -608,7 +609,7 @@ type TaskSeqBuilder() =
                         __stack_condition_fin <- __stack_yield_fin
 
                         if __stack_condition_fin then
-                            condition_res <- task.Result
+                            condition_res <- awaiter.GetResult()
                         else
                             sm.Data.awaiter <- awaiter
                             sm.Data.current <- ValueNone
