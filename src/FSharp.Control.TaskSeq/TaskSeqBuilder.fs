@@ -703,14 +703,14 @@ type TaskSeqBuilder() =
 
     member inline _.Yield(value: 'T) : ResumableTSC<'T> =
         ResumableTSC<'T>(fun sm ->
-            // This will yield with __stack_fin = false
-            // This will resume with __stack_fin = true
             Debug.logInfo "at Yield"
 
-            let __stack_fin = ResumableCode.Yield().Invoke(&sm)
+            // All work happens before the yield point and the yield is in tail position, so nothing has to run
+            // after resuming. This makes it behave the same in static and dynamic resumable code: in dynamic code,
+            // ResumableCode.Yield() resumes with a continuation that just returns 'true', skipping any code after it.
             sm.Data.current <- ValueSome value
             sm.Data.awaiter <- null
-            __stack_fin)
+            ResumableCode.Yield().Invoke(&sm))
 
 //
 // These "modules of priority" allow for an indecisive F# to resolve
@@ -755,49 +755,28 @@ module LowPriority =
             =
 
             ResumableTSC<'U>(fun sm ->
-                if __useResumableCode then
-                    //-- RESUMABLE CODE START
-                    let mutable awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
-                    let mutable __stack_fin = true
+                Debug.logInfo "at TaskLike bind"
+                let awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
 
-                    Debug.logInfo "at TaskLike bind"
-
-                    if not (^Awaiter: (member get_IsCompleted: unit -> bool) awaiter) then
-                        // This will yield with __stack_fin2 = false
-                        // This will resume with __stack_fin2 = true
-                        let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
-                        __stack_fin <- __stack_fin2
-
-                    Debug.logInfo ("at TaskLike bind: this.completed = ", sm.Data.completed)
-
-                    if __stack_fin then
-                        Debug.logInfo "at TaskLike bind!: finished awaiting, calling continuation"
-                        let result = (^Awaiter: (member GetResult: unit -> 'T) awaiter)
-                        (continuation result).Invoke(&sm)
-
-                    else
-                        Debug.logInfo "at TaskLike bind: await further"
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false
-                //-- RESUMABLE CODE END
-                else
-                    // Dynamic path: install the continuation explicitly, see WhileAsync for why Yield() can't be used
-                    let awaiter = (^TaskLike: (member GetAwaiter: unit -> ^Awaiter) (task))
-
-                    if (^Awaiter: (member get_IsCompleted: unit -> bool) awaiter) then
-                        let result = (^Awaiter: (member GetResult: unit -> 'T) awaiter)
-                        (continuation result).Invoke(&sm)
-                    else
-                        sm.ResumptionDynamicInfo.ResumptionFunc <-
-                            TaskSeqResumptionFunc<'U>(fun sm ->
-                                let result = (^Awaiter: (member GetResult: unit -> 'T) awaiter)
-                                (continuation result).Invoke(&sm))
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false)
+                // One code path for static and dynamic resumable code: the await step ends in a tail-position
+                // Yield(), and Combine runs the continuation after it. When resuming, static code jumps back into
+                // the Yield and Combine falls through to the continuation; in dynamic code, CombineDynamic has
+                // installed the continuation. The continuation is invoked in one place only, so it is inlined once.
+                ResumableCode
+                    .Combine(
+                        ResumableTSC<'U>(fun sm ->
+                            if (^Awaiter: (member get_IsCompleted: unit -> bool) awaiter) then
+                                true
+                            else
+                                Debug.logInfo "at TaskLike bind: await further"
+                                sm.Data.awaiter <- awaiter
+                                sm.Data.current <- ValueNone
+                                ResumableCode.Yield().Invoke(&sm)),
+                        ResumableTSC<'U>(fun sm ->
+                            let result = (^Awaiter: (member GetResult: unit -> 'T) awaiter)
+                            (continuation result).Invoke(&sm))
+                    )
+                    .Invoke(&sm))
 
 
 [<AutoOpen>]
@@ -852,93 +831,43 @@ module HighPriority =
         //
         member inline _.Bind(task: Task<'T>, continuation: ('T -> ResumableTSC<'U>)) =
             ResumableTSC<'U>(fun sm ->
-                if __useResumableCode then
-                    //-- RESUMABLE CODE START
-                    let mutable awaiter = task.GetAwaiter()
-                    let mutable __stack_fin = true
+                Debug.logInfo "at Bind"
+                let awaiter = task.GetAwaiter()
 
-                    Debug.logInfo "at Bind"
-
-                    if not awaiter.IsCompleted then
-                        // This will yield with __stack_fin2 = false
-                        // This will resume with __stack_fin2 = true
-                        let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
-                        __stack_fin <- __stack_fin2
-
-                    Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
-                    Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
-
-                    if __stack_fin then
-                        Debug.logInfo "at Bind: finished awaiting, calling continuation"
-                        let result = awaiter.GetResult()
-                        (continuation result).Invoke(&sm)
-
-                    else
-                        Debug.logInfo "at Bind: await further"
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false
-                //-- RESUMABLE CODE END
-                else
-                    // Dynamic path: install the continuation explicitly, see WhileAsync for why Yield() can't be used
-                    let awaiter = task.GetAwaiter()
-
-                    if awaiter.IsCompleted then
-                        (continuation (awaiter.GetResult())).Invoke(&sm)
-                    else
-                        sm.ResumptionDynamicInfo.ResumptionFunc <-
-                            TaskSeqResumptionFunc<'U>(fun sm -> (continuation (awaiter.GetResult())).Invoke(&sm))
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false)
+                // Same single code path as the ^TaskLike Bind, see there.
+                ResumableCode
+                    .Combine(
+                        ResumableTSC<'U>(fun sm ->
+                            if awaiter.IsCompleted then
+                                true
+                            else
+                                Debug.logInfo "at Bind: await further"
+                                sm.Data.awaiter <- awaiter
+                                sm.Data.current <- ValueNone
+                                ResumableCode.Yield().Invoke(&sm)),
+                        ResumableTSC<'U>(fun sm -> (continuation (awaiter.GetResult())).Invoke(&sm))
+                    )
+                    .Invoke(&sm))
 
         member inline _.Bind(computation: Async<'T>, continuation: ('T -> ResumableTSC<'U>)) =
             ResumableTSC<'U>(fun sm ->
-                if __useResumableCode then
-                    //-- RESUMABLE CODE START
-                    let mutable awaiter =
-                        Async.StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken).GetAwaiter()
+                Debug.logInfo "at Bind"
+                let awaiter = Async.StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken).GetAwaiter()
 
-                    let mutable __stack_fin = true
-
-                    Debug.logInfo "at Bind"
-
-                    if not awaiter.IsCompleted then
-                        // This will yield with __stack_fin2 = false
-                        // This will resume with __stack_fin2 = true
-                        let __stack_fin2 = ResumableCode.Yield().Invoke(&sm)
-                        __stack_fin <- __stack_fin2
-
-                    Debug.logInfo ("at Bind: with __stack_fin = ", __stack_fin)
-                    Debug.logInfo ("at Bind: this.completed = ", sm.Data.completed)
-
-                    if __stack_fin then
-                        Debug.logInfo "at Bind: finished awaiting, calling continuation"
-                        let result = awaiter.GetResult()
-                        (continuation result).Invoke(&sm)
-
-                    else
-                        Debug.logInfo "at Bind: await further"
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false
-                //-- RESUMABLE CODE END
-                else
-                    // Dynamic path: install the continuation explicitly, see WhileAsync for why Yield() can't be used
-                    let awaiter = Async.StartImmediateAsTask(computation, cancellationToken = sm.Data.cancellationToken).GetAwaiter()
-
-                    if awaiter.IsCompleted then
-                        (continuation (awaiter.GetResult())).Invoke(&sm)
-                    else
-                        sm.ResumptionDynamicInfo.ResumptionFunc <-
-                            TaskSeqResumptionFunc<'U>(fun sm -> (continuation (awaiter.GetResult())).Invoke(&sm))
-
-                        sm.Data.awaiter <- awaiter
-                        sm.Data.current <- ValueNone
-                        false)
+                // Same single code path as the ^TaskLike Bind, see there.
+                ResumableCode
+                    .Combine(
+                        ResumableTSC<'U>(fun sm ->
+                            if awaiter.IsCompleted then
+                                true
+                            else
+                                Debug.logInfo "at Bind: await further"
+                                sm.Data.awaiter <- awaiter
+                                sm.Data.current <- ValueNone
+                                ResumableCode.Yield().Invoke(&sm)),
+                        ResumableTSC<'U>(fun sm -> (continuation (awaiter.GetResult())).Invoke(&sm))
+                    )
+                    .Invoke(&sm))
 
 [<AutoOpen>]
 module TaskSeqBuilder =
