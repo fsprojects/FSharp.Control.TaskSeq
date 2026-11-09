@@ -2,6 +2,10 @@
 Release notes:
 
 Unreleased
+    - fixes the dynamic resumable code path of `taskSeq` (used in FSI and whenever the F# compiler does not compile the CE to a static state machine, e.g. Debug builds with .NET SDK 10.0.4xx): a `let!`/`do!` on an awaitable that does not complete synchronously dropped the rest of the computation (truncating the sequence, swallowing exceptions, or hanging in loops); `for .. in` over an `IAsyncEnumerable` discarded the awaited `MoveNextAsync` result and called it again; and `DisposeAsync` did not run pending `finally`/`use` compensations. This is the cause of the Debug-only truncation in #473, #505
+    - fixes the dynamic resumable code path of `for .. in` over a `taskSeq` inside `task { .. }`, which crashed with a `NullReferenceException` when `MoveNextAsync` did not complete synchronously, #505
+    - fixes `taskSeq { for x in source do .. }`, and functions built on it like `TaskSeq.map`, reporting the last item twice when the source's `DisposeAsync` completes asynchronously, #452
+    - test: add TaskSeq.Dynamic.Forced.Tests.CE.fs, which forces the dynamic resumable code path (the existing `taskSeqDynamic` tests are compiled statically and never exercised it)
     - fix: `TaskSeq-replicateUntilNoneAsync re-runs the computation from its initial state on each fresh enumeration` test hung CI by declaring its loop counter `n` inside the computation function, so it reset to 0 on every call and the terminating `None` branch was never reached; `n` is now shared across calls as intended
     - test: add SideEffects module to TaskSeq.ReplicateInfinite.Tests.fs and TaskSeq.ThreadState.Tests.fs, verifying computation/generator/folder call counts and re-enumeration semantics
     - test: add direct unit test coverage for the `ValueTask` helper module (`fromResult`, `ofSource`, `ofTask`, `ignore`, `True`/`False`, plus their deprecated aliases), closing a gap where these functions had no dedicated tests despite the `Task`/`Async` equivalents being covered
